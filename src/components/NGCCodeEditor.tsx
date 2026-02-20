@@ -18,9 +18,9 @@ function highlightLine(line: string): JSX.Element[] {
   }
 
   // Keywords
-  const keywords = ['App', 'Page', 'Frame', 'Button', 'Text', 'TextBox', 'Image', 'Var', 'Function', 'List'];
+  const keywords = ['App', 'Page', 'Frame', 'Button', 'Text', 'TextBox', 'Image', 'Var', 'Function', 'List', 'Data'];
   const events = ['Click', 'Hover', 'Start', 'Changed'];
-  const controlFlow = ['If', 'Repeat', 'Wait', 'until', 'while'];
+  const controlFlow = ['If', 'Repeat', 'Wait', 'until', 'while', 'Add', 'Delete', 'Clear', 'Get'];
 
   // Simple token-based highlighting
   const tokens = line.match(/(\s+|"[^"]*"|\w+|[=:+\-*/().,])/g) || [line];

@@ -13,6 +13,7 @@ import { NGCNode, NGCNodeType, DEFAULT_PROPERTIES, generateId } from '@/lib/ngc-
 const DEFAULT_CODE = `App:
     Var(naam)="Wereld"
     Var(score)=0
+    Var(item)=""
     List(items)="Appel,Banaan,Kers"
     Page Home:
         Frame Header:
@@ -50,6 +51,27 @@ const DEFAULT_CODE = `App:
             Hoekradius="8"
             Click:
                 Var(score)=0
+        TextBox ItemInput:
+            Positie="50,230"
+            Grootte="200,35"
+            Placeholder="Nieuw item..."
+            Variabele="item"
+        Button AddData:
+            Tekst="Opslaan"
+            Positie="260,230"
+            Grootte="100,35"
+            Kleur="#22c55e"
+            Hoekradius="6"
+            Click:
+                Data.Add(items, naam=Var(naam), waarde=Var(item))
+        Button ClearData:
+            Tekst="Wis data"
+            Positie="260,275"
+            Grootte="100,35"
+            Kleur="#ef4444"
+            Hoekradius="6"
+            Click:
+                Data.Clear(items)
 `;
 
 function findNodeById(node: NGCNode, id: string): NGCNode | null {
