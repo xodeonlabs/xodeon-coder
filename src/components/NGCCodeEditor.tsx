@@ -18,7 +18,7 @@ function highlightLine(line: string): JSX.Element[] {
   }
 
   // Keywords
-  const keywords = ['App', 'Page', 'Frame', 'Button', 'Text', 'TextBox', 'Image', 'Var', 'Function'];
+  const keywords = ['App', 'Page', 'Frame', 'Button', 'Text', 'TextBox', 'Image', 'Var', 'Function', 'List'];
   const events = ['Click', 'Hover', 'Start', 'Changed'];
   const controlFlow = ['If', 'Repeat', 'Wait', 'until', 'while'];
 
