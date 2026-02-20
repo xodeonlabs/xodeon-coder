@@ -55,6 +55,12 @@ function parseNodeHeader(content: string): { type: string; name: string } | null
     return { type: 'List', name: listDeclMatch[1] };
   }
 
+  // Data commands: Data.Add(...), Data.Delete(...), Data.Clear(...)
+  const dataMatch = content.match(/^Data\.(Add|Delete|Clear|Get)\(.+\)$/);
+  if (dataMatch) {
+    return { type: 'Var', name: content }; // Store as Var-like node with raw command as name
+  }
+
   // Standard node: Type Name:
   const nodeMatch = content.match(/^(\w+)\s+(\w+)\s*:$/);
   if (nodeMatch) {
@@ -167,9 +173,21 @@ export function astToNGC(node: NGCNode, indent: number = 0): string {
   let result = '';
 
   if (node.type === 'Var') {
+    // Data commands stored as Var nodes
+    if (node.name.startsWith('Data.')) {
+      result += `${prefix}${node.name}\n`;
+      return result;
+    }
+    // Var operations: score+1, score-1, etc.
+    const opMatch = node.name.match(/^(\w+)([+\-*/])(.+)$/);
+    if (opMatch) {
+      result += `${prefix}Var(${opMatch[1]})${opMatch[2]}${opMatch[3]}\n`;
+      return result;
+    }
+    // Var assignment: name=value
     if (node.name.includes('=')) {
-      const [varName, value] = node.name.split('=');
-      result += `${prefix}Var(${varName})=${value}\n`;
+      const eqIdx = node.name.indexOf('=');
+      result += `${prefix}Var(${node.name.substring(0, eqIdx)})=${node.name.substring(eqIdx + 1)}\n`;
     } else {
       result += `${prefix}Var(${node.name})\n`;
     }

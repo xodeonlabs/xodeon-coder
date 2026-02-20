@@ -1,6 +1,6 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { NGCNode } from '@/lib/ngc-ast';
-import { createRuntime, NGCRuntime, resolveVarRefs, parseVarDefinition, parseListDefinition } from '@/lib/ngc-runtime';
+import { createRuntime, NGCRuntime, resolveVarRefs, parseVarDefinition, parseListDefinition, parseDataCommand } from '@/lib/ngc-runtime';
 
 interface PreviewProps {
   ast: NGCNode | null;
@@ -37,6 +37,69 @@ function initRuntime(ast: NGCNode, runtime: NGCRuntime) {
   ast.children.forEach(child => initRuntime(child, runtime));
 }
 
+// Execute actions from event children (Var ops, Data ops, List ops)
+function executeActions(eventNode: NGCNode, runtime: NGCRuntime) {
+  for (const child of eventNode.children) {
+    if (child.type === 'Var') {
+      const def = parseVarDefinition(child.name);
+      if (def) {
+        const opMatch = child.name.match(/^(\w+)([+\-*/])(.+)$/);
+        if (opMatch) {
+          const [, varName, op, operand] = opMatch;
+          const current = parseFloat(runtime.getVar(varName)) || 0;
+          const val = parseFloat(resolveVarRefs(operand, runtime)) || 0;
+          let result = current;
+          switch (op) {
+            case '+': result = current + val; break;
+            case '-': result = current - val; break;
+            case '*': result = current * val; break;
+            case '/': result = val !== 0 ? current / val : 0; break;
+          }
+          runtime.setVar(varName, String(result));
+        } else {
+          runtime.setVar(def.varName, resolveVarRefs(cleanStr(def.value), runtime));
+        }
+      }
+    }
+    // Data commands stored as raw in node name
+    if (child.raw) {
+      const dataCmd = parseDataCommand(child.raw.trim());
+      if (dataCmd) {
+        executeDataCommand(dataCmd, runtime);
+      }
+    }
+    // Also check node name for data commands
+    const dataCmd = parseDataCommand(child.name);
+    if (dataCmd) {
+      executeDataCommand(dataCmd, runtime);
+    }
+  }
+}
+
+function executeDataCommand(cmd: ReturnType<typeof parseDataCommand>, runtime: NGCRuntime) {
+  if (!cmd) return;
+  switch (cmd.operation) {
+    case 'Add':
+      if (cmd.fields) {
+        // Resolve variable references in field values
+        const resolved: Record<string, string> = {};
+        for (const [k, v] of Object.entries(cmd.fields)) {
+          resolved[k] = resolveVarRefs(v, runtime);
+        }
+        runtime.dataAdd(cmd.table, resolved);
+      }
+      break;
+    case 'Delete':
+      if (cmd.id) {
+        runtime.dataDelete(cmd.table, resolveVarRefs(cmd.id, runtime));
+      }
+      break;
+    case 'Clear':
+      runtime.dataClear(cmd.table);
+      break;
+  }
+}
+
 function NGCNodeRenderer({ 
   node, 
   runtime, 
@@ -60,40 +123,16 @@ function NGCNodeRenderer({
     ...(size ? { width: size.w, height: size.h } : {}),
   };
 
-  // Find event handlers in children
   const getEventAction = (eventName: string) => {
     return node.children.find(c => c.type === 'Event' && c.name === eventName);
   };
 
-  const executeAction = (eventNode: NGCNode) => {
-    // Parse action from event's raw content or properties
-    // For now support Var operations in event children
-    // e.g., Var(score)+1 or Var(name)=Var(input)
-    for (const child of eventNode.children) {
-      if (child.type === 'Var') {
-        const def = parseVarDefinition(child.name);
-        if (def) {
-          // Check for increment/decrement patterns
-          const opMatch = child.name.match(/^(\w+)([+\-*/])(.+)$/);
-          if (opMatch) {
-            const [, varName, op, operand] = opMatch;
-            const current = parseFloat(runtime.getVar(varName)) || 0;
-            const val = parseFloat(resolveVarRefs(operand, runtime)) || 0;
-            let result = current;
-            switch (op) {
-              case '+': result = current + val; break;
-              case '-': result = current - val; break;
-              case '*': result = current * val; break;
-              case '/': result = val !== 0 ? current / val : 0; break;
-            }
-            runtime.setVar(varName, String(result));
-          } else {
-            runtime.setVar(def.varName, resolveVarRefs(cleanStr(def.value), runtime));
-          }
-        }
-      }
+  const handleEvent = (eventName: string) => {
+    const eventNode = getEventAction(eventName);
+    if (eventNode) {
+      executeActions(eventNode, runtime);
+      onRuntimeChange();
     }
-    onRuntimeChange();
   };
 
   switch (node.type) {
@@ -125,7 +164,6 @@ function NGCNodeRenderer({
       );
 
     case 'Button': {
-      const clickEvent = getEventAction('Click');
       return (
         <button
           style={{
@@ -141,7 +179,7 @@ function NGCNodeRenderer({
             alignItems: 'center',
             justifyContent: 'center',
           }}
-          onClick={() => clickEvent && executeAction(clickEvent)}
+          onClick={() => handleEvent('Click')}
         >
           {text}
         </button>
@@ -215,8 +253,38 @@ function NGCNodeRenderer({
   }
 }
 
+// Component to show data tables in preview
+function DataTableView({ tableName, records }: { tableName: string; records: Array<Record<string, string>> }) {
+  if (records.length === 0) return null;
+  const keys = Object.keys(records[0]).filter(k => k !== 'id');
+  
+  return (
+    <div style={{ margin: '8px 0', background: '#1e293b', borderRadius: 6, padding: 8, fontSize: 12 }}>
+      <div style={{ color: '#94a3b8', fontWeight: 'bold', marginBottom: 4 }}>📊 {tableName}</div>
+      <table style={{ width: '100%', borderCollapse: 'collapse', color: '#e2e8f0' }}>
+        <thead>
+          <tr>
+            {keys.map(k => (
+              <th key={k} style={{ textAlign: 'left', padding: '2px 6px', borderBottom: '1px solid #334155', color: '#94a3b8' }}>{k}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {records.map((rec, i) => (
+            <tr key={rec.id || i}>
+              {keys.map(k => (
+                <td key={k} style={{ padding: '2px 6px', borderBottom: '1px solid #334155' }}>{rec[k]}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export function NGCPreview({ ast }: PreviewProps) {
-  const [, forceUpdate] = useState(0);
+  const [updateCount, forceUpdate] = useState(0);
   
   const runtime = useMemo(() => {
     const rt = createRuntime();
@@ -236,11 +304,21 @@ export function NGCPreview({ ast }: PreviewProps) {
     );
   }
 
+  // Collect data tables for display
+  const dataTables = Object.entries(runtime.data).filter(([, records]) => records.length > 0);
+
   return (
     <div className="h-full w-full overflow-auto" style={{ background: '#0f172a' }}>
-      <div className="relative h-full w-full">
+      <div className="relative w-full" style={{ minHeight: '300px' }}>
         <NGCNodeRenderer node={ast} runtime={runtime} onRuntimeChange={handleRuntimeChange} />
       </div>
+      {dataTables.length > 0 && (
+        <div style={{ padding: '8px 12px', borderTop: '1px solid #334155' }}>
+          {dataTables.map(([name, records]) => (
+            <DataTableView key={name} tableName={name} records={records} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
