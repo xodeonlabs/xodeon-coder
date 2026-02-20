@@ -43,6 +43,18 @@ function parseNodeHeader(content: string): { type: string; name: string } | null
     return { type: 'Var', name: `${varOpMatch[1]}${varOpMatch[2]}${varOpMatch[3]}` };
   }
 
+  // List assignment: List(name)="item1,item2"
+  const listMatch = content.match(/^List\((\w+)\)\s*=\s*(.+)$/);
+  if (listMatch) {
+    return { type: 'List', name: `${listMatch[1]}=${listMatch[2]}` };
+  }
+
+  // List declaration: List(name)
+  const listDeclMatch = content.match(/^List\((\w+)\)$/);
+  if (listDeclMatch) {
+    return { type: 'List', name: listDeclMatch[1] };
+  }
+
   // Standard node: Type Name:
   const nodeMatch = content.match(/^(\w+)\s+(\w+)\s*:$/);
   if (nodeMatch) {
@@ -160,6 +172,16 @@ export function astToNGC(node: NGCNode, indent: number = 0): string {
       result += `${prefix}Var(${varName})=${value}\n`;
     } else {
       result += `${prefix}Var(${node.name})\n`;
+    }
+    return result;
+  }
+
+  if (node.type === 'List') {
+    if (node.name.includes('=')) {
+      const [listName, value] = node.name.split('=');
+      result += `${prefix}List(${listName})=${value}\n`;
+    } else {
+      result += `${prefix}List(${node.name})\n`;
     }
     return result;
   }

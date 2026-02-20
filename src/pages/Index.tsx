@@ -11,35 +11,45 @@ import { astToHTML } from '@/lib/ngc-to-html';
 import { NGCNode, NGCNodeType, DEFAULT_PROPERTIES, generateId } from '@/lib/ngc-ast';
 
 const DEFAULT_CODE = `App:
+    Var(naam)="Wereld"
+    Var(score)=0
+    List(items)="Appel,Banaan,Kers"
     Page Home:
         Frame Header:
             Positie="0,0"
             Grootte="400,60"
             Kleur="#1e293b"
             Text Title:
-                Tekst="Welcome to NGC"
+                Tekst="Hallo Var(naam)!"
                 Positie="20,15"
                 Grootte="300,30"
                 Kleur="#ffffff"
-        Button Play:
-            Tekst="Play"
-            Positie="50,100"
-            Grootte="120,45"
+        TextBox NameInput:
+            Positie="50,80"
+            Grootte="200,35"
+            Placeholder="Type je naam..."
+            Variabele="naam"
+        Text ScoreLabel:
+            Tekst="Score: Var(score)"
+            Positie="50,130"
+            Grootte="200,30"
+            Kleur="#94a3b8"
+        Button PlusOne:
+            Tekst="+1 Score"
+            Positie="50,170"
+            Grootte="120,40"
             Kleur="#3b82f6"
             Hoekradius="8"
             Click:
-                # start game
-        Button Settings:
-            Tekst="Settings"
-            Positie="50,160"
-            Grootte="120,45"
+                Var(score)+1
+        Button Reset:
+            Tekst="Reset"
+            Positie="180,170"
+            Grootte="100,40"
             Kleur="#64748b"
             Hoekradius="8"
-        Text Footer:
-            Tekst="NGC Workspace v1.0"
-            Positie="50,250"
-            Grootte="200,20"
-            Kleur="#94a3b8"
+            Click:
+                Var(score)=0
 `;
 
 function findNodeById(node: NGCNode, id: string): NGCNode | null {
