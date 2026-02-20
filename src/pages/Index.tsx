@@ -84,6 +84,13 @@ function deleteNode(node: NGCNode, nodeId: string): NGCNode {
   };
 }
 
+function renameNode(node: NGCNode, nodeId: string, newName: string): NGCNode {
+  if (node.id === nodeId) {
+    return { ...node, name: newName };
+  }
+  return { ...node, children: node.children.map(c => renameNode(c, nodeId, newName)) };
+}
+
 function duplicateNode(node: NGCNode, nodeId: string): NGCNode {
   const newChildren: NGCNode[] = [];
   for (const child of node.children) {
@@ -142,6 +149,12 @@ const Index = () => {
     setCode(astToNGC(updated));
   }, [ast]);
 
+  const handleRename = useCallback((nodeId: string, newName: string) => {
+    if (!ast) return;
+    const updated = renameNode(ast, nodeId, newName);
+    setCode(astToNGC(updated));
+  }, [ast]);
+
   const handleContextMenu = useCallback((e: React.MouseEvent, nodeId: string) => {
     setContextMenu({ x: e.clientX, y: e.clientY, nodeId });
   }, []);
@@ -183,6 +196,8 @@ const Index = () => {
               selectedId={selectedId}
               onSelect={setSelectedId}
               onContextMenu={handleContextMenu}
+              onRename={handleRename}
+              onDelete={handleDelete}
             />
           </div>
         </div>
