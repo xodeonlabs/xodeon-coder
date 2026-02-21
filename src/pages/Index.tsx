@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { NGCCodeEditor } from '@/components/NGCCodeEditor';
 import { NGCExplorer } from '@/components/NGCExplorer';
 import { NGCProperties } from '@/components/NGCProperties';
@@ -9,7 +9,9 @@ import { parseNGC, astToNGC } from '@/lib/ngc-parser';
 import { astToJSON } from '@/lib/ngc-to-json';
 import { astToHTML } from '@/lib/ngc-to-html';
 import { NGCNode, NGCNodeType, DEFAULT_PROPERTIES, generateId } from '@/lib/ngc-ast';
+import { useAuth } from '@/hooks/useAuth';
 
+const CODE_STORAGE_KEY = 'ngc_editor_code';
 const DEFAULT_CODE = `App:
     Var(naam)="Wereld"
     Var(score)=0
@@ -143,10 +145,16 @@ function duplicateNode(node: NGCNode, nodeId: string): NGCNode {
 }
 
 const Index = () => {
-  const [code, setCode] = useState(DEFAULT_CODE);
+  const { signOut } = useAuth();
+  const [code, setCode] = useState(() => localStorage.getItem(CODE_STORAGE_KEY) || DEFAULT_CODE);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'preview' | 'json' | 'html'>('preview');
+
+  // Save code to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(CODE_STORAGE_KEY, code);
+  }, [code]);
 
   const parseResult = useMemo(() => parseNGC(code), [code]);
   const { ast, errors } = parseResult;
@@ -214,6 +222,7 @@ const Index = () => {
         onExportHTML={() => {}}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        onSignOut={signOut}
       />
 
       <div className="flex flex-1 overflow-hidden">
