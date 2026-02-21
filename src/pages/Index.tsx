@@ -2,12 +2,10 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { NGCCodeEditor } from '@/components/NGCCodeEditor';
 import { NGCExplorer } from '@/components/NGCExplorer';
 import { NGCProperties } from '@/components/NGCProperties';
-import { NGCPreview } from '@/components/NGCPreview';
+
 import { NGCContextMenu } from '@/components/NGCContextMenu';
 import { NGCToolbar } from '@/components/NGCToolbar';
 import { parseNGC, astToNGC } from '@/lib/ngc-parser';
-import { astToJSON } from '@/lib/ngc-to-json';
-import { astToHTML } from '@/lib/ngc-to-html';
 import { NGCNode, NGCNodeType, DEFAULT_PROPERTIES, generateId } from '@/lib/ngc-ast';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -149,7 +147,7 @@ const Index = () => {
   const [code, setCode] = useState(() => localStorage.getItem(CODE_STORAGE_KEY) || DEFAULT_CODE);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<'preview' | 'json' | 'html'>('preview');
+  
 
   // Save code to localStorage whenever it changes
   useEffect(() => {
@@ -204,24 +202,11 @@ const Index = () => {
     return findNodeById(ast, contextMenu.nodeId);
   }, [ast, contextMenu]);
 
-  const jsonOutput = useMemo(() => {
-    if (!ast) return '// No valid AST';
-    return astToJSON(ast);
-  }, [ast]);
-
-  const htmlOutput = useMemo(() => {
-    if (!ast) return '<!-- No valid AST -->';
-    return astToHTML(ast);
-  }, [ast]);
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden">
       <NGCToolbar
         errors={errors}
-        onExportJSON={() => {}}
-        onExportHTML={() => {}}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
         onSignOut={signOut}
       />
 
@@ -266,39 +251,16 @@ const Index = () => {
           )}
         </div>
 
-        {/* Right Panel: Preview/JSON/HTML + Properties */}
-        <div className="w-96 shrink-0 flex flex-col">
-          {/* Output area */}
-          <div className="flex-1 flex flex-col border-b border-border min-h-0">
-            <div className="ide-panel-header">
-              <span>{activeTab === 'preview' ? 'Preview' : activeTab === 'json' ? 'JSON Output' : 'HTML Output'}</span>
-            </div>
-            <div className="flex-1 overflow-auto">
-              {activeTab === 'preview' && <NGCPreview ast={ast} />}
-              {activeTab === 'json' && (
-                <pre className="p-3 text-xs font-mono text-foreground whitespace-pre-wrap" style={{ background: 'hsl(var(--ide-editor-bg))' }}>
-                  {jsonOutput}
-                </pre>
-              )}
-              {activeTab === 'html' && (
-                <pre className="p-3 text-xs font-mono text-foreground whitespace-pre-wrap" style={{ background: 'hsl(var(--ide-editor-bg))' }}>
-                  {htmlOutput}
-                </pre>
-              )}
-            </div>
+        {/* Right Panel: Properties */}
+        <div className="w-72 shrink-0 flex flex-col">
+          <div className="ide-panel-header">
+            <span>Properties</span>
+            {selectedNode && (
+              <span className="ml-auto text-primary normal-case tracking-normal">{selectedNode.name}</span>
+            )}
           </div>
-
-          {/* Properties */}
-          <div className="h-64 shrink-0 flex flex-col">
-            <div className="ide-panel-header">
-              <span>Properties</span>
-              {selectedNode && (
-                <span className="ml-auto text-primary normal-case tracking-normal">{selectedNode.name}</span>
-              )}
-            </div>
-            <div className="flex-1 overflow-auto">
-              <NGCProperties node={selectedNode} onPropertyChange={handlePropertyChange} />
-            </div>
+          <div className="flex-1 overflow-auto">
+            <NGCProperties node={selectedNode} onPropertyChange={handlePropertyChange} />
           </div>
         </div>
       </div>
