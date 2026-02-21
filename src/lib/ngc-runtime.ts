@@ -28,15 +28,36 @@ export interface NGCRuntime {
   dataUpdate: (table: string, id: string, key: string, value: string) => void;
 }
 
+const STORAGE_KEY = 'ngc_runtime_state';
+
 let dataIdCounter = 0;
 function generateDataId(): string {
   return `rec_${Date.now()}_${dataIdCounter++}`;
 }
 
+function saveState(variables: Record<string, string>, lists: Record<string, string[]>, data: Record<string, DataRecord[]>) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ variables, lists, data }));
+  } catch { /* ignore quota errors */ }
+}
+
+function loadState(): { variables: Record<string, string>; lists: Record<string, string[]>; data: Record<string, DataRecord[]> } | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch { /* ignore */ }
+  return null;
+}
+
+export function clearPersistedState() {
+  localStorage.removeItem(STORAGE_KEY);
+}
+
 export function createRuntime(): NGCRuntime {
-  const variables: Record<string, string> = {};
-  const lists: Record<string, string[]> = {};
-  const data: Record<string, DataRecord[]> = {};
+  const saved = loadState();
+  const variables: Record<string, string> = saved?.variables ?? {};
+  const lists: Record<string, string[]> = saved?.lists ?? {};
+  const data: Record<string, DataRecord[]> = saved?.data ?? {};
 
   return {
     variables,
@@ -47,6 +68,7 @@ export function createRuntime(): NGCRuntime {
     },
     setVar(name: string, value: string) {
       variables[name] = value;
+      saveState(variables, lists, data);
     },
     getList(name: string) {
       if (!lists[name]) lists[name] = [];
@@ -55,22 +77,27 @@ export function createRuntime(): NGCRuntime {
     listAdd(name: string, value: string) {
       if (!lists[name]) lists[name] = [];
       lists[name].push(value);
+      saveState(variables, lists, data);
     },
     listRemove(name: string, index: number) {
       if (lists[name]) {
         lists[name].splice(index, 1);
+        saveState(variables, lists, data);
       }
     },
     listClear(name: string) {
       lists[name] = [];
+      saveState(variables, lists, data);
     },
     dataAdd(table: string, record: Record<string, string>) {
       if (!data[table]) data[table] = [];
       data[table].push({ id: generateDataId(), ...record });
+      saveState(variables, lists, data);
     },
     dataDelete(table: string, id: string) {
       if (data[table]) {
         data[table] = data[table].filter(r => r.id !== id);
+        saveState(variables, lists, data);
       }
     },
     dataGet(table: string) {
@@ -83,11 +110,15 @@ export function createRuntime(): NGCRuntime {
     },
     dataClear(table: string) {
       data[table] = [];
+      saveState(variables, lists, data);
     },
     dataUpdate(table: string, id: string, key: string, value: string) {
       if (data[table]) {
         const rec = data[table].find(r => r.id === id);
-        if (rec) rec[key] = value;
+        if (rec) {
+          rec[key] = value;
+          saveState(variables, lists, data);
+        }
       }
     },
   };
