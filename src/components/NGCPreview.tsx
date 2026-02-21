@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { NGCNode } from '@/lib/ngc-ast';
-import { createRuntime, NGCRuntime, resolveVarRefs, parseVarDefinition, parseListDefinition, parseDataCommand } from '@/lib/ngc-runtime';
+import { createRuntime, NGCRuntime, resolveVarRefs, parseVarDefinition, parseListDefinition, parseDataCommand, clearPersistedState } from '@/lib/ngc-runtime';
 
 interface PreviewProps {
   ast: NGCNode | null;
@@ -22,17 +22,19 @@ function parseSize(size: string): { w: number; h: number } {
   return { w: w || 100, h: h || 40 };
 }
 
-// Initialize runtime from AST
+// Initialize runtime from AST - only set defaults if not already persisted
 function initRuntime(ast: NGCNode, runtime: NGCRuntime) {
   if (ast.type === 'Var') {
     const def = parseVarDefinition(ast.name);
-    if (def) {
+    if (def && !(def.varName in runtime.variables)) {
       runtime.setVar(def.varName, cleanStr(def.value));
     }
   }
   if (ast.type === 'List') {
     const def = parseListDefinition(ast.name);
-    def.items.forEach(item => runtime.listAdd(def.listName, item));
+    if (!runtime.lists[def.listName]) {
+      def.items.forEach(item => runtime.listAdd(def.listName, item));
+    }
   }
   ast.children.forEach(child => initRuntime(child, runtime));
 }
@@ -296,6 +298,13 @@ export function NGCPreview({ ast }: PreviewProps) {
     forceUpdate(n => n + 1);
   }, []);
 
+  const handleReset = useCallback(() => {
+    clearPersistedState();
+    forceUpdate(n => n + 1);
+    // Force full re-render by reloading
+    window.location.reload();
+  }, []);
+
   if (!ast) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -319,6 +328,14 @@ export function NGCPreview({ ast }: PreviewProps) {
           ))}
         </div>
       )}
+      <div style={{ padding: '4px 12px', borderTop: '1px solid #334155' }}>
+        <button
+          onClick={handleReset}
+          style={{ fontSize: 11, color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+        >
+          Reset opgeslagen data
+        </button>
+      </div>
     </div>
   );
 }
