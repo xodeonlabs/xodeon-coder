@@ -14,13 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      apps: {
+        Row: {
+          created_at: string
+          id: string
+          is_public: boolean
+          is_remixable: boolean
+          name: string
+          ngc_code: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          is_remixable?: boolean
+          name?: string
+          ngc_code?: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          is_remixable?: boolean
+          name?: string
+          ngc_code?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      project_collaborators: {
+        Row: {
+          app_id: string
+          created_at: string
+          id: string
+          invited_by: string
+          user_id: string
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          id?: string
+          invited_by: string
+          user_id: string
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          id?: string
+          invited_by?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_collaborators_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_app_collaborator: { Args: { _app_id: string }; Returns: boolean }
+      is_app_owner: { Args: { _app_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
