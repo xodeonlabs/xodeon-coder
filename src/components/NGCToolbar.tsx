@@ -1,13 +1,14 @@
-import { ExternalLink, LogOut, AlertCircle, CheckCircle } from 'lucide-react';
+import { ExternalLink, LogOut, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 import { ParseError } from '@/lib/ngc-ast';
 import { useNavigate } from 'react-router-dom';
 
 interface ToolbarProps {
   errors: ParseError[];
+  appName?: string;
   onSignOut?: () => void;
 }
 
-export function NGCToolbar({ errors, onSignOut }: ToolbarProps) {
+export function NGCToolbar({ errors, appName, onSignOut }: ToolbarProps) {
   const navigate = useNavigate();
   return (
     <div
@@ -15,8 +16,11 @@ export function NGCToolbar({ errors, onSignOut }: ToolbarProps) {
       style={{ background: 'hsl(var(--ide-toolbar))' }}
     >
       <div className="flex items-center gap-1">
+        <button onClick={() => navigate('/')} className="text-muted-foreground hover:text-foreground transition-colors mr-2" title="Terug naar dashboard">
+          <ArrowLeft className="h-4 w-4" />
+        </button>
         <span className="text-sm font-bold text-primary font-mono mr-2">NGC</span>
-        <span className="text-xs text-muted-foreground">Workspace</span>
+        {appName && <span className="text-xs text-muted-foreground">{appName}</span>}
       </div>
 
       <div className="flex items-center gap-2">
@@ -36,7 +40,7 @@ export function NGCToolbar({ errors, onSignOut }: ToolbarProps) {
           className="px-3 py-1 text-xs rounded-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
         >
           <ExternalLink className="h-3 w-3 inline mr-1" />
-          Open Preview
+          Preview
         </button>
         {onSignOut && (
           <button

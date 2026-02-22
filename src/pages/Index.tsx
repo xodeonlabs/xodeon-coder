@@ -1,79 +1,16 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { NGCCodeEditor } from '@/components/NGCCodeEditor';
 import { NGCExplorer } from '@/components/NGCExplorer';
 import { NGCProperties } from '@/components/NGCProperties';
-
 import { NGCContextMenu } from '@/components/NGCContextMenu';
 import { NGCToolbar } from '@/components/NGCToolbar';
 import { parseNGC, astToNGC } from '@/lib/ngc-parser';
 import { NGCNode, NGCNodeType, DEFAULT_PROPERTIES, generateId } from '@/lib/ngc-ast';
 import { useAuth } from '@/hooks/useAuth';
-
-const CODE_STORAGE_KEY = 'ngc_editor_code';
-const DEFAULT_CODE = `App:
-    Var(naam)="Wereld"
-    Var(score)=0
-    Var(item)=""
-    List(items)="Appel,Banaan,Kers"
-    Page Home:
-        Frame Header:
-            Positie="0,0"
-            Grootte="400,60"
-            Kleur="#1e293b"
-            Text Title:
-                Tekst="Hallo Var(naam)!"
-                Positie="20,15"
-                Grootte="300,30"
-                Kleur="#ffffff"
-        TextBox NameInput:
-            Positie="50,80"
-            Grootte="200,35"
-            Placeholder="Type je naam..."
-            Variabele="naam"
-        Text ScoreLabel:
-            Tekst="Score: Var(score)"
-            Positie="50,130"
-            Grootte="200,30"
-            Kleur="#94a3b8"
-        Button PlusOne:
-            Tekst="+1 Score"
-            Positie="50,170"
-            Grootte="120,40"
-            Kleur="#3b82f6"
-            Hoekradius="8"
-            Click:
-                Var(score)+1
-        Button Reset:
-            Tekst="Reset"
-            Positie="180,170"
-            Grootte="100,40"
-            Kleur="#64748b"
-            Hoekradius="8"
-            Click:
-                Var(score)=0
-        TextBox ItemInput:
-            Positie="50,230"
-            Grootte="200,35"
-            Placeholder="Nieuw item..."
-            Variabele="item"
-        Button AddData:
-            Tekst="Opslaan"
-            Positie="260,230"
-            Grootte="100,35"
-            Kleur="#22c55e"
-            Hoekradius="6"
-            Click:
-                Data.Add(items, naam=Var(naam), waarde=Var(item))
-        Button ClearData:
-            Tekst="Wis data"
-            Positie="260,275"
-            Grootte="100,35"
-            Kleur="#ef4444"
-            Hoekradius="6"
-            Click:
-                Data.Clear(items)
-`;
-
+import { useToast } from '@/hooks/use-toast';
+const FALLBACK_CODE = 'App:\n    Page Home:\n        Text Hello:\n            Tekst="Hallo!"\n            Positie="50,50"\n            Grootte="200,30"\n            Kleur="#ffffff"\n';
 function findNodeById(node: NGCNode, id: string): NGCNode | null {
   if (node.id === id) return node;
   for (const child of node.children) {
@@ -144,15 +81,40 @@ function duplicateNode(node: NGCNode, nodeId: string): NGCNode {
 
 const Index = () => {
   const { signOut } = useAuth();
-  const [code, setCode] = useState(() => localStorage.getItem(CODE_STORAGE_KEY) || DEFAULT_CODE);
+  const { toast } = useToast();
+  const { appId } = useParams<{ appId: string }>();
+  const navigate = useNavigate();
+  const [code, setCode] = useState(FALLBACK_CODE);
+  const [appName, setAppName] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
-  
+  const [loading, setLoading] = useState(true);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Save code to localStorage whenever it changes
+  // Load app from database
   useEffect(() => {
-    localStorage.setItem(CODE_STORAGE_KEY, code);
-  }, [code]);
+    if (!appId) return;
+    supabase.from('apps').select('ngc_code, name').eq('id', appId).single().then(({ data, error }) => {
+      if (error || !data) {
+        toast({ title: 'App niet gevonden', variant: 'destructive' });
+        navigate('/');
+      } else {
+        setCode(data.ngc_code || FALLBACK_CODE);
+        setAppName(data.name);
+      }
+      setLoading(false);
+    });
+  }, [appId]);
+
+  // Auto-save to database with debounce
+  useEffect(() => {
+    if (loading || !appId) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      supabase.from('apps').update({ ngc_code: code }).eq('id', appId);
+    }, 1500);
+    return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
+  }, [code, appId, loading]);
 
   const parseResult = useMemo(() => parseNGC(code), [code]);
   const { ast, errors } = parseResult;
@@ -203,10 +165,13 @@ const Index = () => {
   }, [ast, contextMenu]);
 
 
+  if (loading) return <div className="flex h-screen items-center justify-center" style={{ background: '#0a0e1a' }}><span className="text-sm text-muted-foreground">Laden...</span></div>;
+
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden">
       <NGCToolbar
         errors={errors}
+        appName={appName}
         onSignOut={signOut}
       />
 
