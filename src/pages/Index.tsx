@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { NGCCodeEditor } from '@/components/NGCCodeEditor';
 import { NGCExplorer } from '@/components/NGCExplorer';
 import { NGCProperties } from '@/components/NGCProperties';
+import { NGCDataPanel } from '@/components/NGCDataPanel';
 import { NGCContextMenu } from '@/components/NGCContextMenu';
 import { NGCToolbar } from '@/components/NGCToolbar';
 import { parseNGC, astToNGC } from '@/lib/ngc-parser';
@@ -176,20 +177,32 @@ const Index = () => {
       />
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Explorer */}
+        {/* Left Panel: Explorer + Data */}
         <div className="w-56 shrink-0 border-r border-border flex flex-col" style={{ background: 'hsl(var(--ide-explorer-bg))' }}>
-          <div className="ide-panel-header">
-            <span>Explorer</span>
+          {/* Explorer */}
+          <div className="flex flex-col min-h-0" style={{ flex: '1 1 50%' }}>
+            <div className="ide-panel-header">
+              <span>Explorer</span>
+            </div>
+            <div className="flex-1 overflow-y-auto min-h-0">
+              <NGCExplorer
+                ast={ast}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                onContextMenu={handleContextMenu}
+                onRename={handleRename}
+                onDelete={handleDelete}
+              />
+            </div>
           </div>
-          <div className="flex-1 overflow-auto">
-            <NGCExplorer
-              ast={ast}
-              selectedId={selectedId}
-              onSelect={setSelectedId}
-              onContextMenu={handleContextMenu}
-              onRename={handleRename}
-              onDelete={handleDelete}
-            />
+          {/* Data Panel */}
+          <div className="flex flex-col min-h-0 border-t border-border" style={{ flex: '1 1 50%' }}>
+            <div className="ide-panel-header">
+              <span>Data</span>
+            </div>
+            <div className="flex-1 overflow-y-auto min-h-0">
+              <NGCDataPanel ast={ast} />
+            </div>
           </div>
         </div>
 
