@@ -36,7 +36,7 @@ export function NGCToolbar({ errors, appName, onSignOut }: ToolbarProps) {
           </div>
         )}
         <button
-          onClick={() => navigate('/preview')}
+          onClick={() => navigate(window.location.pathname.replace('/editor/', '/preview/'))}
           className="px-3 py-1 text-xs rounded-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
         >
           <ExternalLink className="h-3 w-3 inline mr-1" />
