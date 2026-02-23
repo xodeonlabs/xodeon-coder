@@ -22,7 +22,6 @@ function parseSize(size: string): { w: number; h: number } {
   return { w: w || 100, h: h || 40 };
 }
 
-// Initialize runtime from AST - only set defaults if not already persisted
 function initRuntime(ast: NGCNode, runtime: NGCRuntime) {
   if (ast.type === 'Var') {
     const def = parseVarDefinition(ast.name);
@@ -39,9 +38,41 @@ function initRuntime(ast: NGCNode, runtime: NGCRuntime) {
   ast.children.forEach(child => initRuntime(child, runtime));
 }
 
-// Execute actions from event children (Var ops, Data ops, List ops)
-function executeActions(eventNode: NGCNode, runtime: NGCRuntime) {
+function executeDataCommand(cmd: ReturnType<typeof parseDataCommand>, runtime: NGCRuntime) {
+  if (!cmd) return;
+  switch (cmd.operation) {
+    case 'Add':
+      if (cmd.fields) {
+        const resolved: Record<string, string> = {};
+        for (const [k, v] of Object.entries(cmd.fields)) {
+          resolved[k] = resolveVarRefs(v, runtime);
+        }
+        runtime.dataAdd(cmd.table, resolved);
+      }
+      break;
+    case 'Delete':
+      if (cmd.id) {
+        runtime.dataDelete(cmd.table, resolveVarRefs(cmd.id, runtime));
+      }
+      break;
+    case 'Clear':
+      runtime.dataClear(cmd.table);
+      break;
+  }
+}
+
+/** Execute actions; returns a page name if GaNaar is encountered */
+function executeActions(eventNode: NGCNode, runtime: NGCRuntime): string | null {
+  let navigateTo: string | null = null;
+
   for (const child of eventNode.children) {
+    // Check for GaNaar navigation command
+    if (child.name.startsWith('GaNaar ') || child.name.startsWith('GaNaar=')) {
+      const target = child.name.replace(/^GaNaar[\s=]+/, '').replace(/"/g, '').trim();
+      navigateTo = target;
+      continue;
+    }
+
     if (child.type === 'Var') {
       const def = parseVarDefinition(child.name);
       if (def) {
@@ -63,53 +94,32 @@ function executeActions(eventNode: NGCNode, runtime: NGCRuntime) {
         }
       }
     }
-    // Data commands stored as raw in node name
     if (child.raw) {
       const dataCmd = parseDataCommand(child.raw.trim());
-      if (dataCmd) {
-        executeDataCommand(dataCmd, runtime);
-      }
+      if (dataCmd) executeDataCommand(dataCmd, runtime);
     }
-    // Also check node name for data commands
     const dataCmd = parseDataCommand(child.name);
-    if (dataCmd) {
-      executeDataCommand(dataCmd, runtime);
-    }
+    if (dataCmd) executeDataCommand(dataCmd, runtime);
   }
+
+  // Also check event node properties for GaNaar
+  if (eventNode.properties.GaNaar) {
+    navigateTo = cleanStr(eventNode.properties.GaNaar);
+  }
+
+  return navigateTo;
 }
 
-function executeDataCommand(cmd: ReturnType<typeof parseDataCommand>, runtime: NGCRuntime) {
-  if (!cmd) return;
-  switch (cmd.operation) {
-    case 'Add':
-      if (cmd.fields) {
-        // Resolve variable references in field values
-        const resolved: Record<string, string> = {};
-        for (const [k, v] of Object.entries(cmd.fields)) {
-          resolved[k] = resolveVarRefs(v, runtime);
-        }
-        runtime.dataAdd(cmd.table, resolved);
-      }
-      break;
-    case 'Delete':
-      if (cmd.id) {
-        runtime.dataDelete(cmd.table, resolveVarRefs(cmd.id, runtime));
-      }
-      break;
-    case 'Clear':
-      runtime.dataClear(cmd.table);
-      break;
-  }
-}
-
-function NGCNodeRenderer({ 
-  node, 
-  runtime, 
-  onRuntimeChange 
-}: { 
-  node: NGCNode; 
+function NGCNodeRenderer({
+  node,
+  runtime,
+  onRuntimeChange,
+  onNavigate,
+}: {
+  node: NGCNode;
   runtime: NGCRuntime;
   onRuntimeChange: () => void;
+  onNavigate: (pageName: string) => void;
 }) {
   const pos = node.properties.Positie ? parsePosition(node.properties.Positie) : { x: 0, y: 0 };
   const size = node.properties.Grootte ? parseSize(node.properties.Grootte) : null;
@@ -125,47 +135,28 @@ function NGCNodeRenderer({
     ...(size ? { width: size.w, height: size.h } : {}),
   };
 
-  const getEventAction = (eventName: string) => {
-    return node.children.find(c => c.type === 'Event' && c.name === eventName);
-  };
-
   const handleEvent = (eventName: string) => {
-    const eventNode = getEventAction(eventName);
+    const eventNode = node.children.find(c => c.type === 'Event' && c.name === eventName);
     if (eventNode) {
-      executeActions(eventNode, runtime);
+      const target = executeActions(eventNode, runtime);
+      if (target) {
+        onNavigate(target);
+      }
       onRuntimeChange();
     }
   };
 
   switch (node.type) {
-    case 'App':
-      return (
-        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-          {node.children.map(child => (
-            <NGCNodeRenderer key={child.id} node={child} runtime={runtime} onRuntimeChange={onRuntimeChange} />
-          ))}
-        </div>
-      );
-
-    case 'Page':
-      return (
-        <div style={{ width: '100%', height: '100%', position: 'relative', background: '#0f172a' }}>
-          {node.children.map(child => (
-            <NGCNodeRenderer key={child.id} node={child} runtime={runtime} onRuntimeChange={onRuntimeChange} />
-          ))}
-        </div>
-      );
-
     case 'Frame':
       return (
         <div style={{ ...baseStyle, background: color || '#1e293b', borderRadius: `${radius}px`, overflow: 'hidden' }}>
           {node.children.map(child => (
-            <NGCNodeRenderer key={child.id} node={child} runtime={runtime} onRuntimeChange={onRuntimeChange} />
+            <NGCNodeRenderer key={child.id} node={child} runtime={runtime} onRuntimeChange={onRuntimeChange} onNavigate={onNavigate} />
           ))}
         </div>
       );
 
-    case 'Button': {
+    case 'Button':
       return (
         <button
           style={{
@@ -186,7 +177,6 @@ function NGCNodeRenderer({
           {text}
         </button>
       );
-    }
 
     case 'Text':
       return (
@@ -199,7 +189,7 @@ function NGCNodeRenderer({
       const varName = node.properties.Variabele ? cleanStr(node.properties.Variabele) : '';
       const placeholder = node.properties.Placeholder ? cleanStr(node.properties.Placeholder) : '';
       const currentValue = varName ? runtime.getVar(varName) : text;
-      
+
       return (
         <input
           style={{
@@ -255,11 +245,10 @@ function NGCNodeRenderer({
   }
 }
 
-// Component to show data tables in preview
 function DataTableView({ tableName, records }: { tableName: string; records: Array<Record<string, string>> }) {
   if (records.length === 0) return null;
   const keys = Object.keys(records[0]).filter(k => k !== 'id');
-  
+
   return (
     <div style={{ margin: '8px 0', background: '#1e293b', borderRadius: 6, padding: 8, fontSize: 12 }}>
       <div style={{ color: '#94a3b8', fontWeight: 'bold', marginBottom: 4 }}>📊 {tableName}</div>
@@ -287,21 +276,41 @@ function DataTableView({ tableName, records }: { tableName: string; records: Arr
 
 export function NGCPreview({ ast }: PreviewProps) {
   const [updateCount, forceUpdate] = useState(0);
-  
+  const [currentPage, setCurrentPage] = useState<string | null>(null);
+
   const runtime = useMemo(() => {
     const rt = createRuntime();
     if (ast) initRuntime(ast, rt);
     return rt;
   }, [ast]);
 
+  // Get all pages from AST
+  const pages = useMemo(() => {
+    if (!ast) return [];
+    return ast.children.filter(c => c.type === 'Page');
+  }, [ast]);
+
+  // Determine active page
+  const activePage = useMemo(() => {
+    if (pages.length === 0) return null;
+    if (currentPage) {
+      const found = pages.find(p => p.name === currentPage);
+      if (found) return found;
+    }
+    return pages[0]; // default to first page
+  }, [pages, currentPage]);
+
   const handleRuntimeChange = useCallback(() => {
     forceUpdate(n => n + 1);
+  }, []);
+
+  const handleNavigate = useCallback((pageName: string) => {
+    setCurrentPage(pageName);
   }, []);
 
   const handleReset = useCallback(() => {
     clearPersistedState();
     forceUpdate(n => n + 1);
-    // Force full re-render by reloading
     window.location.reload();
   }, []);
 
@@ -313,14 +322,60 @@ export function NGCPreview({ ast }: PreviewProps) {
     );
   }
 
-  // Collect data tables for display
   const dataTables = Object.entries(runtime.data).filter(([, records]) => records.length > 0);
 
   return (
     <div className="h-full w-full overflow-auto" style={{ background: '#0f172a' }}>
+      {/* Page tabs */}
+      {pages.length > 1 && (
+        <div style={{
+          display: 'flex',
+          gap: 0,
+          borderBottom: '1px solid #334155',
+          background: '#0f172a',
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
+        }}>
+          {pages.map(page => (
+            <button
+              key={page.id}
+              onClick={() => setCurrentPage(page.name)}
+              style={{
+                padding: '6px 16px',
+                fontSize: 12,
+                fontFamily: 'inherit',
+                border: 'none',
+                borderBottom: activePage?.id === page.id ? '2px solid #3b82f6' : '2px solid transparent',
+                background: activePage?.id === page.id ? '#1e293b' : 'transparent',
+                color: activePage?.id === page.id ? '#e2e8f0' : '#64748b',
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+              }}
+            >
+              {page.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Active page content */}
       <div className="relative w-full" style={{ minHeight: '300px' }}>
-        <NGCNodeRenderer node={ast} runtime={runtime} onRuntimeChange={handleRuntimeChange} />
+        {activePage && (
+          <div style={{ width: '100%', height: '100%', position: 'relative', background: '#0f172a' }}>
+            {activePage.children.map(child => (
+              <NGCNodeRenderer
+                key={child.id}
+                node={child}
+                runtime={runtime}
+                onRuntimeChange={handleRuntimeChange}
+                onNavigate={handleNavigate}
+              />
+            ))}
+          </div>
+        )}
       </div>
+
       {dataTables.length > 0 && (
         <div style={{ padding: '8px 12px', borderTop: '1px solid #334155' }}>
           {dataTables.map(([name, records]) => (
