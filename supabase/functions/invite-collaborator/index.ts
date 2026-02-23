@@ -33,14 +33,22 @@ Deno.serve(async (req) => {
     const { data: app } = await adminClient.from("apps").select("owner_id").eq("id", app_id).single();
     if (!app || app.owner_id !== user.id) return new Response(JSON.stringify({ error: "Je bent niet de eigenaar" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    // Look up user by email
-    const { data: { users }, error: lookupErr } = await adminClient.auth.admin.listUsers();
-    if (lookupErr) {
-      console.error("listUsers error:", lookupErr);
-      return new Response(JSON.stringify({ error: "Kan gebruikers niet ophalen" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    // Look up user by email (paginate through all users)
+    let targetUser: any = null;
+    let page = 1;
+    const perPage = 500;
+    while (!targetUser) {
+      const { data: { users }, error: lookupErr } = await adminClient.auth.admin.listUsers({ page, perPage });
+      if (lookupErr) {
+        console.error("listUsers error:", lookupErr);
+        return new Response(JSON.stringify({ error: "Kan gebruikers niet ophalen" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      targetUser = users?.find((u: any) => u.email?.toLowerCase() === email.toLowerCase());
+      if (targetUser) break;
+      if (!users || users.length < perPage) break; // no more pages
+      page++;
     }
-    const targetUser = users?.find((u: any) => u.email?.toLowerCase() === email.toLowerCase());
-    if (!targetUser) return new Response(JSON.stringify({ error: "Gebruiker niet gevonden" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (!targetUser) return new Response(JSON.stringify({ error: "Geen account gevonden met dit e-mailadres. De gebruiker moet eerst een account aanmaken." }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
     if (targetUser.id === user.id) return new Response(JSON.stringify({ error: "Je kunt jezelf niet uitnodigen" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
