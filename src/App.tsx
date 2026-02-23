@@ -29,7 +29,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/editor/:appId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-          <Route path="/preview" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
+          <Route path="/preview/:appId" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
