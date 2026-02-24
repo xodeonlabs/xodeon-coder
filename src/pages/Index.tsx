@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { NGCCodeEditor } from '@/components/NGCCodeEditor';
 import { NGCExplorer } from '@/components/NGCExplorer';
-import { NGCProperties } from '@/components/NGCProperties';
+import { NGCComponentLibrary } from '@/components/NGCComponentLibrary';
 import { NGCDataPanel } from '@/components/NGCDataPanel';
 import { NGCContextMenu } from '@/components/NGCContextMenu';
 import { NGCToolbar } from '@/components/NGCToolbar';
@@ -21,12 +21,6 @@ function findNodeById(node: NGCNode, id: string): NGCNode | null {
   return null;
 }
 
-function updateNodeProperty(node: NGCNode, nodeId: string, key: string, value: string): NGCNode {
-  if (node.id === nodeId) {
-    return { ...node, properties: { ...node.properties, [key]: value } };
-  }
-  return { ...node, children: node.children.map(c => updateNodeProperty(c, nodeId, key, value)) };
-}
 
 function addChildNode(node: NGCNode, parentId: string, childType: NGCNodeType): NGCNode {
   if (node.id === parentId) {
@@ -125,11 +119,9 @@ const Index = () => {
     return findNodeById(ast, selectedId);
   }, [ast, selectedId]);
 
-  const handlePropertyChange = useCallback((nodeId: string, key: string, value: string) => {
-    if (!ast) return;
-    const updated = updateNodeProperty(ast, nodeId, key, value);
-    setCode(astToNGC(updated));
-  }, [ast]);
+  const handleInsertCode = useCallback((snippet: string) => {
+    setCode(prev => prev + '\n' + snippet);
+  }, []);
 
   const handleAddChild = useCallback((parentId: string, type: NGCNodeType) => {
     if (!ast) return;
@@ -229,16 +221,13 @@ const Index = () => {
           )}
         </div>
 
-        {/* Right Panel: Properties */}
+        {/* Right Panel: Component Library */}
         <div className="w-72 shrink-0 flex flex-col">
           <div className="ide-panel-header">
-            <span>Properties</span>
-            {selectedNode && (
-              <span className="ml-auto text-primary normal-case tracking-normal">{selectedNode.name}</span>
-            )}
+            <span>Componenten</span>
           </div>
           <div className="flex-1 overflow-auto">
-            <NGCProperties node={selectedNode} onPropertyChange={handlePropertyChange} />
+            <NGCComponentLibrary onInsert={handleInsertCode} />
           </div>
         </div>
       </div>

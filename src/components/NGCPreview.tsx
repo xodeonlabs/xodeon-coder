@@ -376,19 +376,13 @@ export function NGCPreview({ ast }: PreviewProps) {
         )}
       </div>
 
-      {dataTables.length > 0 && (
-        <div style={{ padding: '8px 12px', borderTop: '1px solid #334155' }}>
-          {dataTables.map(([name, records]) => (
-            <DataTableView key={name} tableName={name} records={records} />
-          ))}
-        </div>
-      )}
-      <div style={{ padding: '4px 12px', borderTop: '1px solid #334155' }}>
+      {/* Reset button only, no data tables in preview */}
+      <div style={{ padding: '4px 12px', position: 'absolute', bottom: 0, left: 0 }}>
         <button
           onClick={handleReset}
           style={{ fontSize: 11, color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
         >
-          Reset opgeslagen data
+          Reset
         </button>
       </div>
     </div>
