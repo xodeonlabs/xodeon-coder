@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { NGCCodeEditor } from '@/components/NGCCodeEditor';
@@ -84,6 +85,8 @@ const Index = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [leftOpen, setLeftOpen] = useState(true);
+  const [rightOpen, setRightOpen] = useState(true);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load app from database
@@ -170,36 +173,52 @@ const Index = () => {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Left Panel: Explorer + Data */}
-        <div className="w-56 shrink-0 border-r border-border flex flex-col" style={{ background: 'hsl(var(--ide-explorer-bg))' }}>
-          {/* Explorer */}
-          <div className="flex flex-col min-h-0" style={{ flex: '1 1 50%' }}>
-            <div className="ide-panel-header">
-              <span>Explorer</span>
-            </div>
-            <div className="flex-1 overflow-y-auto min-h-0">
-              <NGCExplorer
-                ast={ast}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
-                onContextMenu={handleContextMenu}
-                onRename={handleRename}
-                onDelete={handleDelete}
-              />
-            </div>
-          </div>
-          {/* Data Panel */}
-          <div className="flex flex-col min-h-0 border-t border-border" style={{ flex: '1 1 50%' }}>
-            <div className="ide-panel-header">
-              <span>Data</span>
-            </div>
-            <div className="flex-1 overflow-y-auto min-h-0">
-              <NGCDataPanel ast={ast} />
-            </div>
-          </div>
+        <div
+          className={`shrink-0 border-r border-border flex flex-col transition-all duration-200 ${leftOpen ? 'w-56' : 'w-0 overflow-hidden border-r-0'}`}
+          style={{ background: 'hsl(var(--ide-explorer-bg))' }}
+        >
+          {leftOpen && (
+            <>
+              {/* Explorer */}
+              <div className="flex flex-col min-h-0" style={{ flex: '1 1 50%' }}>
+                <div className="ide-panel-header">
+                  <span>Explorer</span>
+                </div>
+                <div className="flex-1 overflow-y-auto min-h-0">
+                  <NGCExplorer
+                    ast={ast}
+                    selectedId={selectedId}
+                    onSelect={setSelectedId}
+                    onContextMenu={handleContextMenu}
+                    onRename={handleRename}
+                    onDelete={handleDelete}
+                  />
+                </div>
+              </div>
+              {/* Data Panel */}
+              <div className="flex flex-col min-h-0 border-t border-border" style={{ flex: '1 1 50%' }}>
+                <div className="ide-panel-header">
+                  <span>Data</span>
+                </div>
+                <div className="flex-1 overflow-y-auto min-h-0">
+                  <NGCDataPanel ast={ast} />
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
+        {/* Collapse toggle for left panel */}
+        <button
+          onClick={() => setLeftOpen(p => !p)}
+          className="shrink-0 flex items-center justify-center w-5 hover:bg-secondary/60 transition-colors border-r border-border"
+          title={leftOpen ? 'Paneel inklappen' : 'Paneel uitklappen'}
+        >
+          {leftOpen ? <PanelLeftClose className="h-3.5 w-3.5 text-muted-foreground" /> : <PanelLeftOpen className="h-3.5 w-3.5 text-muted-foreground" />}
+        </button>
+
         {/* Code Editor */}
-        <div className="flex-1 flex flex-col min-w-0 border-r border-border">
+        <div className="flex-1 flex flex-col min-w-0">
           <div className="ide-panel-header">
             <span>Code Editor</span>
             <span className="ml-auto text-muted-foreground opacity-60 normal-case tracking-normal">main.ngc</span>
@@ -221,14 +240,29 @@ const Index = () => {
           )}
         </div>
 
+        {/* Collapse toggle for right panel */}
+        <button
+          onClick={() => setRightOpen(p => !p)}
+          className="shrink-0 flex items-center justify-center w-5 hover:bg-secondary/60 transition-colors border-l border-border"
+          title={rightOpen ? 'Paneel inklappen' : 'Paneel uitklappen'}
+        >
+          {rightOpen ? <PanelRightClose className="h-3.5 w-3.5 text-muted-foreground" /> : <PanelRightOpen className="h-3.5 w-3.5 text-muted-foreground" />}
+        </button>
+
         {/* Right Panel: Component Library */}
-        <div className="w-72 shrink-0 flex flex-col">
-          <div className="ide-panel-header">
-            <span>Componenten</span>
-          </div>
-          <div className="flex-1 overflow-auto">
-            <NGCComponentLibrary onInsert={handleInsertCode} />
-          </div>
+        <div
+          className={`shrink-0 flex flex-col transition-all duration-200 ${rightOpen ? 'w-72' : 'w-0 overflow-hidden'}`}
+        >
+          {rightOpen && (
+            <>
+              <div className="ide-panel-header">
+                <span>Componenten</span>
+              </div>
+              <div className="flex-1 overflow-auto">
+                <NGCComponentLibrary onInsert={handleInsertCode} />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
