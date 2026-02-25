@@ -6,17 +6,24 @@ interface ToolbarProps {
   errors: ParseError[];
   appName?: string;
   onSignOut?: () => void;
+  onSave?: () => Promise<void> | void;
 }
 
-export function NGCToolbar({ errors, appName, onSignOut }: ToolbarProps) {
+export function NGCToolbar({ errors, appName, onSignOut, onSave }: ToolbarProps) {
   const navigate = useNavigate();
+
+  const handleNavigate = async (path: string) => {
+    if (onSave) await onSave();
+    navigate(path);
+  };
+
   return (
     <div
       className="flex items-center justify-between px-3 border-b border-border h-10 shrink-0"
       style={{ background: 'hsl(var(--ide-toolbar))' }}
     >
       <div className="flex items-center gap-1">
-        <button onClick={() => navigate('/')} className="text-muted-foreground hover:text-foreground transition-colors mr-2" title="Terug naar dashboard">
+        <button onClick={() => handleNavigate('/')} className="text-muted-foreground hover:text-foreground transition-colors mr-2" title="Terug naar dashboard">
           <ArrowLeft className="h-4 w-4" />
         </button>
         <span className="text-sm font-bold text-primary font-mono mr-2">NGC</span>
@@ -36,7 +43,7 @@ export function NGCToolbar({ errors, appName, onSignOut }: ToolbarProps) {
           </div>
         )}
         <button
-          onClick={() => navigate(window.location.pathname.replace('/editor/', '/preview/'))}
+          onClick={() => handleNavigate(window.location.pathname.replace('/editor/', '/preview/'))}
           className="px-3 py-1 text-xs rounded-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
         >
           <ExternalLink className="h-3 w-3 inline mr-1" />

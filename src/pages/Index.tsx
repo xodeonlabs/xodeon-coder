@@ -104,6 +104,13 @@ const Index = () => {
     });
   }, [appId]);
 
+  // Save to database
+  const saveNow = useCallback(async () => {
+    if (!appId) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    await supabase.from('apps').update({ ngc_code: code }).eq('id', appId);
+  }, [code, appId]);
+
   // Auto-save to database with debounce
   useEffect(() => {
     if (loading || !appId) return;
@@ -169,6 +176,7 @@ const Index = () => {
         errors={errors}
         appName={appName}
         onSignOut={signOut}
+        onSave={saveNow}
       />
 
       <div className="flex flex-1 overflow-hidden">
