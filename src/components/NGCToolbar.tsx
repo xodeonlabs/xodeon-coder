@@ -1,4 +1,5 @@
-import { ExternalLink, LogOut, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
+import { useState } from 'react';
+import { ExternalLink, LogOut, AlertCircle, CheckCircle, ArrowLeft, Pencil } from 'lucide-react';
 import { ParseError } from '@/lib/ngc-ast';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,14 +8,27 @@ interface ToolbarProps {
   appName?: string;
   onSignOut?: () => void;
   onSave?: () => Promise<void> | void;
+  onRename?: (newName: string) => void;
 }
 
-export function NGCToolbar({ errors, appName, onSignOut, onSave }: ToolbarProps) {
+export function NGCToolbar({ errors, appName, onSignOut, onSave, onRename }: ToolbarProps) {
   const navigate = useNavigate();
+  const [editing, setEditing] = useState(false);
+  const [nameValue, setNameValue] = useState('');
 
   const handleNavigate = async (path: string) => {
     if (onSave) await onSave();
     navigate(path);
+  };
+
+  const startEditing = () => {
+    setNameValue(appName || '');
+    setEditing(true);
+  };
+
+  const commitName = () => {
+    if (nameValue.trim() && onRename) onRename(nameValue.trim());
+    setEditing(false);
   };
 
   return (
@@ -27,7 +41,23 @@ export function NGCToolbar({ errors, appName, onSignOut, onSave }: ToolbarProps)
           <ArrowLeft className="h-4 w-4" />
         </button>
         <span className="text-sm font-bold text-primary font-mono mr-2">NGC</span>
-        {appName && <span className="text-xs text-muted-foreground">{appName}</span>}
+        {editing ? (
+          <input
+            autoFocus
+            className="text-xs text-foreground bg-background border border-border rounded px-1.5 py-0.5"
+            value={nameValue}
+            onChange={e => setNameValue(e.target.value)}
+            onBlur={commitName}
+            onKeyDown={e => { if (e.key === 'Enter') commitName(); if (e.key === 'Escape') setEditing(false); }}
+          />
+        ) : (
+          appName && (
+            <button onClick={startEditing} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors" title="Naam wijzigen">
+              {appName}
+              <Pencil className="h-2.5 w-2.5" />
+            </button>
+          )
+        )}
       </div>
 
       <div className="flex items-center gap-2">
