@@ -376,15 +376,6 @@ export function NGCPreview({ ast }: PreviewProps) {
         )}
       </div>
 
-      {/* Reset button only, no data tables in preview */}
-      <div style={{ padding: '4px 12px', position: 'absolute', bottom: 0, left: 0 }}>
-        <button
-          onClick={handleReset}
-          style={{ fontSize: 11, color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
-        >
-          Reset
-        </button>
-      </div>
     </div>
   );
 }

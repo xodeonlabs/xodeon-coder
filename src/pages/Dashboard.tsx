@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X } from 'lucide-react';
+import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface App {
@@ -64,6 +64,8 @@ export default function Dashboard() {
   const [inviteAppId, setInviteAppId] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviting, setInviting] = useState(false);
+  const [editingNameId, setEditingNameId] = useState<string | null>(null);
+  const [editingNameValue, setEditingNameValue] = useState('');
 
   useEffect(() => { fetchApps(); }, []);
 
@@ -108,6 +110,15 @@ export default function Dashboard() {
   async function toggleRemixable(app: App) {
     const { error } = await supabase.from('apps').update({ is_remixable: !app.is_remixable }).eq('id', app.id);
     if (!error) setApps(apps.map(a => a.id === app.id ? { ...a, is_remixable: !a.is_remixable } : a));
+  }
+
+  async function renameApp(id: string, newName: string) {
+    if (!newName.trim()) return;
+    const { error } = await supabase.from('apps').update({ name: newName.trim() }).eq('id', id);
+    if (!error) {
+      setApps(apps.map(a => a.id === id ? { ...a, name: newName.trim() } : a));
+    }
+    setEditingNameId(null);
   }
 
   async function inviteCollaborator() {
@@ -177,7 +188,19 @@ export default function Dashboard() {
             {myApps.map(app => (
               <div key={app.id} className="group rounded-xl border border-border p-4 transition-all hover:border-primary/40 cursor-pointer" style={{ background: 'hsl(var(--card))' }} onClick={() => navigate(`/editor/${app.id}`)}>
                 <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-semibold text-foreground truncate pr-2">{app.name}</h3>
+                  {editingNameId === app.id ? (
+                    <input
+                      autoFocus
+                      className="font-semibold text-foreground bg-background border border-border rounded px-1 py-0.5 text-sm w-full mr-2"
+                      value={editingNameValue}
+                      onChange={e => setEditingNameValue(e.target.value)}
+                      onBlur={() => renameApp(app.id, editingNameValue)}
+                      onKeyDown={e => { if (e.key === 'Enter') renameApp(app.id, editingNameValue); if (e.key === 'Escape') setEditingNameId(null); }}
+                      onClick={e => e.stopPropagation()}
+                    />
+                  ) : (
+                    <h3 className="font-semibold text-foreground truncate pr-2">{app.name}</h3>
+                  )}
                   <div className="flex items-center gap-1 shrink-0">
                     <span title={app.is_public ? 'Publiek' : 'Privé'}>
                       {app.is_public ? <Globe className="h-3.5 w-3.5 text-primary" /> : <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
@@ -187,6 +210,9 @@ export default function Dashboard() {
                 </div>
                 <p className="text-xs text-muted-foreground mb-4">Laatst bewerkt: {new Date(app.updated_at).toLocaleDateString('nl-NL')}</p>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                  <button onClick={() => { setEditingNameId(app.id); setEditingNameValue(app.name); }} className="rounded p-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Naam wijzigen">
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
                   <button onClick={() => togglePublic(app)} className="rounded p-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title={app.is_public ? 'Maak privé' : 'Maak publiek'}>
                     {app.is_public ? <Lock className="h-3.5 w-3.5" /> : <Globe className="h-3.5 w-3.5" />}
                   </button>

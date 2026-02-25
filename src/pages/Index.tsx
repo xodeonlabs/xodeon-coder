@@ -177,6 +177,10 @@ const Index = () => {
         appName={appName}
         onSignOut={signOut}
         onSave={saveNow}
+        onRename={async (newName) => {
+          setAppName(newName);
+          if (appId) await supabase.from('apps').update({ name: newName }).eq('id', appId);
+        }}
       />
 
       <div className="flex flex-1 overflow-hidden">
