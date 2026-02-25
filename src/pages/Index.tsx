@@ -6,6 +6,7 @@ import { NGCCodeEditor } from '@/components/NGCCodeEditor';
 import { NGCExplorer } from '@/components/NGCExplorer';
 import { NGCComponentLibrary } from '@/components/NGCComponentLibrary';
 import { NGCDataPanel } from '@/components/NGCDataPanel';
+import { NGCChat } from '@/components/NGCChat';
 import { NGCContextMenu } from '@/components/NGCContextMenu';
 import { NGCToolbar } from '@/components/NGCToolbar';
 import { parseNGC, astToNGC } from '@/lib/ngc-parser';
@@ -192,7 +193,7 @@ const Index = () => {
           {leftOpen && (
             <>
               {/* Explorer */}
-              <div className="flex flex-col min-h-0" style={{ flex: '1 1 50%' }}>
+              <div className="flex flex-col min-h-0" style={{ flex: '1 1 33%' }}>
                 <div className="ide-panel-header">
                   <span>Explorer</span>
                 </div>
@@ -208,12 +209,21 @@ const Index = () => {
                 </div>
               </div>
               {/* Data Panel */}
-              <div className="flex flex-col min-h-0 border-t border-border" style={{ flex: '1 1 50%' }}>
+              <div className="flex flex-col min-h-0 border-t border-border" style={{ flex: '1 1 33%' }}>
                 <div className="ide-panel-header">
                   <span>Data</span>
                 </div>
                 <div className="flex-1 overflow-y-auto min-h-0">
                   <NGCDataPanel ast={ast} />
+                </div>
+              </div>
+              {/* Chat Panel */}
+              <div className="flex flex-col min-h-0 border-t border-border" style={{ flex: '1 1 34%' }}>
+                <div className="ide-panel-header">
+                  <span>Chat</span>
+                </div>
+                <div className="flex-1 overflow-hidden min-h-0">
+                  {appId && <NGCChat appId={appId} />}
                 </div>
               </div>
             </>
