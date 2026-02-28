@@ -2,6 +2,36 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
+const GOOGLE_OAUTH_CONFIG_ERROR = 'Google inloggen is nog niet geconfigureerd. Stel de Google OAuth secret eerst in bij Supabase Auth providers.';
+
+const getErrorText = (err: unknown, fallback: string) => {
+  if (err instanceof Error && err.message) return err.message;
+
+  if (err && typeof err === 'object') {
+    const errorPayload = err as {
+      message?: unknown;
+      msg?: unknown;
+      error_description?: unknown;
+      details?: unknown;
+      error?: unknown;
+    };
+
+    const candidates = [
+      errorPayload.message,
+      errorPayload.msg,
+      errorPayload.error_description,
+      errorPayload.details,
+      errorPayload.error,
+    ];
+
+    for (const candidate of candidates) {
+      if (typeof candidate === 'string' && candidate.length > 0) return candidate;
+    }
+  }
+
+  return fallback;
+};
+
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -10,6 +40,19 @@ const Auth = () => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const isGoogleAuthEnabled = import.meta.env.VITE_ENABLE_GOOGLE_AUTH === 'true';
+
+  const getGoogleOAuthErrorMessage = (err: unknown) => {
+    const message = getErrorText(err, 'Google inloggen is mislukt. Probeer het opnieuw.');
+    const normalizedMessage = message.toLowerCase();
+
+    if (normalizedMessage.includes('unsupported provider') || normalizedMessage.includes('missing oauth secret') || normalizedMessage.includes('provider is not enabled')) {
+      return GOOGLE_OAUTH_CONFIG_ERROR;
+    }
+
+    return message;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,17 +65,46 @@ const Auth = () => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         navigate('/');
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin },
-        });
-        if (error) throw error;
-        setMessage('Check je e-mail om je account te bevestigen!');
+        return;
       }
-    } catch (err: any) {
-      setError(err.message);
+
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: window.location.origin },
+      });
+
+      if (error) throw error;
+      setMessage('Check je e-mail om je account te bevestigen!');
+    } catch (err: unknown) {
+      setError(getErrorText(err, 'Er is een onbekende fout opgetreden.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setMessage('');
+
+    if (!isGoogleAuthEnabled) {
+      setError('Google inloggen staat uit. Zet VITE_ENABLE_GOOGLE_AUTH=true en configureer Google OAuth in Supabase.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        },
+      });
+
+      if (error) throw error;
+    } catch (err: unknown) {
+      setError(getGoogleOAuthErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -84,12 +156,38 @@ const Auth = () => {
           >
             {loading ? '...' : isLogin ? 'Inloggen' : 'Registreren'}
           </button>
+
+          <div className="flex items-center gap-2 text-xs" style={{ color: '#64748b' }}>
+            <div className="h-px flex-1" style={{ background: '#334155' }} />
+            <span>of</span>
+            <div className="h-px flex-1" style={{ background: '#334155' }} />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={loading || !isGoogleAuthEnabled}
+            className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{ background: '#1f2937', border: '1px solid #334155' }}
+          >
+            Inloggen met Google
+          </button>
+
+          {!isGoogleAuthEnabled && (
+            <p className="text-xs" style={{ color: '#64748b' }}>
+              Google login is tijdelijk niet beschikbaar.
+            </p>
+          )}
         </form>
 
         <p className="text-xs text-center mt-4" style={{ color: '#64748b' }}>
           {isLogin ? 'Nog geen account?' : 'Al een account?'}{' '}
           <button
-            onClick={() => { setIsLogin(!isLogin); setError(''); setMessage(''); }}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setError('');
+              setMessage('');
+            }}
             className="underline"
             style={{ color: '#3b82f6' }}
           >
