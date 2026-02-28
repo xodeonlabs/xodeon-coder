@@ -38,6 +38,26 @@ const Auth = () => {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setError('');
+    setMessage('');
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        },
+      });
+
+      if (error) throw error;
+    } catch (err: any) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0e1a' }}>
       <div className="w-full max-w-sm p-8 rounded-xl" style={{ background: '#151b2e', border: '1px solid #1e293b' }}>
@@ -83,6 +103,22 @@ const Auth = () => {
             style={{ background: '#3b82f6' }}
           >
             {loading ? '...' : isLogin ? 'Inloggen' : 'Registreren'}
+          </button>
+
+          <div className="flex items-center gap-2 text-xs" style={{ color: '#64748b' }}>
+            <div className="h-px flex-1" style={{ background: '#334155' }} />
+            <span>of</span>
+            <div className="h-px flex-1" style={{ background: '#334155' }} />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors"
+            style={{ background: '#1f2937', border: '1px solid #334155' }}
+          >
+            Inloggen met Google
           </button>
         </form>
 
