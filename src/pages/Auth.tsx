@@ -8,10 +8,25 @@ const getErrorText = (err: unknown, fallback: string) => {
   if (err instanceof Error && err.message) return err.message;
 
   if (err && typeof err === 'object') {
-    const withMessage = err as { message?: unknown; msg?: unknown };
+    const errorPayload = err as {
+      message?: unknown;
+      msg?: unknown;
+      error_description?: unknown;
+      details?: unknown;
+      error?: unknown;
+    };
 
-    if (typeof withMessage.message === 'string' && withMessage.message.length > 0) return withMessage.message;
-    if (typeof withMessage.msg === 'string' && withMessage.msg.length > 0) return withMessage.msg;
+    const candidates = [
+      errorPayload.message,
+      errorPayload.msg,
+      errorPayload.error_description,
+      errorPayload.details,
+      errorPayload.error,
+    ];
+
+    for (const candidate of candidates) {
+      if (typeof candidate === 'string' && candidate.length > 0) return candidate;
+    }
   }
 
   return fallback;
@@ -30,10 +45,9 @@ const Auth = () => {
 
   const getGoogleOAuthErrorMessage = (err: unknown) => {
     const message = getErrorText(err, 'Google inloggen is mislukt. Probeer het opnieuw.');
-    const message = err instanceof Error ? err.message : 'Google inloggen is mislukt. Probeer het opnieuw.';
     const normalizedMessage = message.toLowerCase();
 
-    if (normalizedMessage.includes('unsupported provider') || normalizedMessage.includes('missing oauth secret')) {
+    if (normalizedMessage.includes('unsupported provider') || normalizedMessage.includes('missing oauth secret') || normalizedMessage.includes('provider is not enabled')) {
       return GOOGLE_OAUTH_CONFIG_ERROR;
     }
 
@@ -64,7 +78,6 @@ const Auth = () => {
       setMessage('Check je e-mail om je account te bevestigen!');
     } catch (err: unknown) {
       setError(getErrorText(err, 'Er is een onbekende fout opgetreden.'));
-      setError(err instanceof Error ? err.message : 'Er is een onbekende fout opgetreden.');
     } finally {
       setLoading(false);
     }
@@ -93,26 +106,6 @@ const Auth = () => {
     } catch (err: unknown) {
       setError(getGoogleOAuthErrorMessage(err));
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setError('');
-    setMessage('');
-    setLoading(true);
-
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/`,
-        },
-      });
-
-      if (error) throw error;
-    } catch (err: any) {
-      setError(err.message);
       setLoading(false);
     }
   };
@@ -175,8 +168,6 @@ const Auth = () => {
             onClick={handleGoogleLogin}
             disabled={loading || !isGoogleAuthEnabled}
             className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-            disabled={loading}
-            className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors"
             style={{ background: '#1f2937', border: '1px solid #334155' }}
           >
             Inloggen met Google
