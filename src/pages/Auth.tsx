@@ -2,6 +2,21 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
+const GOOGLE_OAUTH_CONFIG_ERROR = 'Google inloggen is nog niet geconfigureerd. Stel de Google OAuth secret eerst in bij Supabase Auth providers.';
+
+const getErrorText = (err: unknown, fallback: string) => {
+  if (err instanceof Error && err.message) return err.message;
+
+  if (err && typeof err === 'object') {
+    const withMessage = err as { message?: unknown; msg?: unknown };
+
+    if (typeof withMessage.message === 'string' && withMessage.message.length > 0) return withMessage.message;
+    if (typeof withMessage.msg === 'string' && withMessage.msg.length > 0) return withMessage.msg;
+  }
+
+  return fallback;
+};
+
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -10,6 +25,19 @@ const Auth = () => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const isGoogleAuthEnabled = import.meta.env.VITE_ENABLE_GOOGLE_AUTH === 'true';
+
+  const getGoogleOAuthErrorMessage = (err: unknown) => {
+    const message = getErrorText(err, 'Google inloggen is mislukt. Probeer het opnieuw.');
+    const normalizedMessage = message.toLowerCase();
+
+    if (normalizedMessage.includes('unsupported provider') || normalizedMessage.includes('missing oauth secret')) {
+      return GOOGLE_OAUTH_CONFIG_ERROR;
+    }
+
+    return message;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,17 +50,46 @@ const Auth = () => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         navigate('/');
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin },
-        });
-        if (error) throw error;
-        setMessage('Check je e-mail om je account te bevestigen!');
+        return;
       }
-    } catch (err: any) {
-      setError(err.message);
+
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: window.location.origin },
+      });
+
+      if (error) throw error;
+      setMessage('Check je e-mail om je account te bevestigen!');
+    } catch (err: unknown) {
+      setError(getErrorText(err, 'Er is een onbekende fout opgetreden.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setMessage('');
+
+    if (!isGoogleAuthEnabled) {
+      setError('Google inloggen staat uit. Zet VITE_ENABLE_GOOGLE_AUTH=true en configureer Google OAuth in Supabase.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        },
+      });
+
+      if (error) throw error;
+    } catch (err: unknown) {
+      setError(getGoogleOAuthErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -84,12 +141,32 @@ const Auth = () => {
           >
             {loading ? '...' : isLogin ? 'Inloggen' : 'Registreren'}
           </button>
+
+          <div className="flex items-center gap-2 text-xs" style={{ color: '#64748b' }}>
+            <div className="h-px flex-1" style={{ background: '#334155' }} />
+            <span>of</span>
+            <div className="h-px flex-1" style={{ background: '#334155' }} />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors"
+            style={{ background: '#1f2937', border: '1px solid #334155' }}
+          >
+            Inloggen met Google
+          </button>
         </form>
 
         <p className="text-xs text-center mt-4" style={{ color: '#64748b' }}>
           {isLogin ? 'Nog geen account?' : 'Al een account?'}{' '}
           <button
-            onClick={() => { setIsLogin(!isLogin); setError(''); setMessage(''); }}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setError('');
+              setMessage('');
+            }}
             className="underline"
             style={{ color: '#3b82f6' }}
           >
