@@ -15,8 +15,8 @@ const Auth = () => {
 
   const isGoogleAuthEnabled = import.meta.env.VITE_ENABLE_GOOGLE_AUTH === 'true';
 
-  const getErrorMessage = (err: unknown) => {
-    const message = err instanceof Error ? err.message : 'Er is een onbekende fout opgetreden.';
+  const getGoogleOAuthErrorMessage = (err: unknown) => {
+    const message = err instanceof Error ? err.message : 'Google inloggen is mislukt. Probeer het opnieuw.';
     const normalizedMessage = message.toLowerCase();
 
     if (normalizedMessage.includes('unsupported provider') || normalizedMessage.includes('missing oauth secret')) {
@@ -49,7 +49,7 @@ const Auth = () => {
       if (error) throw error;
       setMessage('Check je e-mail om je account te bevestigen!');
     } catch (err: unknown) {
-      setError(getErrorMessage(err));
+      setError(err instanceof Error ? err.message : 'Er is een onbekende fout opgetreden.');
     } finally {
       setLoading(false);
     }
@@ -76,9 +76,7 @@ const Auth = () => {
 
       if (error) throw error;
     } catch (err: unknown) {
-      const fallbackMessage = 'Google inloggen is mislukt. Probeer het opnieuw.';
-      const mappedMessage = getErrorMessage(err);
-      setError(mappedMessage || fallbackMessage);
+      setError(getGoogleOAuthErrorMessage(err));
     } finally {
       setLoading(false);
     }
