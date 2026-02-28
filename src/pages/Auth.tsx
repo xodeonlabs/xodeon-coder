@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
+const GOOGLE_OAUTH_CONFIG_ERROR = 'Google inloggen is nog niet geconfigureerd. Stel de Google OAuth secret eerst in bij Supabase Auth providers.';
+
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -10,7 +12,19 @@ const Auth = () => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
   const isGoogleAuthEnabled = import.meta.env.VITE_ENABLE_GOOGLE_AUTH === 'true';
+
+  const getErrorMessage = (err: unknown) => {
+    const message = err instanceof Error ? err.message : 'Er is een onbekende fout opgetreden.';
+    const normalizedMessage = message.toLowerCase();
+
+    if (normalizedMessage.includes('unsupported provider') || normalizedMessage.includes('missing oauth secret')) {
+      return GOOGLE_OAUTH_CONFIG_ERROR;
+    }
+
+    return message;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,17 +37,19 @@ const Auth = () => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         navigate('/');
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin },
-        });
-        if (error) throw error;
-        setMessage('Check je e-mail om je account te bevestigen!');
+        return;
       }
-    } catch (err: any) {
-      setError(err.message);
+
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: window.location.origin },
+      });
+
+      if (error) throw error;
+      setMessage('Check je e-mail om je account te bevestigen!');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -59,14 +75,10 @@ const Auth = () => {
       });
 
       if (error) throw error;
-    } catch (err: any) {
-      const errorMessage = String(err?.message || '').toLowerCase();
-
-      if (errorMessage.includes('unsupported provider') || errorMessage.includes('missing oauth secret')) {
-        setError('Google inloggen is nog niet geconfigureerd. Stel de Google OAuth secret eerst in bij Supabase Auth providers.');
-      } else {
-        setError(err?.message || 'Google inloggen is mislukt. Probeer het opnieuw.');
-      }
+    } catch (err: unknown) {
+      const fallbackMessage = 'Google inloggen is mislukt. Probeer het opnieuw.';
+      const mappedMessage = getErrorMessage(err);
+      setError(mappedMessage || fallbackMessage);
     } finally {
       setLoading(false);
     }
@@ -145,7 +157,11 @@ const Auth = () => {
         <p className="text-xs text-center mt-4" style={{ color: '#64748b' }}>
           {isLogin ? 'Nog geen account?' : 'Al een account?'}{' '}
           <button
-            onClick={() => { setIsLogin(!isLogin); setError(''); setMessage(''); }}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setError('');
+              setMessage('');
+            }}
             className="underline"
             style={{ color: '#3b82f6' }}
           >
