@@ -135,8 +135,8 @@ const Auth = () => {
 
           <button
             type="submit"
-            disabled={loading || !isGoogleAuthEnabled}
-            className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            disabled={loading}
+            className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors"
             style={{ background: '#3b82f6' }}
           >
             {loading ? '...' : isLogin ? 'Inloggen' : 'Registreren'}
