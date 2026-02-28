@@ -135,8 +135,8 @@ const Auth = () => {
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors"
+            disabled={loading || !isGoogleAuthEnabled}
+            className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             style={{ background: '#3b82f6' }}
           >
             {loading ? '...' : isLogin ? 'Inloggen' : 'Registreren'}
@@ -151,12 +151,18 @@ const Auth = () => {
           <button
             type="button"
             onClick={handleGoogleLogin}
-            disabled={loading}
-            className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors"
+            disabled={loading || !isGoogleAuthEnabled}
+            className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             style={{ background: '#1f2937', border: '1px solid #334155' }}
           >
             Inloggen met Google
           </button>
+
+          {!isGoogleAuthEnabled && (
+            <p className="text-xs" style={{ color: '#64748b' }}>
+              Google login is tijdelijk niet beschikbaar.
+            </p>
+          )}
         </form>
 
         <p className="text-xs text-center mt-4" style={{ color: '#64748b' }}>
