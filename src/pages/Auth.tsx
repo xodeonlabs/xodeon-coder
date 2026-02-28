@@ -10,6 +10,7 @@ const Auth = () => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const isGoogleAuthEnabled = import.meta.env.VITE_ENABLE_GOOGLE_AUTH === 'true';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +34,39 @@ const Auth = () => {
       }
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setMessage('');
+
+    if (!isGoogleAuthEnabled) {
+      setError('Google inloggen staat uit. Zet VITE_ENABLE_GOOGLE_AUTH=true en configureer Google OAuth in Supabase.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        },
+      });
+
+      if (error) throw error;
+    } catch (err: any) {
+      const errorMessage = String(err?.message || '').toLowerCase();
+
+      if (errorMessage.includes('unsupported provider') || errorMessage.includes('missing oauth secret')) {
+        setError('Google inloggen is nog niet geconfigureerd. Stel de Google OAuth secret eerst in bij Supabase Auth providers.');
+      } else {
+        setError(err?.message || 'Google inloggen is mislukt. Probeer het opnieuw.');
+      }
     } finally {
       setLoading(false);
     }
@@ -84,6 +118,28 @@ const Auth = () => {
           >
             {loading ? '...' : isLogin ? 'Inloggen' : 'Registreren'}
           </button>
+
+          <div className="flex items-center gap-2 text-xs" style={{ color: '#64748b' }}>
+            <div className="h-px flex-1" style={{ background: '#334155' }} />
+            <span>of</span>
+            <div className="h-px flex-1" style={{ background: '#334155' }} />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={loading || !isGoogleAuthEnabled}
+            className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{ background: '#1f2937', border: '1px solid #334155' }}
+          >
+            Inloggen met Google
+          </button>
+
+          {!isGoogleAuthEnabled && (
+            <p className="text-xs" style={{ color: '#64748b' }}>
+              Google login is tijdelijk niet beschikbaar.
+            </p>
+          )}
         </form>
 
         <p className="text-xs text-center mt-4" style={{ color: '#64748b' }}>
