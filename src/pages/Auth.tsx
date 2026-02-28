@@ -4,6 +4,19 @@ import { supabase } from '@/integrations/supabase/client';
 
 const GOOGLE_OAUTH_CONFIG_ERROR = 'Google inloggen is nog niet geconfigureerd. Stel de Google OAuth secret eerst in bij Supabase Auth providers.';
 
+const getErrorText = (err: unknown, fallback: string) => {
+  if (err instanceof Error && err.message) return err.message;
+
+  if (err && typeof err === 'object') {
+    const withMessage = err as { message?: unknown; msg?: unknown };
+
+    if (typeof withMessage.message === 'string' && withMessage.message.length > 0) return withMessage.message;
+    if (typeof withMessage.msg === 'string' && withMessage.msg.length > 0) return withMessage.msg;
+  }
+
+  return fallback;
+};
+
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -16,6 +29,7 @@ const Auth = () => {
   const isGoogleAuthEnabled = import.meta.env.VITE_ENABLE_GOOGLE_AUTH === 'true';
 
   const getGoogleOAuthErrorMessage = (err: unknown) => {
+    const message = getErrorText(err, 'Google inloggen is mislukt. Probeer het opnieuw.');
     const message = err instanceof Error ? err.message : 'Google inloggen is mislukt. Probeer het opnieuw.';
     const normalizedMessage = message.toLowerCase();
 
@@ -49,6 +63,7 @@ const Auth = () => {
       if (error) throw error;
       setMessage('Check je e-mail om je account te bevestigen!');
     } catch (err: unknown) {
+      setError(getErrorText(err, 'Er is een onbekende fout opgetreden.'));
       setError(err instanceof Error ? err.message : 'Er is een onbekende fout opgetreden.');
     } finally {
       setLoading(false);
@@ -158,12 +173,20 @@ const Auth = () => {
           <button
             type="button"
             onClick={handleGoogleLogin}
+            disabled={loading || !isGoogleAuthEnabled}
+            className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             disabled={loading}
             className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors"
             style={{ background: '#1f2937', border: '1px solid #334155' }}
           >
             Inloggen met Google
           </button>
+
+          {!isGoogleAuthEnabled && (
+            <p className="text-xs" style={{ color: '#64748b' }}>
+              Google login is tijdelijk niet beschikbaar.
+            </p>
+          )}
         </form>
 
         <p className="text-xs text-center mt-4" style={{ color: '#64748b' }}>
