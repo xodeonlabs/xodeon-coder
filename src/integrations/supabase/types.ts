@@ -121,6 +121,7 @@ export type Database = {
     Functions: {
       is_app_collaborator: { Args: { _app_id: string }; Returns: boolean }
       is_app_owner: { Args: { _app_id: string }; Returns: boolean }
+      is_own_app: { Args: { _app_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

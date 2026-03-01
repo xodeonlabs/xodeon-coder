@@ -132,7 +132,7 @@ export default function Dashboard() {
       if (data?.error) {
         toast({ title: 'Fout', description: data.error, variant: 'destructive' });
       } else {
-        toast({ title: 'Uitgenodigd!', description: `${inviteEmail} is toegevoegd als samenwerker.` });
+        toast({ title: 'Verstuurd', description: data?.message || 'Uitnodiging is verwerkt.' });
         setInviteEmail('');
         setInviteAppId(null);
       }
