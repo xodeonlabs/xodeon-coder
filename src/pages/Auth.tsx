@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-
-const GOOGLE_OAUTH_CONFIG_ERROR = 'Google inloggen is nog niet geconfigureerd. Stel de Google OAuth secret eerst in bij Supabase Auth providers.';
+import { lovable } from '@/integrations/lovable/index';
 
 const getErrorText = (err: unknown, fallback: string) => {
   if (err instanceof Error && err.message) return err.message;
@@ -41,18 +40,6 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const isGoogleAuthEnabled = import.meta.env.VITE_ENABLE_GOOGLE_AUTH === 'true';
-
-  const getGoogleOAuthErrorMessage = (err: unknown) => {
-    const message = getErrorText(err, 'Google inloggen is mislukt. Probeer het opnieuw.');
-    const normalizedMessage = message.toLowerCase();
-
-    if (normalizedMessage.includes('unsupported provider') || normalizedMessage.includes('missing oauth secret') || normalizedMessage.includes('provider is not enabled')) {
-      return GOOGLE_OAUTH_CONFIG_ERROR;
-    }
-
-    return message;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,25 +73,16 @@ const Auth = () => {
   const handleGoogleLogin = async () => {
     setError('');
     setMessage('');
-
-    if (!isGoogleAuthEnabled) {
-      setError('Google inloggen staat uit. Zet VITE_ENABLE_GOOGLE_AUTH=true en configureer Google OAuth in Supabase.');
-      return;
-    }
-
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/`,
-        },
+      const result = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: window.location.origin,
       });
 
-      if (error) throw error;
+      if (result?.error) throw result.error;
     } catch (err: unknown) {
-      setError(getGoogleOAuthErrorMessage(err));
+      setError(getErrorText(err, 'Google inloggen is mislukt. Probeer het opnieuw.'));
     } finally {
       setLoading(false);
     }
@@ -166,18 +144,12 @@ const Auth = () => {
           <button
             type="button"
             onClick={handleGoogleLogin}
-            disabled={loading || !isGoogleAuthEnabled}
+            disabled={loading}
             className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             style={{ background: '#1f2937', border: '1px solid #334155' }}
           >
             Inloggen met Google
           </button>
-
-          {!isGoogleAuthEnabled && (
-            <p className="text-xs" style={{ color: '#64748b' }}>
-              Google login is tijdelijk niet beschikbaar.
-            </p>
-          )}
         </form>
 
         <p className="text-xs text-center mt-4" style={{ color: '#64748b' }}>
