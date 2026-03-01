@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Dashboard from "./pages/Dashboard";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Preview from "./pages/Preview";
 import NotFound from "./pages/NotFound";
 
@@ -27,6 +28,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<Auth />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/editor/:appId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/preview/:appId" element={<ProtectedRoute><Preview /></ProtectedRoute>} />

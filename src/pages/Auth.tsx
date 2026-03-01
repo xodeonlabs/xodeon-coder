@@ -32,13 +32,19 @@ const getErrorText = (err: unknown, fallback: string) => {
 };
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
+    setMode(newMode);
+    setError('');
+    setMessage('');
+  };
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,7 +54,16 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      if (isLogin) {
+      if (mode === 'forgot') {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        setMessage('Check je e-mail voor een link om je wachtwoord te resetten.');
+        return;
+      }
+
+      if (mode === 'login') {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         navigate('/');
@@ -93,7 +108,7 @@ const Auth = () => {
       <div className="w-full max-w-sm p-8 rounded-xl" style={{ background: '#151b2e', border: '1px solid #1e293b' }}>
         <h1 className="text-2xl font-bold text-white mb-1 text-center">NGC Editor</h1>
         <p className="text-sm text-center mb-6" style={{ color: '#64748b' }}>
-          {isLogin ? 'Log in om verder te gaan' : 'Maak een account aan'}
+          {mode === 'forgot' ? 'Wachtwoord herstellen' : mode === 'login' ? 'Log in om verder te gaan' : 'Maak een account aan'}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -109,19 +124,29 @@ const Auth = () => {
               placeholder="jouw@email.nl"
             />
           </div>
-          <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: '#94a3b8' }}>Wachtwoord</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="w-full px-3 py-2 rounded-md text-sm text-white outline-none focus:ring-2 focus:ring-blue-500"
-              style={{ background: '#0f172a', border: '1px solid #334155' }}
-              placeholder="••••••••"
-            />
-          </div>
+          {mode !== 'forgot' && (
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: '#94a3b8' }}>Wachtwoord</label>
+              <input
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="w-full px-3 py-2 rounded-md text-sm text-white outline-none focus:ring-2 focus:ring-blue-500"
+                style={{ background: '#0f172a', border: '1px solid #334155' }}
+                placeholder="••••••••"
+              />
+            </div>
+          )}
+
+          {mode === 'login' && (
+            <div className="text-right">
+              <button type="button" onClick={() => switchMode('forgot')} className="text-xs underline" style={{ color: '#3b82f6' }}>
+                Wachtwoord vergeten?
+              </button>
+            </div>
+          )}
 
           {error && <p className="text-xs text-red-400">{error}</p>}
           {message && <p className="text-xs text-green-400">{message}</p>}
@@ -132,39 +157,52 @@ const Auth = () => {
             className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors"
             style={{ background: '#3b82f6' }}
           >
-            {loading ? '...' : isLogin ? 'Inloggen' : 'Registreren'}
+            {loading ? '...' : mode === 'forgot' ? 'Reset link versturen' : mode === 'login' ? 'Inloggen' : 'Registreren'}
           </button>
 
-          <div className="flex items-center gap-2 text-xs" style={{ color: '#64748b' }}>
-            <div className="h-px flex-1" style={{ background: '#334155' }} />
-            <span>of</span>
-            <div className="h-px flex-1" style={{ background: '#334155' }} />
-          </div>
+          {mode !== 'forgot' && (
+            <>
+              <div className="flex items-center gap-2 text-xs" style={{ color: '#64748b' }}>
+                <div className="h-px flex-1" style={{ background: '#334155' }} />
+                <span>of</span>
+                <div className="h-px flex-1" style={{ background: '#334155' }} />
+              </div>
 
-          <button
-            type="button"
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-            style={{ background: '#1f2937', border: '1px solid #334155' }}
-          >
-            Inloggen met Google
-          </button>
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{ background: '#1f2937', border: '1px solid #334155' }}
+              >
+                Inloggen met Google
+              </button>
+            </>
+          )}
         </form>
 
         <p className="text-xs text-center mt-4" style={{ color: '#64748b' }}>
-          {isLogin ? 'Nog geen account?' : 'Al een account?'}{' '}
-          <button
-            onClick={() => {
-              setIsLogin(!isLogin);
-              setError('');
-              setMessage('');
-            }}
-            className="underline"
-            style={{ color: '#3b82f6' }}
-          >
-            {isLogin ? 'Registreer' : 'Log in'}
-          </button>
+          {mode === 'forgot' ? (
+            <>
+              <button onClick={() => switchMode('login')} className="underline" style={{ color: '#3b82f6' }}>
+                Terug naar inloggen
+              </button>
+            </>
+          ) : mode === 'login' ? (
+            <>
+              Nog geen account?{' '}
+              <button onClick={() => switchMode('register')} className="underline" style={{ color: '#3b82f6' }}>
+                Registreer
+              </button>
+            </>
+          ) : (
+            <>
+              Al een account?{' '}
+              <button onClick={() => switchMode('login')} className="underline" style={{ color: '#3b82f6' }}>
+                Log in
+              </button>
+            </>
+          )}
         </p>
       </div>
     </div>
