@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Plus } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { NGCCodeEditor } from '@/components/NGCCodeEditor';
@@ -11,6 +11,7 @@ import { NGCContextMenu } from '@/components/NGCContextMenu';
 import { NGCToolbar } from '@/components/NGCToolbar';
 import { parseNGC, astToNGC } from '@/lib/ngc-parser';
 import { NGCNode, NGCNodeType, DEFAULT_PROPERTIES, generateId } from '@/lib/ngc-ast';
+import { splitCodeIntoSections, mergeSections, CodeSection } from '@/lib/ngc-code-sections';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 const FALLBACK_CODE = 'App:\n    Page Home:\n        Text Hello:\n            Tekst="Hallo!"\n            Positie="50,50"\n            Grootte="200,30"\n            Kleur="#ffffff"\n';
@@ -88,6 +89,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState<string>('global');
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load app from database
@@ -125,14 +127,47 @@ const Index = () => {
   const parseResult = useMemo(() => parseNGC(code), [code]);
   const { ast, errors } = parseResult;
 
+  // Split code into sections for per-page editing
+  const sections = useMemo(() => splitCodeIntoSections(code), [code]);
+
+  // Get active section's code
+  const activeSection = useMemo(() => {
+    return sections.find(s => s.id === activeTab) || sections[0];
+  }, [sections, activeTab]);
+
+  // Handle section code change
+  const handleSectionCodeChange = useCallback((newSectionCode: string) => {
+    const updatedSections = sections.map(s =>
+      s.id === activeTab ? { ...s, code: newSectionCode } : s
+    );
+    setCode(mergeSections(updatedSections));
+  }, [sections, activeTab]);
+
+  // Add a new page
+  const handleAddPage = useCallback(() => {
+    const pageCount = sections.filter(s => s.id !== 'global').length;
+    const newPageName = `Pagina${pageCount + 1}`;
+    const newPageCode = `    Page ${newPageName}:\n        Text Welkom:\n            Tekst="Welkom op ${newPageName}"\n            Positie="50,50"\n            Grootte="300,30"\n            Kleur="#ffffff"\n`;
+    setCode(prev => prev + newPageCode);
+    setActiveTab(newPageName);
+  }, [sections]);
+
   const selectedNode = useMemo(() => {
     if (!ast || !selectedId) return null;
     return findNodeById(ast, selectedId);
   }, [ast, selectedId]);
 
   const handleInsertCode = useCallback((snippet: string) => {
-    setCode(prev => prev + '\n' + snippet);
-  }, []);
+    // Insert into active section
+    if (activeTab === 'global') {
+      setCode(prev => prev + '\n' + snippet);
+    } else {
+      const updatedSections = sections.map(s =>
+        s.id === activeTab ? { ...s, code: s.code + '\n' + snippet } : s
+      );
+      setCode(mergeSections(updatedSections));
+    }
+  }, [activeTab, sections]);
 
   const handleAddChild = useCallback((parentId: string, type: NGCNodeType) => {
     if (!ast) return;
@@ -241,12 +276,34 @@ const Index = () => {
 
         {/* Code Editor */}
         <div className="flex-1 flex flex-col min-w-0">
-          <div className="ide-panel-header">
-            <span>Code Editor</span>
-            <span className="ml-auto text-muted-foreground opacity-60 normal-case tracking-normal">main.ngc</span>
+          {/* Page Tabs */}
+          <div className="flex items-center border-b border-border shrink-0" style={{ background: 'hsl(var(--ide-explorer-bg))' }}>
+            {sections.map(section => (
+              <button
+                key={section.id}
+                onClick={() => setActiveTab(section.id)}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors border-b-2 ${
+                  activeTab === section.id
+                    ? 'border-primary text-foreground bg-background'
+                    : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/40'
+                }`}
+              >
+                {section.id === 'global' ? '⚙ Globaal' : `📄 ${section.label}`}
+              </button>
+            ))}
+            <button
+              onClick={handleAddPage}
+              className="px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              title="Nieuwe pagina toevoegen"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+            <span className="ml-auto pr-2 text-muted-foreground opacity-60 text-xs normal-case tracking-normal">
+              {activeSection ? (activeTab === 'global' ? 'app.ngc' : `${activeTab.toLowerCase()}.ngc`) : 'main.ngc'}
+            </span>
           </div>
           <div className="flex-1 overflow-hidden">
-            <NGCCodeEditor code={code} onChange={setCode} errors={errors} />
+            <NGCCodeEditor code={activeSection?.code || ''} onChange={handleSectionCodeChange} errors={errors} />
           </div>
 
           {/* Error bar */}

@@ -66,9 +66,9 @@ function executeActions(eventNode: NGCNode, runtime: NGCRuntime): string | null 
   let navigateTo: string | null = null;
 
   for (const child of eventNode.children) {
-    // Check for GaNaar navigation command
-    if (child.name.startsWith('GaNaar ') || child.name.startsWith('GaNaar=')) {
-      const target = child.name.replace(/^GaNaar[\s=]+/, '').replace(/"/g, '').trim();
+    // Check for GaNaar navigation command (parsed as Var node with name "GaNaar PageName")
+    if (child.name.startsWith('GaNaar ')) {
+      const target = child.name.replace(/^GaNaar\s+/, '').replace(/"/g, '').trim();
       navigateTo = target;
       continue;
     }

@@ -61,6 +61,12 @@ function parseNodeHeader(content: string): { type: string; name: string } | null
     return { type: 'Var', name: content }; // Store as Var-like node with raw command as name
   }
 
+  // GaNaar command: GaNaar "PageName" or GaNaar PageName
+  const gaNaarMatch = content.match(/^GaNaar\s*=?\s*"?(\w+)"?\s*$/);
+  if (gaNaarMatch) {
+    return { type: 'Var', name: `GaNaar ${gaNaarMatch[1]}` };
+  }
+
   // Standard node: Type Name:
   const nodeMatch = content.match(/^(\w+)\s+(\w+)\s*:$/);
   if (nodeMatch) {
@@ -173,6 +179,11 @@ export function astToNGC(node: NGCNode, indent: number = 0): string {
   let result = '';
 
   if (node.type === 'Var') {
+    // GaNaar command
+    if (node.name.startsWith('GaNaar ')) {
+      result += `${prefix}${node.name}\n`;
+      return result;
+    }
     // Data commands stored as Var nodes
     if (node.name.startsWith('Data.')) {
       result += `${prefix}${node.name}\n`;
