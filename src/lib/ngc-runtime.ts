@@ -124,9 +124,11 @@ export function createRuntime(): NGCRuntime {
   };
 }
 
-// Resolve variable references in text like Var(name)
+// Resolve variable references in text like Var(name) or {name}
 export function resolveVarRefs(text: string, runtime: NGCRuntime): string {
-  return text.replace(/Var\((\w+)\)/g, (_, name) => runtime.getVar(name));
+  return text
+    .replace(/Var\((\w+)\)/g, (_, name) => runtime.getVar(name))
+    .replace(/\{(\w+)\}/g, (_, name) => runtime.getVar(name));
 }
 
 // Parse Var node name to extract variable name and initial value
