@@ -53,16 +53,22 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
+      const { data, error } = await supabase.auth.signInWithOtp({
         email,
         options: {
           emailRedirectTo: window.location.origin,
         },
       });
       if (error) throw error;
-      setMessage('✅ Magic link verzonden! Check je e-mail (ook spam-folder).');
+      
+      if (data?.user?.id) {
+        setMessage('✅ Magic link verzonden! Check je e-mail (ook spam-folder).\n\n💡 Tip: Kan je de email niet vinden? Probeer Google login of gast mode.');
+      } else {
+        setMessage('✅ Aanvraag verzonden! Je ontvangt een inlog-link via e-mail.');
+      }
     } catch (err: unknown) {
-      setError(getErrorText(err, 'Magic link verzenden mislukt.'));
+      const errMsg = getErrorText(err, 'Magic link verzenden mislukt.');
+      setError(`${errMsg}\n\n💡 Probeer in plaats daarvan:\n• Google login\n• Wachtwoord login\n• Gast mode`);
     } finally {
       setLoading(false);
     }
@@ -104,22 +110,45 @@ const Auth = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific registration errors
+        if (error.message?.includes('User already registered')) {
+          setError('Dit e-mailadres is al geregistreerd. Gebruik inloggen of wachtwoord herstellen.');
+        } else {
+          throw error;
+        }
+        return;
+      }
       
       // Check if user was auto-confirmed (development mode)
       if (data.user?.confirmed_at) {
-        setMessage('Account aangemaakt! Je bent automatisch ingelogd. Even geduld...');
+        setMessage('✅ Account aangemaakt! Je bent automatisch ingelogd. Even geduld...');
         // Auto-login after registration in development
         setTimeout(() => {
           navigate('/');
         }, 1500);
+      } else if (data.user?.id) {
+        // User created but not confirmed - likely production mode
+        setMessage('✅ Account aangemaakt! \n\nProbleem: Bevestigings-email niet ontvangen?\n\n💡 Oplossingen:\n• Check je spam-folder\n• Probeer Google login\n• Gebruik gast mode om de app uit te proberen');
+        // Auto-login anyway in 5 seconds if email not needed
+        setTimeout(() => {
+          const { data: { session } } = supabase.auth.onAuthStateChange((event) => {
+            if (event === 'SIGNED_IN') {
+              navigate('/');
+            }
+          });
+          if (!session) {
+            // Timeout - direct to guest mode suggestion
+            setError('💡 Probeer de app zonder account met gast mode.');
+          }
+        }, 5000);
       } else {
-        setMessage('Account aangemaakt! Check je e-mail om je account te bevestigen. Geen e-mail ontvangen? Controleer je spam-folder of gebruik Google login.');
+        setMessage('Account aangemaakt! Je kunt nu inloggen met je wachtwoord.');
       }
     } catch (err: unknown) {
       const errorMsg = getErrorText(err, 'Er is een onbekende fout opgetreden.');
-      if (errorMsg.includes('email') || errorMsg.includes('mail')) {
-        setError(`${errorMsg} 💡 Tip: Gebruik in plaats daarvan Google login (knop hieronder).`);
+      if (errorMsg.includes('email') || errorMsg.includes('mail') || errorMsg.toLowerCase().includes('invalid')) {
+        setError(`${errorMsg}\n\n💡 Probeer:\n• Google login\n• Magic link\n• Gast mode`);
       } else {
         setError(errorMsg);
       }
