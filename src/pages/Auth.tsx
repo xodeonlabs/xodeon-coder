@@ -177,6 +177,15 @@ const Auth = () => {
               >
                 Inloggen met Google
               </button>
+
+              <button
+                type="button"
+                onClick={() => navigate('/guest')}
+                className="w-full py-2 rounded-md text-sm font-medium transition-colors"
+                style={{ background: 'transparent', border: '1px solid #334155', color: '#94a3b8' }}
+              >
+                🧪 Probeer als gast
+              </button>
             </>
           )}
         </form>
