@@ -209,6 +209,29 @@ const Index = () => {
     }
   }, [activeTab, sections]);
 
+  const handleCreateTemplate = useCallback(async (templateCode: string, templateName: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('apps')
+        .insert({
+          name: templateName,
+          ngc_code: `App:\n${templateCode}`,
+          owner_id: (await supabase.auth.getUser()).data.user?.id,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+      } else if (data) {
+        navigate(`/editor/${data.id}`);
+      }
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : 'Onbekende fout';
+      toast({ title: 'Fout bij aanmaken template', description: errorMessage, variant: 'destructive' });
+    }
+  }, [navigate, toast]);
+
   const handleAddChild = useCallback((parentId: string, type: NGCNodeType) => {
     if (!ast) return;
     const updated = addChildNode(ast, parentId, type);
@@ -378,7 +401,7 @@ const Index = () => {
                 <span>Componenten</span>
               </div>
               <div className="flex-1 overflow-auto">
-                <NGCComponentLibrary onInsert={handleInsertCode} />
+                <NGCComponentLibrary onInsert={handleInsertCode} onCreateTemplate={handleCreateTemplate} />
               </div>
             </>
           )}

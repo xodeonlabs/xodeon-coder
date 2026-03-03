@@ -527,7 +527,7 @@ const LIBRARY: Folder[] = [
   },
 ];
 
-export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => void }) {
+export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: (code: string) => void; onCreateTemplate?: (code: string, name: string) => void }) {
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
@@ -540,10 +540,18 @@ export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => 
     toast({ title: 'Code ingevoegd', description: snippet.label });
   };
 
+  const handleCreateTemplate = (snippet: Snippet, folderName: string) => {
+    if (onCreateTemplate) {
+      onCreateTemplate(snippet.code, snippet.label);
+      toast({ title: 'App aangemaakt', description: `"${snippet.label}" wordt geladen...` });
+    }
+  };
+
   return (
     <div className="overflow-auto h-full p-1.5 space-y-0.5">
       {LIBRARY.map(folder => {
         const isOpen = openFolders[folder.name] ?? false;
+        const isTemplates = folder.name === 'Sjablonen';
         return (
           <div key={folder.name}>
             <button
@@ -564,7 +572,7 @@ export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => 
                 {folder.snippets.map(snippet => (
                   <button
                     key={snippet.label}
-                    onClick={() => handleCopy(snippet)}
+                    onClick={() => isTemplates && onCreateTemplate ? handleCreateTemplate(snippet, folder.name) : handleCopy(snippet)}
                     className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded-sm hover:bg-primary/10 transition-colors text-left group"
                   >
                     <div className="flex-1 min-w-0">
@@ -573,7 +581,11 @@ export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => 
                         <div className="text-muted-foreground/60 text-[10px] truncate">{snippet.description}</div>
                       )}
                     </div>
-                    <Copy className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors" />
+                    {isTemplates && onCreateTemplate ? (
+                      <div className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors">⚡</div>
+                    ) : (
+                      <Copy className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors" />
+                    )}
                   </button>
                 ))}
               </div>
