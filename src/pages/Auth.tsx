@@ -104,9 +104,6 @@ const Auth = () => {
         password,
         options: {
           emailRedirectTo: window.location.origin,
-          data: {
-            auto_confirm_email: true,
-          },
         },
       });
 
@@ -120,30 +117,30 @@ const Auth = () => {
         return;
       }
       
-      // Check if user was auto-confirmed (development mode)
-      if (data.user?.confirmed_at) {
-        setMessage('✅ Account aangemaakt! Je bent automatisch ingelogd. Even geduld...');
-        // Auto-login after registration in development
-        setTimeout(() => {
-          navigate('/');
-        }, 1500);
-      } else if (data.user?.id) {
-        // User created but not confirmed - likely production mode
-        setMessage('✅ Account aangemaakt! \n\nProbleem: Bevestigings-email niet ontvangen?\n\n💡 Oplossingen:\n• Check je spam-folder\n• Probeer Google login\n• Gebruik gast mode om de app uit te proberen');
-        // Auto-login anyway in 5 seconds if email not needed
-        setTimeout(() => {
-          const { data: { session } } = supabase.auth.onAuthStateChange((event) => {
-            if (event === 'SIGNED_IN') {
-              navigate('/');
-            }
+      if (data.user?.id) {
+        // Account created! Now sign in with password automatically
+        setMessage('✅ Account aangemaakt! Je wordt ingelogd...');
+        
+        try {
+          const { error: signInError } = await supabase.auth.signInWithPassword({ 
+            email, 
+            password 
           });
-          if (!session) {
-            // Timeout - direct to guest mode suggestion
-            setError('💡 Probeer de app zonder account met gast mode.');
+          
+          if (signInError) {
+            // If automatic sign-in fails, still navigate - user can login next time
+            setMessage('Account aangemaakt! Je kunt nu inloggen.');
+            setTimeout(() => navigate('/'), 1500);
+          } else {
+            // Signed in successfully
+            setTimeout(() => navigate('/'), 500);
           }
-        }, 5000);
+        } catch {
+          // Fallback: redirect to dashboard anyway
+          setTimeout(() => navigate('/'), 1500);
+        }
       } else {
-        setMessage('Account aangemaakt! Je kunt nu inloggen met je wachtwoord.');
+        setMessage('Account aangemaakt! Je kunt nu inloggen.');
       }
     } catch (err: unknown) {
       const errorMsg = getErrorText(err, 'Er is een onbekende fout opgetreden.');
