@@ -215,6 +215,92 @@ const LIBRARY: Folder[] = [
     ],
   },
   {
+    name: 'Besturing',
+    icon: '🔀',
+    snippets: [
+      {
+        label: 'If-statement',
+        description: 'Voer code uit als voorwaarde waar is',
+        code:
+          '            If(voorwaarde):
+' +
+          '                Text Result:
+' +
+          '                    Tekst="Waar"
+' +
+          '                    Positie="0,0"
+' +
+          '                    Grootte="100,30"
+' +
+          '                    Kleur="#22c55e"
+',
+      },
+      {
+        label: 'If-Else-statement',
+        description: 'Kijk twee voorwaarden uit',
+        code:
+          '            If(voorwaarde):
+' +
+          '                Text Waar:
+' +
+          '                    Tekst="Waar"
+' +
+          '                    Positie="0,0"
+' +
+          '                    Grootte="100,30"
+' +
+          '                    Kleur="#22c55e"
+' +
+          '            Else:
+' +
+          '                Text Onwaar:
+' +
+          '                    Tekst="Onwaar"
+' +
+          '                    Positie="0,0"
+' +
+          '                    Grootte="100,30"
+' +
+          '                    Kleur="#ef4444"
+',
+      },
+      {
+        label: 'Repeat-loop',
+        description: 'Herhaal een blok X keer',
+        code:
+          '            Repeat(5):
+' +
+          '                Button Item:
+' +
+          '                    Tekst="Klik mij"
+' +
+          '                    Positie="0,0"
+' +
+          '                    Grootte="100,40"
+' +
+          '                    Kleur="#3b82f6"
+',
+      },
+      {
+        label: 'While-loop',
+        description: 'Herhaal zolang voorwaarde waar is',
+        code:
+          '            While(teller<10):
+' +
+          '                Text Counter:
+' +
+          '                    Tekst="Teller"
+' +
+          '                    Positie="0,0"
+' +
+          '                    Grootte="100,30"
+' +
+          '                    Kleur="#3b82f6"
+',
+      },
+    ],
+  },
+  {
     name: 'Sjablonen',
     icon: '⭐',
     snippets: [

@@ -11,7 +11,10 @@ export type NGCNodeType =
   | 'Var'
   | 'Function'
   | 'Event'
-  | 'List';
+  | 'List'
+  | 'If'
+  | 'Repeat'
+  | 'While';
 
 export type EventType = 'Click' | 'Hover' | 'Start' | 'Changed';
 
@@ -40,8 +43,8 @@ export interface ParseResult {
 // Valid children per type
 export const VALID_CHILDREN: Record<string, NGCNodeType[]> = {
   App: ['Page', 'Var', 'Function', 'List'],
-  Page: ['Frame', 'Button', 'Text', 'TextBox', 'Image', 'Var', 'Function', 'List'],
-  Frame: ['Frame', 'Button', 'Text', 'TextBox', 'Image'],
+  Page: ['Frame', 'Button', 'Text', 'TextBox', 'Image', 'Var', 'Function', 'List', 'If', 'Repeat', 'While'],
+  Frame: ['Frame', 'Button', 'Text', 'TextBox', 'Image', 'If', 'Repeat', 'While'],
   Button: ['Event'],
   Text: [],
   TextBox: [],
@@ -50,6 +53,9 @@ export const VALID_CHILDREN: Record<string, NGCNodeType[]> = {
   Function: [],
   Event: [],
   List: [],
+  If: ['Frame', 'Button', 'Text', 'TextBox', 'Image'],
+  Repeat: ['Frame', 'Button', 'Text', 'TextBox', 'Image'],
+  While: ['Frame', 'Button', 'Text', 'TextBox', 'Image'],
 };
 
 export const DEFAULT_PROPERTIES: Record<string, Record<string, string>> = {
@@ -63,6 +69,9 @@ export const DEFAULT_PROPERTIES: Record<string, Record<string, string>> = {
   Function: {},
   Event: {},
   List: {},
+  If: { Voorwaarde: '""' },
+  Repeat: { Aantal: '"5"' },
+  While: { Voorwaarde: '""' },
 };
 
 export const NODE_ICONS: Record<string, string> = {
@@ -77,6 +86,9 @@ export const NODE_ICONS: Record<string, string> = {
   Function: '⚙️',
   Event: '⚡',
   List: '📋',
+  If: '❓',
+  Repeat: '🔁',
+  While: '🔄',
 };
 
 let idCounter = 0;
