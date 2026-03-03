@@ -567,10 +567,14 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const loadTemplates = async () => {
       setLoadingTemplates(true);
       await refreshTemplates();
-      setLoadingTemplates(false);
+      if (isMounted) {
+        setLoadingTemplates(false);
+      }
     };
     
     loadTemplates();
@@ -580,8 +584,9 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
       .channel('templates-channel')
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'templates', filter: 'is_public=eq.true' },
+        { event: 'INSERT', schema: 'public', table: 'templates' },
         async (payload) => {
+          if (!isMounted) return;
           console.log('New template detected:', payload);
           setActiveTab('community');
           await refreshTemplates();
@@ -591,9 +596,10 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
       .subscribe();
 
     return () => {
+      isMounted = false;
       supabase.removeChannel(subscription);
     };
-  }, [refreshTemplates, toast]);
+  }, [refreshTemplates]);
 
   const toggle = (name: string) => {
     setOpenFolders(prev => ({ ...prev, [name]: !prev[name] }));
