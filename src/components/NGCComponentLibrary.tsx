@@ -547,30 +547,53 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
   const { toast } = useToast();
 
   // Load community templates from database
+  const refreshTemplates = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('templates')
+        .select('*')
+        .eq('is_public', true)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      
+      if (error) {
+        console.error('Fout bij laden templates:', error);
+      } else {
+        setCommunityTemplates(data || []);
+      }
+    } catch (e) {
+      console.error('Template loading error:', e);
+    }
+  }, []);
+
   useEffect(() => {
     const loadTemplates = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('templates')
-          .select('*')
-          .eq('is_public', true)
-          .order('downloads', { ascending: false })
-          .limit(50);
-        
-        if (error) {
-          console.error('Fout bij laden templates:', error);
-        } else {
-          setCommunityTemplates(data || []);
-        }
-      } catch (e) {
-        console.error('Template loading error:', e);
-      } finally {
-        setLoadingTemplates(false);
-      }
+      setLoadingTemplates(true);
+      await refreshTemplates();
+      setLoadingTemplates(false);
     };
     
     loadTemplates();
-  }, []);
+
+    // Subscribe to new templates in real-time
+    const subscription = supabase
+      .channel('templates-channel')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'templates', filter: 'is_public=eq.true' },
+        async (payload) => {
+          console.log('New template detected:', payload);
+          setActiveTab('community');
+          await refreshTemplates();
+          toast({ title: 'Nieuwe template! 🎉', description: 'Een nieuwe template is gedeeld.' });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [refreshTemplates, toast]);
 
   const toggle = (name: string) => {
     setOpenFolders(prev => ({ ...prev, [name]: !prev[name] }));
