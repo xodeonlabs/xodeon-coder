@@ -543,6 +543,7 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
   const [communityTemplates, setCommunityTemplates] = useState<Template[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
+  const [activeTab, setActiveTab] = useState<'library' | 'community'>('library');
   const { toast } = useToast();
 
   // Load community templates from database
@@ -600,91 +601,123 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
   };
 
   return (
-    <div className="overflow-auto h-full p-1.5 space-y-0.5">
-      {LIBRARY.map(folder => {
-        const isOpen = openFolders[folder.name] ?? false;
-        const isTemplates = folder.name === 'Sjablonen';
-        return (
-          <div key={folder.name}>
-            <button
-              onClick={() => toggle(folder.name)}
-              className="flex items-center gap-1.5 w-full px-2 py-1.5 text-xs rounded-sm hover:bg-secondary/60 transition-colors text-left"
-            >
-              {isOpen ? (
-                <ChevronDown className="h-3 w-3 text-muted-foreground shrink-0" />
-              ) : (
-                <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
-              )}
-              <span>{folder.icon}</span>
-              <span className="font-medium text-foreground">{folder.name}</span>
-              <span className="ml-auto text-muted-foreground/60 text-[10px]">{folder.snippets.length}</span>
-            </button>
-            {isOpen && (
-              <div className="ml-4 space-y-0.5 mt-0.5">
-                {folder.snippets.map(snippet => (
-                  <button
-                    key={snippet.label}
-                    onClick={() => isTemplates && onCreateTemplate ? handleCreateTemplate(snippet, folder.name) : handleCopy(snippet)}
-                    className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded-sm hover:bg-primary/10 transition-colors text-left group"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="text-foreground truncate">{snippet.label}</div>
-                      {snippet.description && (
-                        <div className="text-muted-foreground/60 text-[10px] truncate">{snippet.description}</div>
-                      )}
-                    </div>
-                    {isTemplates && onCreateTemplate ? (
-                      <div className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors">⚡</div>
-                    ) : (
-                      <Copy className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      })}
-
-      {/* Community Templates */}
-      <div className="border-t border-border/30 mt-2 pt-2">
+    <div className="flex flex-col h-full">
+      {/* Tab buttons */}
+      <div className="flex border-b border-border/30 px-1.5 pt-1.5">
         <button
-          onClick={() => toggle('Gemeenschap')}
-          className="flex items-center gap-1.5 w-full px-2 py-1.5 text-xs rounded-sm hover:bg-secondary/60 transition-colors text-left"
+          onClick={() => setActiveTab('library')}
+          className={`flex-1 py-1.5 text-xs font-medium rounded-t-sm transition-colors text-center ${
+            activeTab === 'library'
+              ? 'bg-secondary/60 text-foreground border-b-2 border-primary'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
         >
-          {openFolders['Gemeenschap'] ? (
-            <ChevronDown className="h-3 w-3 text-muted-foreground shrink-0" />
-          ) : (
-            <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
-          )}
-          <span>👥</span>
-          <span className="font-medium text-foreground">Gemeenschap</span>
-          <span className="ml-auto text-muted-foreground/60 text-[10px]">{communityTemplates.length}</span>
+          📚 Bibliotheek
         </button>
-        {openFolders['Gemeenschap'] && (
-          <div className="ml-4 space-y-0.5 mt-0.5">
+        <button
+          onClick={() => setActiveTab('community')}
+          className={`flex-1 py-1.5 text-xs font-medium rounded-t-sm transition-colors text-center relative ${
+            activeTab === 'community'
+              ? 'bg-secondary/60 text-foreground border-b-2 border-accent'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          👥 Gemeenschap
+          {communityTemplates.length > 0 && (
+            <span className="absolute top-0.5 right-1 h-2 w-2 rounded-full bg-accent animate-pulse"></span>
+          )}
+        </button>
+      </div>
+
+      {/* Tab content */}
+      <div className="flex-1 overflow-auto p-1.5">
+        {activeTab === 'library' ? (
+          // Library tab
+          <div className="space-y-0.5">
+            {LIBRARY.map(folder => {
+              const isOpen = openFolders[folder.name] ?? false;
+              const isTemplates = folder.name === 'Sjablonen';
+              return (
+                <div key={folder.name}>
+                  <button
+                    onClick={() => toggle(folder.name)}
+                    className="flex items-center gap-1.5 w-full px-2 py-1.5 text-xs rounded-sm hover:bg-secondary/60 transition-colors text-left"
+                  >
+                    {isOpen ? (
+                      <ChevronDown className="h-3 w-3 text-muted-foreground shrink-0" />
+                    ) : (
+                      <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
+                    )}
+                    <span>{folder.icon}</span>
+                    <span className="font-medium text-foreground">{folder.name}</span>
+                    <span className="ml-auto text-muted-foreground/60 text-[10px]">{folder.snippets.length}</span>
+                  </button>
+                  {isOpen && (
+                    <div className="ml-4 space-y-0.5 mt-0.5">
+                      {folder.snippets.map(snippet => (
+                        <button
+                          key={snippet.label}
+                          onClick={() => isTemplates && onCreateTemplate ? handleCreateTemplate(snippet, folder.name) : handleCopy(snippet)}
+                          className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded-sm hover:bg-primary/10 transition-colors text-left group"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="text-foreground truncate">{snippet.label}</div>
+                            {snippet.description && (
+                              <div className="text-muted-foreground/60 text-[10px] truncate">{snippet.description}</div>
+                            )}
+                          </div>
+                          {isTemplates && onCreateTemplate ? (
+                            <div className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors">⚡</div>
+                          ) : (
+                            <Copy className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          // Community tab
+          <div className="space-y-0.5">
             {loadingTemplates ? (
-              <div className="px-2 py-2 text-[10px] text-muted-foreground">Laden...</div>
+              <div className="flex items-center justify-center py-12 text-muted-foreground">
+                <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary/20 border-t-primary mr-2"></div>
+                <span className="text-sm">Templates laden...</span>
+              </div>
             ) : communityTemplates.length === 0 ? (
-              <div className="px-2 py-2 text-[10px] text-muted-foreground">Geen templates beschikbaar</div>
+              <div className="flex items-center justify-center py-12 text-muted-foreground">
+                <div className="text-center">
+                  <div className="text-2xl mb-2">📭</div>
+                  <p className="text-sm">Geen community templates beschikbaar</p>
+                  <p className="text-xs text-muted-foreground/60 mt-1">Deel je eerste template!</p>
+                </div>
+              </div>
             ) : (
               communityTemplates.map(template => (
                 <button
                   key={template.id}
                   onClick={() => handleCreateFromCommunity(template)}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded-sm hover:bg-accent/10 transition-colors text-left group"
+                  className="flex items-center gap-2 w-full px-2.5 py-2 text-xs rounded-sm hover:bg-accent/10 transition-colors text-left group bg-secondary/30"
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="text-foreground truncate">{template.name}</div>
-                    <div className="text-muted-foreground/60 text-[10px] truncate">{template.description || 'Geen beschrijving'}</div>
-                    <div className="flex items-center gap-1 text-muted-foreground/50 text-[9px] mt-0.5">
-                      <Star className="h-2.5 w-2.5" fill="currentColor" />
-                      <span>{template.rating?.toFixed(1) || '0'}</span>
+                    <div className="text-foreground font-medium truncate">{template.name}</div>
+                    <div className="text-muted-foreground/70 text-[10px] truncate mt-0.5">{template.description || 'Geen beschrijving'}</div>
+                    <div className="flex items-center gap-2 text-muted-foreground/50 text-[9px] mt-1">
+                      <div className="flex items-center gap-1">
+                        <Star className="h-2.5 w-2.5" fill="currentColor" />
+                        <span>{template.rating?.toFixed(1) || '0'}</span>
+                      </div>
                       <span>•</span>
-                      <span>{template.downloads} downloads</span>
+                      <div className="flex items-center gap-1">
+                        <span>📥</span>
+                        <span>{template.downloads}</span>
+                      </div>
                     </div>
                   </div>
-                  <Share2 className="h-3 w-3 text-muted-foreground/40 group-hover:text-accent shrink-0 transition-colors" />
+                  <Share2 className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-accent shrink-0 transition-colors" />
                 </button>
               ))
             )}
