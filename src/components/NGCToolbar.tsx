@@ -1,20 +1,26 @@
 import { useState } from 'react';
-import { ExternalLink, LogOut, AlertCircle, CheckCircle, ArrowLeft, Pencil } from 'lucide-react';
+import { ExternalLink, LogOut, AlertCircle, CheckCircle, ArrowLeft, Pencil, Share2, X } from 'lucide-react';
 import { ParseError } from '@/lib/ngc-ast';
 import { useNavigate } from 'react-router-dom';
 
 interface ToolbarProps {
   errors: ParseError[];
   appName?: string;
+  appCode?: string;
   onSignOut?: () => void;
   onSave?: () => Promise<void> | void;
   onRename?: (newName: string) => void;
+  onShareTemplate?: (name: string, description: string, code: string) => Promise<void>;
 }
 
-export function NGCToolbar({ errors, appName, onSignOut, onSave, onRename }: ToolbarProps) {
+export function NGCToolbar({ errors, appName, appCode, onSignOut, onSave, onRename, onShareTemplate }: ToolbarProps) {
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [nameValue, setNameValue] = useState('');
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [templateName, setTemplateName] = useState('');
+  const [templateDescription, setTemplateDescription] = useState('');
+  const [sharing, setSharing] = useState(false);
 
   const handleNavigate = async (path: string) => {
     if (onSave) await onSave();
@@ -29,6 +35,21 @@ export function NGCToolbar({ errors, appName, onSignOut, onSave, onRename }: Too
   const commitName = () => {
     if (nameValue.trim() && onRename) onRename(nameValue.trim());
     setEditing(false);
+  };
+
+  const handleShareTemplate = async () => {
+    if (!templateName.trim() || !onShareTemplate || !appCode) return;
+    setSharing(true);
+    try {
+      await onShareTemplate(templateName, templateDescription, appCode);
+      setShowShareDialog(false);
+      setTemplateName('');
+      setTemplateDescription('');
+    } catch (e) {
+      console.error('Share error:', e);
+    } finally {
+      setSharing(false);
+    }
   };
 
   return (
@@ -76,6 +97,16 @@ export function NGCToolbar({ errors, appName, onSignOut, onSave, onRename }: Too
             <span className="text-sm font-medium">Ready</span>
           </div>
         )}
+        {onShareTemplate && (
+          <button
+            onClick={() => setShowShareDialog(true)}
+            className="px-4 py-1.5 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center gap-2"
+            title="Deel als template"
+          >
+            <Share2 className="h-4 w-4" />
+            Template
+          </button>
+        )}
         <button
           onClick={() => handleNavigate(window.location.pathname.replace('/editor/', '/preview/'))}
           className="px-4 py-1.5 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center gap-2"
@@ -93,6 +124,59 @@ export function NGCToolbar({ errors, appName, onSignOut, onSave, onRename }: Too
           </button>
         )}
       </div>
+
+      {/* Share Template Dialog */}
+      {showShareDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowShareDialog(false)}>
+          <div className="rounded-2xl border border-border/50 p-8 w-full max-w-md shadow-2xl" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10"><Share2 className="h-5 w-5 text-primary" /></div>
+                Deel als template
+              </h3>
+              <button onClick={() => setShowShareDialog(false)} className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg p-1.5 transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-base text-muted-foreground mb-6">Deel je app zodat anderen het als template kunnen gebruiken.</p>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-foreground">Template naam</label>
+                <input
+                  type="text"
+                  placeholder="Bv. Todo App Pro"
+                  value={templateName}
+                  onChange={e => setTemplateName(e.target.value)}
+                  autoFocus
+                  className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-2"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground">Beschrijving (optioneel)</label>
+                <textarea
+                  placeholder="Wat doet deze template? Welke features heeft het?"
+                  value={templateDescription}
+                  onChange={e => setTemplateDescription(e.target.value)}
+                  rows={3}
+                  className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-2 resize-none"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-8">
+              <button onClick={() => setShowShareDialog(false)} className="px-5 py-2.5 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
+                Annuleren
+              </button>
+              <button 
+                onClick={handleShareTemplate} 
+                disabled={sharing || !templateName.trim()}
+                className="px-6 py-2.5 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all active:scale-95"
+              >
+                {sharing ? 'Delen...' : 'Delen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

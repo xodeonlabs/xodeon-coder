@@ -1,11 +1,23 @@
-import { useState } from 'react';
-import { ChevronRight, ChevronDown, Copy } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronRight, ChevronDown, Copy, Share2, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Snippet {
   label: string;
   code: string;
   description?: string;
+}
+
+interface Template {
+  id: string;
+  name: string;
+  description: string | null;
+  ngc_code: string;
+  creator_id: string;
+  downloads: number;
+  rating: number;
+  created_at: string;
 }
 
 interface Folder {
@@ -529,7 +541,35 @@ const LIBRARY: Folder[] = [
 
 export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: (code: string) => void; onCreateTemplate?: (code: string, name: string) => void }) {
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
+  const [communityTemplates, setCommunityTemplates] = useState<Template[]>([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(true);
   const { toast } = useToast();
+
+  // Load community templates from database
+  useEffect(() => {
+    const loadTemplates = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('templates')
+          .select('*')
+          .eq('is_public', true)
+          .order('downloads', { ascending: false })
+          .limit(50);
+        
+        if (error) {
+          console.error('Fout bij laden templates:', error);
+        } else {
+          setCommunityTemplates(data || []);
+        }
+      } catch (e) {
+        console.error('Template loading error:', e);
+      } finally {
+        setLoadingTemplates(false);
+      }
+    };
+    
+    loadTemplates();
+  }, []);
 
   const toggle = (name: string) => {
     setOpenFolders(prev => ({ ...prev, [name]: !prev[name] }));
@@ -540,10 +580,22 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
     toast({ title: 'Code ingevoegd', description: snippet.label });
   };
 
-  const handleCreateTemplate = (snippet: Snippet, folderName: string) => {
+  const handleCreateTemplate = (snippet: Snippet | Template, name: string) => {
     if (onCreateTemplate) {
-      onCreateTemplate(snippet.code, snippet.label);
-      toast({ title: 'App aangemaakt', description: `"${snippet.label}" wordt geladen...` });
+      const code = 'code' in snippet ? snippet.code : snippet.ngc_code;
+      onCreateTemplate(code, name);
+      toast({ title: 'App aangemaakt', description: `"${name}" wordt geladen...` });
+    }
+  };
+
+  const handleCreateFromCommunity = async (template: Template) => {
+    if (onCreateTemplate) {
+      handleCreateTemplate(template, template.name);
+      // Increment downloads
+      await supabase
+        .from('templates')
+        .update({ downloads: template.downloads + 1 })
+        .eq('id', template.id);
     }
   };
 
@@ -593,6 +645,52 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
           </div>
         );
       })}
+
+      {/* Community Templates */}
+      <div className="border-t border-border/30 mt-2 pt-2">
+        <button
+          onClick={() => toggle('Gemeenschap')}
+          className="flex items-center gap-1.5 w-full px-2 py-1.5 text-xs rounded-sm hover:bg-secondary/60 transition-colors text-left"
+        >
+          {openFolders['Gemeenschap'] ? (
+            <ChevronDown className="h-3 w-3 text-muted-foreground shrink-0" />
+          ) : (
+            <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
+          )}
+          <span>👥</span>
+          <span className="font-medium text-foreground">Gemeenschap</span>
+          <span className="ml-auto text-muted-foreground/60 text-[10px]">{communityTemplates.length}</span>
+        </button>
+        {openFolders['Gemeenschap'] && (
+          <div className="ml-4 space-y-0.5 mt-0.5">
+            {loadingTemplates ? (
+              <div className="px-2 py-2 text-[10px] text-muted-foreground">Laden...</div>
+            ) : communityTemplates.length === 0 ? (
+              <div className="px-2 py-2 text-[10px] text-muted-foreground">Geen templates beschikbaar</div>
+            ) : (
+              communityTemplates.map(template => (
+                <button
+                  key={template.id}
+                  onClick={() => handleCreateFromCommunity(template)}
+                  className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded-sm hover:bg-accent/10 transition-colors text-left group"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="text-foreground truncate">{template.name}</div>
+                    <div className="text-muted-foreground/60 text-[10px] truncate">{template.description || 'Geen beschrijving'}</div>
+                    <div className="flex items-center gap-1 text-muted-foreground/50 text-[9px] mt-0.5">
+                      <Star className="h-2.5 w-2.5" fill="currentColor" />
+                      <span>{template.rating?.toFixed(1) || '0'}</span>
+                      <span>•</span>
+                      <span>{template.downloads} downloads</span>
+                    </div>
+                  </div>
+                  <Share2 className="h-3 w-3 text-muted-foreground/40 group-hover:text-accent shrink-0 transition-colors" />
+                </button>
+              ))
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

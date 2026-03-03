@@ -232,6 +232,35 @@ const Index = () => {
     }
   }, [navigate, toast]);
 
+  const handleShareTemplate = useCallback(async (templateName: string, templateDescription: string, templateCode: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({ title: 'Fout', description: 'Je moet ingelogd zijn', variant: 'destructive' });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('templates')
+        .insert({
+          name: templateName,
+          description: templateDescription,
+          ngc_code: templateCode,
+          creator_id: user.id,
+          is_public: true,
+        });
+
+      if (error) {
+        toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+      } else {
+        toast({ title: 'Succes', description: 'Template gedeeld! 🎉', variant: 'default' });
+      }
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : 'Onbekende fout';
+      toast({ title: 'Fout bij delen template', description: errorMessage, variant: 'destructive' });
+    }
+  }, [toast]);
+
   const handleAddChild = useCallback((parentId: string, type: NGCNodeType) => {
     if (!ast) return;
     const updated = addChildNode(ast, parentId, type);
@@ -274,12 +303,14 @@ const Index = () => {
       <NGCToolbar
         errors={errors}
         appName={appName}
+        appCode={code}
         onSignOut={signOut}
         onSave={saveNow}
         onRename={async (newName) => {
           setAppName(newName);
           if (appId) await supabase.from('apps').update({ name: newName }).eq('id', appId);
         }}
+        onShareTemplate={handleShareTemplate}
       />
 
       <div className="flex flex-1 overflow-hidden">
