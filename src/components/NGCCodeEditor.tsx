@@ -87,9 +87,20 @@ export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
   const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(null);
   const [currentWord, setCurrentWord] = useState('');
   const [wordStart, setWordStart] = useState(0);
+  const cursorPos = useRef<number | null>(null);
 
   const lines = code.split('\n');
   const errorLines = new Set(errors.map(e => e.line));
+
+  // Restore cursor position after code prop updates
+  useEffect(() => {
+    const ta = textareaRef.current;
+    if (ta && cursorPos.current !== null) {
+      const pos = Math.min(cursorPos.current, code.length);
+      ta.selectionStart = ta.selectionEnd = pos;
+      cursorPos.current = null;
+    }
+  }, [code]);
 
   const handleScroll = useCallback(() => {
     if (textareaRef.current && highlightRef.current) {
@@ -163,6 +174,7 @@ export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
   }, [code, closeSuggestions]);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    cursorPos.current = e.target.selectionStart;
     onChange(e.target.value);
   }, [onChange]);
 
