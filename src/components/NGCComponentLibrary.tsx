@@ -222,81 +222,51 @@ const LIBRARY: Folder[] = [
         label: 'If-statement',
         description: 'Voer code uit als voorwaarde waar is',
         code:
-          '            If(voorwaarde):
-' +
-          '                Text Result:
-' +
-          '                    Tekst="Waar"
-' +
-          '                    Positie="0,0"
-' +
-          '                    Grootte="100,30"
-' +
-          '                    Kleur="#22c55e"
-',
+          'If(voorwaarde):\n' +
+          '    Text Result:\n' +
+          '        Tekst="Waar"\n' +
+          '        Positie="0,0"\n' +
+          '        Grootte="100,30"\n' +
+          '        Kleur="#22c55e"\n',
       },
       {
         label: 'If-Else-statement',
         description: 'Kijk twee voorwaarden uit',
         code:
-          '            If(voorwaarde):
-' +
-          '                Text Waar:
-' +
-          '                    Tekst="Waar"
-' +
-          '                    Positie="0,0"
-' +
-          '                    Grootte="100,30"
-' +
-          '                    Kleur="#22c55e"
-' +
-          '            Else:
-' +
-          '                Text Onwaar:
-' +
-          '                    Tekst="Onwaar"
-' +
-          '                    Positie="0,0"
-' +
-          '                    Grootte="100,30"
-' +
-          '                    Kleur="#ef4444"
-',
+          'If(voorwaarde):\n' +
+          '    Text Waar:\n' +
+          '        Tekst="Waar"\n' +
+          '        Positie="0,0"\n' +
+          '        Grootte="100,30"\n' +
+          '        Kleur="#22c55e"\n' +
+          'Else:\n' +
+          '    Text Onwaar:\n' +
+          '        Tekst="Onwaar"\n' +
+          '        Positie="0,0"\n' +
+          '        Grootte="100,30"\n' +
+          '        Kleur="#ef4444"\n',
       },
       {
         label: 'Repeat-loop',
         description: 'Herhaal een blok X keer',
         code:
-          '            Repeat(5):
-' +
-          '                Button Item:
-' +
-          '                    Tekst="Klik mij"
-' +
-          '                    Positie="0,0"
-' +
-          '                    Grootte="100,40"
-' +
-          '                    Kleur="#3b82f6"
-',
+          'Repeat(5):\n' +
+          '    Button Item:\n' +
+          '        Tekst="Klik mij"\n' +
+          '        Positie="0,0"\n' +
+          '        Grootte="100,40"\n' +
+          '        Kleur="#3b82f6"\n',
       },
       {
         label: 'While-loop',
         description: 'Herhaal zolang voorwaarde waar is',
         code:
-          '            While(teller<10):
-' +
-          '                Text Counter:
-' +
-          '                    Tekst="Teller"
-' +
-          '                    Positie="0,0"
-' +
-          '                    Grootte="100,30"
-' +
-          '                    Kleur="#3b82f6"
-',
+          'While(teller<10):\n' +
+          '    Text Counter:\n' +
+          '        Tekst="Teller"\n' +
+          '        Positie="0,0"\n' +
+          '        Grootte="100,30"\n' +
+          '        Kleur="#3b82f6"\n',
       },
     ],
   },
