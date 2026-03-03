@@ -66,17 +66,17 @@ export const DEFAULT_PROPERTIES: Record<string, Record<string, string>> = {
 };
 
 export const NODE_ICONS: Record<string, string> = {
-  App: '',
-  Page: '',
-  Frame: '',
-  Button: '',
-  Text: '',
-  TextBox: '',
-  Image: '',
-  Var: '',
-  Function: '',
-  Event: '',
-  List: '',
+  App: '📱',
+  Page: '📄',
+  Frame: '📦',
+  Button: '🔘',
+  Text: '📝',
+  TextBox: '✏️',
+  Image: '🖼️',
+  Var: '💾',
+  Function: '⚙️',
+  Event: '⚡',
+  List: '📋',
 };
 
 let idCounter = 0;

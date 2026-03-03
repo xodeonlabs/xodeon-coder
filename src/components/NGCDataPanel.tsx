@@ -130,7 +130,7 @@ export function NGCDataPanel({ ast }: DataPanelProps) {
       {vars.length > 0 && (
         <div>
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            Variabelen
+            💾 Variabelen
           </h3>
           <div className="rounded-md border border-border overflow-hidden">
             <table className="w-full text-xs">
@@ -157,7 +157,7 @@ export function NGCDataPanel({ ast }: DataPanelProps) {
       {lists.length > 0 && (
         <div>
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            Lijsten
+            📋 Lijsten
           </h3>
           {lists.map((list, i) => (
             <div key={i} className="mb-3">
@@ -193,7 +193,7 @@ export function NGCDataPanel({ ast }: DataPanelProps) {
       {operations.length > 0 && (
         <div>
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            Data Operaties
+            ⚡ Data Operaties
           </h3>
           <div className="rounded-md border border-border overflow-hidden">
             <table className="w-full text-xs">

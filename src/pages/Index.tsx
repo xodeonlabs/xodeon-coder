@@ -373,7 +373,7 @@ const Index = () => {
               {/* Explorer */}
               <div className="flex flex-col min-h-0" style={{ flex: '1 1 33%' }}>
                 <div className="ide-panel-header">
-                  <span>Explorer</span>
+                  <span>📂 Explorer</span>
                 </div>
                 <div className="flex-1 overflow-y-auto min-h-0">
                   <NGCExplorer
@@ -389,7 +389,7 @@ const Index = () => {
               {/* Data Panel */}
               <div className="flex flex-col min-h-0 border-t border-border" style={{ flex: '1 1 33%' }}>
                 <div className="ide-panel-header">
-                  <span>Data</span>
+                  <span>💾 Data</span>
                 </div>
                 <div className="flex-1 overflow-y-auto min-h-0">
                   <NGCDataPanel ast={ast} />
@@ -398,7 +398,7 @@ const Index = () => {
               {/* Chat Panel */}
               <div className="flex flex-col min-h-0 border-t border-border" style={{ flex: '1 1 34%' }}>
                 <div className="ide-panel-header">
-                  <span>Chat</span>
+                  <span>🗣️ Chat</span>
                 </div>
                 <div className="flex-1 overflow-hidden min-h-0">
                   {appId && <NGCChat appId={appId} />}
@@ -431,7 +431,7 @@ const Index = () => {
                     : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/40'
                 }`}
               >
-                {section.id === 'global' ? 'Globaal' : `${section.label}`}
+                {section.id === 'global' ? '🌍 Globaal' : `📄 ${section.label}`}
               </button>
             ))}
             <button
@@ -439,7 +439,7 @@ const Index = () => {
               className="px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
               title="Nieuwe pagina toevoegen"
             >
-              <Plus className="h-3.5 w-3.5" />
+              ➕
             </button>
             <span className="ml-auto pr-2 text-muted-foreground opacity-60 text-xs normal-case tracking-normal">
               {activeSection ? (activeTab === 'global' ? 'app.ngc' : `${activeSection.label.toLowerCase()}.ngc`) : 'main.ngc'}

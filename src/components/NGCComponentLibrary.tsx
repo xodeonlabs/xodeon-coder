@@ -28,7 +28,7 @@ interface Folder {
 const LIBRARY: Folder[] = [
   {
     name: 'Pagina',
-    icon: '',
+    icon: '📄',
     snippets: [
       {
         label: 'Lege pagina',
@@ -49,7 +49,7 @@ const LIBRARY: Folder[] = [
   },
   {
     name: 'Knoppen',
-    icon: '',
+    icon: '🔘',
     snippets: [
       {
         label: 'Knop',
@@ -92,7 +92,7 @@ const LIBRARY: Folder[] = [
   },
   {
     name: 'Tekst',
-    icon: '',
+    icon: '📝',
     snippets: [
       {
         label: 'Tekst label',
@@ -135,7 +135,7 @@ const LIBRARY: Folder[] = [
   },
   {
     name: 'Afbeelding',
-    icon: '',
+    icon: '🖼️',
     snippets: [
       {
         label: 'Afbeelding',
@@ -150,7 +150,7 @@ const LIBRARY: Folder[] = [
   },
   {
     name: 'Frames',
-    icon: '',
+    icon: '📦',
     snippets: [
       {
         label: 'Container',
@@ -175,7 +175,7 @@ const LIBRARY: Folder[] = [
   },
   {
     name: 'Data',
-    icon: '',
+    icon: '💾',
     snippets: [
       {
         label: 'Variabele',
@@ -216,7 +216,7 @@ const LIBRARY: Folder[] = [
   },
   {
     name: 'Sjablonen',
-    icon: '',
+    icon: '⭐',
     snippets: [
       {
         label: 'Login pagina',
@@ -670,7 +670,7 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          Bibliotheek
+          📂 Bibliotheek
         </button>
         <button
           onClick={() => setActiveTab('community')}
@@ -680,7 +680,7 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          Gemeenschap
+          🌟 Gemeenschap
           {communityTemplates.length > 0 && (
             <span className="absolute top-0.5 right-1 h-2 w-2 rounded-full bg-accent animate-pulse"></span>
           )}
