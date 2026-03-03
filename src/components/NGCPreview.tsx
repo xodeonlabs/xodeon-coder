@@ -249,6 +249,26 @@ function NGCNodeRenderer({
       );
     }
 
+    case 'If':
+    case 'Repeat':
+    case 'While': {
+      // Render children of control flow nodes
+      // In a full implementation, these would evaluate conditions
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {node.children.map(child => (
+            <NGCNodeRenderer
+              key={child.id}
+              node={child}
+              runtime={runtime}
+              onRuntimeChange={onRuntimeChange}
+              onNavigate={onNavigate}
+            />
+          ))}
+        </div>
+      );
+    }
+
     case 'Var':
     case 'Function':
     case 'Event':
