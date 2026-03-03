@@ -60,8 +60,9 @@ export function splitCodeIntoSections(fullCode: string): CodeSection[] {
     const start = pageStarts[i].lineIdx;
     const end = i + 1 < pageStarts.length ? pageStarts[i + 1].lineIdx : lines.length;
     const pageLines = lines.slice(start, end);
+    // Use index-based unique id to avoid duplicate name collisions
     sections.push({
-      id: pageStarts[i].name,
+      id: `page_${i}_${pageStarts[i].name}`,
       label: pageStarts[i].name,
       code: pageLines.join('\n'),
       startLine: start + 1,

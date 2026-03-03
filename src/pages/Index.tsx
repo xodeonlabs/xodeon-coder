@@ -175,13 +175,21 @@ const Index = () => {
     setCode(mergeSections(updatedSections));
   }, [sections, activeTab]);
 
-  // Add a new page
+  // Add a new page with a unique name
   const handleAddPage = useCallback(() => {
-    const pageCount = sections.filter(s => s.id !== 'global').length;
-    const newPageName = `Pagina${pageCount + 1}`;
+    const existingNames = sections.filter(s => s.id !== 'global').map(s => s.label);
+    let idx = existingNames.length + 1;
+    let newPageName = `Pagina${idx}`;
+    while (existingNames.includes(newPageName)) {
+      idx++;
+      newPageName = `Pagina${idx}`;
+    }
     const newPageCode = `    Page ${newPageName}:\n        Text Welkom:\n            Tekst="Welkom op ${newPageName}"\n            Positie="50,50"\n            Grootte="300,30"\n            Kleur="#ffffff"\n`;
     setCode(prev => prev + newPageCode);
-    setActiveTab(newPageName);
+    // Set active tab after code updates (will match new section id)
+    setTimeout(() => {
+      setActiveTab(`page_${existingNames.length}_${newPageName}`);
+    }, 50);
   }, [sections]);
 
   const selectedNode = useMemo(() => {
@@ -331,7 +339,7 @@ const Index = () => {
               <Plus className="h-3.5 w-3.5" />
             </button>
             <span className="ml-auto pr-2 text-muted-foreground opacity-60 text-xs normal-case tracking-normal">
-              {activeSection ? (activeTab === 'global' ? 'app.ngc' : `${activeTab.toLowerCase()}.ngc`) : 'main.ngc'}
+              {activeSection ? (activeTab === 'global' ? 'app.ngc' : `${activeSection.label.toLowerCase()}.ngc`) : 'main.ngc'}
             </span>
           </div>
           <div className="flex-1 overflow-hidden">
