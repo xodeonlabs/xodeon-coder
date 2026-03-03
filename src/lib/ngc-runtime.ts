@@ -192,5 +192,11 @@ export function parseDataCommand(content: string): DataCommand | null {
     return { operation: 'Clear', table: clearMatch[1] };
   }
 
+  // Data.Get(tableName) - convert table records to list
+  const getMatch = content.match(/^Data\.Get\((\w+)\)$/);
+  if (getMatch) {
+    return { operation: 'Get', table: getMatch[1] };
+  }
+
   return null;
 }

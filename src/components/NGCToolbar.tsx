@@ -33,18 +33,22 @@ export function NGCToolbar({ errors, appName, onSignOut, onSave, onRename }: Too
 
   return (
     <div
-      className="flex items-center justify-between px-3 border-b border-border h-10 shrink-0"
-      style={{ background: 'hsl(var(--ide-toolbar))' }}
+      className="flex items-center justify-between px-4 border-b border-border/50 h-12 shrink-0 backdrop-blur-sm"
+      style={{ background: 'hsl(var(--ide-toolbar) / 0.85)' }}
     >
-      <div className="flex items-center gap-1">
-        <button onClick={() => handleNavigate('/')} className="text-muted-foreground hover:text-foreground transition-colors mr-2" title="Terug naar dashboard">
+      <div className="flex items-center gap-3">
+        <button onClick={() => handleNavigate('/')} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors" title="Terug naar dashboard">
           <ArrowLeft className="h-4 w-4" />
         </button>
-        <span className="text-sm font-bold text-primary font-mono mr-2">NGC</span>
+        <div className="flex items-center gap-2.5">
+          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-bold text-xs">N</div>
+          <span className="text-sm font-bold text-foreground font-mono">NGC</span>
+        </div>
+        <div className="h-4 w-px bg-border/30"></div>
         {editing ? (
           <input
             autoFocus
-            className="text-xs text-foreground bg-background border border-border rounded px-1.5 py-0.5"
+            className="text-sm text-foreground bg-background border border-primary/30 rounded-lg px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-primary/50"
             value={nameValue}
             onChange={e => setNameValue(e.target.value)}
             onBlur={commitName}
@@ -52,40 +56,40 @@ export function NGCToolbar({ errors, appName, onSignOut, onSave, onRename }: Too
           />
         ) : (
           appName && (
-            <button onClick={startEditing} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors" title="Naam wijzigen">
+            <button onClick={startEditing} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group" title="Naam wijzigen">
               {appName}
-              <Pencil className="h-2.5 w-2.5" />
+              <Pencil className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
             </button>
           )
         )}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         {errors.length > 0 ? (
-          <div className="flex items-center gap-1 text-destructive">
-            <AlertCircle className="h-3.5 w-3.5" />
-            <span className="text-xs">{errors.length} error{errors.length > 1 ? 's' : ''}</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive">
+            <AlertCircle className="h-4 w-4" />
+            <span className="text-sm font-medium">{errors.length} error{errors.length > 1 ? 's' : ''}</span>
           </div>
         ) : (
-          <div className="flex items-center gap-1 text-ide-success">
-            <CheckCircle className="h-3.5 w-3.5" />
-            <span className="text-xs">Ready</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-ide-success/10 text-ide-success">
+            <CheckCircle className="h-4 w-4" />
+            <span className="text-sm font-medium">Ready</span>
           </div>
         )}
         <button
           onClick={() => handleNavigate(window.location.pathname.replace('/editor/', '/preview/'))}
-          className="px-3 py-1 text-xs rounded-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          className="px-4 py-1.5 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center gap-2"
         >
-          <ExternalLink className="h-3 w-3 inline mr-1" />
+          <ExternalLink className="h-4 w-4" />
           Preview
         </button>
         {onSignOut && (
           <button
             onClick={onSignOut}
-            className="px-2 py-1 text-xs rounded-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
             title="Uitloggen"
           >
-            <LogOut className="h-3 w-3" />
+            <LogOut className="h-4 w-4" />
           </button>
         )}
       </div>

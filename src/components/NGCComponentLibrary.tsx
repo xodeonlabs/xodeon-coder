@@ -181,6 +181,26 @@ const LIBRARY: Folder[] = [
         description: 'Een lijst met items',
         code: '    List(items="item1,item2,item3")\n',
       },
+      {
+        label: 'Data toevoegen',
+        description: 'Voeg een record toe aan een tabel',
+        code: '                Data.Add(gebruikers, naam="Jan", leeftijd="25")\n',
+      },
+      {
+        label: 'Data ophalen',
+        description: 'Converteer tabel records naar een lijst',
+        code: '                Data.Get(gebruikers)\n',
+      },
+      {
+        label: 'Data verwijderen',
+        description: 'Verwijder een record uit een tabel',
+        code: '                Data.Delete(gebruikers, "rec_123456")\n',
+      },
+      {
+        label: 'Data wissen',
+        description: 'Wis alle records uit een tabel',
+        code: '                Data.Clear(gebruikers)\n',
+      },
     ],
   },
   {
@@ -242,6 +262,266 @@ const LIBRARY: Folder[] = [
           '            Hoekradius="8"\n' +
           '            Event Click:\n' +
           '                GaNaar "Home"\n',
+      },
+      {
+        label: 'Teller app',
+        description: 'Eenvoudige teller met plus/min knoppen',
+        code:
+          '    Var(teller=0)\n' +
+          '    Page Teller:\n' +
+          '        Frame Container:\n' +
+          '            Positie="50,80"\n' +
+          '            Grootte="300,180"\n' +
+          '            Kleur="#1e293b"\n' +
+          '            Hoekradius="12"\n' +
+          '            Text Titel:\n' +
+          '                Tekst="Mijn Teller"\n' +
+          '                Positie="10,10"\n' +
+          '                Grootte="280,30"\n' +
+          '                Kleur="#ffffff"\n' +
+          '            Text Display:\n' +
+          '                Tekst="0"\n' +
+          '                Positie="100,55"\n' +
+          '                Grootte="100,40"\n' +
+          '                Kleur="#22c55e"\n' +
+          '            Button PlusBtn:\n' +
+          '                Tekst="+"\n' +
+          '                Positie="20,110"\n' +
+          '                Grootte="60,40"\n' +
+          '                Kleur="#22c55e"\n' +
+          '                Hoekradius="6"\n' +
+          '                Event Click:\n' +
+          '                    Var(teller+1)\n' +
+          '            Button MinBtn:\n' +
+          '                Tekst="-"\n' +
+          '                Positie="100,110"\n' +
+          '                Grootte="60,40"\n' +
+          '                Kleur="#ef4444"\n' +
+          '                Hoekradius="6"\n' +
+          '                Event Click:\n' +
+          '                    Var(teller-1)\n' +
+          '            Button ResetBtn:\n' +
+          '                Tekst="Reset"\n' +
+          '                Positie="180,110"\n' +
+          '                Grootte="100,40"\n' +
+          '                Kleur="#f59e0b"\n' +
+          '                Hoekradius="6"\n' +
+          '                Event Click:\n' +
+          '                    Var(teller=0)\n',
+      },
+      {
+        label: 'Todo lijstje',
+        description: 'Basis todo app met toevoegen & verwijderen',
+        code:
+          '    Var(nieuweItem="")\n' +
+          '    List(items="Boodschappen,Huiswerk,Sporten")\n' +
+          '    Page Todo:\n' +
+          '        Text Titel:\n' +
+          '            Tekst="Mijn Todo Lijstje"\n' +
+          '            Positie="20,20"\n' +
+          '            Grootte="300,30"\n' +
+          '            Kleur="#ffffff"\n' +
+          '        TextBox NewItem:\n' +
+          '            Positie="20,65"\n' +
+          '            Grootte="240,35"\n' +
+          '            Placeholder="Nieuwe item..."\n' +
+          '            Variabele="nieuweItem"\n' +
+          '        Button AddBtn:\n' +
+          '            Tekst="Toevoegen"\n' +
+          '            Positie="265,65"\n' +
+          '            Grootte="75,35"\n' +
+          '            Kleur="#22c55e"\n' +
+          '            Hoekradius="4"\n' +
+          '            Event Click:\n' +
+          '                Data.Add(todos, taak=Var(nieuweItem))\n',
+      },
+      {
+        label: 'Quiz app',
+        description: 'Eenvoudige quiz met score tracking',
+        code:
+          '    Var(score=0)\n' +
+          '    Var(vraagNummer=1)\n' +
+          '    Page Quiz:\n' +
+          '        Text Titel:\n' +
+          '            Tekst="Quiz"\n' +
+          '            Positie="50,20"\n' +
+          '            Grootte="300,30"\n' +
+          '            Kleur="#ffffff"\n' +
+          '        Text Vraag:\n' +
+          '            Tekst="Wat is de hoofdstad van Nederland?"\n' +
+          '            Positie="30,70"\n' +
+          '            Grootte="340,40"\n' +
+          '            Kleur="#e0e0e0"\n' +
+          '        Button Antwoord1:\n' +
+          '            Tekst="Amsterdam"\n' +
+          '            Positie="30,130"\n' +
+          '            Grootte="140,40"\n' +
+          '            Kleur="#3b82f6"\n' +
+          '            Hoekradius="6"\n' +
+          '            Event Click:\n' +
+          '                Var(score+1)\n' +
+          '        Button Antwoord2:\n' +
+          '            Tekst="Rotterdam"\n' +
+          '            Positie="180,130"\n' +
+          '            Grootte="140,40"\n' +
+          '            Kleur="#3b82f6"\n' +
+          '            Hoekradius="6"\n' +
+          '        Text ScoreLbl:\n' +
+          '            Tekst="Score: 0"\n' +
+          '            Positie="30,190"\n' +
+          '            Grootte="100,30"\n' +
+          '            Kleur="#22c55e"\n',
+      },
+      {
+        label: 'Formulier',
+        description: 'Contact formulier met meerdere velden',
+        code:
+          '    Var(naam="")\n' +
+          '    Var(email="")\n' +
+          '    Var(bericht="")\n' +
+          '    Page Contact:\n' +
+          '        Frame FormBox:\n' +
+          '            Positie="30,30"\n' +
+          '            Grootte="340,300"\n' +
+          '            Kleur="#1e293b"\n' +
+          '            Hoekradius="12"\n' +
+          '            Text Titel:\n' +
+          '                Tekst="Contact Formulier"\n' +
+          '                Positie="15,15"\n' +
+          '                Grootte="310,25"\n' +
+          '                Kleur="#ffffff"\n' +
+          '            TextBox NaamInput:\n' +
+          '                Positie="15,50"\n' +
+          '                Grootte="310,35"\n' +
+          '                Placeholder="Uw naam"\n' +
+          '                Variabele="naam"\n' +
+          '            TextBox EmailInput:\n' +
+          '                Positie="15,95"\n' +
+          '                Grootte="310,35"\n' +
+          '                Placeholder="Uw email"\n' +
+          '                Variabele="email"\n' +
+          '            TextBox BerichtInput:\n' +
+          '                Positie="15,140"\n' +
+          '                Grootte="310,100"\n' +
+          '                Placeholder="Uw bericht..."\n' +
+          '                Variabele="bericht"\n' +
+          '            Button VerstuurBtn:\n' +
+          '                Tekst="Verstuur"\n' +
+          '                Positie="15,250"\n' +
+          '                Grootte="310,40"\n' +
+          '                Kleur="#3b82f6"\n' +
+          '                Hoekradius="6"\n' +
+          '                Event Click:\n' +
+          '                    Data.Add(berichten, naam=Var(naam), email=Var(email), bericht=Var(bericht))\n',
+      },
+      {
+        label: 'Galerij viewer',
+        description: 'Afbeeldingen viewer met navigatie',
+        code:
+          '    Var(huidigeAfbeelding=0)\n' +
+          '    Page Galerij:\n' +
+          '        Text Titel:\n' +
+          '            Tekst="Foto Galerij"\n' +
+          '            Positie="20,20"\n' +
+          '            Grootte="360,30"\n' +
+          '            Kleur="#ffffff"\n' +
+          '        Frame ImageFrame:\n' +
+          '            Positie="20,70"\n' +
+          '            Grootte="360,240"\n' +
+          '            Kleur="#2d3748"\n' +
+          '            Hoekradius="8"\n' +
+          '            Image Foto:\n' +
+          '                Bron="https://via.placeholder.com/360x240"\n' +
+          '                Positie="0,0"\n' +
+          '                Grootte="360,240"\n' +
+          '        Button VorigBtn:\n' +
+          '            Tekst="← Vorig"\n' +
+          '            Positie="20,330"\n' +
+          '            Grootte="170,40"\n' +
+          '            Kleur="#3b82f6"\n' +
+          '            Hoekradius="6"\n' +
+          '            Event Click:\n' +
+          '                Var(huidigeAfbeelding-1)\n' +
+          '        Button VolgendeBtn:\n' +
+          '            Tekst="Volgende →"\n' +
+          '            Positie="210,330"\n' +
+          '            Grootte="170,40"\n' +
+          '            Kleur="#3b82f6"\n' +
+          '            Hoekradius="6"\n' +
+          '            Event Click:\n' +
+          '                Var(huidigeAfbeelding+1)\n',
+      },
+      {
+        label: 'Profiel pagina',
+        description: 'Gebruiker profiel met gegevens',
+        code:
+          '    Var(gebruikernaam="JanDoe")\n' +
+          '    Var(email="jan@example.com")\n' +
+          '    Var(bio="Ik hou van coderen!")\n' +
+          '    Page Profiel:\n' +
+          '        Frame ProfielBox:\n' +
+          '            Positie="20,20"\n' +
+          '            Grootte="360,200"\n' +
+          '            Kleur="#1e293b"\n' +
+          '            Hoekradius="12"\n' +
+          '            Text GebruikerNaam:\n' +
+          '                Tekst="JanDoe"\n' +
+          '                Positie="20,20"\n' +
+          '                Grootte="320,30"\n' +
+          '                Kleur="#3b82f6"\n' +
+          '            Text EmailLabel:\n' +
+          '                Tekst="Email: jan@example.com"\n' +
+          '                Positie="20,60"\n' +
+          '                Grootte="320,25"\n' +
+          '                Kleur="#e0e0e0"\n' +
+          '            Text BioLabel:\n' +
+          '                Tekst="Bio: Ik hou van coderen!"\n' +
+          '                Positie="20,95"\n' +
+          '                Grootte="320,70"\n' +
+          '                Kleur="#e0e0e0"\n' +
+          '        Button BewerkenBtn:\n' +
+          '            Tekst="Bewerk Profiel"\n' +
+          '            Positie="20,240"\n' +
+          '            Grootte="360,40"\n' +
+          '            Kleur="#22c55e"\n' +
+          '            Hoekradius="6"\n' +
+          '            Event Click:\n' +
+          '                GaNaar "ProfielEdit"\n',
+      },
+      {
+        label: 'Menu/Navigatie',
+        description: 'Navigatie menu met meerdere knoppen',
+        code:
+          '    Page Home:\n' +
+          '        Text Titel:\n' +
+          '            Tekst="Home"\n' +
+          '            Positie="20,20"\n' +
+          '            Grootte="360,40"\n' +
+          '            Kleur="#ffffff"\n' +
+          '        Button DashboardBtn:\n' +
+          '            Tekst="📊 Dashboard"\n' +
+          '            Positie="20,80"\n' +
+          '            Grootte="360,50"\n' +
+          '            Kleur="#3b82f6"\n' +
+          '            Hoekradius="8"\n' +
+          '            Event Click:\n' +
+          '                GaNaar "Dashboard"\n' +
+          '        Button ProfielBtn:\n' +
+          '            Tekst="👤 Mijn Profiel"\n' +
+          '            Positie="20,140"\n' +
+          '            Grootte="360,50"\n' +
+          '            Kleur="#8b5cf6"\n' +
+          '            Hoekradius="8"\n' +
+          '            Event Click:\n' +
+          '                GaNaar "Profiel"\n' +
+          '        Button InstellingenBtn:\n' +
+          '            Tekst="⚙️ Instellingen"\n' +
+          '            Positie="20,200"\n' +
+          '            Grootte="360,50"\n' +
+          '            Kleur="#f59e0b"\n' +
+          '            Hoekradius="8"\n' +
+          '            Event Click:\n' +
+          '                GaNaar "Instellingen"\n',
       },
     ],
   },

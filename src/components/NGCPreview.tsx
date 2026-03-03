@@ -58,6 +58,20 @@ function executeDataCommand(cmd: ReturnType<typeof parseDataCommand>, runtime: N
     case 'Clear':
       runtime.dataClear(cmd.table);
       break;
+    case 'Get': {
+      // Convert table records to list: Data.Get(tableName)
+      const records = runtime.dataGet(cmd.table);
+      if (records.length > 0) {
+        // Create a list with comma-separated values from first record's values
+        const listName = `${cmd.table}_list`;
+        runtime.listClear(listName);
+        records.forEach(record => {
+          const values = Object.values(record).filter(v => typeof v === 'string').join(', ');
+          runtime.listAdd(listName, values);
+        });
+      }
+      break;
+    }
   }
 }
 

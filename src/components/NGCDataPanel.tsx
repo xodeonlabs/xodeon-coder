@@ -16,9 +16,35 @@ interface ExtractedVar {
   value: string;
 }
 
-function extractDataFromAST(node: NGCNode, vars: ExtractedVar[], lists: ExtractedList[]) {
+interface DataOperation {
+  type: 'Add' | 'Delete' | 'Clear' | 'Get';
+  table: string;
+  details?: string;
+}
+
+function extractDataFromAST(node: NGCNode, vars: ExtractedVar[], lists: ExtractedList[], operations: DataOperation[]) {
   if (node.type === 'Var') {
     const raw = node.name;
+    // Check for Data operations
+    if (raw.startsWith('Data.')) {
+      const addMatch = raw.match(/^Data\.Add\((\w+)\s*,/);
+      if (addMatch) {
+        operations.push({ type: 'Add', table: addMatch[1], details: raw });
+      }
+      const getMatch = raw.match(/^Data\.Get\((\w+)\)/);
+      if (getMatch) {
+        operations.push({ type: 'Get', table: getMatch[1], details: raw });
+      }
+      const delMatch = raw.match(/^Data\.Delete\((\w+)\s*,/);
+      if (delMatch) {
+        operations.push({ type: 'Delete', table: delMatch[1], details: raw });
+      }
+      const clearMatch = raw.match(/^Data\.Clear\((\w+)\)/);
+      if (clearMatch) {
+        operations.push({ type: 'Clear', table: clearMatch[1], details: raw });
+      }
+      return;
+    }
     if (raw.includes('(') && raw.includes(')')) {
       const inner = raw.match(/\(([^)]+)\)/)?.[1] || '';
       if (inner.includes('=')) {
@@ -52,19 +78,20 @@ function extractDataFromAST(node: NGCNode, vars: ExtractedVar[], lists: Extracte
     }
   }
   for (const child of node.children) {
-    extractDataFromAST(child, vars, lists);
+    extractDataFromAST(child, vars, lists, operations);
   }
 }
 
 export function NGCDataPanel({ ast }: DataPanelProps) {
-  const { vars, lists } = useMemo(() => {
+  const { vars, lists, operations } = useMemo(() => {
     const vars: ExtractedVar[] = [];
     const lists: ExtractedList[] = [];
-    if (ast) extractDataFromAST(ast, vars, lists);
-    return { vars, lists };
+    const operations: DataOperation[] = [];
+    if (ast) extractDataFromAST(ast, vars, lists, operations);
+    return { vars, lists, operations };
   }, [ast]);
 
-  const hasData = vars.length > 0 || lists.length > 0;
+  const hasData = vars.length > 0 || lists.length > 0 || operations.length > 0;
 
   if (!hasData) {
     return (
@@ -140,6 +167,38 @@ export function NGCDataPanel({ ast }: DataPanelProps) {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Data Operations */}
+      {operations.length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <span className="text-xs">⚙️</span> Data Operaties
+          </h3>
+          <div className="rounded-md border border-border overflow-hidden">
+            <table className="w-full text-xs">
+              <thead>
+                <tr style={{ background: 'hsl(var(--ide-panel-header))' }}>
+                  <th className="text-left px-2 py-1.5 text-muted-foreground font-medium">Type</th>
+                  <th className="text-left px-2 py-1.5 text-muted-foreground font-medium">Tabel</th>
+                </tr>
+              </thead>
+              <tbody>
+                {operations.map((op, i) => (
+                  <tr key={i} className="border-t border-border hover:bg-secondary/50 transition-colors">
+                    <td className="px-2 py-1.5 font-mono text-primary">
+                      {op.type === 'Get' && '📥 Ophalen'}
+                      {op.type === 'Add' && '➕ Toevoegen'}
+                      {op.type === 'Delete' && '🗑️ Verwijderen'}
+                      {op.type === 'Clear' && '🧹 Wissen'}
+                    </td>
+                    <td className="px-2 py-1.5 font-mono text-foreground">{op.table}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
