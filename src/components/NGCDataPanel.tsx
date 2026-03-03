@@ -33,7 +33,10 @@ function extractDataFromAST(node: NGCNode, vars: ExtractedVar[], lists: Extracte
       }
       const getMatch = raw.match(/^Data\.Get\((\w+)\)/);
       if (getMatch) {
-        operations.push({ type: 'Get', table: getMatch[1], details: raw });
+        const tableName = getMatch[1];
+        operations.push({ type: 'Get', table: tableName, details: raw });
+        // treat Data.Get like a list fetch so the UI shows a corresponding list
+        lists.push({ name: tableName, items: [] });
       }
       const delMatch = raw.match(/^Data\.Delete\((\w+)\s*,/);
       if (delMatch) {
@@ -62,20 +65,36 @@ function extractDataFromAST(node: NGCNode, vars: ExtractedVar[], lists: Extracte
   }
   if (node.type === 'List') {
     const raw = node.name;
+    let parsedItems: string[] = [];
+    let listName = raw;
+
     if (raw.includes('(') && raw.includes(')')) {
       const inner = raw.match(/\(([^)]+)\)/)?.[1] || '';
       if (inner.includes('=')) {
         const eqIdx = inner.indexOf('=');
         const name = inner.substring(0, eqIdx);
         const itemsStr = inner.substring(eqIdx + 1).replace(/^"|"$/g, '');
-        lists.push({ name, items: itemsStr ? itemsStr.split(',').map(s => s.trim()) : [] });
+        listName = name;
+        parsedItems = itemsStr ? itemsStr.split(',').map(s => s.trim()) : [];
       } else {
-        lists.push({ name: inner, items: [] });
+        listName = inner;
       }
     } else {
       const val = Object.values(node.properties)[0] || '';
-      lists.push({ name: raw, items: val ? val.replace(/^"|"$/g, '').split(',').map(s => s.trim()) : [] });
+      parsedItems = val ? val.replace(/^"|"$/g, '').split(',').map(s => s.trim()) : [];
     }
+
+    lists.push({ name: listName, items: parsedItems });
+
+    // also record any Var() expressions that appear inside the list items
+    parsedItems.forEach(item => {
+      const varMatch = item.match(/Var\(([^)=]+)(=([^)]*))?\)/);
+      if (varMatch) {
+        const varName = varMatch[1];
+        const varValue = varMatch[3] || '';
+        vars.push({ name: varName, value: varValue.replace(/^"|"$/g, '') });
+      }
+    });
   }
   for (const child of node.children) {
     extractDataFromAST(child, vars, lists, operations);
