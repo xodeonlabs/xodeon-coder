@@ -32,7 +32,7 @@ const getErrorText = (err: unknown, fallback: string) => {
 };
 
 const Auth = () => {
-  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot' | 'magic-link'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -40,10 +40,32 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
+  const switchMode = (newMode: 'login' | 'register' | 'forgot' | 'magic-link') => {
     setMode(newMode);
     setError('');
     setMessage('');
+  };
+
+  const handleMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setMessage('');
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: window.location.origin,
+        },
+      });
+      if (error) throw error;
+      setMessage('✅ Magic link verzonden! Check je e-mail (ook spam-folder).');
+    } catch (err: unknown) {
+      setError(getErrorText(err, 'Magic link verzenden mislukt.'));
+    } finally {
+      setLoading(false);
+    }
   };
 
 
@@ -70,16 +92,37 @@ const Auth = () => {
         return;
       }
 
-      const { error } = await supabase.auth.signUp({
+      // Register mode
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: window.location.origin },
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            auto_confirm_email: true,
+          },
+        },
       });
 
       if (error) throw error;
-      setMessage('Check je e-mail om je account te bevestigen!');
+      
+      // Check if user was auto-confirmed (development mode)
+      if (data.user?.confirmed_at) {
+        setMessage('Account aangemaakt! Je bent automatisch ingelogd. Even geduld...');
+        // Auto-login after registration in development
+        setTimeout(() => {
+          navigate('/');
+        }, 1500);
+      } else {
+        setMessage('Account aangemaakt! Check je e-mail om je account te bevestigen. Geen e-mail ontvangen? Controleer je spam-folder of gebruik Google login.');
+      }
     } catch (err: unknown) {
-      setError(getErrorText(err, 'Er is een onbekende fout opgetreden.'));
+      const errorMsg = getErrorText(err, 'Er is een onbekende fout opgetreden.');
+      if (errorMsg.includes('email') || errorMsg.includes('mail')) {
+        setError(`${errorMsg} 💡 Tip: Gebruik in plaats daarvan Google login (knop hieronder).`);
+      } else {
+        setError(errorMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -108,10 +151,10 @@ const Auth = () => {
       <div className="w-full max-w-sm p-8 rounded-xl" style={{ background: '#151b2e', border: '1px solid #1e293b' }}>
         <h1 className="text-2xl font-bold text-white mb-1 text-center">NGC Editor</h1>
         <p className="text-sm text-center mb-6" style={{ color: '#64748b' }}>
-          {mode === 'forgot' ? 'Wachtwoord herstellen' : mode === 'login' ? 'Log in om verder te gaan' : 'Maak een account aan'}
+          {mode === 'forgot' ? 'Wachtwoord herstellen' : mode === 'magic-link' ? 'Inloggen met link' : mode === 'login' ? 'Log in om verder te gaan' : 'Maak een account aan'}
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={mode === 'magic-link' ? handleMagicLink : handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-medium mb-1" style={{ color: '#94a3b8' }}>E-mail</label>
             <input
@@ -124,7 +167,7 @@ const Auth = () => {
               placeholder="jouw@email.nl"
             />
           </div>
-          {mode !== 'forgot' && (
+          {(mode === 'login' || mode === 'register') && (
             <div>
               <label className="block text-xs font-medium mb-1" style={{ color: '#94a3b8' }}>Wachtwoord</label>
               <input
@@ -148,16 +191,24 @@ const Auth = () => {
             </div>
           )}
 
-          {error && <p className="text-xs text-red-400">{error}</p>}
-          {message && <p className="text-xs text-green-400">{message}</p>}
+          {error && (
+            <div className="p-3 rounded-md text-xs text-orange-300" style={{ background: '#422006', border: '1px solid #78350f' }}>
+              {error}
+            </div>
+          )}
+          {message && (
+            <div className="p-3 rounded-md text-xs text-green-300" style={{ background: '#052e16', border: '1px solid #15803d' }}>
+              {message}
+            </div>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors"
+            className="w-full py-2 rounded-md text-sm font-medium text-white transition-colors disabled:opacity-60"
             style={{ background: '#3b82f6' }}
           >
-            {loading ? '...' : mode === 'forgot' ? 'Reset link versturen' : mode === 'login' ? 'Inloggen' : 'Registreren'}
+            {loading ? '...' : mode === 'forgot' ? 'Reset link versturen' : mode === 'magic-link' ? 'Magic link versturen' : mode === 'login' ? 'Inloggen' : 'Registreren'}
           </button>
 
           {mode !== 'forgot' && (
@@ -178,6 +229,17 @@ const Auth = () => {
                 Inloggen met Google
               </button>
 
+              {mode === 'login' && (
+                <button
+                  type="button"
+                  onClick={() => switchMode('magic-link')}
+                  className="w-full py-2 rounded-md text-sm font-medium transition-colors"
+                  style={{ background: 'transparent', border: '1px solid #334155', color: '#94a3b8' }}
+                >
+                  🔗 Magic link
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={() => navigate('/guest')}
@@ -192,6 +254,12 @@ const Auth = () => {
 
         <p className="text-xs text-center mt-4" style={{ color: '#64748b' }}>
           {mode === 'forgot' ? (
+            <>
+              <button onClick={() => switchMode('login')} className="underline" style={{ color: '#3b82f6' }}>
+                Terug naar inloggen
+              </button>
+            </>
+          ) : mode === 'magic-link' ? (
             <>
               <button onClick={() => switchMode('login')} className="underline" style={{ color: '#3b82f6' }}>
                 Terug naar inloggen
