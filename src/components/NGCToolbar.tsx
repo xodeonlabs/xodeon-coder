@@ -128,8 +128,8 @@ export function NGCToolbar({ errors, appName, appCode, onSignOut, onSave, onRena
       {/* Share Template Dialog */}
       {showShareDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowShareDialog(false)}>
-          <div className="rounded-2xl border border-border/50 p-8 w-full max-w-md shadow-2xl" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-6">
+          <div className="rounded-2xl border border-border/50 p-6 w-full max-w-md shadow-2xl" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10"><Share2 className="h-5 w-5 text-primary" /></div>
                 Deel als template
@@ -138,38 +138,38 @@ export function NGCToolbar({ errors, appName, appCode, onSignOut, onSave, onRena
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <p className="text-base text-muted-foreground mb-6">Deel je app zodat anderen het als template kunnen gebruiken.</p>
-            <div className="space-y-4">
+            <p className="text-sm text-muted-foreground mb-4">Deel je app zodat anderen het als template kunnen gebruiken.</p>
+            <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium text-foreground">Template naam</label>
+                <label className="text-xs font-medium text-foreground uppercase tracking-wide">Template naam</label>
                 <input
                   type="text"
                   placeholder="Bv. Todo App Pro"
                   value={templateName}
                   onChange={e => setTemplateName(e.target.value)}
                   autoFocus
-                  className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-2"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-1.5"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-foreground">Beschrijving (optioneel)</label>
+                <label className="text-xs font-medium text-foreground uppercase tracking-wide">Beschrijving (optioneel)</label>
                 <textarea
                   placeholder="Wat doet deze template? Welke features heeft het?"
                   value={templateDescription}
                   onChange={e => setTemplateDescription(e.target.value)}
-                  rows={3}
-                  className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-2 resize-none"
+                  rows={2}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-1.5 resize-none"
                 />
               </div>
             </div>
-            <div className="flex justify-end gap-3 mt-8">
-              <button onClick={() => setShowShareDialog(false)} className="px-5 py-2.5 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
+            <div className="flex justify-end gap-2 mt-6">
+              <button onClick={() => setShowShareDialog(false)} className="px-4 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
                 Annuleren
               </button>
               <button 
                 onClick={handleShareTemplate} 
                 disabled={sharing || !templateName.trim()}
-                className="px-6 py-2.5 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all active:scale-95"
+                className="px-5 py-2 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all active:scale-95"
               >
                 {sharing ? 'Delen...' : 'Delen'}
               </button>
