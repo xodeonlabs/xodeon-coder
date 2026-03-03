@@ -92,6 +92,8 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<string>('global');
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const isRemoteUpdate = useRef(false);
+
   // Load app from database
   useEffect(() => {
     if (!appId) return;
@@ -107,6 +109,36 @@ const Index = () => {
     });
   }, [appId]);
 
+  // Realtime collaboration: listen for changes from other users
+  useEffect(() => {
+    if (!appId) return;
+    const channel = supabase
+      .channel(`app-collab-${appId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'apps', filter: `id=eq.${appId}` },
+        (payload) => {
+          const newRecord = payload.new as { ngc_code: string; name: string };
+          // Only apply if it's a remote change (not our own save)
+          isRemoteUpdate.current = true;
+          setCode(prev => {
+            if (prev !== newRecord.ngc_code) return newRecord.ngc_code;
+            return prev;
+          });
+          setAppName(prev => {
+            if (prev !== newRecord.name) return newRecord.name;
+            return prev;
+          });
+          setTimeout(() => { isRemoteUpdate.current = false; }, 100);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [appId]);
+
   // Save to database
   const saveNow = useCallback(async () => {
     if (!appId) return;
@@ -114,9 +146,9 @@ const Index = () => {
     await supabase.from('apps').update({ ngc_code: code }).eq('id', appId);
   }, [code, appId]);
 
-  // Auto-save to database with debounce
+  // Auto-save to database with debounce (skip remote updates)
   useEffect(() => {
-    if (loading || !appId) return;
+    if (loading || !appId || isRemoteUpdate.current) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       supabase.from('apps').update({ ngc_code: code }).eq('id', appId);
