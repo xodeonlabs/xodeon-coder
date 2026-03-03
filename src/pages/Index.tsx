@@ -253,6 +253,8 @@ const Index = () => {
         return;
       }
 
+      let resultError: any = null;
+      // Try inserting into the dedicated templates table first
       const { error } = await supabase
         .from('templates')
         .insert({
@@ -264,7 +266,24 @@ const Index = () => {
         });
 
       if (error) {
-        toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+        // table might not exist, fallback to apps
+        if (error.code === 'PGRST205' || error.message?.includes('templates')) {
+          console.warn('templates table missing – falling back to apps');
+          const { error: appsErr } = await supabase.from('apps').insert({
+            name: templateName,
+            ngc_code: templateCode,
+            owner_id: user.id,
+            is_public: true,
+            is_remixable: true,
+          });
+          resultError = appsErr;
+        } else {
+          resultError = error;
+        }
+      }
+
+      if (resultError) {
+        toast({ title: 'Fout', description: resultError.message, variant: 'destructive' });
       } else {
         toast({ title: 'Succes', description: 'Template gedeeld!', variant: 'default' });
       }

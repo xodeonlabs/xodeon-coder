@@ -11,7 +11,12 @@ interface Snippet {
 }
 
 // derive the template type from the generated supabase types
-type Template = Database['public']['Tables']['templates']['Row'];
+// primary template row type; if the table is missing we will fall back to using
+// public entries from the `apps` table and mark them with `is_fallback`.
+interface Template extends Database['public']['Tables']['templates']['Row'] {
+  // extra flag used internally when the record was sourced from `apps`
+  is_fallback?: boolean;
+}
 
 interface Folder {
   name: string;
@@ -550,7 +555,35 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
         .limit(50);
       
       if (error) {
-        console.error('Fout bij laden templates:', error);
+        // table might not exist yet
+        if (error.code === 'PGRST205' || error.message?.includes('templates')) {
+          console.warn('Templates table missing, falling back to public apps');
+          const { data: apps, error: appsErr } = await supabase
+            .from('apps')
+            .select('id,name,ngc_code,owner_id,created_at')
+            .eq('is_public', true)
+            .order('created_at', { ascending: false })
+            .limit(50);
+          if (appsErr) {
+            console.error('Failed to load apps fallback:', appsErr);
+            setCommunityTemplates([]);
+          } else {
+            const fallback = (apps || []).map(a => ({
+              id: a.id,
+              name: a.name,
+              description: '',
+              ngc_code: a.ngc_code,
+              creator_id: a.owner_id,
+              downloads: 0,
+              rating: 0,
+              created_at: a.created_at as string,
+              is_fallback: true,
+            } as Template));
+            setCommunityTemplates(fallback);
+          }
+        } else {
+          console.error('Fout bij laden templates:', error);
+        }
       } else {
         setCommunityTemplates(data || []);
       }
@@ -614,11 +647,13 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
   const handleCreateFromCommunity = async (template: Template) => {
     if (onCreateTemplate) {
       handleCreateTemplate(template, template.name);
-      // Increment downloads
-      await supabase
-        .from('templates')
-        .update({ downloads: template.downloads + 1 })
-        .eq('id', template.id);
+      // Increment downloads if this is a real template row
+      if (!template.is_fallback) {
+        await supabase
+          .from('templates')
+          .update({ downloads: template.downloads + 1 })
+          .eq('id', template.id);
+      }
     }
   };
 
