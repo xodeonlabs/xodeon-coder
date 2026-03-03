@@ -253,7 +253,7 @@ const Index = () => {
       if (error) {
         toast({ title: 'Fout', description: error.message, variant: 'destructive' });
       } else {
-        toast({ title: 'Succes', description: 'Template gedeeld! 🎉', variant: 'default' });
+        toast({ title: 'Succes', description: 'Template gedeeld!', variant: 'default' });
       }
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'Onbekende fout';
@@ -382,7 +382,7 @@ const Index = () => {
                     : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/40'
                 }`}
               >
-                {section.id === 'global' ? '⚙ Globaal' : `📄 ${section.label}`}
+                {section.id === 'global' ? 'Globaal' : `${section.label}`}
               </button>
             ))}
             <button

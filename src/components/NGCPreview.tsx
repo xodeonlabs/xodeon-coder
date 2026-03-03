@@ -265,7 +265,7 @@ function DataTableView({ tableName, records }: { tableName: string; records: Arr
 
   return (
     <div style={{ margin: '8px 0', background: '#1e293b', borderRadius: 6, padding: 8, fontSize: 12 }}>
-      <div style={{ color: '#94a3b8', fontWeight: 'bold', marginBottom: 4 }}>📊 {tableName}</div>
+      <div style={{ color: '#94a3b8', fontWeight: 'bold', marginBottom: 4 }}>{tableName}</div>
       <table style={{ width: '100%', borderCollapse: 'collapse', color: '#e2e8f0' }}>
         <thead>
           <tr>

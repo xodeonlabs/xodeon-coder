@@ -91,7 +91,7 @@ function ExplorerNode({
         ) : (
           <span className="w-3 shrink-0" />
         )}
-        <span className="text-xs">{NODE_ICONS[node.type] || '📁'}</span>
+        <span className="text-xs">{NODE_ICONS[node.type] || ''}</span>
         {editing ? (
           <input
             ref={inputRef}

@@ -181,7 +181,7 @@ export default function Dashboard() {
           </div>
         ) : myApps.length === 0 ? (
           <div className="rounded-xl border border-border/40 p-16 text-center" style={{ background: 'hsl(var(--card))' }}>
-            <div className="mb-4 text-4xl">📦</div>
+            <div className="mb-4 text-4xl"></div>
             <p className="text-lg text-muted-foreground mb-6">Je hebt nog geen apps. Maak je eerste app!</p>
             <button onClick={createApp} disabled={creating} className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95">
               <Plus className="h-5 w-5" />

@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 
+// sometimes the SupabaseAuthClient definition is missing newer methods
+// so we cast to `any` once and reuse the alias in this file
+const auth = supabase.auth as any;
+
 const getErrorText = (err: unknown, fallback: string) => {
   if (err instanceof Error && err.message) return err.message;
 
@@ -53,7 +57,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithOtp({
+      const { data, error } = await auth.signInWithOtp({
         email,
         options: {
           emailRedirectTo: window.location.origin,
@@ -62,13 +66,13 @@ const Auth = () => {
       if (error) throw error;
       
       if (data?.user?.id) {
-        setMessage('✅ Magic link verzonden! Check je e-mail (ook spam-folder).\n\n💡 Tip: Kan je de email niet vinden? Probeer Google login of gast mode.');
+        setMessage('Magic link verzonden! Check je e-mail (ook spam-folder).\n\nTip: Kan je de email niet vinden? Probeer Google login of gast mode.');
       } else {
-        setMessage('✅ Aanvraag verzonden! Je ontvangt een inlog-link via e-mail.');
+        setMessage('Aanvraag verzonden! Je ontvangt een inlog-link via e-mail.');
       }
     } catch (err: unknown) {
       const errMsg = getErrorText(err, 'Magic link verzenden mislukt.');
-      setError(`${errMsg}\n\n💡 Probeer in plaats daarvan:\n• Google login\n• Wachtwoord login\n• Gast mode`);
+      setError(`${errMsg}\n\nProbeer in plaats daarvan:\n• Google login\n• Wachtwoord login\n• Gast mode`);
     } finally {
       setLoading(false);
     }
@@ -83,7 +87,7 @@ const Auth = () => {
 
     try {
       if (mode === 'forgot') {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        const { error } = await auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/reset-password`,
         });
         if (error) throw error;
@@ -92,14 +96,14 @@ const Auth = () => {
       }
 
       if (mode === 'login') {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await auth.signInWithPassword({ email, password });
         if (error) throw error;
         navigate('/');
         return;
       }
 
       // Register mode
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await auth.signUp({
         email,
         password,
         options: {
@@ -122,7 +126,7 @@ const Auth = () => {
         setMessage('✅ Account aangemaakt! Je wordt ingelogd...');
         
         try {
-          const { error: signInError } = await supabase.auth.signInWithPassword({ 
+          const { error: signInError } = await auth.signInWithPassword({ 
             email, 
             password 
           });
@@ -145,7 +149,7 @@ const Auth = () => {
     } catch (err: unknown) {
       const errorMsg = getErrorText(err, 'Er is een onbekende fout opgetreden.');
       if (errorMsg.includes('email') || errorMsg.includes('mail') || errorMsg.toLowerCase().includes('invalid')) {
-        setError(`${errorMsg}\n\n💡 Probeer:\n• Google login\n• Magic link\n• Gast mode`);
+        setError(`${errorMsg}\n\nProbeer:\n• Google login\n• Magic link\n• Gast mode`);
       } else {
         setError(errorMsg);
       }
@@ -262,7 +266,7 @@ const Auth = () => {
                   className="w-full py-2 rounded-md text-sm font-medium transition-colors"
                   style={{ background: 'transparent', border: '1px solid #334155', color: '#94a3b8' }}
                 >
-                  🔗 Magic link
+                  Magic link
                 </button>
               )}
 
@@ -272,7 +276,7 @@ const Auth = () => {
                 className="w-full py-2 rounded-md text-sm font-medium transition-colors"
                 style={{ background: 'transparent', border: '1px solid #334155', color: '#94a3b8' }}
               >
-                🧪 Probeer als gast
+                Probeer als gast
               </button>
             </>
           )}

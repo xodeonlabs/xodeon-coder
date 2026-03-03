@@ -111,7 +111,7 @@ export function NGCDataPanel({ ast }: DataPanelProps) {
       {vars.length > 0 && (
         <div>
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            <span className="text-xs">💾</span> Variabelen
+            Variabelen
           </h3>
           <div className="rounded-md border border-border overflow-hidden">
             <table className="w-full text-xs">
@@ -138,7 +138,7 @@ export function NGCDataPanel({ ast }: DataPanelProps) {
       {lists.length > 0 && (
         <div>
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            <span className="text-xs">📋</span> Lijsten
+            Lijsten
           </h3>
           {lists.map((list, i) => (
             <div key={i} className="mb-3">
@@ -174,7 +174,7 @@ export function NGCDataPanel({ ast }: DataPanelProps) {
       {operations.length > 0 && (
         <div>
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            <span className="text-xs">⚙️</span> Data Operaties
+            Data Operaties
           </h3>
           <div className="rounded-md border border-border overflow-hidden">
             <table className="w-full text-xs">
@@ -188,10 +188,10 @@ export function NGCDataPanel({ ast }: DataPanelProps) {
                 {operations.map((op, i) => (
                   <tr key={i} className="border-t border-border hover:bg-secondary/50 transition-colors">
                     <td className="px-2 py-1.5 font-mono text-primary">
-                      {op.type === 'Get' && '📥 Ophalen'}
-                      {op.type === 'Add' && '➕ Toevoegen'}
-                      {op.type === 'Delete' && '🗑️ Verwijderen'}
-                      {op.type === 'Clear' && '🧹 Wissen'}
+                      {op.type === 'Get' && 'Ophalen'}
+                      {op.type === 'Add' && 'Toevoegen'}
+                      {op.type === 'Delete' && 'Verwijderen'}
+                      {op.type === 'Clear' && 'Wissen'}
                     </td>
                     <td className="px-2 py-1.5 font-mono text-foreground">{op.table}</td>
                   </tr>

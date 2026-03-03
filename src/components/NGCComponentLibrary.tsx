@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ChevronRight, ChevronDown, Copy, Share2, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 
 interface Snippet {
   label: string;
@@ -9,16 +10,8 @@ interface Snippet {
   description?: string;
 }
 
-interface Template {
-  id: string;
-  name: string;
-  description: string | null;
-  ngc_code: string;
-  creator_id: string;
-  downloads: number;
-  rating: number;
-  created_at: string;
-}
+// derive the template type from the generated supabase types
+type Template = Database['public']['Tables']['templates']['Row'];
 
 interface Folder {
   name: string;
@@ -29,7 +22,7 @@ interface Folder {
 const LIBRARY: Folder[] = [
   {
     name: 'Pagina',
-    icon: '📄',
+    icon: '',
     snippets: [
       {
         label: 'Lege pagina',
@@ -50,7 +43,7 @@ const LIBRARY: Folder[] = [
   },
   {
     name: 'Knoppen',
-    icon: '🔘',
+    icon: '',
     snippets: [
       {
         label: 'Knop',
@@ -93,7 +86,7 @@ const LIBRARY: Folder[] = [
   },
   {
     name: 'Tekst',
-    icon: '📝',
+    icon: '',
     snippets: [
       {
         label: 'Tekst label',
@@ -136,7 +129,7 @@ const LIBRARY: Folder[] = [
   },
   {
     name: 'Afbeelding',
-    icon: '🖼️',
+    icon: '',
     snippets: [
       {
         label: 'Afbeelding',
@@ -151,7 +144,7 @@ const LIBRARY: Folder[] = [
   },
   {
     name: 'Frames',
-    icon: '🔲',
+    icon: '',
     snippets: [
       {
         label: 'Container',
@@ -176,7 +169,7 @@ const LIBRARY: Folder[] = [
   },
   {
     name: 'Data',
-    icon: '💾',
+    icon: '',
     snippets: [
       {
         label: 'Variabele',
@@ -217,7 +210,7 @@ const LIBRARY: Folder[] = [
   },
   {
     name: 'Sjablonen',
-    icon: '📋',
+    icon: '',
     snippets: [
       {
         label: 'Login pagina',
@@ -511,7 +504,7 @@ const LIBRARY: Folder[] = [
           '            Grootte="360,40"\n' +
           '            Kleur="#ffffff"\n' +
           '        Button DashboardBtn:\n' +
-          '            Tekst="📊 Dashboard"\n' +
+          '            Tekst="Dashboard"\n' +
           '            Positie="20,80"\n' +
           '            Grootte="360,50"\n' +
           '            Kleur="#3b82f6"\n' +
@@ -519,7 +512,7 @@ const LIBRARY: Folder[] = [
           '            Event Click:\n' +
           '                GaNaar "Dashboard"\n' +
           '        Button ProfielBtn:\n' +
-          '            Tekst="👤 Mijn Profiel"\n' +
+          '            Tekst="Mijn Profiel"\n' +
           '            Positie="20,140"\n' +
           '            Grootte="360,50"\n' +
           '            Kleur="#8b5cf6"\n' +
@@ -527,7 +520,7 @@ const LIBRARY: Folder[] = [
           '            Event Click:\n' +
           '                GaNaar "Profiel"\n' +
           '        Button InstellingenBtn:\n' +
-          '            Tekst="⚙️ Instellingen"\n' +
+          '            Tekst="Instellingen"\n' +
           '            Positie="20,200"\n' +
           '            Grootte="360,50"\n' +
           '            Kleur="#f59e0b"\n' +
@@ -590,7 +583,7 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
           console.log('New template detected:', payload);
           setActiveTab('community');
           await refreshTemplates();
-          toast({ title: 'Nieuwe template! 🎉', description: 'Een nieuwe template is gedeeld.' });
+          toast({ title: 'Nieuwe template!', description: 'Een nieuwe template is gedeeld.' });
         }
       )
       .subscribe();
@@ -641,7 +634,7 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          📚 Bibliotheek
+          Bibliotheek
         </button>
         <button
           onClick={() => setActiveTab('community')}
@@ -651,7 +644,7 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          👥 Gemeenschap
+          Gemeenschap
           {communityTemplates.length > 0 && (
             <span className="absolute top-0.5 right-1 h-2 w-2 rounded-full bg-accent animate-pulse"></span>
           )}
@@ -719,7 +712,7 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
             ) : communityTemplates.length === 0 ? (
               <div className="flex items-center justify-center py-12 text-muted-foreground">
                 <div className="text-center">
-                  <div className="text-2xl mb-2">📭</div>
+                  <div className="text-2xl mb-2"></div>
                   <p className="text-sm">Geen community templates beschikbaar</p>
                   <p className="text-xs text-muted-foreground/60 mt-1">Deel je eerste template!</p>
                 </div>
