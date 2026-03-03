@@ -12,11 +12,12 @@ interface Snippet {
 
 // derive the template type from the generated supabase types
 // primary template row type; if the table is missing we will fall back to using
-// public entries from the `apps` table and mark them with `is_fallback`.
-interface Template extends Database['public']['Tables']['templates']['Row'] {
+// public entries from the `apps` table and mark them with `is_fallback`.  We use
+// a type alias because you cannot `extends` a computed property type.
+export type Template = Database['public']['Tables']['templates']['Row'] & {
   // extra flag used internally when the record was sourced from `apps`
   is_fallback?: boolean;
-}
+};
 
 interface Folder {
   name: string;
@@ -638,7 +639,7 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
 
   const handleCreateTemplate = (snippet: Snippet | Template, name: string) => {
     if (onCreateTemplate) {
-      const code = 'code' in snippet ? snippet.code : snippet.ngc_code;
+      const code = 'code' in snippet ? snippet.code : (snippet as any).ngc_code;
       onCreateTemplate(code, name);
       toast({ title: 'App aangemaakt', description: `"${name}" wordt geladen...` });
     }
@@ -646,13 +647,13 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
 
   const handleCreateFromCommunity = async (template: Template) => {
     if (onCreateTemplate) {
-      handleCreateTemplate(template, template.name);
+      handleCreateTemplate(template, (template as any).name);
       // Increment downloads if this is a real template row
       if (!template.is_fallback) {
         await supabase
           .from('templates')
-          .update({ downloads: template.downloads + 1 })
-          .eq('id', template.id);
+          .update({ downloads: (template as any).downloads + 1 })
+          .eq('id', (template as any).id);
       }
     }
   };
@@ -755,22 +756,22 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
             ) : (
               communityTemplates.map(template => (
                 <button
-                  key={template.id}
+                  key={(template as any).id}
                   onClick={() => handleCreateFromCommunity(template)}
                   className="flex items-center gap-2 w-full px-2.5 py-2 text-xs rounded-sm hover:bg-accent/10 transition-colors text-left group bg-secondary/30"
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="text-foreground font-medium truncate">{template.name}</div>
-                    <div className="text-muted-foreground/70 text-[10px] truncate mt-0.5">{template.description || 'Geen beschrijving'}</div>
+                    <div className="text-foreground font-medium truncate">{(template as any).name}</div>
+                    <div className="text-muted-foreground/70 text-[10px] truncate mt-0.5">{(template as any).description || 'Geen beschrijving'}</div>
                     <div className="flex items-center gap-2 text-muted-foreground/50 text-[9px] mt-1">
                       <div className="flex items-center gap-1">
                         <Star className="h-2.5 w-2.5" fill="currentColor" />
-                        <span>{template.rating?.toFixed(1) || '0'}</span>
+                        <span>{((template as any).rating as number)?.toFixed(1) || '0'}</span>
                       </div>
                       <span>•</span>
                       <div className="flex items-center gap-1">
                         <span>📥</span>
-                        <span>{template.downloads}</span>
+                        <span>{(template as any).downloads}</span>
                       </div>
                     </div>
                   </div>
