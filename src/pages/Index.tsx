@@ -95,16 +95,29 @@ const Index = () => {
   const isRemoteUpdate = useRef(false);
 
   // Load app from database
+  const [loadError, setLoadError] = useState<string | null>(null);
   useEffect(() => {
-    if (!appId) return;
+    if (!appId) {
+      setLoadError('Geen app-id opgegeven. Ga terug naar het dashboard om een app te openen.');
+      setLoading(false);
+      return;
+    }
+
     supabase.from('apps').select('ngc_code, name').eq('id', appId).single().then(({ data, error }) => {
       if (error || !data) {
-        toast({ title: 'App niet gevonden', variant: 'destructive' });
-        navigate('/');
+        // On error we still show a message but avoid throwing an uncaught exception or
+        // immediately redirecting, which can be confusing when developing or in
+        // environments where RLS blocks anonymous selects.
+        const msg = error ? error.message : 'App niet gevonden';
+        setLoadError(msg);
+        setLoading(false);
       } else {
         setCode(data.ngc_code || FALLBACK_CODE);
         setAppName(data.name);
+        setLoading(false);
       }
+    }).catch((e) => {
+      setLoadError(e instanceof Error ? e.message : String(e));
       setLoading(false);
     });
   }, [appId]);
@@ -297,6 +310,23 @@ const Index = () => {
 
 
   if (loading) return <div className="flex h-screen items-center justify-center" style={{ background: '#0a0e1a' }}><span className="text-sm text-muted-foreground">Laden...</span></div>;
+
+  if (loadError) {
+    return (
+      <div className="flex h-screen items-center justify-center p-4" style={{ background: '#0a0e1a' }}>
+        <div className="text-center">
+          <p className="text-lg font-semibold text-white mb-2">Fout bij laden editor</p>
+          <p className="text-sm text-red-400 mb-4">{loadError}</p>
+          <button
+            className="px-4 py-2 bg-primary rounded text-white"
+            onClick={() => navigate('/')}
+          >
+            Ga terug naar dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden">
