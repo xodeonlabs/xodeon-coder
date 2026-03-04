@@ -69,6 +69,28 @@ export default function Dashboard() {
 
   useEffect(() => { fetchApps(); }, []);
 
+  // Auto-save guest code as a new app after login/signup
+  useEffect(() => {
+    const guestCode = localStorage.getItem('ngc_guest_code');
+    if (!guestCode || !session?.user?.id) return;
+    localStorage.removeItem('ngc_guest_code');
+
+    (async () => {
+      const { data, error } = await supabase
+        .from('apps')
+        .insert({ owner_id: session.user.id, name: 'Gast Project', ngc_code: guestCode })
+        .select()
+        .single();
+      if (!error && data) {
+        toast({ title: 'Gastcode opgeslagen!', description: 'Je gastproject is bewaard als "Gast Project".' });
+        navigate(`/editor/${data.id}`);
+      } else {
+        toast({ title: 'Opslaan mislukt', description: error?.message || 'Onbekende fout', variant: 'destructive' });
+        fetchApps();
+      }
+    })();
+  }, [session?.user?.id]);
+
   async function fetchApps() {
     const { data, error } = await supabase.from('apps').select('*').order('updated_at', { ascending: false });
     if (error) {

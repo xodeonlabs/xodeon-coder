@@ -69,7 +69,11 @@ const Guest = () => {
             {showPreview ? 'Code Only' : 'Show Preview'}
           </button>
           <button
-            onClick={() => navigate('/auth')}
+            onClick={() => {
+              // Save current guest code so it can be restored after signup/login
+              localStorage.setItem('ngc_guest_code', code);
+              navigate('/auth');
+            }}
             className="text-xs px-3 py-1 rounded font-medium text-white transition-colors"
             style={{ background: '#3b82f6' }}
           >
