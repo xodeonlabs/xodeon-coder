@@ -1,4 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { NGCCodeEditor } from '@/components/NGCCodeEditor';
 import { NGCPreview } from '@/components/NGCPreview';
@@ -83,6 +85,13 @@ const Guest = () => {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
+        {/* Guest warning banner */}
+        <Alert variant="destructive" className="absolute bottom-4 left-4 z-50 w-auto max-w-sm border-yellow-500/50 bg-yellow-500/10 text-yellow-400">
+          <AlertTriangle className="h-4 w-4 !text-yellow-400" />
+          <AlertDescription className="text-xs text-yellow-300">
+            Je code wordt <strong>niet opgeslagen</strong>. Log in om je werk te bewaren.
+          </AlertDescription>
+        </Alert>
         {/* Code editor */}
         <div className={`flex flex-col min-w-0 ${showPreview ? 'w-1/2' : 'flex-1'}`}>
           <div className="ide-panel-header">
