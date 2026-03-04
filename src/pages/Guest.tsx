@@ -42,6 +42,7 @@ const GUEST_CODE = `App:
 const Guest = () => {
   const navigate = useNavigate();
   const [code, setCode] = useState(GUEST_CODE);
+  const [showBanner, setShowBanner] = useState(true);
   const [showPreview, setShowPreview] = useState(true);
 
   const { ast, errors } = useMemo(() => parseNGC(code), [code]);
@@ -85,13 +86,15 @@ const Guest = () => {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Guest warning banner */}
-        <Alert variant="destructive" className="absolute bottom-4 left-4 z-50 w-auto max-w-sm border-yellow-500/50 bg-yellow-500/10 text-yellow-400">
-          <AlertTriangle className="h-4 w-4 !text-yellow-400" />
-          <AlertDescription className="text-xs text-yellow-300">
-            Je code wordt <strong>niet opgeslagen</strong>. Log in om je werk te bewaren.
-          </AlertDescription>
-        </Alert>
+        {showBanner && (
+          <Alert variant="destructive" className="absolute bottom-4 left-4 z-50 w-auto max-w-sm border-yellow-500/50 bg-yellow-500/10 text-yellow-400">
+            <AlertTriangle className="h-4 w-4 !text-yellow-400" />
+            <AlertDescription className="text-xs text-yellow-300 flex items-center gap-2">
+              Je code wordt <strong>niet opgeslagen</strong>. Log in om je werk te bewaren.
+              <button onClick={() => setShowBanner(false)} className="ml-1 hover:text-yellow-100 transition-colors font-bold">✕</button>
+            </AlertDescription>
+          </Alert>
+        )}
         {/* Code editor */}
         <div className={`flex flex-col min-w-0 ${showPreview ? 'w-1/2' : 'flex-1'}`}>
           <div className="ide-panel-header">
