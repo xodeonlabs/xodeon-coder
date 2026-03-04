@@ -105,9 +105,6 @@ const Index = () => {
 
     supabase.from('apps').select('ngc_code, name').eq('id', appId).single().then(({ data, error }) => {
       if (error || !data) {
-        // On error we still show a message but avoid throwing an uncaught exception or
-        // immediately redirecting, which can be confusing when developing or in
-        // environments where RLS blocks anonymous selects.
         const msg = error ? error.message : 'App niet gevonden';
         setLoadError(msg);
         setLoading(false);
@@ -116,9 +113,6 @@ const Index = () => {
         setAppName(data.name);
         setLoading(false);
       }
-    }).catch((e) => {
-      setLoadError(e instanceof Error ? e.message : String(e));
-      setLoading(false);
     });
   }, [appId]);
 
@@ -255,8 +249,8 @@ const Index = () => {
 
       let resultError: any = null;
       // Try inserting into the dedicated templates table first
-      const { error } = await supabase
-        .from('templates')
+      const { error } = await (supabase
+        .from('templates' as any) as any)
         .insert({
           name: templateName,
           description: templateDescription,

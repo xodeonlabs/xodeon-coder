@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ChevronRight, ChevronDown, Copy, Share2, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
+
 
 interface Snippet {
   label: string;
@@ -10,12 +10,18 @@ interface Snippet {
   description?: string;
 }
 
-// derive the template type from the generated supabase types
-// primary template row type; if the table is missing we will fall back to using
-// public entries from the `apps` table and mark them with `is_fallback`.  We use
-// a type alias because you cannot `extends` a computed property type.
-export type Template = Database['public']['Tables']['templates']['Row'] & {
-  // extra flag used internally when the record was sourced from `apps`
+// Template type – the dedicated `templates` table may not exist yet so we
+// define the shape manually rather than deriving from Database types.
+export type Template = {
+  id: string;
+  name: string;
+  description: string;
+  ngc_code: string;
+  creator_id: string;
+  downloads: number;
+  rating: number;
+  created_at: string;
+  is_public?: boolean;
   is_fallback?: boolean;
 };
 
@@ -604,8 +610,8 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
   // Load community templates from database
   const refreshTemplates = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('templates')
+      const { data, error } = await (supabase
+        .from('templates' as any) as any)
         .select('*')
         .eq('is_public', true)
         .order('created_at', { ascending: false })
@@ -706,8 +712,8 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
       handleCreateTemplate(template, (template as any).name);
       // Increment downloads if this is a real template row
       if (!template.is_fallback) {
-        await supabase
-          .from('templates')
+        await (supabase
+          .from('templates' as any) as any)
           .update({ downloads: (template as any).downloads + 1 })
           .eq('id', (template as any).id);
       }
