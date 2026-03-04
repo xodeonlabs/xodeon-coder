@@ -114,56 +114,6 @@ export type Database = {
           },
         ]
       }
-      templates: {
-        Row: {
-          id: string
-          creator_id: string
-          name: string
-          description: string | null
-          ngc_code: string
-          category: string
-          downloads: number
-          rating: number
-          is_public: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          creator_id: string
-          name: string
-          description?: string | null
-          ngc_code: string
-          category?: string
-          downloads?: number
-          rating?: number
-          is_public?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          creator_id?: string
-          name?: string
-          description?: string | null
-          ngc_code?: string
-          category?: string
-          downloads?: number
-          rating?: number
-          is_public?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "templates_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "auth.users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never
@@ -183,16 +133,6 @@ export type Database = {
 }
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
-
-// module augmentation to add missing auth methods (some versions omit them)
-declare module '@supabase/supabase-js' {
-  interface SupabaseAuthClient {
-    signInWithOtp: any;
-    resetPasswordForEmail: any;
-    signInWithPassword: any;
-    signUp: any;
-  }
-}
 
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
