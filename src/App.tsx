@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import Dashboard from "./pages/Dashboard";
 import Index from "./pages/Index";
+import Organization from "./pages/Organization";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Preview from "./pages/Preview";
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/guest" element={<Guest />} />
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/organization" element={<ProtectedRoute><Organization /></ProtectedRoute>} />
           <Route path="/editor/:appId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/preview/:appId" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
