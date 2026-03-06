@@ -298,6 +298,7 @@ export default function OrganizationPage() {
 
         {/* Members panel */}
         {selectedOrg && (
+          <>
           <div className="mt-8 rounded-xl border border-border/50 p-6" style={{ background: 'hsl(var(--card))' }}>
             <h3 className="text-lg font-bold text-foreground mb-1 flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
@@ -341,7 +342,6 @@ export default function OrganizationPage() {
             )}
           </div>
 
-          {/* Org Apps */}
           <div className="mt-6 rounded-xl border border-border/50 p-6" style={{ background: 'hsl(var(--card))' }}>
             <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
               <AppWindow className="h-5 w-5 text-accent" />
@@ -367,6 +367,7 @@ export default function OrganizationPage() {
               </div>
             )}
           </div>
+          </>
         )}
       </div>
     </div>
