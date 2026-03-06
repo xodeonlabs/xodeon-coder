@@ -218,12 +218,17 @@ const Index = () => {
 
   const handleCreateTemplate = useCallback(async (templateCode: string, templateName: string) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({ title: 'Fout', description: 'Je moet ingelogd zijn', variant: 'destructive' });
+        return;
+      }
       const { data, error } = await supabase
         .from('apps')
         .insert({
           name: templateName,
           ngc_code: `App:\n${templateCode}`,
-          owner_id: (await supabase.auth.getUser()).data.user?.id,
+          owner_id: user.id,
         })
         .select()
         .single();
