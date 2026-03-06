@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn } from 'lucide-react';
+import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow } from 'lucide-react';
 
 interface Organization {
   id: string;
@@ -18,6 +18,12 @@ interface OrgMember {
   user_id: string;
   role: 'owner' | 'admin' | 'member';
   created_at: string;
+}
+
+interface OrgApp {
+  id: string;
+  name: string;
+  updated_at: string;
 }
 
 export default function OrganizationPage() {
@@ -35,6 +41,7 @@ export default function OrganizationPage() {
   const [joining, setJoining] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [members, setMembers] = useState<OrgMember[]>([]);
+  const [orgApps, setOrgApps] = useState<OrgApp[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
 
   useEffect(() => { fetchOrgs(); }, []);
@@ -98,12 +105,12 @@ export default function OrganizationPage() {
   async function viewMembers(org: Organization) {
     setSelectedOrg(org);
     setLoadingMembers(true);
-    const { data, error } = await supabase
-      .from('organization_members')
-      .select('*')
-      .eq('organization_id', org.id)
-      .order('created_at', { ascending: true });
-    if (!error) setMembers((data as unknown as OrgMember[]) || []);
+    const [membersRes, appsRes] = await Promise.all([
+      supabase.from('organization_members').select('*').eq('organization_id', org.id).order('created_at', { ascending: true }),
+      supabase.from('apps').select('id, name, updated_at').eq('organization_id', org.id as any).order('updated_at', { ascending: false }),
+    ]);
+    if (!membersRes.error) setMembers((membersRes.data as unknown as OrgMember[]) || []);
+    if (!appsRes.error) setOrgApps((appsRes.data as unknown as OrgApp[]) || []);
     setLoadingMembers(false);
   }
 
@@ -328,6 +335,33 @@ export default function OrganizationPage() {
                         </button>
                       </div>
                     )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Org Apps */}
+          <div className="mt-6 rounded-xl border border-border/50 p-6" style={{ background: 'hsl(var(--card))' }}>
+            <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+              <AppWindow className="h-5 w-5 text-accent" />
+              Apps van {selectedOrg.name}
+            </h3>
+            {orgApps.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nog geen apps gekoppeld. Koppel apps via het dashboard.</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {orgApps.map(app => (
+                  <div
+                    key={app.id}
+                    onClick={() => navigate(`/editor/${app.id}`)}
+                    className="rounded-lg border border-border/40 p-4 cursor-pointer hover:border-primary/40 hover:shadow-md transition-all"
+                    style={{ background: 'hsl(var(--background))' }}
+                  >
+                    <h4 className="font-semibold text-sm text-foreground truncate">{app.name}</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {new Date(app.updated_at).toLocaleDateString('nl-NL', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </p>
                   </div>
                 ))}
               </div>

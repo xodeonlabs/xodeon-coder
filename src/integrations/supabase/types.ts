@@ -22,6 +22,7 @@ export type Database = {
           is_remixable: boolean
           name: string
           ngc_code: string
+          organization_id: string | null
           owner_id: string
           updated_at: string
         }
@@ -32,6 +33,7 @@ export type Database = {
           is_remixable?: boolean
           name?: string
           ngc_code?: string
+          organization_id?: string | null
           owner_id: string
           updated_at?: string
         }
@@ -42,10 +44,19 @@ export type Database = {
           is_remixable?: boolean
           name?: string
           ngc_code?: string
+          organization_id?: string | null
           owner_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "apps_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       chat_messages: {
         Row: {
@@ -186,6 +197,7 @@ export type Database = {
         Returns: boolean
       }
       is_app_collaborator: { Args: { _app_id: string }; Returns: boolean }
+      is_app_org_member: { Args: { _app_id: string }; Returns: boolean }
       is_app_owner: { Args: { _app_id: string }; Returns: boolean }
       is_org_member: { Args: { _org_id: string }; Returns: boolean }
       is_org_owner: { Args: { _org_id: string }; Returns: boolean }

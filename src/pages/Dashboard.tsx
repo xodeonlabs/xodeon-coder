@@ -13,6 +13,12 @@ interface App {
   created_at: string;
   updated_at: string;
   owner_id: string;
+  organization_id: string | null;
+}
+
+interface Org {
+  id: string;
+  name: string;
 }
 
 const DEFAULT_NGC_CODE = `App:
@@ -66,8 +72,24 @@ export default function Dashboard() {
   const [inviting, setInviting] = useState(false);
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [editingNameValue, setEditingNameValue] = useState('');
+  const [orgs, setOrgs] = useState<Org[]>([]);
 
-  useEffect(() => { fetchApps(); }, []);
+  useEffect(() => { fetchApps(); fetchOrgs(); }, []);
+
+  async function fetchOrgs() {
+    const { data } = await supabase.from('organizations').select('id, name').order('name');
+    if (data) setOrgs(data as unknown as Org[]);
+  }
+
+  async function linkAppToOrg(appId: string, orgId: string | null) {
+    const { error } = await supabase.from('apps').update({ organization_id: orgId } as any).eq('id', appId);
+    if (error) {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    } else {
+      setApps(apps.map(a => a.id === appId ? { ...a, organization_id: orgId } : a));
+      toast({ title: orgId ? 'Gekoppeld aan bedrijf' : 'Ontkoppeld van bedrijf' });
+    }
+  }
 
   // Auto-save guest code as a new app after login/signup
   useEffect(() => {
@@ -238,8 +260,27 @@ export default function Dashboard() {
                     {app.is_remixable && <span title="Remixbaar"><Copy className="h-4 w-4 text-accent" /></span>}
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground mb-4">Gewijzigd: {new Date(app.updated_at).toLocaleDateString('nl-NL', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                <div className="flex items-center gap-2 mb-3">
+                  <p className="text-sm text-muted-foreground">Gewijzigd: {new Date(app.updated_at).toLocaleDateString('nl-NL', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                  {app.organization_id && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent flex items-center gap-1">
+                      <Building2 className="h-3 w-3" />
+                      {orgs.find(o => o.id === app.organization_id)?.name || 'Bedrijf'}
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                  {orgs.length > 0 && (
+                    <select
+                      value={app.organization_id || ''}
+                      onChange={e => linkAppToOrg(app.id, e.target.value || null)}
+                      className="text-xs rounded-lg border border-border bg-background px-2 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 max-w-[120px]"
+                      title="Koppel aan bedrijf"
+                    >
+                      <option value="">Geen bedrijf</option>
+                      {orgs.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
+                    </select>
+                  )}
                   <button onClick={() => { setEditingNameId(app.id); setEditingNameValue(app.name); }} className="rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Naam wijzigen">
                     <Pencil className="h-4 w-4" />
                   </button>
