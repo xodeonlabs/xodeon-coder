@@ -104,7 +104,7 @@ export function AppSidebar() {
 
   useEffect(() => {
     if (!session?.user?.id) return;
-    supabase.from('user_roles').select('role').eq('user_id', session.user.id).eq('role', 'admin').maybeSingle()
+    supabase.from('user_roles').select('role').eq('user_id', session.user.id).in('role', ['admin', 'owner']).maybeSingle()
       .then(({ data }) => setIsAdmin(!!data));
     supabase.from('user_coins').select('balance').eq('user_id', session.user.id).maybeSingle()
       .then(({ data }) => setCoins((data as any)?.balance ?? 0));
