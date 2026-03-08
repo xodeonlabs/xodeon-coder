@@ -1,12 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield } from 'lucide-react';
+import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield, Sparkles, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { AdBanner } from '@/components/AdBanner';
 import { AppIcon, IconPicker } from '@/components/IconPicker';
+import confetti from 'canvas-confetti';
+
+// 🎨 Surprise 10: Unique gradient accents per app card
+const APP_GRADIENTS = [
+  'from-blue-500/20 to-cyan-500/10',
+  'from-purple-500/20 to-pink-500/10',
+  'from-emerald-500/20 to-teal-500/10',
+  'from-orange-500/20 to-amber-500/10',
+  'from-rose-500/20 to-red-500/10',
+  'from-indigo-500/20 to-violet-500/10',
+  'from-lime-500/20 to-green-500/10',
+  'from-fuchsia-500/20 to-purple-500/10',
+];
+
+// 💬 Surprise 6: Motivational quotes
+const QUOTES = [
+  { text: 'De beste apps beginnen met één regel code.', emoji: '✨' },
+  { text: 'Elke expert was ooit een beginner.', emoji: '🌱' },
+  { text: 'Code is poëzie die machines kunnen lezen.', emoji: '📜' },
+  { text: 'Fouten maken is het begin van iets moois.', emoji: '💎' },
+  { text: 'Bouw iets waar je trots op bent.', emoji: '🏆' },
+  { text: 'De enige limiet is je verbeelding.', emoji: '🚀' },
+  { text: 'Kleine stappen leiden tot grote apps.', emoji: '👣' },
+  { text: 'Vandaag is een mooie dag om te creëren.', emoji: '🎨' },
+];
 
 interface App {
   id: string;
@@ -106,6 +131,34 @@ export default function Dashboard() {
       }
     }
     loadCoins();
+  }, [session?.user?.id]);
+
+  // 👋 Surprise 2: Time-based greeting
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    if (h < 6) return 'Goedenacht';
+    if (h < 12) return 'Goedemorgen';
+    if (h < 18) return 'Goedemiddag';
+    return 'Goedenavond';
+  };
+
+  // 💬 Surprise 6: Random quote
+  const [quote] = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)]);
+
+  // ⌨️ Surprise 4: Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+        e.preventDefault();
+        createApp();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        navigate('/analytics');
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, [session?.user?.id]);
 
   useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); }, []);
@@ -256,7 +309,10 @@ export default function Dashboard() {
       toast({ title: 'Fout', description: error.message?.includes('unique') ? 'Deze URL is al in gebruik. Kies een andere.' : error.message, variant: 'destructive' });
     } else {
       setApps(apps.map(a => a.id === publishAppId ? { ...a, slug: cleanSlug, is_public: true } : a));
-      toast({ title: 'Gepubliceerd!', description: `Je app is nu beschikbaar op /app/${cleanSlug}` });
+      toast({ title: '🎉 Gepubliceerd!', description: `Je app is nu beschikbaar op /app/${cleanSlug}` });
+      // 🎉 Surprise 1: Confetti!
+      confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 }, colors: ['#38bdf8', '#818cf8', '#f472b6', '#34d399', '#fbbf24'] });
+      setTimeout(() => confetti({ particleCount: 50, spread: 120, origin: { y: 0.5 } }), 300);
     }
     setSavingSlug(false);
   }
@@ -385,9 +441,22 @@ export default function Dashboard() {
         </div>
         <div className="flex items-center gap-1 sm:gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-accent/10 text-accent" title="Jouw coins">
-              <Coins className="h-4 w-4" />
+            {/* ✨ Surprise 3 & 8: Sparkle coins with tooltip */}
+            <div className="relative group/coins flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-accent/10 text-accent cursor-default" title="Jouw coins">
+              <Coins className="h-4 w-4 animate-pulse" />
               <span className="text-xs sm:text-sm font-semibold">{totalCoins}</span>
+              <Sparkles className="h-3 w-3 opacity-0 group-hover/coins:opacity-100 transition-opacity text-yellow-400" />
+              {/* Tooltip */}
+              <div className="absolute top-full mt-2 right-0 hidden group-hover/coins:block z-50 rounded-xl border border-border/50 p-4 shadow-xl min-w-[200px]" style={{ background: 'hsl(var(--card))' }}>
+                <div className="text-xs text-muted-foreground mb-2">💰 Coin Overzicht</div>
+                <div className="text-2xl font-bold text-foreground mb-1">{totalCoins} coins</div>
+                <div className="text-[10px] text-muted-foreground">
+                  Gebruik coins voor chat-retentie, advertenties en meer.
+                </div>
+                <div className="mt-2 pt-2 border-t border-border/30 text-[10px] text-muted-foreground/60">
+                  ⌨️ Ctrl+N = Nieuwe App · Ctrl+K = Analytics
+                </div>
+              </div>
             </div>
           </div>
           <button onClick={() => navigate('/analytics')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
@@ -422,8 +491,12 @@ export default function Dashboard() {
         {/* Create button */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 sm:mb-12">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Mijn Apps</h2>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">Maak en beheer je NGC applicaties</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              {getGreeting()}{displayName ? `, ${displayName}` : ''} 👋
+            </h2>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
+              {quote.emoji} <em>{quote.text}</em>
+            </p>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <button onClick={() => setShowTemplateDialog(true)} className="flex items-center gap-1.5 sm:gap-2 rounded-xl px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold transition-all border border-primary/30 text-primary hover:bg-primary/10 active:scale-95">
@@ -442,19 +515,26 @@ export default function Dashboard() {
             <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary/20 border-t-primary"></div>
           </div>
         ) : myApps.length === 0 ? (
-          <div className="rounded-xl border border-border/40 p-16 text-center" style={{ background: 'hsl(var(--card))' }}>
-            <div className="mb-4 text-4xl"></div>
-            <p className="text-lg text-muted-foreground mb-6">Je hebt nog geen apps. Maak je eerste app!</p>
-            <button onClick={createApp} disabled={creating} className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95">
-              <Plus className="h-5 w-5" />
-              Nieuwe App
-            </button>
+          <div className="rounded-xl border border-border/40 p-16 text-center relative overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+            <div className="relative">
+              <div className="mb-4 text-5xl">🚀</div>
+              <p className="text-lg font-medium text-foreground mb-2">Begin je avontuur!</p>
+              <p className="text-sm text-muted-foreground mb-6">{quote.emoji} {quote.text}</p>
+              <button onClick={createApp} disabled={creating} className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95">
+                <Plus className="h-5 w-5" />
+                Maak je eerste app
+              </button>
+              <p className="text-[10px] text-muted-foreground/40 mt-4">💡 Tip: Ctrl+N om snel een app aan te maken</p>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {myApps.map(app => (
-              <div key={app.id} className="group rounded-xl border border-border/40 p-5 transition-all hover:border-primary/60 hover:shadow-lg hover:shadow-primary/10 cursor-pointer hover:-translate-y-1" style={{ background: 'hsl(var(--card))' }} onClick={() => navigate(`/editor/${app.id}`)}>
-                <div className="flex items-start gap-3 mb-4">
+            {myApps.map((app, idx) => (
+              <div key={app.id} className={`group rounded-xl border border-border/40 p-5 transition-all hover:border-primary/60 hover:shadow-xl hover:shadow-primary/15 cursor-pointer hover:-translate-y-1.5 relative overflow-hidden`} style={{ background: 'hsl(var(--card))' }} onClick={() => navigate(`/editor/${app.id}`)}>
+                {/* 🌈 Surprise 5 & 10: Animated gradient overlay */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${APP_GRADIENTS[idx % APP_GRADIENTS.length]} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
+                <div className="relative flex items-start gap-3 mb-4">
                   {/* App icon */}
                   <button
                     onClick={e => { e.stopPropagation(); setIconPickerAppId(app.id); }}
@@ -571,6 +651,41 @@ export default function Dashboard() {
                   <p className="text-sm text-muted-foreground">Gewijzigd: {new Date(app.updated_at).toLocaleDateString('nl-NL', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* 📅 Surprise 9: Mini activity bar */}
+        {myApps.length > 0 && (
+          <div className="mt-12 rounded-xl border border-border/30 p-5" style={{ background: 'hsl(var(--card) / 0.5)' }}>
+            <div className="flex items-center gap-3 mb-3">
+              <Zap className="h-4 w-4 text-accent" />
+              <span className="text-xs font-semibold text-foreground">Activiteit</span>
+            </div>
+            <div className="flex items-end gap-1 h-8">
+              {Array.from({ length: 30 }, (_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - (29 - i));
+                const dayStr = d.toISOString().split('T')[0];
+                const appsUpdated = myApps.filter(a => a.updated_at.startsWith(dayStr)).length;
+                const h = appsUpdated ? Math.min(100, 30 + appsUpdated * 30) : 8;
+                return (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-sm transition-all hover:opacity-80"
+                    style={{
+                      height: `${h}%`,
+                      background: appsUpdated > 0 ? 'hsl(var(--primary))' : 'hsl(var(--muted))',
+                      opacity: appsUpdated > 0 ? 0.8 : 0.3,
+                    }}
+                    title={`${dayStr}: ${appsUpdated} app(s) bijgewerkt`}
+                  />
+                );
+              })}
+            </div>
+            <div className="flex justify-between mt-1.5">
+              <span className="text-[9px] text-muted-foreground/50">30 dagen geleden</span>
+              <span className="text-[9px] text-muted-foreground/50">vandaag</span>
             </div>
           </div>
         )}
