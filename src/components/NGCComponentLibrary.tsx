@@ -699,25 +699,9 @@ export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => 
     toast({ title: 'Code ingevoegd', description: snippet.label });
   };
 
-  const handleCreateTemplate = (snippet: Snippet | Template, name: string) => {
-    if (onCreateTemplate) {
-      const code = 'code' in snippet ? snippet.code : (snippet as any).ngc_code;
-      onCreateTemplate(code, name);
-      toast({ title: 'App aangemaakt', description: `"${name}" wordt geladen...` });
-    }
-  };
-
-  const handleCreateFromCommunity = async (template: Template) => {
-    if (onCreateTemplate) {
-      handleCreateTemplate(template, (template as any).name);
-      // Increment downloads if this is a real template row
-      if (!template.is_fallback) {
-        await (supabase
-          .from('templates' as any) as any)
-          .update({ downloads: (template as any).downloads + 1 })
-          .eq('id', (template as any).id);
-      }
-    }
+  const handleUseTemplate = (template: Template) => {
+    onInsert(template.ngc_code);
+    toast({ title: 'Template ingevoegd', description: template.name });
   };
 
   return (
