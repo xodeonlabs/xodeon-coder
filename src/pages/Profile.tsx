@@ -186,6 +186,37 @@ export default function Profile() {
     ? format(new Date(profile.created_at), 'd MMMM yyyy', { locale: nl })
     : '';
 
+  async function handleBannerUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !session?.user?.id) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: 'Te groot', description: 'Maximaal 5MB', variant: 'destructive' });
+      return;
+    }
+    setUploadingBanner(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${session.user.id}/banner.${ext}`;
+      const { error: uploadErr } = await supabase.storage
+        .from('avatars')
+        .upload(path, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
+      const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+      const { error: updateErr } = await supabase
+        .from('profiles')
+        .update({ banner_url: publicUrl } as any)
+        .eq('id', session.user.id);
+      if (updateErr) throw updateErr;
+      setProfile(prev => prev ? { ...prev, banner_url: publicUrl } : prev);
+      toast({ title: '✅ Banner bijgewerkt!' });
+    } catch (err: any) {
+      toast({ title: 'Fout', description: err.message, variant: 'destructive' });
+    }
+    setUploadingBanner(false);
+    if (bannerInputRef.current) bannerInputRef.current.value = '';
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="relative h-48 sm:h-64 overflow-hidden">
