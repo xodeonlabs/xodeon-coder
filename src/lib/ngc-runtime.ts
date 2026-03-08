@@ -162,22 +162,36 @@ export function createRuntime(): NGCRuntime {
       }
     },
 
-    // Coins API
+    // Coins API — trade-based: transfers between owner pool and user
     coinsGet(name: string) {
       return coins[name] ?? 0;
+    },
+    coinsOwnerGet(name: string) {
+      return ownerCoins[name] ?? 0;
     },
     coinsSet(name: string, amount: number) {
       coins[name] = Math.max(0, amount);
       save();
     },
-    coinsAdd(name: string, amount: number) {
-      coins[name] = (coins[name] ?? 0) + amount;
+    coinsOwnerSet(name: string, amount: number) {
+      ownerCoins[name] = Math.max(0, amount);
       save();
     },
+    // Coins.Add: transfer from owner → user
+    coinsAdd(name: string, amount: number) {
+      const ownerCurrent = ownerCoins[name] ?? 0;
+      if (ownerCurrent < amount) return false;
+      ownerCoins[name] = ownerCurrent - amount;
+      coins[name] = (coins[name] ?? 0) + amount;
+      save();
+      return true;
+    },
+    // Coins.Remove: transfer from user → owner
     coinsRemove(name: string, amount: number) {
       const current = coins[name] ?? 0;
       if (current < amount) return false;
       coins[name] = current - amount;
+      ownerCoins[name] = (ownerCoins[name] ?? 0) + amount;
       save();
       return true;
     },
