@@ -1083,6 +1083,37 @@ export default function AdminPanel() {
                             ))}
                           </div>
                         </div>
+                        <div>
+                          <label className="text-[11px] text-muted-foreground mb-1 block">Beschrijving</label>
+                          <textarea
+                            value={templateEditDescription}
+                            onChange={e => setTemplateEditDescription(e.target.value)}
+                            rows={2}
+                            className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[11px] text-muted-foreground mb-1 block">Zichtbaarheid</label>
+                          <div className="flex flex-wrap gap-1.5">
+                            {[
+                              { value: 'public', label: '🌍 Publiek' },
+                              { value: 'friends', label: '👥 Vrienden' },
+                              { value: 'org', label: '🏢 Bedrijf' },
+                            ].map(vis => (
+                              <button
+                                key={vis.value}
+                                onClick={() => setTemplateEditVisibility(vis.value)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                                  templateEditVisibility === vis.value
+                                    ? 'border-primary/40 bg-primary/10 text-primary'
+                                    : 'border-border/40 text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                }`}
+                              >
+                                {vis.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                         <div className="flex gap-2">
                           <button onClick={() => saveTemplateEdit(t.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors">
                             <Save className="h-3.5 w-3.5" /> Opslaan
