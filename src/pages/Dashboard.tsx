@@ -105,7 +105,8 @@ export default function Dashboard() {
     } catch { /* ignore */ }
   }, []);
 
-  useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); checkAdminRole(); }, []);
+  useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); }, []);
+  useEffect(() => { checkAdminRole(); }, [session?.user?.id]);
 
   async function checkAdminRole() {
     if (!session?.user?.id) return;
