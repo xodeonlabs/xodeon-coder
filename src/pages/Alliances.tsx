@@ -75,6 +75,8 @@ export default function Alliances() {
   const [newIcon, setNewIcon] = useState('🤝');
   const [creating, setCreating] = useState(false);
   const [allOrgs, setAllOrgs] = useState<OrgInfo[]>([]);
+  const [myOwnedOrgs, setMyOwnedOrgs] = useState<OrgInfo[]>([]);
+  const [selectedOrgForCreate, setSelectedOrgForCreate] = useState('');
   const [showAddOrg, setShowAddOrg] = useState(false);
   const [addOrgId, setAddOrgId] = useState('');
 
@@ -85,27 +87,29 @@ export default function Alliances() {
 
   async function checkAdmin() {
     if (!session?.user?.id) return;
-    // Check if user owns any organization
-    const { data } = await supabase.from('organizations').select('id').eq('owner_id', session.user.id).limit(1);
-    setIsOrgOwner(!!(data && data.length > 0));
+    const { data } = await supabase.from('organizations').select('id, name, icon').eq('owner_id', session.user.id);
+    const owned = (data as unknown as OrgInfo[]) || [];
+    setMyOwnedOrgs(owned);
+    setIsOrgOwner(owned.length > 0);
+    if (owned.length > 0) setSelectedOrgForCreate(owned[0].id);
   }
 
   async function createAlliance() {
-    if (!newName.trim() || !session?.user?.id || creating) return;
+    if (!newName.trim() || !session?.user?.id || creating || !selectedOrgForCreate) return;
     setCreating(true);
-    const { error } = await supabase.from('alliances' as any).insert({
+    const { data: inserted, error } = await supabase.from('alliances' as any).insert({
       name: newName.trim(),
       icon: newIcon,
       created_by: session.user.id,
-    } as any);
+    } as any).select('id').single();
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
-    } else {
-      // Create coin pool
-      const { data: newAlliance } = await supabase.from('alliances' as any).select('id').eq('name', newName.trim()).order('created_at', { ascending: false }).limit(1).single();
-      if (newAlliance) {
-        await supabase.from('alliance_coins' as any).insert({ alliance_id: (newAlliance as any).id, balance: 0 } as any);
-      }
+    } else if (inserted) {
+      const allianceId = (inserted as any).id;
+      // Add coin pool
+      await supabase.from('alliance_coins' as any).insert({ alliance_id: allianceId, balance: 0 } as any);
+      // Auto-add selected org as member
+      await supabase.from('alliance_members' as any).insert({ alliance_id: allianceId, organization_id: selectedOrgForCreate } as any);
       toast({ title: '✅ Alliantie aangemaakt!' });
       setNewName('');
       setNewIcon('🤝');
@@ -337,8 +341,20 @@ export default function Alliances() {
                     className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
                   />
                 </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Jouw bedrijf in deze alliantie</label>
+                  <select
+                    value={selectedOrgForCreate}
+                    onChange={e => setSelectedOrgForCreate(e.target.value)}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  >
+                    {myOwnedOrgs.map(o => (
+                      <option key={o.id} value={o.id}>{o.icon || '🏢'} {o.name}</option>
+                    ))}
+                  </select>
+                </div>
                 <div className="flex gap-2">
-                  <button onClick={createAlliance} disabled={creating || !newName.trim()} className="px-4 py-2 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors">
+                  <button onClick={createAlliance} disabled={creating || !newName.trim() || !selectedOrgForCreate} className="px-4 py-2 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors">
                     {creating ? 'Bezig...' : 'Aanmaken'}
                   </button>
                   <button onClick={() => setShowCreate(false)} className="px-4 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
