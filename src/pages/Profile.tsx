@@ -195,23 +195,32 @@ export default function Profile() {
     }
     setUploadingBanner(true);
     try {
-      const ext = file.name.split('.').pop();
-      const path = `${session.user.id}/banner.${ext}`;
+      const ext = file.name.split('.').pop() || 'png';
+      const path = `${session.user.id}/banner_${Date.now()}.${ext}`;
+      
+      // Delete old banner first to avoid conflicts
+      const { data: existing } = await supabase.storage.from('avatars').list(session.user.id, { search: 'banner_' });
+      if (existing && existing.length > 0) {
+        const toDelete = existing.filter(f => f.name.startsWith('banner_')).map(f => `${session.user.id}/${f.name}`);
+        if (toDelete.length > 0) await supabase.storage.from('avatars').remove(toDelete);
+      }
+
       const { error: uploadErr } = await supabase.storage
         .from('avatars')
-        .upload(path, file, { upsert: true });
+        .upload(path, file, { cacheControl: '3600', upsert: false });
       if (uploadErr) throw uploadErr;
       const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
       const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
       const { error: updateErr } = await supabase
         .from('profiles')
-        .update({ banner_url: publicUrl } as any)
+        .update({ banner_url: publicUrl })
         .eq('id', session.user.id);
       if (updateErr) throw updateErr;
       setProfile(prev => prev ? { ...prev, banner_url: publicUrl } : prev);
       toast({ title: '✅ Banner bijgewerkt!' });
     } catch (err: any) {
-      toast({ title: 'Fout', description: err.message, variant: 'destructive' });
+      console.error('Banner upload error:', err);
+      toast({ title: 'Fout', description: err.message || 'Upload mislukt', variant: 'destructive' });
     }
     setUploadingBanner(false);
     if (bannerInputRef.current) bannerInputRef.current.value = '';
