@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Bot, Send, Check, X, Loader2, Sparkles, Plus, MessageSquare, Trash2, ArrowLeft } from 'lucide-react';
+import { Bot, Send, Check, X, Loader2, Sparkles, Plus, MessageSquare, Trash2, ArrowLeft, Pencil } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -39,6 +39,9 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
   const [pendingCode, setPendingCode] = useState<string | null>(null);
   const [view, setView] = useState<'list' | 'chat'>('list');
   const [loadingConvos, setLoadingConvos] = useState(true);
+  const [editingConvoId, setEditingConvoId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState('');
+  const editInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Load conversations
@@ -101,6 +104,23 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
       setView('list');
     }
   }, [activeConvoId]);
+
+  const startRename = useCallback((convoId: string, currentTitle: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setEditingConvoId(convoId);
+    setEditingTitle(currentTitle);
+    setTimeout(() => editInputRef.current?.focus(), 50);
+  }, []);
+
+  const confirmRename = useCallback(async () => {
+    if (!editingConvoId || !editingTitle.trim()) {
+      setEditingConvoId(null);
+      return;
+    }
+    await supabase.from('ai_conversations').update({ title: editingTitle.trim() }).eq('id', editingConvoId);
+    setConversations(prev => prev.map(c => c.id === editingConvoId ? { ...c, title: editingTitle.trim() } : c));
+    setEditingConvoId(null);
+  }, [editingConvoId, editingTitle]);
 
   const openConversation = (convo: Conversation) => {
     setActiveConvoId(convo.id);
@@ -266,11 +286,34 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
                 >
                   <MessageSquare className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-foreground truncate">{convo.title}</p>
+                    {editingConvoId === convo.id ? (
+                      <input
+                        ref={editInputRef}
+                        value={editingTitle}
+                        onChange={(e) => setEditingTitle(e.target.value)}
+                        onBlur={confirmRename}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') confirmRename();
+                          if (e.key === 'Escape') setEditingConvoId(null);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-xs text-foreground bg-secondary border border-border rounded px-1.5 py-0.5 w-full outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    ) : (
+                      <p className="text-xs text-foreground truncate">{convo.title}</p>
+                    )}
                     <p className="text-[9px] text-muted-foreground">
                       {new Date(convo.updated_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
+                  {editingConvoId !== convo.id && (
+                    <button
+                      onClick={(e) => startRename(convo.id, convo.title, e)}
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all shrink-0"
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </button>
+                  )}
                   <button
                     onClick={(e) => deleteConversation(convo.id, e)}
                     className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all shrink-0"
@@ -297,10 +340,28 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
         >
           <ArrowLeft className="h-3.5 w-3.5" />
         </button>
-        <Sparkles className="h-3.5 w-3.5 text-primary" />
-        <span className="text-[11px] font-semibold text-foreground truncate flex-1">
-          {conversations.find(c => c.id === activeConvoId)?.title || 'AI Assistent'}
-        </span>
+        <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
+        {editingConvoId === activeConvoId ? (
+          <input
+            ref={editInputRef}
+            value={editingTitle}
+            onChange={(e) => setEditingTitle(e.target.value)}
+            onBlur={confirmRename}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') confirmRename();
+              if (e.key === 'Escape') setEditingConvoId(null);
+            }}
+            className="text-[11px] font-semibold text-foreground bg-secondary border border-border rounded px-1.5 py-0.5 flex-1 min-w-0 outline-none focus:ring-1 focus:ring-primary"
+          />
+        ) : (
+          <span
+            onClick={() => activeConvoId && startRename(activeConvoId, conversations.find(c => c.id === activeConvoId)?.title || '')}
+            className="text-[11px] font-semibold text-foreground truncate flex-1 cursor-pointer hover:text-primary transition-colors"
+            title="Klik om te hernoemen"
+          >
+            {conversations.find(c => c.id === activeConvoId)?.title || 'AI Assistent'}
+          </span>
+        )}
       </div>
 
       {/* Messages */}
