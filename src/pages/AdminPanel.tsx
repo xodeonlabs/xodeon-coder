@@ -101,6 +101,9 @@ export default function AdminPanel() {
   const [chatReplyInputs, setChatReplyInputs] = useState<Record<string, string>>({});
   const [chatSending, setChatSending] = useState<string | null>(null);
   const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'chats' | 'activity'>('users');
+  const [collabAppId, setCollabAppId] = useState<string | null>(null);
+  const [collabEmail, setCollabEmail] = useState('');
+  const [collabAdding, setCollabAdding] = useState(false);
 
   // Add role
   const [addRoleUserId, setAddRoleUserId] = useState('');
