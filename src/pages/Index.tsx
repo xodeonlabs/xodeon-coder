@@ -393,7 +393,7 @@ const Index = () => {
       <div className="flex flex-1 overflow-hidden">
         {/* Left Panel: Explorer + Data (hidden on mobile) */}
         <div
-          className={`shrink-0 border-r border-border flex-col transition-all duration-200 hidden sm:flex ${leftOpen ? 'w-56' : 'w-0 overflow-hidden border-r-0'}`}
+          className={`shrink-0 border-r border-border flex-col transition-all duration-200 flex ${leftOpen ? 'w-56' : 'w-0 overflow-hidden border-r-0'}`}
           style={{ background: 'hsl(var(--ide-explorer-bg))' }}
         >
           {leftOpen && (
@@ -470,7 +470,7 @@ const Index = () => {
         {/* Collapse toggle for left panel (hidden on mobile) */}
         <button
           onClick={() => setLeftOpen(p => !p)}
-          className="shrink-0 items-center justify-center w-5 hover:bg-secondary/60 transition-colors border-r border-border hidden sm:flex"
+          className="shrink-0 items-center justify-center w-5 hover:bg-secondary/60 transition-colors border-r border-border flex"
           title={leftOpen ? 'Paneel inklappen' : 'Paneel uitklappen'}
         >
           {leftOpen ? <PanelLeftClose className="h-3.5 w-3.5 text-muted-foreground" /> : <PanelLeftOpen className="h-3.5 w-3.5 text-muted-foreground" />}
@@ -581,7 +581,7 @@ const Index = () => {
         {/* Collapse toggle for right panel (hidden on mobile) */}
         <button
           onClick={() => setRightOpen(p => !p)}
-          className="shrink-0 items-center justify-center w-5 hover:bg-secondary/60 transition-colors border-l border-border hidden sm:flex"
+          className="shrink-0 items-center justify-center w-5 hover:bg-secondary/60 transition-colors border-l border-border flex"
           title={rightOpen ? 'Paneel inklappen' : 'Paneel uitklappen'}
         >
           {rightOpen ? <PanelRightClose className="h-3.5 w-3.5 text-muted-foreground" /> : <PanelRightOpen className="h-3.5 w-3.5 text-muted-foreground" />}
@@ -589,7 +589,7 @@ const Index = () => {
 
         {/* Right Panel: Component Library (hidden on mobile) */}
         <div
-          className={`shrink-0 flex-col transition-all duration-200 hidden sm:flex ${rightOpen ? 'w-72' : 'w-0 overflow-hidden'}`}
+          className={`shrink-0 flex-col transition-all duration-200 flex ${rightOpen ? 'w-72' : 'w-0 overflow-hidden'}`}
         >
           {rightOpen && (
             <>
