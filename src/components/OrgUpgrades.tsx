@@ -172,12 +172,31 @@ const LEVELS = [
 
 export { LEVELS, TAX_RATES, MONTHLY_COSTS };
 
-export function OrgUpgrades({ orgId, orgName, currentLevel, orgBalance, isOwner, levelPaidUntil, onUpgrade }: OrgUpgradesProps) {
+export function OrgUpgrades({ orgId, orgName, currentLevel, orgBalance, isOwner, levelPaidUntil, autoPay: initialAutoPay, onUpgrade }: OrgUpgradesProps) {
   const { toast } = useToast();
   const [upgrading, setUpgrading] = useState(false);
+  const [autoPayEnabled, setAutoPayEnabled] = useState(initialAutoPay ?? false);
+  const [togglingAutoPay, setTogglingAutoPay] = useState(false);
   const [coinConfirm, setCoinConfirm] = useState<{ open: boolean; amount: number; description: string; onConfirm: () => void }>({
     open: false, amount: 0, description: '', onConfirm: () => {},
   });
+
+  async function handleToggleAutoPay() {
+    if (!isOwner) {
+      toast({ title: 'Alleen de eigenaar kan dit wijzigen', variant: 'destructive' });
+      return;
+    }
+    setTogglingAutoPay(true);
+    const newValue = !autoPayEnabled;
+    const { error } = await supabase.from('organizations').update({ auto_pay: newValue } as any).eq('id', orgId);
+    if (error) {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    } else {
+      setAutoPayEnabled(newValue);
+      toast({ title: newValue ? '✅ Automatisch betalen ingeschakeld' : 'Automatisch betalen uitgeschakeld', duration: 2000 });
+    }
+    setTogglingAutoPay(false);
+  }
 
   const paidUntil = levelPaidUntil ? new Date(levelPaidUntil) : new Date();
   const now = new Date();
