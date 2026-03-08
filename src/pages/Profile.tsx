@@ -276,7 +276,7 @@ export default function Profile() {
         <ActivityTimeline userId={profile!.id} />
 
         {/* Apps gallery */}
-        <PublicApps userId={profile!.id} />
+        <PublicApps userId={profile!.id} isOwner={isOwnProfile} />
 
         {/* Footer spacer */}
         <div className="h-12" />
