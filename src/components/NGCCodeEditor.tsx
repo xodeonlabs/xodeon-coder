@@ -204,7 +204,8 @@ export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
       if (suggestions.length > 0) {
         if (e.key === 'ArrowDown') { e.preventDefault(); setSelectedIdx(i => (i + 1) % suggestions.length); return; }
         if (e.key === 'ArrowUp') { e.preventDefault(); setSelectedIdx(i => (i - 1 + suggestions.length) % suggestions.length); return; }
-        if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); applySuggestion(suggestions[selectedIdx]); return; }
+        if (e.key === 'Tab') { e.preventDefault(); applySuggestion(suggestions[selectedIdx]); return; }
+        if (e.key === 'Enter') { closeSuggestions(); return; }
         if (e.key === 'Escape') { e.preventDefault(); closeSuggestions(); return; }
       }
       if (e.key === 'Tab') {
