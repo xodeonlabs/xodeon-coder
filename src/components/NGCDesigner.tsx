@@ -273,7 +273,7 @@ const PALETTE_ITEMS: { type: NGCNodeType; label: string; icon: string }[] = [
   { type: 'Frame', label: 'Frame', icon: '📦' },
 ];
 
-export function NGCDesigner({ ast, selectedId, onSelect, onPositionChange, onSizeChange, onDropNew }: DesignerProps) {
+export function NGCDesigner({ ast, selectedId, onSelect, onPositionChange, onSizeChange, onDropNew, onDelete }: DesignerProps) {
   const [updateCount, forceUpdate] = useState(0);
   const [currentPage, setCurrentPage] = useState<string | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
