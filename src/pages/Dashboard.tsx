@@ -222,6 +222,7 @@ export default function Dashboard() {
   const [apps, setApps] = useState<App[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [showNewAppDialog, setShowNewAppDialog] = useState(false);
   const [inviteAppId, setInviteAppId] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
   const [invitePercentage, setInvitePercentage] = useState(10);
