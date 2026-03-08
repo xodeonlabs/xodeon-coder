@@ -562,17 +562,17 @@ export default function Alliances() {
                 <div className="rounded-xl border border-border/40 p-5" style={{ background: 'hsl(var(--card))' }}>
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-sm font-semibold text-foreground">Leden</h2>
-                    {isAllianceOwner && (
+                    {userOrgId && (
                       <button
                         onClick={() => { setShowAddOrg(true); loadAllOrgs(); }}
                         className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                       >
-                        <UserPlus className="h-3 w-3" /> Bedrijf toevoegen
+                        <UserPlus className="h-3 w-3" /> Bedrijf uitnodigen
                       </button>
                     )}
                   </div>
 
-                  {isAllianceOwner && showAddOrg && (
+                  {userOrgId && showAddOrg && (
                     <div className="mb-4 p-3 rounded-lg border border-border/30 bg-secondary/20 space-y-2">
                       <select
                         value={addOrgId}
