@@ -23,15 +23,25 @@ export function NGCChat({ appId }: NGCChatProps) {
   const [profiles, setProfiles] = useState<Record<string, string>>({});
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Load messages
+  // Load messages and profiles
   useEffect(() => {
     supabase
       .from('chat_messages')
       .select('*')
       .eq('app_id', appId)
       .order('created_at', { ascending: true })
-      .then(({ data }) => {
-        if (data) setMessages(data as ChatMessage[]);
+      .then(async ({ data }) => {
+        if (!data) return;
+        setMessages(data as ChatMessage[]);
+        const userIds = [...new Set(data.map(m => m.user_id))];
+        if (userIds.length > 0) {
+          const { data: profs } = await supabase.from('profiles').select('id, display_name').in('id', userIds);
+          if (profs) {
+            const map: Record<string, string> = {};
+            for (const p of profs) { if (p.display_name) map[p.id] = p.display_name; }
+            setProfiles(map);
+          }
+        }
       });
   }, [appId]);
 
