@@ -244,12 +244,46 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
     }
   }, [input, messages, currentCode, isLoading, activeConvoId]);
 
-  const handleApply = () => {
-    if (pendingCode) {
+  const countAddedLines = useCallback((oldCode: string, newCode: string): number => {
+    const oldLines = oldCode.split('\n').length;
+    const newLines = newCode.split('\n').length;
+    return Math.max(0, newLines - oldLines);
+  }, []);
+
+  const handleApply = useCallback(() => {
+    if (!pendingCode || !session?.user?.id) return;
+
+    const addedLines = countAddedLines(currentCode, pendingCode);
+    const cost = addedLines; // 1 coin per added line
+
+    if (cost <= 0) {
+      // No added lines, apply for free
       onApplyCode(pendingCode);
       setPendingCode(null);
+      return;
     }
-  };
+
+    setCoinConfirm({
+      open: true,
+      amount: cost,
+      description: `De AI heeft ${addedLines} nieuwe regels code toegevoegd. Kosten: 1 coin per regel.`,
+      onConfirm: async () => {
+        const { data: coinRow } = await supabase.from('user_coins').select('id, balance').eq('user_id', session.user.id).maybeSingle();
+        const balance = (coinRow as any)?.balance ?? 0;
+
+        if (balance < cost) {
+          toast({ title: 'Niet genoeg coins', description: `Je hebt ${cost} coins nodig maar je hebt er ${balance}.`, variant: 'destructive' });
+          return;
+        }
+
+        await supabase.from('user_coins').update({ balance: balance - cost, updated_at: new Date().toISOString() } as any).eq('id', (coinRow as any).id);
+        toast({ title: `${cost} coins afgeschreven`, description: `${addedLines} regels code toegepast.` });
+        onApplyCode(pendingCode);
+        setPendingCode(null);
+        setCoinConfirm(prev => ({ ...prev, open: false }));
+      },
+    });
+  }, [pendingCode, currentCode, session?.user?.id, onApplyCode, toast, countAddedLines]);
 
   // Conversation list view
   if (view === 'list') {
