@@ -513,7 +513,7 @@ export default function GroupChats() {
                             {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
                             <AvatarFallback className="text-[8px] font-bold bg-primary/20 text-primary">{name.slice(0, 2).toUpperCase()}</AvatarFallback>
                           </Avatar>
-                          <StatusDot isDnd={profile?.is_dnd ?? false} className="absolute -bottom-0.5 -right-0.5 h-2 w-2 border" />
+                          <StatusDot status={getOnlineStatus(profile?.is_dnd ?? false, profile?.last_seen_at)} className="absolute -bottom-0.5 -right-0.5 h-2 w-2 border" />
                         </div>
                       )}
                       {!isMine && !showName && <div className="w-6" />}
