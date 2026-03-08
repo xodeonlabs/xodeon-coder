@@ -198,8 +198,8 @@ export default function AdminPanel() {
     if (data?.coins) setUserCoins(data.coins);
   }
 
-  async function loadAdminAlliances() {
-    if (alliancesLoaded) return;
+  async function loadAdminAlliances(force = false) {
+    if (alliancesLoaded && !force) return;
     setAlliancesLoaded(true);
     // Load alliances
     const { data: allianceData } = await supabase.from('alliances' as any).select('*').order('created_at', { ascending: false });
