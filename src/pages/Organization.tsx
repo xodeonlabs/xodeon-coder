@@ -15,6 +15,7 @@ interface Organization {
   join_code: string;
   owner_id: string;
   created_at: string;
+  icon?: string;
 }
 
 interface OrgMember {
