@@ -441,7 +441,7 @@ export function OrgUpgrades({ orgId, orgName, currentLevel, orgBalance, isOwner,
           return (
             <div
               key={lvl.level}
-              className={`relative rounded-xl border p-4 transition-all ${
+              className={`relative rounded-xl border p-3 sm:p-4 transition-all ${
                 isCurrent
                   ? `${lvl.borderColor} ring-1 ring-offset-1 ring-offset-background shadow-lg`
                   : `${lvl.borderColor} hover:shadow-md`
