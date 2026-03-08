@@ -515,13 +515,18 @@ export default function Dashboard() {
             <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary/20 border-t-primary"></div>
           </div>
         ) : myApps.length === 0 ? (
-          <div className="rounded-xl border border-border/40 p-16 text-center" style={{ background: 'hsl(var(--card))' }}>
-            <div className="mb-4 text-4xl"></div>
-            <p className="text-lg text-muted-foreground mb-6">Je hebt nog geen apps. Maak je eerste app!</p>
-            <button onClick={createApp} disabled={creating} className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95">
-              <Plus className="h-5 w-5" />
-              Nieuwe App
-            </button>
+          <div className="rounded-xl border border-border/40 p-16 text-center relative overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+            <div className="relative">
+              <div className="mb-4 text-5xl">🚀</div>
+              <p className="text-lg font-medium text-foreground mb-2">Begin je avontuur!</p>
+              <p className="text-sm text-muted-foreground mb-6">{quote.emoji} {quote.text}</p>
+              <button onClick={createApp} disabled={creating} className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95">
+                <Plus className="h-5 w-5" />
+                Maak je eerste app
+              </button>
+              <p className="text-[10px] text-muted-foreground/40 mt-4">💡 Tip: Ctrl+N om snel een app aan te maken</p>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
