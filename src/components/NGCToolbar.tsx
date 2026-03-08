@@ -59,6 +59,20 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
     }
   };
 
+  const handleExportHtml = () => {
+    if (!appCode) return;
+    const { ast } = parseNGC(appCode);
+    if (!ast) return;
+    const html = exportToHtml(ast, appName || 'App');
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(appName || 'app').replace(/\s+/g, '-').toLowerCase()}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div
       className="flex items-center justify-between px-2 sm:px-4 border-b border-border/50 h-11 sm:h-12 shrink-0 backdrop-blur-sm"
