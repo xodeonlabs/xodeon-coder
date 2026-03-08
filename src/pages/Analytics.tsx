@@ -169,8 +169,8 @@ export default function Analytics() {
           </div>
           <div className="rounded-xl border border-border/40 p-5" style={{ background: 'hsl(var(--card))' }}>
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-green-500/10">
-                <Globe className="h-4 w-4 text-green-400" />
+              <div className="p-2 rounded-lg bg-accent/10">
+                <Globe className="h-4 w-4 text-accent" />
               </div>
               <span className="text-xs text-muted-foreground font-medium">Publieke apps</span>
             </div>
