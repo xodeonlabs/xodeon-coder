@@ -143,6 +143,7 @@ export default function Dashboard() {
   const [iconPickerAppId, setIconPickerAppId] = useState<string | null>(null);
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [contractAppId, setContractAppId] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     async function loadCoins() {
