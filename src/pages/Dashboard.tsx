@@ -14,6 +14,7 @@ interface App {
   updated_at: string;
   owner_id: string;
   organization_id: string | null;
+  slug: string | null;
 }
 
 interface Org {
