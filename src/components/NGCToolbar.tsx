@@ -12,6 +12,7 @@ interface ToolbarProps {
   onSignOut?: () => void;
   onSave?: () => Promise<void> | void;
   onRename?: (newName: string) => void;
+  onChangeIcon?: (icon: string) => void;
   onShareTemplate?: (name: string, description: string, code: string) => Promise<void>;
 }
 
