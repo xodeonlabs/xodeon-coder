@@ -1,9 +1,11 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { NGCNode } from '@/lib/ngc-ast';
 import { createRuntime, NGCRuntime, resolveVarRefs, parseVarDefinition, parseListDefinition, parseDataCommand, parseCoinsCommand, clearPersistedState } from '@/lib/ngc-runtime';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PreviewProps {
   ast: NGCNode | null;
+  organizationId?: string | null;
 }
 
 function cleanStr(val: string): string {
