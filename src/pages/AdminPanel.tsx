@@ -420,9 +420,11 @@ export default function AdminPanel() {
 
   function UserLink({ userId, className }: { userId: string; className?: string }) {
     const name = getUserNameText(userId);
+    const p = profiles.find(p => p.id === userId);
+    const profileSlug = (p as any)?.username || userId;
     return (
       <span
-        onClick={(e) => { e.stopPropagation(); navigate(`/profiel/${userId}`); }}
+        onClick={(e) => { e.stopPropagation(); navigate(`/profiel/${profileSlug}`); }}
         className={`cursor-pointer hover:text-primary hover:underline transition-colors ${className || ''}`}
       >
         {name}
