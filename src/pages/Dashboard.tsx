@@ -87,6 +87,7 @@ export default function Dashboard() {
   const [totalCoins, setTotalCoins] = useState(0);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [unreadOrgMessages, setUnreadOrgMessages] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     try {
