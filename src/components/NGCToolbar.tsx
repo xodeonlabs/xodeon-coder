@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ExternalLink, LogOut, AlertCircle, CheckCircle, ArrowLeft, Pencil, Share2, X, Menu, Download } from 'lucide-react';
 import { parseNGC } from '@/lib/ngc-parser';
 import { exportToHtml } from '@/lib/ngc-to-html';
