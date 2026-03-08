@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Er is een fout opgetreden bij het uitnodigen." }, 500);
     }
 
-    return jsonResponse({ success: true, message: "Uitnodiging is verstuurd." });
+    return jsonResponse({ success: true, message: "Uitnodiging is verstuurd.", collaborator_id: targetUser.id });
   } catch (e) {
     console.error("Unexpected error:", e);
     return jsonResponse({ error: "Er is een onverwachte fout opgetreden." }, 500);
