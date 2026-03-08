@@ -387,11 +387,12 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
   const [currentPage, setCurrentPage] = useState<string | null>(null);
   const [orgBalance, setOrgBalance] = useState<number | null>(null);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const runtime = useMemo(() => {
     const rt = createRuntime();
     if (ast) initRuntime(ast, rt);
     return rt;
-  }, [ast]);
+  }, [ast, updateCount]);
 
   // Load org coin balance if app belongs to an org
   useEffect(() => {
