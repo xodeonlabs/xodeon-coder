@@ -21,6 +21,7 @@ export function NGCChat({ appId }: NGCChatProps) {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
+  const [adminIds, setAdminIds] = useState<Set<string>>(new Set());
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Load messages and profiles
@@ -41,6 +42,13 @@ export function NGCChat({ appId }: NGCChatProps) {
             for (const p of profs) { if (p.display_name) map[p.id] = p.display_name; }
             setProfiles(map);
           }
+          // Check which senders are admins
+          const adminSet = new Set<string>();
+          for (const uid of userIds) {
+            const { data: isAdmin } = await supabase.rpc('has_role', { _user_id: uid, _role: 'admin' });
+            if (isAdmin) adminSet.add(uid);
+          }
+          setAdminIds(adminSet);
         }
       });
   }, [appId]);
@@ -90,10 +98,11 @@ export function NGCChat({ appId }: NGCChatProps) {
         )}
         {messages.map(msg => {
           const isMe = msg.user_id === currentUserId;
-          const shortName = profiles[msg.user_id] || msg.user_email.split('@')[0];
+          const isAdminUser = adminIds.has(msg.user_id);
+          const shortName = isAdminUser ? 'Admin' : (profiles[msg.user_id] || msg.user_email.split('@')[0]);
           return (
             <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-              <span className="text-[10px] text-muted-foreground mb-0.5 px-1">{shortName}</span>
+              <span className={`text-[10px] mb-0.5 px-1 font-semibold ${isAdminUser ? 'text-destructive' : 'text-muted-foreground'}`}>{shortName}</span>
               <div
                 className={`rounded-lg px-2.5 py-1.5 text-xs max-w-[85%] break-words ${
                   isMe
