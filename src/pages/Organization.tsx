@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle, MessageCircle } from 'lucide-react';
+import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle, MessageCircle, Megaphone, Pencil } from 'lucide-react';
 import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { OrgChat } from '@/components/OrgChat';
@@ -66,6 +66,15 @@ export default function OrganizationPage() {
   const [txNote, setTxNote] = useState('');
   const [txProcessing, setTxProcessing] = useState(false);
   const [iconPickerOrgId, setIconPickerOrgId] = useState<string | null>(null);
+
+  // Ad management
+  const [orgAd, setOrgAd] = useState<{ id: string; emoji: string; title: string; description: string; url: string } | null>(null);
+  const [showAdForm, setShowAdForm] = useState(false);
+  const [adEmoji, setAdEmoji] = useState('🚀');
+  const [adTitle, setAdTitle] = useState('');
+  const [adDescription, setAdDescription] = useState('');
+  const [adUrl, setAdUrl] = useState('');
+  const [adSaving, setAdSaving] = useState(false);
 
   useEffect(() => { fetchOrgs(); }, []);
 
@@ -147,15 +156,15 @@ export default function OrganizationPage() {
     setLoadingMembers(true);
     setShowDeposit(false);
     setShowWithdraw(false);
-    const [membersRes, appsRes, coinsRes] = await Promise.all([
+    const [membersRes, appsRes, coinsRes, adsRes] = await Promise.all([
       supabase.from('organization_members').select('*').eq('organization_id', org.id).order('created_at', { ascending: true }),
       supabase.from('apps').select('id, name, updated_at').eq('organization_id', org.id as any).order('updated_at', { ascending: false }),
       supabase.from('org_coins').select('*').eq('organization_id', org.id),
+      supabase.from('ads' as any).select('*').eq('organization_id', org.id),
     ]);
     if (!membersRes.error) {
       const mems = (membersRes.data as unknown as OrgMember[]) || [];
       setMembers(mems);
-      // Fetch profiles for all members
       const userIds = mems.map(m => m.user_id);
       if (userIds.length > 0) {
         const { data: profiles } = await supabase.from('profiles').select('id, display_name, avatar_url, bio').in('id', userIds);
@@ -170,6 +179,13 @@ export default function OrganizationPage() {
     }
     if (!appsRes.error) setOrgApps((appsRes.data as unknown as OrgApp[]) || []);
     if (!coinsRes.error) setOrgCoins((coinsRes.data as unknown as OrgCoin[]) || []);
+    if (!adsRes.error && adsRes.data && adsRes.data.length > 0) {
+      const ad = adsRes.data[0] as any;
+      setOrgAd({ id: ad.id, emoji: ad.emoji, title: ad.title, description: ad.description, url: ad.url });
+    } else {
+      setOrgAd(null);
+    }
+    setShowAdForm(false);
     setLoadingMembers(false);
   }
 
@@ -315,6 +331,51 @@ export default function OrganizationPage() {
       if (selectedOrg?.id === orgId) setSelectedOrg({ ...selectedOrg, icon });
     }
     setIconPickerOrgId(null);
+  }
+
+  async function saveOrgAd() {
+    if (!selectedOrg || !adTitle.trim()) return;
+    setAdSaving(true);
+    const adData = {
+      organization_id: selectedOrg.id,
+      emoji: adEmoji || '🚀',
+      title: adTitle.trim(),
+      description: adDescription.trim(),
+      url: adUrl.trim(),
+      is_active: true,
+      pages: ['dashboard', 'organizations'],
+    };
+    if (orgAd) {
+      const { error } = await supabase.from('ads' as any).update(adData).eq('id', orgAd.id);
+      if (error) {
+        toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+      } else {
+        setOrgAd({ id: orgAd.id, ...adData });
+        setShowAdForm(false);
+        toast({ title: 'Advertentie bijgewerkt!' });
+      }
+    } else {
+      const { data, error } = await supabase.from('ads' as any).insert(adData).select().single();
+      if (error) {
+        toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+      } else if (data) {
+        setOrgAd({ id: (data as any).id, ...adData });
+        setShowAdForm(false);
+        toast({ title: 'Advertentie aangemaakt!' });
+      }
+    }
+    setAdSaving(false);
+  }
+
+  async function deleteOrgAd() {
+    if (!orgAd) return;
+    if (!confirm('Weet je zeker dat je de advertentie wilt verwijderen?')) return;
+    const { error } = await supabase.from('ads' as any).delete().eq('id', orgAd.id);
+    if (!error) {
+      setOrgAd(null);
+      setShowAdForm(false);
+      toast({ title: 'Advertentie verwijderd' });
+    }
   }
 
   async function deleteOrg(org: Organization) {
@@ -571,7 +632,106 @@ export default function OrganizationPage() {
             )}
           </div>
 
-          {/* Bedrijfschat */}
+          {/* Advertentie */}
+          {(selectedOrg.owner_id === session?.user?.id || members.find(m => m.user_id === session?.user?.id && m.role === 'admin')) && (
+            <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                  <Megaphone className="h-5 w-5 text-accent" />
+                  Advertentie
+                </h3>
+                {orgAd && !showAdForm && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => { setAdEmoji(orgAd.emoji); setAdTitle(orgAd.title); setAdDescription(orgAd.description); setAdUrl(orgAd.url); setShowAdForm(true); }}
+                      className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                      title="Bewerken"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button onClick={deleteOrgAd} className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Verwijderen">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {orgAd && !showAdForm ? (
+                <div className="flex items-center gap-3 rounded-lg border border-border/40 p-3" style={{ background: 'hsl(var(--background))' }}>
+                  <span className="text-2xl">{orgAd.emoji}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-sm text-foreground">{orgAd.title}</p>
+                    <p className="text-xs text-muted-foreground truncate">{orgAd.description}</p>
+                    {orgAd.url && <p className="text-xs text-primary truncate mt-0.5">{orgAd.url}</p>}
+                  </div>
+                </div>
+              ) : showAdForm ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">Emoji</label>
+                      <input
+                        value={adEmoji}
+                        onChange={e => setAdEmoji(e.target.value)}
+                        className="w-14 text-center text-lg rounded-lg border border-border bg-background px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">Titel *</label>
+                      <input
+                        value={adTitle}
+                        onChange={e => setAdTitle(e.target.value)}
+                        placeholder="Jouw advertentietitel"
+                        className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1">Beschrijving</label>
+                    <input
+                      value={adDescription}
+                      onChange={e => setAdDescription(e.target.value)}
+                      placeholder="Korte beschrijving"
+                      className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1">URL (optioneel)</label>
+                    <input
+                      value={adUrl}
+                      onChange={e => setAdUrl(e.target.value)}
+                      placeholder="https://..."
+                      className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={saveOrgAd}
+                      disabled={adSaving || !adTitle.trim()}
+                      className="px-4 py-2 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                    >
+                      {adSaving ? 'Opslaan...' : orgAd ? 'Bijwerken' : 'Aanmaken'}
+                    </button>
+                    <button
+                      onClick={() => setShowAdForm(false)}
+                      className="px-4 py-2 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                    >
+                      Annuleren
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setAdEmoji('🚀'); setAdTitle(''); setAdDescription(''); setAdUrl(''); setShowAdForm(true); }}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors w-full justify-center"
+                >
+                  <Plus className="h-4 w-4" />
+                  Advertentie maken (max. 1)
+                </button>
+              )}
+            </div>
+          )}
+
           <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
             <div className="px-4 sm:px-6 py-3 border-b border-border/50">
               <h3 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
