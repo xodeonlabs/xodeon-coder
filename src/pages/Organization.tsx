@@ -244,7 +244,7 @@ export default function OrganizationPage() {
   async function loadPublicOrgs() {
     // Load all orgs (we'll use admin edge function or just show orgs user is not in)
     // For simplicity, load all org names via a search
-    const { data } = await supabase.from('organizations').select('id, name, join_code, owner_id, created_at, icon');
+    const { data } = await supabase.from('organizations').select('id, name, join_code, owner_id, created_at, icon, bio');
     // Filter out orgs user is already in
     const myOrgIds = new Set(orgs.map(o => o.id));
     setAllPublicOrgs(((data as unknown as Organization[]) || []).filter(o => !myOrgIds.has(o.id)));
