@@ -296,6 +296,7 @@ export default function Dashboard() {
             <Building2 className="h-4 w-4" /> <span className="hidden sm:inline">Bedrijven</span>
           </button>
           <span className="hidden md:inline text-sm text-muted-foreground truncate max-w-[180px]">{session?.user?.email}</span>
+          <ProfileAvatar size="sm" editable />
           <button onClick={signOut} className="p-1.5 sm:p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all" title="Uitloggen">
             <LogOut className="h-4 w-4" />
           </button>
