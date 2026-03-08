@@ -654,6 +654,41 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+
+        {/* 📅 Surprise 9: Mini activity bar */}
+        {myApps.length > 0 && (
+          <div className="mt-12 rounded-xl border border-border/30 p-5" style={{ background: 'hsl(var(--card) / 0.5)' }}>
+            <div className="flex items-center gap-3 mb-3">
+              <Zap className="h-4 w-4 text-accent" />
+              <span className="text-xs font-semibold text-foreground">Activiteit</span>
+            </div>
+            <div className="flex items-end gap-1 h-8">
+              {Array.from({ length: 30 }, (_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - (29 - i));
+                const dayStr = d.toISOString().split('T')[0];
+                const appsUpdated = myApps.filter(a => a.updated_at.startsWith(dayStr)).length;
+                const h = appsUpdated ? Math.min(100, 30 + appsUpdated * 30) : 8;
+                return (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-sm transition-all hover:opacity-80"
+                    style={{
+                      height: `${h}%`,
+                      background: appsUpdated > 0 ? 'hsl(var(--primary))' : 'hsl(var(--muted))',
+                      opacity: appsUpdated > 0 ? 0.8 : 0.3,
+                    }}
+                    title={`${dayStr}: ${appsUpdated} app(s) bijgewerkt`}
+                  />
+                );
+              })}
+            </div>
+            <div className="flex justify-between mt-1.5">
+              <span className="text-[9px] text-muted-foreground/50">30 dagen geleden</span>
+              <span className="text-[9px] text-muted-foreground/50">vandaag</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Invite Dialog */}
