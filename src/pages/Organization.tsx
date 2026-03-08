@@ -147,6 +147,12 @@ export default function OrganizationPage() {
   const [joinRequests, setJoinRequests] = useState<{ id: string; user_id: string; status: string; created_at: string }[]>([]);
   const [requestProfiles, setRequestProfiles] = useState<Record<string, { display_name: string | null; avatar_url: string | null }>>({});
 
+  // Link public app state
+  const [showLinkApp, setShowLinkApp] = useState(false);
+  const [linkAppSearch, setLinkAppSearch] = useState('');
+  const [linkAppResults, setLinkAppResults] = useState<{ id: string; name: string; owner_id: string }[]>([]);
+  const [linkingAppId, setLinkingAppId] = useState<string | null>(null);
+
   useEffect(() => { fetchOrgs(); fetchMyRequests(); }, []);
 
   async function fetchOrgs() {
