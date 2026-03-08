@@ -39,6 +39,22 @@ export function setNotificationToastEnabled(enabled: boolean) {
   }
 }
 
+export function getDoNotDisturbEnabled(): boolean {
+  try {
+    return localStorage.getItem(DND_STORAGE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+export function setDoNotDisturbEnabled(enabled: boolean) {
+  try {
+    localStorage.setItem(DND_STORAGE_KEY, String(enabled));
+  } catch {
+    // ignore
+  }
+}
+
 export function useNotificationSound() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
