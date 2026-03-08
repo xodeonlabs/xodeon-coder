@@ -70,6 +70,7 @@ export default function Settings() {
         username: cleanUsername || null,
         social_links: filteredSocials,
         show_email: showEmail,
+        public_email: showEmail ? (session.user.email || null) : null,
         updated_at: new Date().toISOString(),
       } as any);
     if (error) {
