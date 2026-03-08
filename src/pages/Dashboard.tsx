@@ -526,21 +526,27 @@ export default function Dashboard() {
     }
   }
 
-  async function convertToTemplate(app: App) {
-    if (!session?.user?.id) return;
+  function openTemplateDialog(app: App) {
+    setTemplateDialog({ open: true, app, name: app.name, category: 'algemeen' });
+  }
+
+  async function confirmConvertToTemplate() {
+    if (!session?.user?.id || !templateDialog.app) return;
     const { error } = await supabase.from('templates').insert({
       author_id: session.user.id,
-      name: app.name,
-      description: `Template op basis van "${app.name}"`,
-      ngc_code: app.ngc_code,
+      name: templateDialog.name || templateDialog.app.name,
+      description: `Template op basis van "${templateDialog.app.name}"`,
+      ngc_code: templateDialog.app.ngc_code,
+      category: templateDialog.category,
       is_published: true,
     });
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: '📦 Template aangemaakt!', description: `"${app.name}" is nu beschikbaar als template.` });
+      toast({ title: '📦 Template aangemaakt!', description: `"${templateDialog.name}" is nu beschikbaar als template.` });
       confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
     }
+    setTemplateDialog({ open: false, app: null, name: '', category: 'algemeen' });
   }
 
   async function createTemplate() {
