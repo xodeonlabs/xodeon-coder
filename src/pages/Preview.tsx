@@ -8,12 +8,14 @@ const Preview = () => {
   const { appId } = useParams<{ appId: string }>();
   const navigate = useNavigate();
   const [code, setCode] = useState('');
+  const [orgId, setOrgId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!appId) return;
-    supabase.from('apps').select('ngc_code').eq('id', appId).single().then(({ data }) => {
+    supabase.from('apps').select('ngc_code, organization_id').eq('id', appId).single().then(({ data }) => {
       setCode(data?.ngc_code || '');
+      setOrgId((data as any)?.organization_id || null);
       setLoading(false);
     });
   }, [appId]);
