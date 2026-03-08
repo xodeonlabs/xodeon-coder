@@ -21,6 +21,7 @@ export interface NGCRuntime {
   lists: Record<string, string[]>;
   data: Record<string, DataRecord[]>;
   coins: Record<string, number>;
+  ownerCoins: Record<string, number>;
   coinCodes: Record<string, CoinCode[]>;
   getVar: (name: string) => string;
   setVar: (name: string, value: string) => void;
@@ -34,11 +35,13 @@ export interface NGCRuntime {
   dataFind: (table: string, key: string, value: string) => DataRecord | undefined;
   dataClear: (table: string) => void;
   dataUpdate: (table: string, id: string, key: string, value: string) => void;
-  // Coins API
+  // Coins API — trade-based: coins transfer between owner pool and user
   coinsGet: (name: string) => number;
+  coinsOwnerGet: (name: string) => number;
   coinsSet: (name: string, amount: number) => void;
-  coinsAdd: (name: string, amount: number) => void;
-  coinsRemove: (name: string, amount: number) => boolean;
+  coinsOwnerSet: (name: string, amount: number) => void;
+  coinsAdd: (name: string, amount: number) => boolean; // owner→user transfer
+  coinsRemove: (name: string, amount: number) => boolean; // user→owner transfer
   coinsRegisterCode: (name: string, code: string, amount: number) => void;
   coinsRedeemCode: (name: string, code: string) => { success: boolean; amount: number };
 }
