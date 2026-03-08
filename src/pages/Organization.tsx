@@ -561,9 +561,14 @@ export default function OrganizationPage() {
             {/* Deposit/Withdraw form */}
             {(showDeposit || showWithdraw) && (
               <div className="rounded-lg border border-border p-4 mb-4" style={{ background: 'hsl(var(--background))' }}>
-                <h4 className="text-sm font-semibold text-foreground mb-3">
-                  {showDeposit ? '💰 Coins storten' : '💸 Coins opnemen'}
-                </h4>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-foreground">
+                    {showDeposit ? '💰 Coins storten (persoonlijk → bedrijf)' : '💸 Coins opnemen (bedrijf → persoonlijk)'}
+                  </h4>
+                  <span className="text-xs text-muted-foreground">
+                    Jouw saldo: <span className="font-mono font-semibold text-foreground">{personalCoins}</span>
+                  </span>
+                </div>
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-3">
                   <input
                     type="number"
