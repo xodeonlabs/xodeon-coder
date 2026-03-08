@@ -9,11 +9,14 @@ import { Pin, PinOff } from 'lucide-react';
 
 const PublicApp = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { session } = useAuth();
   const [code, setCode] = useState('');
+  const [appId, setAppId] = useState<string | null>(null);
   const [appName, setAppName] = useState('');
   const [orgId, setOrgId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [isPinned, setIsPinned] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
