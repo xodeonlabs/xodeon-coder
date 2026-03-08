@@ -284,13 +284,14 @@ export default function OrganizationPage() {
         .eq('id', coin.id);
       if (updateErr) throw updateErr;
 
-      // Transfer personal coins
-      if (type === 'deposit') {
-        updatePersonalCoins(-amount); // Deduct from personal
-      } else {
-        updatePersonalCoins(amount); // Add to personal
+      // Transfer personal coins via user_coins table
+      const { data: userCoinRow } = await supabase.from('user_coins').select('id, balance').eq('user_id', session.user.id).maybeSingle();
+      const currentUserBalance = userCoinRow?.balance ?? 0;
+      const newUserBalance = type === 'deposit' ? currentUserBalance - amount : currentUserBalance + amount;
+      if (userCoinRow) {
+        await supabase.from('user_coins').update({ balance: Math.max(0, newUserBalance), updated_at: new Date().toISOString() }).eq('id', userCoinRow.id);
       }
-      setPersonalCoins(getPersonalCoins());
+      await fetchPersonalCoins();
 
       // Log transaction
       await supabase.from('org_coin_transactions').insert({
