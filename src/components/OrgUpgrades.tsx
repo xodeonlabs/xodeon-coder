@@ -11,6 +11,7 @@ interface OrgUpgradesProps {
   orgBalance: number;
   isOwner: boolean;
   levelPaidUntil?: string | null;
+  autoPay?: boolean;
   onUpgrade: (newLevel: number) => void;
 }
 
