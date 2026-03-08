@@ -204,6 +204,7 @@ export default function AdminPanel() {
       if (data?.error) throw new Error(data.error);
 
       const messages = { ban: 'Gebruiker geblokkeerd', unban: 'Gebruiker gedeblokkeerd', delete: 'Gebruiker verwijderd' };
+      await logAction(messages[action], 'user', userId);
       toast({ title: messages[action] });
       setConfirmAction(null);
       fetchAll();
