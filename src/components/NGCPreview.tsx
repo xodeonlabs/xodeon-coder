@@ -407,84 +407,77 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
       });
   }, [organizationId, updateCount]);
 
-  // Org-aware coin operations
-  const orgCoinsAdd = useCallback(async (name: string, amount: number): Promise<boolean> => {
-    if (!organizationId) return runtime.coinsAdd(name, amount);
-    // Fetch current org balance
-    const { data } = await supabase.from('org_coins').select('id, balance').eq('organization_id', organizationId).eq('name', 'coins').single();
-    if (!data || (data as any).balance < amount) return false;
-    const newOrgBalance = (data as any).balance - amount;
-    await supabase.from('org_coins').update({ balance: newOrgBalance, updated_at: new Date().toISOString() } as any).eq('id', (data as any).id);
-    // Add to user
-    runtime.coins[name] = (runtime.coins[name] ?? 0) + amount;
-    // Log
-    const { data: authData } = await supabase.auth.getUser();
-    if (authData?.user) {
-      await supabase.from('org_coin_transactions').insert({
-        organization_id: organizationId, coin_name: 'coins', amount, type: 'withdraw',
-        user_id: authData.user.id, note: `App: Coins.Add(${name}, ${amount})`,
-      } as any);
-    }
-    setOrgBalance(newOrgBalance);
-    return true;
-  }, [organizationId, runtime]);
-
-  const orgCoinsRemove = useCallback(async (name: string, amount: number): Promise<boolean> => {
-    if (!organizationId) return runtime.coinsRemove(name, amount);
-    const current = runtime.coins[name] ?? 0;
-    if (current < amount) return false;
-    runtime.coins[name] = current - amount;
-    // Add back to org
-    const { data } = await supabase.from('org_coins').select('id, balance').eq('organization_id', organizationId).eq('name', 'coins').single();
-    if (data) {
-      const newOrgBalance = (data as any).balance + amount;
+  // DB-synced coin operations (user_coins for personal, org_coins for org apps)
+  const dbCoinsAdd = useCallback(async (name: string, amount: number): Promise<boolean> => {
+    if (organizationId) {
+      // Org path: withdraw from org vault, add to user runtime
+      const { data } = await supabase.from('org_coins').select('id, balance').eq('organization_id', organizationId).eq('name', 'coins').single();
+      if (!data || (data as any).balance < amount) return false;
+      const newOrgBalance = (data as any).balance - amount;
       await supabase.from('org_coins').update({ balance: newOrgBalance, updated_at: new Date().toISOString() } as any).eq('id', (data as any).id);
+      runtime.coins[name] = (runtime.coins[name] ?? 0) + amount;
+      const { data: authData } = await supabase.auth.getUser();
+      if (authData?.user) {
+        await supabase.from('org_coin_transactions').insert({
+          organization_id: organizationId, coin_name: 'coins', amount, type: 'withdraw',
+          user_id: authData.user.id, note: `App: Coins.Add(${name}, ${amount})`,
+        } as any);
+      }
       setOrgBalance(newOrgBalance);
+      return true;
     }
+    // Personal path: add to user_coins in DB
+    runtime.coinsAdd(name, amount);
     const { data: authData } = await supabase.auth.getUser();
     if (authData?.user) {
-      await supabase.from('org_coin_transactions').insert({
-        organization_id: organizationId, coin_name: 'coins', amount, type: 'deposit',
-        user_id: authData.user.id, note: `App: Coins.Remove(${name}, ${amount})`,
-      } as any);
+      const { data: coinRow } = await supabase.from('user_coins').select('id, balance').eq('user_id', authData.user.id).maybeSingle();
+      if (coinRow) {
+        await supabase.from('user_coins').update({ balance: (coinRow as any).balance + amount, updated_at: new Date().toISOString() } as any).eq('id', (coinRow as any).id);
+      } else {
+        await supabase.from('user_coins').insert({ user_id: authData.user.id, balance: 100 + amount } as any);
+      }
     }
     return true;
   }, [organizationId, runtime]);
 
-  // Get all pages from AST
-  const pages = useMemo(() => {
-    if (!ast) return [];
-    return ast.children.filter(c => c.type === 'Page');
-  }, [ast]);
-
-  // Determine active page
-  const activePage = useMemo(() => {
-    if (pages.length === 0) return null;
-    if (currentPage) {
-      const found = pages.find(p => p.name === currentPage);
-      if (found) return found;
+  const dbCoinsRemove = useCallback(async (name: string, amount: number): Promise<boolean> => {
+    if (organizationId) {
+      // Org path: remove from user runtime, deposit back to org vault
+      const current = runtime.coins[name] ?? 0;
+      if (current < amount) return false;
+      runtime.coins[name] = current - amount;
+      const { data } = await supabase.from('org_coins').select('id, balance').eq('organization_id', organizationId).eq('name', 'coins').single();
+      if (data) {
+        const newOrgBalance = (data as any).balance + amount;
+        await supabase.from('org_coins').update({ balance: newOrgBalance, updated_at: new Date().toISOString() } as any).eq('id', (data as any).id);
+        setOrgBalance(newOrgBalance);
+      }
+      const { data: authData } = await supabase.auth.getUser();
+      if (authData?.user) {
+        await supabase.from('org_coin_transactions').insert({
+          organization_id: organizationId, coin_name: 'coins', amount, type: 'deposit',
+          user_id: authData.user.id, note: `App: Coins.Remove(${name}, ${amount})`,
+        } as any);
+      }
+      return true;
     }
-    return pages[0]; // default to first page
-  }, [pages, currentPage]);
+    // Personal path: remove from user_coins in DB
+    const success = runtime.coinsRemove(name, amount);
+    if (!success) return false;
+    const { data: authData } = await supabase.auth.getUser();
+    if (authData?.user) {
+      const { data: coinRow } = await supabase.from('user_coins').select('id, balance').eq('user_id', authData.user.id).maybeSingle();
+      if (coinRow) {
+        await supabase.from('user_coins').update({ balance: Math.max(0, (coinRow as any).balance - amount), updated_at: new Date().toISOString() } as any).eq('id', (coinRow as any).id);
+      }
+    }
+    return true;
+  }, [organizationId, runtime]);
 
-  const handleRuntimeChange = useCallback(() => {
-    forceUpdate(n => n + 1);
-  }, []);
-
-  const handleNavigate = useCallback((pageName: string) => {
-    setCurrentPage(pageName);
-  }, []);
-
-  const handleReset = useCallback(() => {
-    clearPersistedState();
-    forceUpdate(n => n + 1);
-    window.location.reload();
-  }, []);
-
-  const coinHandlers: CoinHandlers | undefined = organizationId ? {
-    add: orgCoinsAdd,
-    remove: orgCoinsRemove,
-  } : undefined;
+  const coinHandlers: CoinHandlers = {
+    add: dbCoinsAdd,
+    remove: dbCoinsRemove,
+  };
 
   if (!ast) {
     return (
