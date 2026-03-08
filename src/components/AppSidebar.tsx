@@ -288,7 +288,7 @@ export function AppSidebar() {
           >
             <ProfileAvatar size="sm" />
             {dndEnabled && (
-              <span className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full bg-destructive border-2 border-background" title="Niet storen" />
+              <span className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full bg-destructive border-2 border-background animate-pulse" title="Niet storen" />
             )}
           </div>
           {!collapsed && (
