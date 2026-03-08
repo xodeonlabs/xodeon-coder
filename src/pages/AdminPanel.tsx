@@ -184,7 +184,29 @@ export default function AdminPanel() {
     setLoading(false);
   }
 
-  async function logAction(action: string, targetType: string, targetId?: string, details?: string) {
+  async function loadAllCoins() {
+    const { data } = await supabase.functions.invoke('admin-manage-coins', { body: { action: 'list', user_id: '_', amount: 0 } });
+    if (data?.coins) setUserCoins(data.coins);
+  }
+
+  async function adminUpdateCoins() {
+    if (!coinUserId || !coinAmount) return;
+    setCoinSaving(true);
+    const { error } = await supabase.functions.invoke('admin-manage-coins', {
+      body: { action: coinAction, user_id: coinUserId, amount: parseInt(coinAmount) },
+    });
+    if (error) {
+      toast({ title: 'Fout', description: String(error), variant: 'destructive' });
+    } else {
+      toast({ title: 'Coins bijgewerkt!' });
+      setCoinAmount('');
+      await loadAllCoins();
+      await logAction(`coins_${coinAction}`, 'user', coinUserId, `${coinAction === 'add' ? '+' : '='}${coinAmount}`);
+    }
+    setCoinSaving(false);
+  }
+
+
     if (!session?.user?.id) return;
     await (supabase.from('admin_activity_log' as any) as any).insert({
       admin_id: session.user.id,
