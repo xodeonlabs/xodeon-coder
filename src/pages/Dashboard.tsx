@@ -634,6 +634,7 @@ export default function Dashboard() {
             <div className="flex flex-col gap-1">
               <MobileNavItem onClick={() => { navigate('/templates'); setMobileMenuOpen(false); }} icon={<LayoutGrid className="h-4 w-4" />} label="Templates" />
               <MobileNavItem onClick={() => { navigate('/berichten'); setMobileMenuOpen(false); }} icon={<MessageCircle className="h-4 w-4" />} label="Berichten" />
+              <MobileNavItem onClick={() => { navigate('/groepen'); setMobileMenuOpen(false); }} icon={<Users className="h-4 w-4" />} label="Groepen" />
               <MobileNavItem onClick={() => { navigate('/analytics'); setMobileMenuOpen(false); }} icon={<BarChart3 className="h-4 w-4" />} label="Analytics" />
               <MobileNavItem onClick={() => { navigate('/organization'); setMobileMenuOpen(false); }} icon={<Building2 className="h-4 w-4" />} label="Bedrijven" badge={unreadOrgMessages} />
               <MobileNavItem onClick={() => { navigate('/alliances'); setMobileMenuOpen(false); }} icon={<Handshake className="h-4 w-4" />} label="Allianties" />
