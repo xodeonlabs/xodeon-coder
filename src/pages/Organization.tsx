@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle, MessageCircle, Megaphone, Pencil, Search, CheckCircle, XCircle, Clock, Link, Globe } from 'lucide-react';
+import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle, MessageCircle, Megaphone, Pencil, Search, CheckCircle, XCircle, Clock, Link, Globe, ArrowUp } from 'lucide-react';
 import { CoinConfirmDialog } from '@/components/CoinConfirmDialog';
 import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { OrgChat } from '@/components/OrgChat';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
+import { OrgUpgrades } from '@/components/OrgUpgrades';
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { getCached, setCache, clearCache, CACHE_TTL } from '@/lib/cache';
@@ -21,6 +22,7 @@ interface Organization {
   created_at: string;
   icon?: string;
   bio?: string;
+  level?: number;
 }
 
 interface OrgMember {
@@ -1104,9 +1106,30 @@ export default function OrganizationPage() {
                   className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors w-full justify-center"
                 >
                   <Plus className="h-4 w-4" />
-                  Advertentie maken (max. 1)
+                  Advertentie maken (max. {[1,2,3,5,10][(((selectedOrg as any).level ?? 1) - 1)] ?? 1})
                 </button>
               )}
+            </div>
+          )}
+
+          {/* Upgrades - alleen zichtbaar voor eigenaar */}
+          {selectedOrg.owner_id === session?.user?.id && (
+            <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+              <h3 className="text-lg font-bold text-foreground flex items-center gap-2 mb-4">
+                <ArrowUp className="h-5 w-5 text-primary" />
+                Upgrades
+              </h3>
+              <OrgUpgrades
+                orgId={selectedOrg.id}
+                orgName={selectedOrg.name}
+                currentLevel={(selectedOrg as any).level ?? 1}
+                orgBalance={orgCoins.reduce((sum, c) => sum + c.balance, 0)}
+                isOwner={selectedOrg.owner_id === session?.user?.id}
+                onUpgrade={(newLevel) => {
+                  setSelectedOrg({ ...selectedOrg, level: newLevel } as any);
+                  viewMembers({ ...selectedOrg, level: newLevel } as any);
+                }}
+              />
             </div>
           )}
 

@@ -897,6 +897,7 @@ export type Database = {
           icon: string | null
           id: string
           join_code: string
+          level: number
           name: string
           owner_id: string
           updated_at: string
@@ -908,6 +909,7 @@ export type Database = {
           icon?: string | null
           id?: string
           join_code?: string
+          level?: number
           name: string
           owner_id: string
           updated_at?: string
@@ -919,6 +921,7 @@ export type Database = {
           icon?: string | null
           id?: string
           join_code?: string
+          level?: number
           name?: string
           owner_id?: string
           updated_at?: string
