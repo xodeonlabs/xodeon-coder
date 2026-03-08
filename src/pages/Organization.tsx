@@ -159,6 +159,7 @@ export default function OrganizationPage() {
       toast({ title: 'Gejoind!', description: 'Je bent toegevoegd aan het bedrijf.' });
       setJoinCode('');
       setShowJoin(false);
+      clearCache(`orgs-list:${session?.user?.id}`);
       fetchOrgs();
     } catch (err: any) {
       toast({ title: 'Fout', description: err.message || 'Ongeldige code', variant: 'destructive' });
