@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Send, Check, CheckCheck } from 'lucide-react';
+import { Send, Check, CheckCheck, Gamepad2 } from 'lucide-react';
+import { SnakeGame } from '@/components/SnakeGame';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { getCached, setCache, CACHE_TTL } from '@/lib/cache';
 
@@ -22,6 +23,7 @@ export function OrgChat({ organizationId }: OrgChatProps) {
   const [profiles, setProfiles] = useState<Record<string, { display_name: string | null; avatar_url: string | null }>>({});
   const [adminIds, setAdminIds] = useState<Set<string>>(new Set());
   const [input, setInput] = useState('');
+  const [showGame, setShowGame] = useState(false);
   const [sending, setSending] = useState(false);
   const [lastReadAt, setLastReadAt] = useState<string | null>(null);
   const [otherReadAt, setOtherReadAt] = useState<Record<string, string>>({});
@@ -238,7 +240,25 @@ export function OrgChat({ organizationId }: OrgChatProps) {
         <div ref={bottomRef} />
       </div>
 
+      {showGame && session?.user && (
+        <div className="border-t border-border p-2">
+          <SnakeGame
+            channelName={`org-${organizationId}`}
+            userId={session.user.id}
+            userName={profiles[session.user.id]?.display_name || session.user.email?.split('@')[0] || 'Speler'}
+            onClose={() => setShowGame(false)}
+          />
+        </div>
+      )}
+
       <div className="border-t border-border p-2 flex gap-1.5">
+        <button
+          onClick={() => setShowGame(!showGame)}
+          className={`rounded-lg p-2 transition-colors ${showGame ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'}`}
+          title="Snake spelen"
+        >
+          <Gamepad2 className="h-3.5 w-3.5" />
+        </button>
         <input
           className="flex-1 rounded-lg bg-background border border-border px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
           placeholder="Typ een bericht..."

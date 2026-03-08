@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { ArrowLeft, Send, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Send, MessageCircle, Gamepad2 } from 'lucide-react';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
+import { SnakeGame } from '@/components/SnakeGame';
 
 interface ChatFriend {
   id: string;
@@ -33,6 +34,7 @@ export default function FriendChatPage() {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [showGame, setShowGame] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const myId = session?.user?.id;
   const [myRetentionHours, setMyRetentionHours] = useState(24);
