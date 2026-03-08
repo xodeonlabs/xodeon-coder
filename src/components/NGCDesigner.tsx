@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
 import { NGCNode, NGCNodeType, DEFAULT_PROPERTIES, generateId } from '@/lib/ngc-ast';
 import { createRuntime, NGCRuntime, resolveVarRefs, parseVarDefinition, parseListDefinition, parseDataCommand, clearPersistedState } from '@/lib/ngc-runtime';
-import { Move, MousePointer, Plus } from 'lucide-react';
+import { Move, MousePointer, Plus, Trash2 } from 'lucide-react';
 
 interface DesignerProps {
   ast: NGCNode | null;
