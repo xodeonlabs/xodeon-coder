@@ -77,6 +77,8 @@ export default function AdminPanel() {
   const [editingAd, setEditingAd] = useState<AdRow | null>(null);
   const [adForm, setAdForm] = useState({ emoji: '🚀', title: '', description: '', url: '', gradient: 'linear-gradient(135deg, hsl(200 40% 14%), hsl(var(--secondary)))' });
   const [savingAd, setSavingAd] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [emojiSearch, setEmojiSearch] = useState('');
 
   useEffect(() => {
     checkAdmin();
