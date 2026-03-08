@@ -40,6 +40,33 @@ export function AppSidebar() {
   const [profileUsername, setProfileUsername] = useState<string | null>(null);
   const [unreadGroups, setUnreadGroups] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [pinnedApps, setPinnedApps] = useState<{ id: string; name: string; icon: string | null }[]>([]);
+
+  const fetchPinnedApps = useCallback(async () => {
+    if (!session?.user?.id) return;
+    const { data } = await supabase
+      .from('pinned_apps' as any)
+      .select('app_id, sort_order')
+      .eq('user_id', session.user.id)
+      .order('sort_order');
+    if (data && (data as any[]).length > 0) {
+      const appIds = (data as any[]).map((p: any) => p.app_id);
+      const { data: apps } = await supabase.from('apps').select('id, name, icon').in('id', appIds);
+      if (apps) {
+        const sorted = appIds.map((id: string) => apps.find((a: any) => a.id === id)).filter(Boolean) as any[];
+        setPinnedApps(sorted);
+      }
+    } else {
+      setPinnedApps([]);
+    }
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    fetchPinnedApps();
+    const handler = () => fetchPinnedApps();
+    window.addEventListener('pinned-apps-changed', handler);
+    return () => window.removeEventListener('pinned-apps-changed', handler);
+  }, [fetchPinnedApps]);
 
   const fetchUnreadGroups = useCallback(async () => {
     if (!session?.user?.id) return;
