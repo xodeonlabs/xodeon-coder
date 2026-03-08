@@ -481,7 +481,7 @@ export default function Settings() {
               <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${soundEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
             </button>
           </div>
-          <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-secondary/30 border border-border/30 mt-3">
+          <div className={`flex items-center justify-between py-3 px-4 rounded-xl bg-secondary/30 border border-border/30 mt-3 ${dndEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
             <div>
               <p className="text-sm font-medium text-foreground">Pop-up notificaties</p>
               <p className="text-xs text-muted-foreground mt-0.5">Toon een toast-melding bij nieuwe berichten</p>
