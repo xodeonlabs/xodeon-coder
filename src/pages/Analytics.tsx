@@ -131,22 +131,22 @@ export default function Analytics() {
   return (
     <div className="min-h-screen" style={{ background: 'hsl(var(--background))' }}>
       {/* Header */}
-      <header className="border-b border-border/50 px-6 py-4 flex items-center gap-4" style={{ background: 'hsl(var(--ide-toolbar) / 0.8)' }}>
-        <button onClick={() => navigate('/')} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
+      <header className="border-b border-border/50 px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4" style={{ background: 'hsl(var(--ide-toolbar) / 0.8)' }}>
+        <button onClick={() => navigate('/')} className="p-1.5 sm:p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all shrink-0">
           <ArrowLeft className="h-4 w-4" />
         </button>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <BarChart3 className="h-5 w-5 text-primary" />
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 shrink-0">
+            <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-foreground">Analytics</h1>
-            <p className="text-xs text-muted-foreground">Statistieken van je gepubliceerde apps</p>
+          <div className="min-w-0">
+            <h1 className="text-base sm:text-lg font-bold text-foreground">Analytics</h1>
+            <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Statistieken van je gepubliceerde apps</p>
           </div>
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Stats cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           <div className="rounded-xl border border-border/40 p-5" style={{ background: 'hsl(var(--card))' }}>

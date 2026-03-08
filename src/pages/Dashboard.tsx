@@ -253,39 +253,39 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen" style={{ background: 'hsl(var(--background))' }}>
       {/* Header */}
-      <header className="border-b border-border/50 px-6 py-4 flex items-center justify-between backdrop-blur-sm" style={{ background: 'hsl(var(--ide-toolbar) / 0.8)' }}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-bold text-sm">N</div>
-          <h1 className="text-xl font-bold text-foreground tracking-tight">NGC Studio</h1>
+      <header className="border-b border-border/50 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between backdrop-blur-sm gap-2" style={{ background: 'hsl(var(--ide-toolbar) / 0.8)' }}>
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-bold text-xs sm:text-sm shrink-0">N</div>
+          <h1 className="text-base sm:text-xl font-bold text-foreground tracking-tight truncate">NGC Studio</h1>
         </div>
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/analytics')} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
-            <BarChart3 className="h-4 w-4" /> Analytics
+        <div className="flex items-center gap-1 sm:gap-4">
+          <button onClick={() => navigate('/analytics')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
+            <BarChart3 className="h-4 w-4" /> <span className="hidden sm:inline">Analytics</span>
           </button>
-          <button onClick={() => navigate('/organization')} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
-            <Building2 className="h-4 w-4" /> Bedrijven
+          <button onClick={() => navigate('/organization')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
+            <Building2 className="h-4 w-4" /> <span className="hidden sm:inline">Bedrijven</span>
           </button>
-          <span className="text-sm text-muted-foreground">{session?.user?.email}</span>
-          <button onClick={signOut} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all" title="Uitloggen">
+          <span className="hidden md:inline text-sm text-muted-foreground truncate max-w-[180px]">{session?.user?.email}</span>
+          <button onClick={signOut} className="p-1.5 sm:p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all" title="Uitloggen">
             <LogOut className="h-4 w-4" />
           </button>
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
         {/* Create button */}
-        <div className="flex items-center justify-between mb-12">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 sm:mb-12">
           <div>
-            <h2 className="text-3xl font-bold text-foreground">Mijn Apps</h2>
-            <p className="text-base text-muted-foreground mt-2">Maak en beheer je NGC applicaties</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Mijn Apps</h2>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">Maak en beheer je NGC applicaties</p>
           </div>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setShowTemplateDialog(true)} className="flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all border border-primary/30 text-primary hover:bg-primary/10 active:scale-95">
-              <FileCode className="h-5 w-5" />
-              Template aanmaken
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button onClick={() => setShowTemplateDialog(true)} className="flex items-center gap-1.5 sm:gap-2 rounded-xl px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold transition-all border border-primary/30 text-primary hover:bg-primary/10 active:scale-95">
+              <FileCode className="h-4 w-4 sm:h-5 sm:w-5" />
+              Template
             </button>
-            <button onClick={createApp} disabled={creating} className="flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 disabled:opacity-50 active:scale-95">
-              <Plus className="h-5 w-5" />
+            <button onClick={createApp} disabled={creating} className="flex items-center gap-1.5 sm:gap-2 rounded-xl px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 disabled:opacity-50 active:scale-95">
+              <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
               Nieuwe App
             </button>
           </div>
