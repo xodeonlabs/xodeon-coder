@@ -1187,8 +1187,7 @@ export default function AdminPanel() {
                                       toast({ title: 'Fout', description: error?.message || data?.error, variant: 'destructive' });
                                     } else {
                                       toast({ title: 'Bedrijf toegevoegd!' });
-                                      setAlliancesLoaded(false);
-                                      loadAdminAlliances();
+                                      loadAdminAlliances(true);
                                     }
                                   }}
                                   className="px-2 py-1 rounded-lg text-[11px] font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
