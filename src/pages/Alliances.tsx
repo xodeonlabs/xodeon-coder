@@ -12,6 +12,7 @@ interface Alliance {
   name: string;
   icon: string;
   created_at: string;
+  created_by: string;
 }
 
 interface AllianceMember {
@@ -66,6 +67,7 @@ export default function Alliances() {
   const [sharedApps, setSharedApps] = useState<{ id: string; name: string; org_name: string; views: number }[]>([]);
   const [orgStats, setOrgStats] = useState<{ name: string; views: number }[]>([]);
   const [userOrgId, setUserOrgId] = useState<string | null>(null);
+  const [creatorProfiles, setCreatorProfiles] = useState<Record<string, string>>({});
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
   // Org owner state (replaces admin-only)
@@ -201,8 +203,18 @@ export default function Alliances() {
   async function loadAlliances() {
     if (!session?.user?.id) return;
     const { data } = await supabase.from('alliances' as any).select('*').order('created_at');
-    setAlliances((data as unknown as Alliance[]) || []);
+    const allianceList = (data as unknown as Alliance[]) || [];
+    setAlliances(allianceList);
     setLoading(false);
+
+    // Load creator profiles
+    const creatorIds = [...new Set(allianceList.map(a => a.created_by))];
+    if (creatorIds.length > 0) {
+      const { data: profileData } = await supabase.from('profiles').select('id, display_name').in('id', creatorIds);
+      const map: Record<string, string> = {};
+      (profileData || []).forEach(p => { map[p.id] = p.display_name || 'Onbekend'; });
+      setCreatorProfiles(map);
+    }
   }
 
   async function selectAlliance(alliance: Alliance) {
@@ -443,7 +455,7 @@ export default function Alliances() {
                     <div className="flex items-center gap-3 mb-3">
                       <span className="text-2xl">{alliance.icon}</span>
                       <h3 className="text-sm font-semibold text-foreground flex-1">{alliance.name}</h3>
-                      {isOrgOwner && (
+                      {alliance.created_by === session?.user?.id && (
                         <button
                           onClick={e => { e.stopPropagation(); deleteAlliance(alliance.id); }}
                           className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
@@ -454,7 +466,7 @@ export default function Alliances() {
                       )}
                     </div>
                     <p className="text-[11px] text-muted-foreground">
-                      Aangemaakt op {new Date(alliance.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      Aangemaakt door <span className="font-medium text-foreground/70">{creatorProfiles[alliance.created_by] || 'Onbekend'}</span> · {new Date(alliance.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </p>
                   </div>
                 ))}
