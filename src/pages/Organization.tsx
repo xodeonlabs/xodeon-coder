@@ -1263,9 +1263,9 @@ export default function OrganizationPage() {
         )}
       </div>
       {iconPickerOrgId && (
-        <IconPicker
-          value={orgs.find(o => o.id === iconPickerOrgId)?.icon || 'building-2'}
-          onChange={(icon) => changeOrgIcon(iconPickerOrgId, icon)}
+        <EmojiPicker
+          value={orgs.find(o => o.id === iconPickerOrgId)?.icon || '🏢'}
+          onChange={(emoji) => changeOrgIcon(iconPickerOrgId, emoji)}
           onClose={() => setIconPickerOrgId(null)}
         />
       )}
