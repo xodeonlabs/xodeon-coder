@@ -86,6 +86,7 @@ export default function Dashboard() {
   const [savingSlug, setSavingSlug] = useState(false);
   const [totalCoins, setTotalCoins] = useState(0);
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [unreadOrgMessages, setUnreadOrgMessages] = useState(0);
 
   useEffect(() => {
     try {
