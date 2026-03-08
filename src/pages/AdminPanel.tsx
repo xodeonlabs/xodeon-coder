@@ -232,6 +232,7 @@ export default function AdminPanel() {
     setCollabAdding(false);
   }
 
+  async function removeRole(roleId: string) {
     const { error } = await supabase.from('user_roles').delete().eq('id', roleId);
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
