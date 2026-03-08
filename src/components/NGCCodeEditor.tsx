@@ -43,6 +43,12 @@ const ALL_SUGGESTIONS: Suggestion[] = [
   { label: 'If', insert: 'If(conditie):', kind: 'command' },
   { label: 'Repeat', insert: 'Repeat(5):', kind: 'command' },
   { label: 'Wait', insert: 'Wait(1000)', kind: 'command' },
+  // Coins
+  { label: 'Coins', insert: 'Coins(munten)=100', kind: 'keyword' },
+  { label: 'Coins.Add', insert: 'Coins.Add(munten, 10)', kind: 'command' },
+  { label: 'Coins.Remove', insert: 'Coins.Remove(munten, 5)', kind: 'command' },
+  { label: 'Coins.Code', insert: 'Coins.Code(munten, "BUY100", 100)', kind: 'command' },
+  { label: 'Coins.Redeem', insert: 'Coins.Redeem(munten, codeVar)', kind: 'command' },
 ];
 
 const KIND_COLORS: Record<string, string> = {
