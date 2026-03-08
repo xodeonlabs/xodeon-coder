@@ -309,7 +309,10 @@ export default function Dashboard() {
       toast({ title: 'Fout', description: error.message?.includes('unique') ? 'Deze URL is al in gebruik. Kies een andere.' : error.message, variant: 'destructive' });
     } else {
       setApps(apps.map(a => a.id === publishAppId ? { ...a, slug: cleanSlug, is_public: true } : a));
-      toast({ title: 'Gepubliceerd!', description: `Je app is nu beschikbaar op /app/${cleanSlug}` });
+      toast({ title: '🎉 Gepubliceerd!', description: `Je app is nu beschikbaar op /app/${cleanSlug}` });
+      // 🎉 Surprise 1: Confetti!
+      confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 }, colors: ['#38bdf8', '#818cf8', '#f472b6', '#34d399', '#fbbf24'] });
+      setTimeout(() => confetti({ particleCount: 50, spread: 120, origin: { y: 0.5 } }), 300);
     }
     setSavingSlug(false);
   }
