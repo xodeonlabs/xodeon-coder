@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, Megaphone, Plus, Eye, EyeOff, Pencil, Ban, ShieldOff, Activity, MessageCircle, Send, Coins } from 'lucide-react';
+import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, Megaphone, Plus, Eye, EyeOff, Pencil, Ban, ShieldOff, Activity, MessageCircle, Send, Coins, Handshake, BarChart3 } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const EMOJI_LIST = [
@@ -100,7 +100,16 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [chatReplyInputs, setChatReplyInputs] = useState<Record<string, string>>({});
   const [chatSending, setChatSending] = useState<string | null>(null);
-  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'chats' | 'activity' | 'coins'>('users');
+  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'chats' | 'activity' | 'coins' | 'alliances'>('users');
+  
+  // Alliances management
+  const [adminAlliances, setAdminAlliances] = useState<any[]>([]);
+  const [adminAllianceMembers, setAdminAllianceMembers] = useState<Record<string, any[]>>({});
+  const [adminAllianceCoins, setAdminAllianceCoins] = useState<Record<string, number>>({});
+  const [adminAllianceChats, setAdminAllianceChats] = useState<Record<string, any[]>>({});
+  const [adminAllianceStats, setAdminAllianceStats] = useState<Record<string, { apps: number; views: number }>>({});
+  const [selectedAdminAlliance, setSelectedAdminAlliance] = useState<string | null>(null);
+  const [alliancesLoaded, setAlliancesLoaded] = useState(false);
 
   // Coins management
   const [userCoins, setUserCoins] = useState<{ user_id: string; balance: number }[]>([]);
@@ -126,7 +135,7 @@ export default function AdminPanel() {
   const [emojiSearch, setEmojiSearch] = useState('');
 
   // Management confirmations
-  const [confirmAction, setConfirmAction] = useState<{ id: string; action: string; type: 'user' | 'app' | 'org' | 'ad'; name: string } | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ id: string; action: string; type: 'user' | 'app' | 'org' | 'ad' | 'alliance'; name: string } | null>(null);
   const [managingUser, setManagingUser] = useState(false);
 
   useEffect(() => {
@@ -187,6 +196,79 @@ export default function AdminPanel() {
   async function loadAllCoins() {
     const { data } = await supabase.functions.invoke('admin-manage-coins', { body: { action: 'list', user_id: '_', amount: 0 } });
     if (data?.coins) setUserCoins(data.coins);
+  }
+
+  async function loadAdminAlliances() {
+    if (alliancesLoaded) return;
+    setAlliancesLoaded(true);
+    // Load alliances
+    const { data: allianceData } = await supabase.from('alliances' as any).select('*').order('created_at', { ascending: false });
+    const allList = (allianceData as any[]) || [];
+    setAdminAlliances(allList);
+
+    if (allList.length === 0) return;
+
+    const allianceIds = allList.map((a: any) => a.id);
+
+    // Load members
+    const { data: memberData } = await supabase.from('alliance_members' as any).select('*').in('alliance_id', allianceIds);
+    const memberMap: Record<string, any[]> = {};
+    (memberData as any[] || []).forEach(m => {
+      if (!memberMap[m.alliance_id]) memberMap[m.alliance_id] = [];
+      memberMap[m.alliance_id].push(m);
+    });
+    setAdminAllianceMembers(memberMap);
+
+    // Load coins
+    const { data: coinData } = await supabase.from('alliance_coins' as any).select('*').in('alliance_id', allianceIds);
+    const coinMap: Record<string, number> = {};
+    (coinData as any[] || []).forEach(c => { coinMap[c.alliance_id] = c.balance; });
+    setAdminAllianceCoins(coinMap);
+
+    // Load chats
+    const { data: chatData } = await supabase.from('alliance_chat_messages' as any).select('*').in('alliance_id', allianceIds).order('created_at', { ascending: true }).limit(500);
+    const chatMap: Record<string, any[]> = {};
+    (chatData as any[] || []).forEach(c => {
+      if (!chatMap[c.alliance_id]) chatMap[c.alliance_id] = [];
+      chatMap[c.alliance_id].push(c);
+    });
+    setAdminAllianceChats(chatMap);
+
+    // Load stats - get org IDs from members, then apps and views
+    const allOrgIds = [...new Set((memberData as any[] || []).map(m => m.organization_id))];
+    if (allOrgIds.length > 0) {
+      const { data: appsData } = await supabase.from('apps').select('id, organization_id').in('organization_id', allOrgIds);
+      const appsList = (appsData || []);
+      const appIds = appsList.map(a => a.id);
+      let viewCounts: Record<string, number> = {};
+      if (appIds.length > 0) {
+        const { data: viewData } = await supabase.from('app_views').select('app_id').in('app_id', appIds);
+        (viewData || []).forEach(v => { viewCounts[v.app_id] = (viewCounts[v.app_id] || 0) + 1; });
+      }
+
+      const statsMap: Record<string, { apps: number; views: number }> = {};
+      allianceIds.forEach(aid => {
+        const orgIds = (memberMap[aid] || []).map(m => m.organization_id);
+        const allianceApps = appsList.filter(a => orgIds.includes(a.organization_id));
+        const totalViews = allianceApps.reduce((s, a) => s + (viewCounts[a.id] || 0), 0);
+        statsMap[aid] = { apps: allianceApps.length, views: totalViews };
+      });
+      setAdminAllianceStats(statsMap);
+    }
+  }
+
+  async function adminDeleteAlliance(id: string) {
+    const alliance = adminAlliances.find(a => a.id === id);
+    const { data, error } = await supabase.functions.invoke('admin-delete-resource', {
+      body: { type: 'alliance', target_id: id },
+    });
+    if (error || data?.error) {
+      toast({ title: 'Fout', description: error?.message || data?.error, variant: 'destructive' });
+    } else {
+      await logAction('Alliantie verwijderd', 'alliance', id, alliance?.name || '');
+      setAdminAlliances(adminAlliances.filter(a => a.id !== id));
+      toast({ title: 'Alliantie verwijderd' });
+    }
   }
 
   async function adminUpdateCoins() {
@@ -454,6 +536,9 @@ export default function AdminPanel() {
       } else if (confirmAction.type === 'ad') {
         await deleteAd(confirmAction.id);
         setConfirmAction(null);
+      } else if (confirmAction.type === 'alliance') {
+        await adminDeleteAlliance(confirmAction.id);
+        setConfirmAction(null);
       }
     } catch (e: any) {
       toast({ title: 'Fout', description: e.message, variant: 'destructive' });
@@ -548,6 +633,12 @@ export default function AdminPanel() {
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'chats' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
             <MessageCircle className="h-4 w-4" /> Chats
+          </button>
+          <button
+            onClick={() => { setTab('alliances'); loadAdminAlliances(); }}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'alliances' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
+          >
+            <Handshake className="h-4 w-4" /> Allianties
           </button>
           <button
             onClick={() => setTab('activity')}
@@ -1006,6 +1097,117 @@ export default function AdminPanel() {
           </div>
         )}
 
+        {/* Alliances tab */}
+        {tab === 'alliances' && (
+          <div className="space-y-6">
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+              <Handshake className="h-4 w-4 text-primary" /> Allianties ({adminAlliances.length})
+            </h3>
+
+            {adminAlliances.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Geen allianties gevonden.</p>
+            ) : (
+              <div className="space-y-4">
+                {adminAlliances.map(alliance => {
+                  const mems = adminAllianceMembers[alliance.id] || [];
+                  const coinBalance = adminAllianceCoins[alliance.id] ?? 0;
+                  const chats = adminAllianceChats[alliance.id] || [];
+                  const stats = adminAllianceStats[alliance.id] || { apps: 0, views: 0 };
+                  const isExpanded = selectedAdminAlliance === alliance.id;
+
+                  return (
+                    <div key={alliance.id} className="rounded-xl border border-border/50 overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
+                      {/* Alliance header */}
+                      <div
+                        className="flex items-center gap-3 p-4 cursor-pointer hover:bg-secondary/20 transition-colors"
+                        onClick={() => setSelectedAdminAlliance(isExpanded ? null : alliance.id)}
+                      >
+                        <span className="text-xl">{alliance.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-semibold text-foreground">{alliance.name}</h4>
+                          <p className="text-[10px] text-muted-foreground">
+                            Door {getUserName(alliance.created_by)} · {mems.length} bedrijven · {coinBalance} coins · {stats.apps} apps · {stats.views} views
+                          </p>
+                        </div>
+                        <button
+                          onClick={e => { e.stopPropagation(); setConfirmAction({ id: alliance.id, action: 'delete', type: 'alliance', name: alliance.name }); }}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+
+                      {/* Expanded details */}
+                      {isExpanded && (
+                        <div className="border-t border-border/30 p-4 space-y-4">
+                          {/* Stats */}
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div className="rounded-lg p-3 bg-secondary/20">
+                              <p className="text-[10px] text-muted-foreground">Bedrijven</p>
+                              <p className="text-lg font-bold text-foreground">{mems.length}</p>
+                            </div>
+                            <div className="rounded-lg p-3 bg-secondary/20">
+                              <p className="text-[10px] text-muted-foreground">Kluis</p>
+                              <p className="text-lg font-bold text-foreground">{coinBalance}</p>
+                            </div>
+                            <div className="rounded-lg p-3 bg-secondary/20">
+                              <p className="text-[10px] text-muted-foreground">Apps</p>
+                              <p className="text-lg font-bold text-foreground">{stats.apps}</p>
+                            </div>
+                            <div className="rounded-lg p-3 bg-secondary/20">
+                              <p className="text-[10px] text-muted-foreground">Views</p>
+                              <p className="text-lg font-bold text-foreground">{stats.views}</p>
+                            </div>
+                          </div>
+
+                          {/* Members */}
+                          <div>
+                            <h5 className="text-xs font-semibold text-muted-foreground mb-2">Leden</h5>
+                            <div className="space-y-1">
+                              {mems.map(m => {
+                                const orgName = orgs.find(o => o.id === m.organization_id)?.name || m.organization_id.slice(0, 8);
+                                return (
+                                  <div key={m.id} className="flex items-center gap-2 py-1.5 px-2 rounded-lg bg-background/50 text-sm">
+                                    <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                                    <span className="text-foreground">{orgName}</span>
+                                    <span className="text-[10px] text-muted-foreground ml-auto">{new Date(m.joined_at).toLocaleDateString('nl-NL')}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Chat messages */}
+                          <div>
+                            <h5 className="text-xs font-semibold text-muted-foreground mb-2">
+                              <MessageCircle className="h-3 w-3 inline mr-1" />
+                              Chat ({chats.length} berichten)
+                            </h5>
+                            {chats.length === 0 ? (
+                              <p className="text-xs text-muted-foreground">Geen berichten.</p>
+                            ) : (
+                              <div className="max-h-[200px] overflow-y-auto space-y-1.5 rounded-lg border border-border/30 p-3 bg-background/50">
+                                {chats.map(msg => (
+                                  <div key={msg.id} className="text-xs">
+                                    <span className="font-medium text-primary">{getUserName(msg.user_id)}</span>
+                                    <span className="text-muted-foreground mx-1">·</span>
+                                    <span className="text-muted-foreground">{new Date(msg.created_at).toLocaleString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                                    <p className="text-foreground mt-0.5">{msg.content}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
         {tab === 'chats' && (
           <div className="space-y-6">
             {/* App chats grouped by app */}
@@ -1329,7 +1531,7 @@ export default function AdminPanel() {
 
       {/* Confirm dialog */}
       {confirmAction && (() => {
-        const typeLabels: Record<string, string> = { user: 'Gebruiker', app: 'App', org: 'Bedrijf', ad: 'Advertentie' };
+        const typeLabels: Record<string, string> = { user: 'Gebruiker', app: 'App', org: 'Bedrijf', ad: 'Advertentie', alliance: 'Alliantie' };
         const typeLabel = typeLabels[confirmAction.type] || '';
         const isDelete = confirmAction.action === 'delete';
         const isBan = confirmAction.action === 'ban';
