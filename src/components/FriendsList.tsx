@@ -4,12 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users } from 'lucide-react';
+import { StatusDot } from '@/components/StatusDot';
 
 interface Friend {
   id: string;
   display_name: string | null;
   avatar_url: string | null;
   username: string | null;
+  is_dnd?: boolean;
 }
 
 export function FriendsList({ userId }: { userId: string }) {
@@ -42,7 +44,7 @@ export function FriendsList({ userId }: { userId: string }) {
 
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, display_name, avatar_url, username')
+      .select('id, display_name, avatar_url, username, is_dnd')
       .in('id', friendIds);
 
     setFriends(profiles || []);
@@ -81,14 +83,17 @@ export function FriendsList({ userId }: { userId: string }) {
               onClick={() => navigate(`/profiel/${friend.username || friend.id}`)}
               className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-secondary/50 transition-all group"
             >
-              <Avatar className="h-12 w-12 ring-2 ring-transparent group-hover:ring-primary/20 transition-all">
-                {friend.avatar_url ? (
-                  <AvatarImage src={friend.avatar_url} alt={friend.display_name || ''} className="object-cover" />
-                ) : null}
-                <AvatarFallback className="text-xs font-bold bg-gradient-to-br from-primary/30 to-accent/20 text-primary">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative">
+                <Avatar className="h-12 w-12 ring-2 ring-transparent group-hover:ring-primary/20 transition-all">
+                  {friend.avatar_url ? (
+                    <AvatarImage src={friend.avatar_url} alt={friend.display_name || ''} className="object-cover" />
+                  ) : null}
+                  <AvatarFallback className="text-xs font-bold bg-gradient-to-br from-primary/30 to-accent/20 text-primary">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <StatusDot isDnd={(friend as any).is_dnd ?? false} className="absolute -bottom-0.5 -right-0.5" />
+              </div>
               <span className="text-[11px] text-muted-foreground font-medium truncate max-w-[72px]">
                 {friend.display_name || 'Anoniem'}
               </span>

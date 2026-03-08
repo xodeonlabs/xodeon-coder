@@ -8,6 +8,7 @@ import { ArrowLeft, Calendar, Code2, Users, Eye, ExternalLink, Settings, Sparkle
 import { FriendButton } from '@/components/FriendButton';
 import { FriendsList } from '@/components/FriendsList';
 import { ActivityTimeline } from '@/components/ActivityTimeline';
+import { StatusDot } from '@/components/StatusDot';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
@@ -21,6 +22,7 @@ interface ProfileData {
   social_links: Record<string, string> | null;
   show_email: boolean;
   email?: string;
+  is_dnd?: boolean;
 }
 
 interface ProfileStats {
@@ -56,18 +58,18 @@ export default function Profile() {
       if (isUuid) {
         const res = await supabase
           .from('profiles')
-          .select('id, display_name, avatar_url, bio, created_at, username, social_links, show_email, public_email')
+          .select('id, display_name, avatar_url, bio, created_at, username, social_links, show_email, public_email, is_dnd')
           .eq('id', username)
           .single();
-        prof = res.data ? { ...res.data, email: (res.data as any).public_email } as ProfileData : null;
+        prof = res.data ? { ...res.data, email: (res.data as any).public_email, is_dnd: (res.data as any).is_dnd } as ProfileData : null;
         error = res.error;
       } else {
         const res = await supabase
           .from('profiles')
-          .select('id, display_name, avatar_url, bio, created_at, username, social_links, show_email, public_email')
+          .select('id, display_name, avatar_url, bio, created_at, username, social_links, show_email, public_email, is_dnd')
           .eq('username', username)
           .single();
-        prof = res.data ? { ...res.data, email: (res.data as any).public_email } as ProfileData : null;
+        prof = res.data ? { ...res.data, email: (res.data as any).public_email, is_dnd: (res.data as any).is_dnd } as ProfileData : null;
         error = res.error;
       }
 
@@ -230,6 +232,7 @@ export default function Profile() {
                   {initials}
                 </AvatarFallback>
               </Avatar>
+              <StatusDot isDnd={profile?.is_dnd ?? false} size="md" className="absolute bottom-1 right-1" />
             </div>
 
             {/* Name & Bio */}

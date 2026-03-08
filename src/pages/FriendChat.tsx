@@ -6,6 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ArrowLeft, Send, MessageCircle, Gamepad2 } from 'lucide-react';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { SnakeGame } from '@/components/SnakeGame';
+import { StatusDot } from '@/components/StatusDot';
 
 interface ChatFriend {
   id: string;
@@ -15,6 +16,7 @@ interface ChatFriend {
   lastMessage?: string;
   lastMessageAt?: string;
   unread?: number;
+  is_dnd?: boolean;
 }
 
 interface Message {
@@ -68,7 +70,7 @@ export default function FriendChatPage() {
 
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, display_name, avatar_url, username')
+      .select('id, display_name, avatar_url, username, is_dnd')
       .in('id', friendIds);
 
     if (!profiles) { setLoading(false); return; }
@@ -218,14 +220,17 @@ export default function FriendChatPage() {
 
           {selectedFriend ? (
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <Avatar className="h-8 w-8">
-                {selectedFriend.avatar_url ? (
-                  <AvatarImage src={selectedFriend.avatar_url} alt="" className="object-cover" />
-                ) : null}
-                <AvatarFallback className="text-xs font-bold bg-gradient-to-br from-primary/30 to-accent/20 text-primary">
-                  {selectedFriend.display_name?.slice(0, 2).toUpperCase() || '??'}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative shrink-0">
+                <Avatar className="h-8 w-8">
+                  {selectedFriend.avatar_url ? (
+                    <AvatarImage src={selectedFriend.avatar_url} alt="" className="object-cover" />
+                  ) : null}
+                  <AvatarFallback className="text-xs font-bold bg-gradient-to-br from-primary/30 to-accent/20 text-primary">
+                    {selectedFriend.display_name?.slice(0, 2).toUpperCase() || '??'}
+                  </AvatarFallback>
+                </Avatar>
+                <StatusDot isDnd={(selectedFriend as any).is_dnd ?? false} className="absolute -bottom-0.5 -right-0.5" />
+              </div>
               <div className="min-w-0">
                 <h2 className="text-sm font-bold text-foreground truncate">{selectedFriend.display_name || 'Anoniem'}</h2>
                 {selectedFriend.username && <p className="text-[11px] text-muted-foreground">@{selectedFriend.username}</p>}
@@ -282,10 +287,12 @@ export default function FriendChatPage() {
                           {initials}
                         </AvatarFallback>
                       </Avatar>
-                      {(friend.unread ?? 0) > 0 && (
+                      {(friend.unread ?? 0) > 0 ? (
                         <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1">
                           {friend.unread}
                         </span>
+                      ) : (
+                        <StatusDot isDnd={(friend as any).is_dnd ?? false} className="absolute -bottom-0.5 -right-0.5" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">

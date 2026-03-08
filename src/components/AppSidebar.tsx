@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/sidebar';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { AppIcon } from '@/components/IconPicker';
+import { StatusDot } from '@/components/StatusDot';
 
 const NAV_ITEMS = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard },
@@ -287,7 +288,7 @@ export function AppSidebar() {
             className="cursor-pointer shrink-0 relative"
           >
             <ProfileAvatar size="sm" />
-            <span className={`absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background ${dndEnabled ? 'bg-destructive animate-pulse' : 'bg-emerald-500'}`} title={dndEnabled ? 'Niet storen' : 'Beschikbaar'} />
+            <StatusDot isDnd={dndEnabled} className="absolute -top-0.5 -right-0.5" />
           </div>
           {!collapsed && (
             <div className="flex-1 min-w-0">

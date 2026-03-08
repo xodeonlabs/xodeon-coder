@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 const NOTIFICATION_SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
 const STORAGE_KEY = 'ngc-notification-sound';
@@ -51,6 +52,12 @@ export function setDoNotDisturbEnabled(enabled: boolean) {
   try {
     localStorage.setItem(DND_STORAGE_KEY, String(enabled));
     window.dispatchEvent(new CustomEvent('dnd-changed', { detail: enabled }));
+    // Sync to database
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user?.id) {
+        supabase.from('profiles').update({ is_dnd: enabled } as any).eq('id', data.user.id).then(() => {});
+      }
+    });
   } catch {
     // ignore
   }

@@ -962,6 +962,7 @@ export type Database = {
           display_name: string | null
           friend_chat_retention_hours: number
           id: string
+          is_dnd: boolean
           public_email: string | null
           show_email: boolean | null
           social_links: Json | null
@@ -975,6 +976,7 @@ export type Database = {
           display_name?: string | null
           friend_chat_retention_hours?: number
           id: string
+          is_dnd?: boolean
           public_email?: string | null
           show_email?: boolean | null
           social_links?: Json | null
@@ -988,6 +990,7 @@ export type Database = {
           display_name?: string | null
           friend_chat_retention_hours?: number
           id?: string
+          is_dnd?: boolean
           public_email?: string | null
           show_email?: boolean | null
           social_links?: Json | null
