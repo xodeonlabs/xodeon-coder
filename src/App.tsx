@@ -35,6 +35,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <AppLayout>{children}</AppLayout>;
 }
 
+function ProtectedPreview() {
+  const { session, loading } = useAuth();
+  usePresence();
+  if (loading) return <div className="flex h-screen items-center justify-center" style={{ background: '#0a0e1a' }}><span className="text-sm text-muted-foreground">Laden...</span></div>;
+  if (!session) return <Navigate to="/auth" replace />;
+  return <Preview />;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -52,7 +60,7 @@ const App = () => (
           <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
           <Route path="/alliances" element={<ProtectedRoute><Alliances /></ProtectedRoute>} />
           <Route path="/editor/:appId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-          <Route path="/preview/:appId" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
+          <Route path="/preview/:appId" element={<ProtectedPreview />} />
           <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
           <Route path="/berichten" element={<ProtectedRoute><FriendChat /></ProtectedRoute>} />
           <Route path="/groepen" element={<ProtectedRoute><GroupChats /></ProtectedRoute>} />
