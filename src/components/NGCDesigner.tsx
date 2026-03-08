@@ -242,14 +242,14 @@ function DesignerNodeContent({ node, runtime }: { node: NGCNode; runtime: NGCRun
   switch (node.type) {
     case 'Frame':
       return (
-        <div style={{ width: '100%', height: '100%', background: color || '#1e293b', borderRadius: `${radius}px`, overflow: 'hidden', position: 'relative' }}>
+        <div style={{ width: '100%', height: '100%', background: color || 'rgb(30,41,59)', borderRadius: `${radius}px`, overflow: 'hidden', position: 'relative' }}>
         </div>
       );
     case 'Button':
       return (
         <div style={{
           width: '100%', height: '100%',
-          background: color || '#3b82f6', color: '#fff',
+          background: color || 'rgb(59,130,246)', color: '#fff',
           borderRadius: `${radius}px`,
           fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
           pointerEvents: 'none',
@@ -259,7 +259,7 @@ function DesignerNodeContent({ node, runtime }: { node: NGCNode; runtime: NGCRun
       );
     case 'Text':
       return (
-        <div style={{ width: '100%', height: '100%', color: color || '#fff', fontSize: 16, pointerEvents: 'none' }}>
+        <div style={{ width: '100%', height: '100%', color: color || 'rgb(255,255,255)', fontSize: 16, pointerEvents: 'none' }}>
           {text}
         </div>
       );
