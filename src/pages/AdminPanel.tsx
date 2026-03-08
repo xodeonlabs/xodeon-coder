@@ -648,6 +648,64 @@ export default function AdminPanel() {
           </div>
         )}
 
+        {/* Activity tab */}
+        {tab === 'activity' && (
+          <div className="rounded-xl border border-border/50 p-5" style={{ background: 'hsl(var(--card))' }}>
+            <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
+              <Activity className="h-4 w-4 text-primary" /> Recente activiteiten ({activityLogs.length})
+            </h3>
+            {activityLogs.length === 0 ? (
+              <div className="text-center py-8">
+                <Activity className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">Nog geen activiteiten gelogd.</p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {activityLogs.map((log: any) => {
+                  const adminName = getUserName(log.admin_id);
+                  const targetName = log.target_id ? getUserName(log.target_id) : null;
+                  const time = new Date(log.created_at);
+                  const timeStr = time.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+                  
+                  const actionIcons: Record<string, JSX.Element> = {
+                    'Rol toegevoegd': <UserPlus className="h-3.5 w-3.5 text-primary" />,
+                    'Rol verwijderd': <Trash2 className="h-3.5 w-3.5 text-orange-500" />,
+                    'Gebruiker geblokkeerd': <Ban className="h-3.5 w-3.5 text-orange-500" />,
+                    'Gebruiker gedeblokkeerd': <ShieldOff className="h-3.5 w-3.5 text-primary" />,
+                    'Gebruiker verwijderd': <Trash2 className="h-3.5 w-3.5 text-destructive" />,
+                    'Advertentie aangemaakt': <Plus className="h-3.5 w-3.5 text-primary" />,
+                    'Advertentie bijgewerkt': <Pencil className="h-3.5 w-3.5 text-primary" />,
+                    'Advertentie verwijderd': <Trash2 className="h-3.5 w-3.5 text-destructive" />,
+                    'Advertentie geactiveerd': <Eye className="h-3.5 w-3.5 text-primary" />,
+                    'Advertentie gedeactiveerd': <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />,
+                  };
+
+                  return (
+                    <div key={log.id} className="flex items-start gap-3 rounded-lg px-3 py-2.5 bg-background/50 hover:bg-secondary/20 transition-colors">
+                      <div className="mt-0.5 p-1.5 rounded-lg bg-secondary/60 shrink-0">
+                        {actionIcons[log.action] || <Activity className="h-3.5 w-3.5 text-muted-foreground" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-foreground">
+                          <span className="font-semibold">{adminName}</span>
+                          {' '}<span className="text-muted-foreground">{log.action.toLowerCase()}</span>
+                          {targetName && log.target_type === 'user' && (
+                            <>{' '}<span className="font-medium">{targetName}</span></>
+                          )}
+                          {log.details && (
+                            <span className="text-muted-foreground"> · {log.details}</span>
+                          )}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{timeStr}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Stats */}
         <div className="grid grid-cols-4 gap-3 mt-6">
           <div className="rounded-xl border border-border/50 p-4 text-center" style={{ background: 'hsl(var(--card))' }}>
