@@ -298,9 +298,12 @@ export default function Dashboard() {
   }, [session?.user?.id]);
 
   async function fetchApps() {
+    if (!session?.user?.id) { setLoading(false); return; }
+    const cached = getCached<App[]>(CACHE_KEYS.apps(session.user.id), CACHE_TTL.short);
+    if (cached) { setApps(cached); setLoading(false); return; }
     const { data, error } = await supabase.from('apps').select('*').order('updated_at', { ascending: false });
     if (error) { toast({ title: 'Fout bij laden', description: error.message, variant: 'destructive' }); }
-    else { setApps(data || []); }
+    else { setApps(data || []); setCache(CACHE_KEYS.apps(session.user.id), data || []); }
     setLoading(false);
   }
 
