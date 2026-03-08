@@ -271,6 +271,7 @@ export default function AdminPanel() {
     }
   }
 
+  async function adminUpdateCoins() {
     if (!coinUserId || !coinAmount) return;
     setCoinSaving(true);
     const { error } = await supabase.functions.invoke('admin-manage-coins', {
