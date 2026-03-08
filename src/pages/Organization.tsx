@@ -51,7 +51,7 @@ export default function OrganizationPage() {
   const [joining, setJoining] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [members, setMembers] = useState<OrgMember[]>([]);
-  const [memberProfiles, setMemberProfiles] = useState<Record<string, { display_name: string | null; avatar_url: string | null }>>({});
+  const [memberProfiles, setMemberProfiles] = useState<Record<string, { display_name: string | null; avatar_url: string | null; bio: string | null }>>({});
   const [orgApps, setOrgApps] = useState<OrgApp[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [orgCoins, setOrgCoins] = useState<OrgCoin[]>([]);
@@ -153,11 +153,11 @@ export default function OrganizationPage() {
       // Fetch profiles for all members
       const userIds = mems.map(m => m.user_id);
       if (userIds.length > 0) {
-        const { data: profiles } = await supabase.from('profiles').select('id, display_name, avatar_url').in('id', userIds);
+        const { data: profiles } = await supabase.from('profiles').select('id, display_name, avatar_url, bio').in('id', userIds);
         if (profiles) {
-          const map: Record<string, { display_name: string | null; avatar_url: string | null }> = {};
+          const map: Record<string, { display_name: string | null; avatar_url: string | null; bio: string | null }> = {};
           for (const p of profiles) {
-            map[p.id] = { display_name: p.display_name, avatar_url: p.avatar_url };
+            map[p.id] = { display_name: p.display_name, avatar_url: p.avatar_url, bio: (p as any).bio ?? null };
           }
           setMemberProfiles(map);
         }
@@ -493,10 +493,17 @@ export default function OrganizationPage() {
                         </AvatarFallback>
                       </Avatar>
                       {roleIcon(member.role)}
-                      <span className="text-sm text-foreground truncate">
-                        {memberProfiles[member.user_id]?.display_name || `${member.user_id.slice(0, 8)}...`}
-                      </span>
-                      <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-secondary shrink-0">{roleLabel(member.role)}</span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-foreground truncate">
+                            {memberProfiles[member.user_id]?.display_name || `${member.user_id.slice(0, 8)}...`}
+                          </span>
+                          <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-secondary shrink-0">{roleLabel(member.role)}</span>
+                        </div>
+                        {memberProfiles[member.user_id]?.bio && (
+                          <p className="text-[11px] text-muted-foreground truncate mt-0.5">{memberProfiles[member.user_id].bio}</p>
+                        )}
+                      </div>
                     </div>
                     {selectedOrg.owner_id === session?.user?.id && member.role !== 'owner' && (
                       <div className="flex items-center gap-2">
