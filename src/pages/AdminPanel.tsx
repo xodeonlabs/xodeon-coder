@@ -406,12 +406,28 @@ export default function AdminPanel() {
     return authUsers.find(u => u.id === userId)?.email || null;
   }
 
-  function getUserName(userId: string) {
+  function getUserNameText(userId: string) {
     const p = profiles.find(p => p.id === userId);
     if (p?.display_name) return p.display_name;
     const email = getUserEmail(userId);
     if (email) return email;
     return `${userId.slice(0, 8)}...`;
+  }
+
+  function getUserName(userId: string) {
+    return getUserNameText(userId);
+  }
+
+  function UserLink({ userId, className }: { userId: string; className?: string }) {
+    const name = getUserNameText(userId);
+    return (
+      <span
+        onClick={(e) => { e.stopPropagation(); navigate(`/profiel/${userId}`); }}
+        className={`cursor-pointer hover:text-primary hover:underline transition-colors ${className || ''}`}
+      >
+        {name}
+      </span>
+    );
   }
 
   function getUserAvatar(userId: string) {
@@ -720,7 +736,7 @@ export default function AdminPanel() {
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-foreground truncate">{displayLabel}</p>
+                          <p className="text-sm font-semibold text-foreground truncate"><UserLink userId={profile.id} /></p>
                           {email && profile.display_name && <p className="text-[11px] text-muted-foreground truncate">{email}</p>}
                           {profile.bio && <p className="text-[11px] text-muted-foreground truncate">{profile.bio}</p>}
                           <p className="text-[10px] text-muted-foreground">
@@ -799,7 +815,7 @@ export default function AdminPanel() {
                   <div className="min-w-0 flex-1 cursor-pointer" onClick={() => navigate(`/editor/${app.id}`)}>
                     <p className="text-sm font-semibold text-foreground truncate">{app.name}</p>
                     <p className="text-[11px] text-muted-foreground">
-                      Eigenaar: {getUserName(app.owner_id)} · {app.is_public ? '🌍 Publiek' : '🔒 Privé'}
+                      Eigenaar: <UserLink userId={app.owner_id} /> · {app.is_public ? '🌍 Publiek' : '🔒 Privé'}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -870,7 +886,7 @@ export default function AdminPanel() {
                 <div key={org.id} className="flex items-center justify-between rounded-lg px-4 py-3 bg-background/50">
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-foreground truncate">{org.name}</p>
-                    <p className="text-[11px] text-muted-foreground">Eigenaar: {getUserName(org.owner_id)}</p>
+                    <p className="text-[11px] text-muted-foreground">Eigenaar: <UserLink userId={org.owner_id} /></p>
                   </div>
                   <button
                     onClick={() => setConfirmAction({ id: org.id, action: 'delete', type: 'org', name: org.name })}
