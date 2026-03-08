@@ -24,8 +24,20 @@ function parseSize(size: string): { w: number; h: number } {
 
 function initRuntime(ast: NGCNode, runtime: NGCRuntime) {
   if (ast.type === 'Var') {
+    // Check for coins definition
+    const coinsDef = parseCoinsCommand(ast.name);
+    if (coinsDef && coinsDef.operation === 'Set') {
+      if (runtime.coinsGet(coinsDef.name) === 0 && !(coinsDef.name in runtime.coins)) {
+        runtime.coinsSet(coinsDef.name, coinsDef.amount!);
+      }
+    }
+    // Check for coins code registration
+    if (coinsDef && coinsDef.operation === 'RegisterCode') {
+      runtime.coinsRegisterCode(coinsDef.name, coinsDef.code!, coinsDef.amount!);
+    }
+
     const def = parseVarDefinition(ast.name);
-    if (def && !(def.varName in runtime.variables)) {
+    if (def && !(def.varName in runtime.variables) && !coinsDef) {
       runtime.setVar(def.varName, cleanStr(def.value));
     }
   }
