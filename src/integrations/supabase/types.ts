@@ -270,6 +270,7 @@ export type Database = {
       }
       alliances: {
         Row: {
+          chat_retention_hours: number
           created_at: string
           created_by: string
           icon: string | null
@@ -277,6 +278,7 @@ export type Database = {
           name: string
         }
         Insert: {
+          chat_retention_hours?: number
           created_at?: string
           created_by: string
           icon?: string | null
@@ -284,6 +286,7 @@ export type Database = {
           name: string
         }
         Update: {
+          chat_retention_hours?: number
           created_at?: string
           created_by?: string
           icon?: string | null
@@ -752,6 +755,7 @@ export type Database = {
       organizations: {
         Row: {
           bio: string
+          chat_retention_hours: number
           created_at: string
           icon: string | null
           id: string
@@ -762,6 +766,7 @@ export type Database = {
         }
         Insert: {
           bio?: string
+          chat_retention_hours?: number
           created_at?: string
           icon?: string | null
           id?: string
@@ -772,6 +777,7 @@ export type Database = {
         }
         Update: {
           bio?: string
+          chat_retention_hours?: number
           created_at?: string
           icon?: string | null
           id?: string
@@ -788,6 +794,7 @@ export type Database = {
           bio: string | null
           created_at: string
           display_name: string | null
+          friend_chat_retention_hours: number
           id: string
           public_email: string | null
           show_email: boolean | null
@@ -800,6 +807,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          friend_chat_retention_hours?: number
           id: string
           public_email?: string | null
           show_email?: boolean | null
@@ -812,6 +820,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          friend_chat_retention_hours?: number
           id?: string
           public_email?: string | null
           show_email?: boolean | null

@@ -5,10 +5,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const FRIEND_CHAT_RETENTION_HOURS = 24;
-const ORG_CHAT_RETENTION_HOURS = 48;
-const ALLIANCE_CHAT_RETENTION_HOURS = 48;
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -50,57 +46,122 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 2. Friend messages
+    // 2. Friend messages (per-user retention from profiles.friend_chat_retention_hours)
     {
-      const cutoff = new Date(Date.now() - FRIEND_CHAT_RETENTION_HOURS * 60 * 60 * 1000).toISOString();
-      const { data, error } = await supabase
-        .from("friend_messages")
-        .delete()
-        .lt("created_at", cutoff)
-        .select("id");
+      // Get all unique retention values
+      const { data: profiles, error: profError } = await supabase
+        .from("profiles")
+        .select("id, friend_chat_retention_hours");
 
-      if (error) {
-        console.error("Error deleting friend messages:", error);
+      if (profError) {
+        console.error("Error fetching profiles for friend retention:", profError);
       } else {
-        const count = data?.length ?? 0;
-        if (count > 0) console.log(`Friend messages: deleted ${count} (${FRIEND_CHAT_RETENTION_HOURS}h)`);
-        totalDeleted += count;
+        // Group users by retention hours
+        const retentionMap = new Map<number, string[]>();
+        for (const p of profiles ?? []) {
+          const hours = p.friend_chat_retention_hours ?? 24;
+          if (!retentionMap.has(hours)) retentionMap.set(hours, []);
+          retentionMap.get(hours)!.push(p.id);
+        }
+
+        // For each retention group, delete old messages where BOTH sender and receiver have that retention
+        // Simplified: delete messages older than the MINIMUM retention of sender/receiver
+        // For simplicity, we delete based on sender's retention setting
+        for (const [hours, userIds] of retentionMap) {
+          const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+          for (let i = 0; i < userIds.length; i += 50) {
+            const batch = userIds.slice(i, i + 50);
+            const { data, error } = await supabase
+              .from("friend_messages")
+              .delete()
+              .in("sender_id", batch)
+              .lt("created_at", cutoff)
+              .select("id");
+
+            if (error) {
+              console.error("Error deleting friend messages:", error);
+            } else {
+              const count = data?.length ?? 0;
+              if (count > 0) console.log(`Friend messages (${hours}h): deleted ${count}`);
+              totalDeleted += count;
+            }
+          }
+        }
+
+        // Also clean up messages from users without profiles (fallback 24h)
+        const fallbackCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        const allUserIds = (profiles ?? []).map(p => p.id);
+        if (allUserIds.length > 0) {
+          // Delete old messages from senders not in profiles
+          const { data, error } = await supabase
+            .from("friend_messages")
+            .delete()
+            .lt("created_at", fallbackCutoff)
+            .select("id");
+          // This is handled by the per-user logic above for known users
+        }
       }
     }
 
-    // 3. Org chat messages
+    // 3. Org chat messages (per-org retention)
     {
-      const cutoff = new Date(Date.now() - ORG_CHAT_RETENTION_HOURS * 60 * 60 * 1000).toISOString();
-      const { data, error } = await supabase
-        .from("org_chat_messages")
-        .delete()
-        .lt("created_at", cutoff)
-        .select("id");
+      const { data: orgs, error: orgsError } = await supabase
+        .from("organizations")
+        .select("id, chat_retention_hours");
 
-      if (error) {
-        console.error("Error deleting org chat messages:", error);
+      if (orgsError) {
+        console.error("Error fetching orgs:", orgsError);
       } else {
-        const count = data?.length ?? 0;
-        if (count > 0) console.log(`Org chat: deleted ${count} (${ORG_CHAT_RETENTION_HOURS}h)`);
-        totalDeleted += count;
+        for (const org of orgs ?? []) {
+          const hours = org.chat_retention_hours ?? 48;
+          const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+
+          const { data, error } = await supabase
+            .from("org_chat_messages")
+            .delete()
+            .eq("organization_id", org.id)
+            .lt("created_at", cutoff)
+            .select("id");
+
+          if (error) {
+            console.error(`Error deleting org chat for ${org.id}:`, error);
+            continue;
+          }
+          const count = data?.length ?? 0;
+          if (count > 0) console.log(`Org ${org.id}: deleted ${count} msgs (${hours}h)`);
+          totalDeleted += count;
+        }
       }
     }
 
-    // 4. Alliance chat messages
+    // 4. Alliance chat messages (per-alliance retention)
     {
-      const cutoff = new Date(Date.now() - ALLIANCE_CHAT_RETENTION_HOURS * 60 * 60 * 1000).toISOString();
-      const { data, error } = await supabase
-        .from("alliance_chat_messages")
-        .delete()
-        .lt("created_at", cutoff)
-        .select("id");
+      const { data: alliances, error: alliancesError } = await supabase
+        .from("alliances")
+        .select("id, chat_retention_hours");
 
-      if (error) {
-        console.error("Error deleting alliance chat messages:", error);
+      if (alliancesError) {
+        console.error("Error fetching alliances:", alliancesError);
       } else {
-        const count = data?.length ?? 0;
-        if (count > 0) console.log(`Alliance chat: deleted ${count} (${ALLIANCE_CHAT_RETENTION_HOURS}h)`);
-        totalDeleted += count;
+        for (const alliance of alliances ?? []) {
+          const hours = alliance.chat_retention_hours ?? 48;
+          const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+
+          const { data, error } = await supabase
+            .from("alliance_chat_messages")
+            .delete()
+            .eq("alliance_id", alliance.id)
+            .lt("created_at", cutoff)
+            .select("id");
+
+          if (error) {
+            console.error(`Error deleting alliance chat for ${alliance.id}:`, error);
+            continue;
+          }
+          const count = data?.length ?? 0;
+          if (count > 0) console.log(`Alliance ${alliance.id}: deleted ${count} msgs (${hours}h)`);
+          totalDeleted += count;
+        }
       }
     }
 

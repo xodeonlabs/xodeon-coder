@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ArrowLeft, Send, MessageCircle } from 'lucide-react';
+import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 
 interface ChatFriend {
   id: string;
@@ -34,11 +35,16 @@ export default function FriendChatPage() {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const myId = session?.user?.id;
+  const [myRetentionHours, setMyRetentionHours] = useState(24);
 
   // Load friends list
   useEffect(() => {
     if (!myId) return;
     loadFriends();
+    // Load own retention setting
+    supabase.from('profiles').select('friend_chat_retention_hours').eq('id', myId).maybeSingle().then(({ data }) => {
+      if (data) setMyRetentionHours((data as any).friend_chat_retention_hours ?? 24);
+    });
   }, [myId]);
 
   async function loadFriends() {
@@ -224,10 +230,20 @@ export default function FriendChatPage() {
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-bold text-foreground font-display">Berichten</h2>
-            </div>
+            <>
+              <div className="flex items-center gap-2 flex-1">
+                <MessageCircle className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-bold text-foreground font-display">Berichten</h2>
+              </div>
+              <ChatRetentionSelector
+                currentHours={myRetentionHours}
+                onUpdate={async (hours) => {
+                  const { error } = await supabase.from('profiles').update({ friend_chat_retention_hours: hours } as any).eq('id', myId!);
+                  if (!error) setMyRetentionHours(hours);
+                }}
+                label="Bewaring"
+              />
+            </>
           )}
         </div>
       </header>
