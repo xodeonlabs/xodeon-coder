@@ -388,6 +388,56 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Template Dialog */}
+      {showTemplateDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowTemplateDialog(false)}>
+          <div className="rounded-2xl border border-border/50 p-8 w-full max-w-md shadow-2xl" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10"><FileCode className="h-5 w-5 text-primary" /></div>
+                Template aanmaken
+              </h3>
+              <button onClick={() => setShowTemplateDialog(false)} className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg p-1.5 transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6">Maak een publieke template die anderen kunnen remixen.</p>
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Naam</label>
+                <input
+                  type="text"
+                  placeholder="Mijn Template"
+                  value={templateName}
+                  onChange={e => setTemplateName(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && createTemplate()}
+                  className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Beschrijving (optioneel)</label>
+                <textarea
+                  placeholder="Korte beschrijving van de template..."
+                  value={templateDesc}
+                  onChange={e => setTemplateDesc(e.target.value)}
+                  rows={3}
+                  className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setShowTemplateDialog(false)} className="px-5 py-2.5 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
+                Annuleren
+              </button>
+              <button onClick={createTemplate} disabled={creatingTemplate || !templateName.trim()} className="px-6 py-2.5 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all active:scale-95">
+                {creatingTemplate ? 'Aanmaken...' : 'Aanmaken'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
