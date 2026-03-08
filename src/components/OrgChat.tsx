@@ -77,6 +77,17 @@ export function OrgChat({ organizationId }: OrgChatProps) {
         return map;
       });
     }
+    // Check which senders are admins
+    const adminSet = new Set<string>();
+    for (const uid of unique) {
+      const { data: isAdmin } = await supabase.rpc('has_role', { _user_id: uid, _role: 'admin' });
+      if (isAdmin) adminSet.add(uid);
+    }
+    setAdminIds(prev => {
+      const merged = new Set(prev);
+      adminSet.forEach(id => merged.add(id));
+      return merged;
+    });
   }
 
   // Mark as read when viewing
