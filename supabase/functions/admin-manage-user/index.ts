@@ -59,6 +59,16 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Invalid user ID format" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // Protect owner from being managed
+    const { data: targetRoles } = await adminClient
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", target_user_id)
+      .eq("role", "owner");
+    if (targetRoles && targetRoles.length > 0) {
+      return new Response(JSON.stringify({ error: "Cannot manage the platform owner" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     if (action === "ban") {
       // Ban user by updating their ban status
       const { error } = await adminClient.auth.admin.updateUserById(target_user_id, {
