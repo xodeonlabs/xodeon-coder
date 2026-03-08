@@ -761,7 +761,7 @@ export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => 
                       {folder.snippets.map(snippet => (
                         <button
                           key={snippet.label}
-                          onClick={() => isTemplates && onCreateTemplate ? handleCreateTemplate(snippet, folder.name) : handleCopy(snippet)}
+                          onClick={() => handleCopy(snippet)}
                           className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded-sm hover:bg-primary/10 transition-colors text-left group"
                         >
                           <div className="flex-1 min-w-0">
