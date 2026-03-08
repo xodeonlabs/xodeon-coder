@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Send, Check, CheckCheck } from 'lucide-react';
+import { Send, Check, CheckCheck, Gamepad2 } from 'lucide-react';
+import { SnakeGame } from '@/components/SnakeGame';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { getCached, setCache, CACHE_TTL } from '@/lib/cache';
 
