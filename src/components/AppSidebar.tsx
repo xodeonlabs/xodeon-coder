@@ -96,7 +96,7 @@ export function AppSidebar() {
         const msg = payload.new as any;
         if (msg?.user_id !== session.user.id) {
           playNotification();
-          if (getNotificationToastEnabled()) {
+          if (!getDoNotDisturbEnabled() && getNotificationToastEnabled()) {
             supabase.from('profiles').select('display_name').eq('id', msg.user_id).maybeSingle().then(({ data }) => {
               const name = data?.display_name || 'Iemand';
               toast(name, {
