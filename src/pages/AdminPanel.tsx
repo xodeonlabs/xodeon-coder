@@ -1109,7 +1109,7 @@ export default function AdminPanel() {
                             <Pencil className="h-3.5 w-3.5" />
                           </button>
                           <button
-                            onClick={() => setConfirmAction({ id: t.id, action: 'delete', type: 'app', name: t.name })}
+                            onClick={() => setConfirmAction({ id: t.id, action: 'delete', type: 'template', name: t.name })}
                             className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                             title="Verwijderen"
                           >
