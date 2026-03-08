@@ -736,7 +736,7 @@ export default function AdminPanel() {
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-foreground truncate">{displayLabel}</p>
+                          <p className="text-sm font-semibold text-foreground truncate"><UserLink userId={profile.id} /></p>
                           {email && profile.display_name && <p className="text-[11px] text-muted-foreground truncate">{email}</p>}
                           {profile.bio && <p className="text-[11px] text-muted-foreground truncate">{profile.bio}</p>}
                           <p className="text-[10px] text-muted-foreground">
