@@ -223,6 +223,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showNewAppDialog, setShowNewAppDialog] = useState(false);
+  const [templateDialog, setTemplateDialog] = useState<{ open: boolean; app: App | null; name: string; category: string }>({ open: false, app: null, name: '', category: 'algemeen' });
   const [inviteAppId, setInviteAppId] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
   const [invitePercentage, setInvitePercentage] = useState(10);
@@ -525,21 +526,27 @@ export default function Dashboard() {
     }
   }
 
-  async function convertToTemplate(app: App) {
-    if (!session?.user?.id) return;
+  function openTemplateDialog(app: App) {
+    setTemplateDialog({ open: true, app, name: app.name, category: 'algemeen' });
+  }
+
+  async function confirmConvertToTemplate() {
+    if (!session?.user?.id || !templateDialog.app) return;
     const { error } = await supabase.from('templates').insert({
       author_id: session.user.id,
-      name: app.name,
-      description: `Template op basis van "${app.name}"`,
-      ngc_code: app.ngc_code,
+      name: templateDialog.name || templateDialog.app.name,
+      description: `Template op basis van "${templateDialog.app.name}"`,
+      ngc_code: templateDialog.app.ngc_code,
+      category: templateDialog.category,
       is_published: true,
     });
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: '📦 Template aangemaakt!', description: `"${app.name}" is nu beschikbaar als template.` });
+      toast({ title: '📦 Template aangemaakt!', description: `"${templateDialog.name}" is nu beschikbaar als template.` });
       confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
     }
+    setTemplateDialog({ open: false, app: null, name: '', category: 'algemeen' });
   }
 
   async function createTemplate() {
@@ -980,7 +987,7 @@ export default function Dashboard() {
                   <ActionBtn onClick={() => setContractAppId(app.id)} icon={<FileText className="h-3.5 w-3.5" />} title="Contracten bekijken" className="hover:text-accent" />
                   <ActionBtn onClick={() => openPublishDialog(app)} icon={<ExternalLink className="h-3.5 w-3.5" />} title="Publiceren" className="hover:text-primary" />
                   <ActionBtn onClick={() => togglePin(app.id)} icon={pinnedAppIds.includes(app.id) ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />} title={pinnedAppIds.includes(app.id) ? 'Losmaken' : 'Vastpinnen'} className={pinnedAppIds.includes(app.id) ? 'text-primary hover:text-destructive' : 'hover:text-primary'} />
-                  <ActionBtn onClick={() => convertToTemplate(app)} icon={<BookTemplate className="h-3.5 w-3.5" />} title="Maak template" className="hover:text-primary" />
+                  <ActionBtn onClick={() => openTemplateDialog(app)} icon={<BookTemplate className="h-3.5 w-3.5" />} title="Maak template" className="hover:text-primary" />
                   <ActionBtn onClick={() => duplicateApp(app)} icon={<CopyPlus className="h-3.5 w-3.5" />} title="Dupliceren" className="hover:text-accent" />
                   <ActionBtn onClick={() => deleteApp(app.id, app.name)} icon={<Trash2 className="h-3.5 w-3.5" />} title="Verwijderen" className="ml-auto hover:text-destructive hover:bg-destructive/10" />
                 </div>
@@ -1237,6 +1244,68 @@ export default function Dashboard() {
                 <p className="text-[11px] text-muted-foreground mt-0.5">Start vanuit een bestaand sjabloon</p>
               </div>
             </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Template Dialog */}
+      <Dialog open={templateDialog.open} onOpenChange={(open) => !open && setTemplateDialog(prev => ({ ...prev, open: false }))}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Template aanmaken</DialogTitle>
+            <DialogDescription>Geef je template een naam en kies een categorie.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Naam</label>
+              <input
+                type="text"
+                value={templateDialog.name}
+                onChange={e => setTemplateDialog(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Template naam..."
+                className="w-full px-3 py-2.5 rounded-xl border border-border/40 bg-card text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Categorie</label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { value: 'algemeen', label: 'Algemeen', icon: '✨' },
+                  { value: 'game', label: 'Games', icon: '🎮' },
+                  { value: 'tool', label: 'Tools', icon: '🛠️' },
+                  { value: 'shop', label: 'Shops', icon: '🛒' },
+                  { value: 'educatie', label: 'Educatie', icon: '📚' },
+                ].map(cat => (
+                  <button
+                    key={cat.value}
+                    onClick={() => setTemplateDialog(prev => ({ ...prev, category: cat.value }))}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border transition-all ${
+                      templateDialog.category === cat.value
+                        ? 'border-primary/40 bg-primary/10 text-primary'
+                        : 'border-border/40 text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                    }`}
+                  >
+                    <span>{cat.icon}</span>
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                onClick={() => setTemplateDialog({ open: false, app: null, name: '', category: 'algemeen' })}
+                className="px-4 py-2 text-sm font-medium rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/30 transition-colors"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={confirmConvertToTemplate}
+                disabled={!templateDialog.name.trim()}
+                className="px-5 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 disabled:opacity-50 transition-all active:scale-[0.98]"
+              >
+                Aanmaken
+              </button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
