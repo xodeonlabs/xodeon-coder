@@ -21,6 +21,7 @@ interface Organization {
   created_at: string;
   icon?: string;
   bio?: string;
+  level?: number;
 }
 
 interface OrgMember {
