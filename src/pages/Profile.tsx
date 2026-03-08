@@ -655,7 +655,6 @@ function PublicApps({ userId, isOwner = false }: { userId: string; isOwner?: boo
     </div>
   );
 }
-      const { data } = await supabase
         .from('apps')
         .select('id, name, icon, slug, created_at, ngc_code')
         .eq('owner_id', userId)
