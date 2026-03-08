@@ -101,7 +101,24 @@ export default function OrganizationPage() {
         .from('organization_members')
         .insert({ organization_id: org.id, user_id: session.user.id, role: 'owner' as any });
 
-      toast({ title: 'Bedrijf aangemaakt!', description: `"${org.name}" is klaar.` });
+      // Start bedrijf met 1000 coins
+      await supabase.from('org_coins').insert({
+        organization_id: org.id,
+        name: 'coins',
+        balance: 1000,
+      } as any);
+
+      // Log de initiële storting
+      await supabase.from('org_coin_transactions').insert({
+        organization_id: org.id,
+        coin_name: 'coins',
+        amount: 1000,
+        type: 'deposit',
+        user_id: session.user.id,
+        note: 'Startsaldo bedrijf',
+      } as any);
+
+      toast({ title: 'Bedrijf aangemaakt!', description: `"${org.name}" is klaar met 1000 startcoins.` });
       setNewOrgName('');
       setShowCreate(false);
       fetchOrgs();
