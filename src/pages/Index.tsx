@@ -9,6 +9,7 @@ import { NGCDataPanel } from '@/components/NGCDataPanel';
 import { NGCChat } from '@/components/NGCChat';
 import { NGCContextMenu } from '@/components/NGCContextMenu';
 import { NGCToolbar } from '@/components/NGCToolbar';
+import { NGCDesigner } from '@/components/NGCDesigner';
 import { parseNGC, astToNGC } from '@/lib/ngc-parser';
 import { NGCNode, NGCNodeType, DEFAULT_PROPERTIES, generateId } from '@/lib/ngc-ast';
 import { splitCodeIntoSections, mergeSections, CodeSection } from '@/lib/ngc-code-sections';
