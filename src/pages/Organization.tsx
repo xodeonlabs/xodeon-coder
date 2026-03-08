@@ -1021,12 +1021,24 @@ export default function OrganizationPage() {
           )}
 
           <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
-            <div className="px-4 sm:px-6 py-3 border-b border-border/50">
-              <h3 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
-                <MessageCircle className="h-5 w-5 text-primary" />
-                Groepschat
-              </h3>
-              <p className="text-xs text-muted-foreground mt-0.5">Chat met alle leden van {selectedOrg.name}</p>
+            <div className="px-4 sm:px-6 py-3 border-b border-border/50 flex items-center justify-between">
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5 text-primary" />
+                  Groepschat
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Chat met alle leden van {selectedOrg.name}</p>
+              </div>
+              {(selectedOrg.owner_id === session?.user?.id || members.find(m => m.user_id === session?.user?.id && (m.role === 'owner' || m.role === 'admin'))) && (
+                <ChatRetentionSelector
+                  currentHours={(selectedOrg as any).chat_retention_hours ?? 48}
+                  onUpdate={async (hours) => {
+                    const { error } = await supabase.from('organizations').update({ chat_retention_hours: hours } as any).eq('id', selectedOrg.id);
+                    if (!error) setSelectedOrg({ ...selectedOrg, chat_retention_hours: hours } as any);
+                  }}
+                  label="Bewaring"
+                />
+              )}
             </div>
             <div style={{ height: 350 }}>
               <OrgChat organizationId={selectedOrg.id} />
