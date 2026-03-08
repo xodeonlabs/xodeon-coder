@@ -2,6 +2,19 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { NGCNode } from '@/lib/ngc-ast';
 import { createRuntime, NGCRuntime, resolveVarRefs, parseVarDefinition, parseListDefinition, parseDataCommand, parseCoinsCommand, clearPersistedState } from '@/lib/ngc-runtime';
 import { supabase } from '@/integrations/supabase/client';
+import { icons } from 'lucide-react';
+
+function LucideIcon({ name, size = 16, color = 'currentColor' }: { name: string; size?: number; color?: string }) {
+  // Convert common names: "heart" -> "Heart", "arrow-left" -> "ArrowLeft"
+  const pascalName = name
+    .split('-')
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('') as keyof typeof icons;
+  
+  const IconComponent = icons[pascalName];
+  if (!IconComponent) return null;
+  return <IconComponent size={size} color={color} />;
+}
 
 interface PreviewProps {
   ast: NGCNode | null;
