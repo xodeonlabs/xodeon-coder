@@ -26,6 +26,7 @@ const PublicApp = () => {
         } else {
           setCode(data.ngc_code || '');
           setAppName(data.name);
+          setOrgId((data as any).organization_id || null);
           // Record page view
           supabase.from('app_views').insert({
             app_id: data.id,
