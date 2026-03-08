@@ -142,6 +142,22 @@ export default function GroupChats() {
             if (data) setProfiles(prev => ({ ...prev, [data.id]: data }));
           });
         }
+        // Update own read status when receiving messages
+        if (myId && msg.user_id !== myId) {
+          supabase.from('chat_group_read_status' as any).upsert(
+            { group_id: selectedGroup.id, user_id: myId, last_read_at: new Date().toISOString() } as any,
+            { onConflict: 'group_id,user_id' }
+          );
+        }
+      })
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'chat_group_read_status',
+        filter: `group_id=eq.${selectedGroup.id}`,
+      }, (payload) => {
+        const row = payload.new as any;
+        if (row?.user_id && row?.last_read_at) {
+          setReadStatuses(prev => ({ ...prev, [row.user_id]: row.last_read_at }));
+        }
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
