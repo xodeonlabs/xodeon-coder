@@ -201,6 +201,7 @@ export default function AdminPanel() {
     return !!(authUser as any)?.banned_until && new Date((authUser as any).banned_until) > new Date();
   }
 
+  function getUserEmail(userId: string) {
     return authUsers.find(u => u.id === userId)?.email || null;
   }
 
