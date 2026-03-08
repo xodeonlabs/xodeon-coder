@@ -182,7 +182,7 @@ export function parseNGC(code: string): ParseResult {
     return { node, endIdx: idx };
   }
 
-  const result = parseNode(rootLineIdx, -1);
+  const result = parseNode(rootLineIdx, -1, 'root');
   if (!result) {
     errors.push({ line: lineInfos[rootLineIdx].lineNumber, message: 'Failed to parse App node' });
     return { ast: null, errors };
