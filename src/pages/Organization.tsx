@@ -175,7 +175,7 @@ export default function OrganizationPage() {
       setShowLinkApp(false);
       setLinkAppSearch('');
       setLinkAppResults([]);
-      selectOrg(selectedOrg);
+      viewMembers(selectedOrg);
     } catch (err: any) {
       toast({ title: 'Fout', description: err.message, variant: 'destructive' });
     }
