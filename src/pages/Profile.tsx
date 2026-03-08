@@ -655,7 +655,7 @@ function PublicApps({ userId, isOwner = false }: { userId: string; isOwner?: boo
     </div>
   );
 }
-        .from('apps')
+
         .select('id, name, icon, slug, created_at, ngc_code')
         .eq('owner_id', userId)
         .eq('is_public', true)
