@@ -94,8 +94,13 @@ function executeDataCommand(cmd: ReturnType<typeof parseDataCommand>, runtime: N
   }
 }
 
+interface CoinHandlers {
+  add: (name: string, amount: number) => Promise<boolean> | boolean;
+  remove: (name: string, amount: number) => Promise<boolean> | boolean;
+}
+
 /** Execute actions; returns a page name if GaNaar is encountered */
-function executeActions(eventNode: NGCNode, runtime: NGCRuntime): string | null {
+function executeActions(eventNode: NGCNode, runtime: NGCRuntime, coinHandlers?: CoinHandlers): string | null {
   let navigateTo: string | null = null;
 
   for (const child of eventNode.children) {
@@ -112,10 +117,18 @@ function executeActions(eventNode: NGCNode, runtime: NGCRuntime): string | null 
       if (coinsCmd) {
         switch (coinsCmd.operation) {
           case 'Add':
-            runtime.coinsAdd(coinsCmd.name, coinsCmd.amount!);
+            if (coinHandlers) {
+              coinHandlers.add(coinsCmd.name, coinsCmd.amount!);
+            } else {
+              runtime.coinsAdd(coinsCmd.name, coinsCmd.amount!);
+            }
             break;
           case 'Remove':
-            runtime.coinsRemove(coinsCmd.name, coinsCmd.amount!);
+            if (coinHandlers) {
+              coinHandlers.remove(coinsCmd.name, coinsCmd.amount!);
+            } else {
+              runtime.coinsRemove(coinsCmd.name, coinsCmd.amount!);
+            }
             break;
           case 'Code':
             if (coinsCmd.varName) {
