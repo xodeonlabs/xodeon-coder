@@ -142,7 +142,7 @@ export default function OrgProfile() {
           </button>
           <div className="flex items-center gap-3 min-w-0">
             <div className="p-2 rounded-xl bg-primary/10">
-              {org.icon ? <AppIcon icon={org.icon} className="h-6 w-6 text-primary" /> : <Building2 className="h-6 w-6 text-primary" />}
+              {org.icon ? <AppIcon iconName={org.icon} className="h-6 w-6 text-primary" /> : <Building2 className="h-6 w-6 text-primary" />}
             </div>
             <div className="min-w-0">
               <h1 className="text-lg font-bold text-foreground truncate">{org.name}</h1>
