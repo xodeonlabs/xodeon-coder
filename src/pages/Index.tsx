@@ -777,6 +777,7 @@ const Index = () => {
                   onPositionChange={handlePositionChange}
                   onSizeChange={handleSizeChange}
                   onDropNew={handleDropNew}
+                  onDelete={handleDelete}
                 />
               </div>
             )}

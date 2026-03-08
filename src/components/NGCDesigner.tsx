@@ -1,7 +1,7 @@
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { NGCNode, NGCNodeType, DEFAULT_PROPERTIES, generateId } from '@/lib/ngc-ast';
 import { createRuntime, NGCRuntime, resolveVarRefs, parseVarDefinition, parseListDefinition, parseDataCommand, clearPersistedState } from '@/lib/ngc-runtime';
-import { Move, MousePointer, Plus } from 'lucide-react';
+import { Move, MousePointer, Plus, Trash2 } from 'lucide-react';
 
 interface DesignerProps {
   ast: NGCNode | null;
@@ -10,6 +10,7 @@ interface DesignerProps {
   onPositionChange: (nodeId: string, x: number, y: number) => void;
   onSizeChange: (nodeId: string, w: number, h: number) => void;
   onDropNew: (parentId: string, type: NGCNodeType, x: number, y: number) => void;
+  onDelete?: (nodeId: string) => void;
 }
 
 function cleanStr(val: string): string {
@@ -52,6 +53,7 @@ function DraggableNode({
   onSelect,
   onPositionChange,
   onSizeChange,
+  onDelete,
   children,
 }: {
   node: NGCNode;
@@ -60,6 +62,7 @@ function DraggableNode({
   onSelect: (id: string | null) => void;
   onPositionChange: (nodeId: string, x: number, y: number) => void;
   onSizeChange: (nodeId: string, w: number, h: number) => void;
+  onDelete?: (nodeId: string) => void;
   children: React.ReactNode;
 }) {
   const pos = node.properties.Positie ? parsePosition(node.properties.Positie) : { x: 0, y: 0 };
@@ -153,6 +156,35 @@ function DraggableNode({
         {node.type}: {node.name}
       </div>
 
+      {/* Delete button */}
+      {isSelected && onDelete && (
+        <button
+          onMouseDown={e => e.stopPropagation()}
+          onClick={e => {
+            e.stopPropagation();
+            onDelete(node.id);
+          }}
+          style={{
+            position: 'absolute',
+            top: -18,
+            right: 0,
+            width: 16,
+            height: 16,
+            background: '#ef4444',
+            border: 'none',
+            borderRadius: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            zIndex: 200,
+          }}
+          title="Verwijderen"
+        >
+          <Trash2 size={10} color="#fff" />
+        </button>
+      )}
+
       {/* Resize handle */}
       {isSelected && size && (
         <div
@@ -241,7 +273,7 @@ const PALETTE_ITEMS: { type: NGCNodeType; label: string; icon: string }[] = [
   { type: 'Frame', label: 'Frame', icon: '📦' },
 ];
 
-export function NGCDesigner({ ast, selectedId, onSelect, onPositionChange, onSizeChange, onDropNew }: DesignerProps) {
+export function NGCDesigner({ ast, selectedId, onSelect, onPositionChange, onSizeChange, onDropNew, onDelete }: DesignerProps) {
   const [updateCount, forceUpdate] = useState(0);
   const [currentPage, setCurrentPage] = useState<string | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -303,6 +335,20 @@ export function NGCDesigner({ ast, selectedId, onSelect, onPositionChange, onSiz
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
   }, []);
+
+  // Keyboard delete
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId && onDelete) {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        e.preventDefault();
+        onDelete(selectedId);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [selectedId, onDelete]);
 
   if (!ast) {
     return (
@@ -388,6 +434,7 @@ export function NGCDesigner({ ast, selectedId, onSelect, onPositionChange, onSiz
             onSelect={onSelect}
             onPositionChange={onPositionChange}
             onSizeChange={onSizeChange}
+            onDelete={onDelete}
           >
             <DesignerNodeContent node={child} runtime={runtime} />
           </DraggableNode>
