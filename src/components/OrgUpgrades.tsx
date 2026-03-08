@@ -323,29 +323,31 @@ export function OrgUpgrades({ orgId, orgName, currentLevel, orgBalance, isOwner,
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Current level badge + tax + monthly info */}
       <div className="flex flex-col gap-3 mb-2">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">{LEVELS[currentLevel - 1].icon}</span>
-          <div>
-            <p className="text-sm font-bold text-foreground">Level {currentLevel} — {LEVELS[currentLevel - 1].name}</p>
-            <p className="text-[11px] text-muted-foreground">Huidige rang van {orgName}</p>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2.5">
+            <span className="text-2xl">{LEVELS[currentLevel - 1].icon}</span>
+            <div>
+              <p className="text-sm font-bold text-foreground">Level {currentLevel} — {LEVELS[currentLevel - 1].name}</p>
+              <p className="text-[11px] text-muted-foreground">Huidige rang van {orgName}</p>
+            </div>
           </div>
-          <div className="ml-auto flex items-center gap-2 flex-wrap justify-end">
-            <span className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-full bg-accent/15 text-accent border border-accent/30">
+          <div className="flex items-center gap-1.5 sm:ml-auto flex-wrap">
+            <span className="flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold rounded-full bg-accent/15 text-accent border border-accent/30">
               <Percent className="h-3 w-3" />
               {TAX_RATES[currentLevel]}% tax
             </span>
             {MONTHLY_COSTS[currentLevel] > 0 && (
-              <span className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-full bg-primary/15 text-primary border border-primary/30">
+              <span className="flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold rounded-full bg-primary/15 text-primary border border-primary/30">
                 <Coins className="h-3 w-3" />
-                {MONTHLY_COSTS[currentLevel]}/maand
+                {MONTHLY_COSTS[currentLevel]}/mo
               </span>
             )}
             {currentLevel >= 10 && (
-              <span className="px-3 py-1 text-xs font-bold rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                MAX LEVEL
+              <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                MAX
               </span>
             )}
           </div>
@@ -356,25 +358,25 @@ export function OrgUpgrades({ orgId, orgName, currentLevel, orgBalance, isOwner,
           <div className={`rounded-xl border p-3 ${
             isExpired ? 'border-destructive/40 bg-destructive/10' : isExpiringSoon ? 'border-amber-500/40 bg-amber-500/10' : 'border-border/40 bg-muted/30'
           }`}>
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+              <div className="flex items-start gap-2 min-w-0">
                 {isExpired ? (
-                  <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+                  <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
                 ) : (
-                  <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <Calendar className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                 )}
-                <div>
+                <div className="min-w-0">
                   {isExpired ? (
-                    <p className="text-xs font-semibold text-destructive">Level verlopen! Betaal om je level en chat te behouden.</p>
+                    <p className="text-xs font-semibold text-destructive">Level verlopen! Betaal om te behouden.</p>
                   ) : (
-                    <p className="text-xs text-foreground">
-                      <span className="font-semibold">Betaald tot:</span>{' '}
-                      {paidUntil.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}
-                      <span className="text-muted-foreground ml-1">({daysLeft} {daysLeft === 1 ? 'dag' : 'dagen'} resterend)</span>
+                    <p className="text-xs text-foreground leading-relaxed">
+                      <span className="font-semibold">Tot:</span>{' '}
+                      {paidUntil.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })}
+                      <span className="text-muted-foreground ml-1">({daysLeft}d)</span>
                     </p>
                   )}
-                  <p className="text-[10px] text-muted-foreground mt-0.5">
-                    Zonder betaling verlies je je level en wordt je chat bewaring teruggebracht naar 12u.
+                  <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
+                    Zonder betaling verlies je je level.
                   </p>
                 </div>
               </div>
@@ -382,14 +384,14 @@ export function OrgUpgrades({ orgId, orgName, currentLevel, orgBalance, isOwner,
                 <button
                   onClick={handlePayMonthly}
                   disabled={upgrading}
-                  className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all active:scale-95 disabled:opacity-50 ${
+                  className={`shrink-0 w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all active:scale-95 disabled:opacity-50 ${
                     isExpired
                       ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
                       : 'bg-primary text-primary-foreground hover:bg-primary/90'
                   }`}
                 >
                   <Coins className="h-3.5 w-3.5" />
-                  Betaal {MONTHLY_COSTS[currentLevel]} coins
+                  Betaal {MONTHLY_COSTS[currentLevel]}
                 </button>
               )}
             </div>
@@ -401,24 +403,24 @@ export function OrgUpgrades({ orgId, orgName, currentLevel, orgBalance, isOwner,
       <div className="rounded-xl border border-border/40 p-3 bg-muted/30">
         <div className="flex items-start gap-2">
           <Percent className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-          <div>
-            <p className="text-xs font-semibold text-foreground mb-1">Belasting & maandelijkse kosten</p>
+          <div className="min-w-0 w-full">
+            <p className="text-xs font-semibold text-foreground mb-1">Belasting & kosten</p>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
-              Hoe hoger je level, hoe meer belasting en maandkosten. Je kunt je level ook verlagen om kosten te besparen.
+              Hoger level = meer belasting & kosten. Verlaag je level om te besparen.
             </p>
-            <div className="grid grid-cols-5 gap-1 mt-2">
+            <div className="grid grid-cols-5 gap-0.5 sm:gap-1 mt-2">
               {LEVELS.map((lvl) => (
                 <div
                   key={lvl.level}
-                  className={`text-center p-1 rounded ${
+                  className={`text-center p-0.5 sm:p-1 rounded ${
                     lvl.level === currentLevel
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-secondary text-muted-foreground'
                   }`}
                 >
-                  <p className="text-[10px] font-bold">L{lvl.level}</p>
-                  <p className="text-[9px] font-mono">{TAX_RATES[lvl.level]}%</p>
-                  <p className="text-[9px] font-mono">{MONTHLY_COSTS[lvl.level]}c</p>
+                  <p className="text-[9px] sm:text-[10px] font-bold">L{lvl.level}</p>
+                  <p className="text-[8px] sm:text-[9px] font-mono">{TAX_RATES[lvl.level]}%</p>
+                  <p className="text-[8px] sm:text-[9px] font-mono">{MONTHLY_COSTS[lvl.level]}c</p>
                 </div>
               ))}
             </div>
