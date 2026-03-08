@@ -569,7 +569,7 @@ const Index = () => {
         {/* Left Panel */}
         {leftOpen && (
           <>
-            <ResizablePanel defaultSize={15} minSize={8} maxSize={50} order={1}>
+            <ResizablePanel defaultSize={15} minSize={5} maxSize={70} order={1}>
               <div
                 className="h-full flex flex-col"
                 style={{ background: 'hsl(var(--ide-explorer-bg))' }}
