@@ -298,10 +298,38 @@ export default function Dashboard() {
   }
 
   async function updateRetention(id: string, hours: number) {
+    const app = apps.find(a => a.id === id);
+    if (!app) return;
+    const currentHours = app.chat_retention_hours ?? 12;
+
+    // Only charge if increasing beyond 12 hours
+    if (hours > 12 && hours > currentHours) {
+      const extraBlocks = Math.ceil((hours - Math.max(currentHours, 12)) / 12);
+      const cost = extraBlocks * 5;
+
+      if (cost > 0) {
+        const { data: authData } = await supabase.auth.getUser();
+        if (!authData?.user) return;
+
+        const { data: coinRow } = await supabase.from('user_coins').select('id, balance').eq('user_id', authData.user.id).maybeSingle();
+        const balance = (coinRow as any)?.balance ?? 0;
+
+        if (balance < cost) {
+          toast({ title: 'Niet genoeg coins', description: `Je hebt ${cost} coins nodig maar je hebt er ${balance}.`, variant: 'destructive' });
+          return;
+        }
+
+        await supabase.from('user_coins').update({ balance: balance - cost, updated_at: new Date().toISOString() } as any).eq('id', (coinRow as any).id);
+        toast({ title: `${cost} coins afgeschreven`, description: `Bewaartijd verlengd naar ${hours >= 24 ? Math.round(hours / 24) + ' dag(en)' : hours + ' uur'}` });
+      }
+    }
+
     const { error } = await supabase.from('apps').update({ chat_retention_hours: hours } as any).eq('id', id);
     if (!error) {
       setApps(apps.map(a => a.id === id ? { ...a, chat_retention_hours: hours } : a));
-      toast({ title: 'Bewaartermijn bijgewerkt', description: `Chat wordt nu ${hours} uur bewaard` });
+      if (hours <= 12) {
+        toast({ title: 'Bewaartermijn bijgewerkt', description: `Chat wordt nu ${hours} uur bewaard` });
+      }
     }
   }
 
