@@ -269,7 +269,7 @@ export default function Analytics() {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {app.is_public ? (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-400">Publiek</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/10 text-accent">Publiek</span>
                     ) : (
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">Privé</span>
                     )}
