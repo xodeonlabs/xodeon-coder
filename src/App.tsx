@@ -20,6 +20,7 @@ import Settings from "./pages/Settings";
 import AdminPanel from "./pages/AdminPanel";
 import Alliances from "./pages/Alliances";
 import Profile from "./pages/Profile";
+import OrgProfile from "./pages/OrgProfile";
 import NotFound from "./pages/NotFound";
 import FriendChat from "./pages/FriendChat";
 import GroupChats from "./pages/GroupChats";
@@ -57,6 +58,7 @@ const App = () => (
           <Route path="/groepen" element={<ProtectedRoute><GroupChats /></ProtectedRoute>} />
           <Route path="/app/:slug" element={<PublicApp />} />
           <Route path="/profiel/:username" element={<Profile />} />
+          <Route path="/bedrijf/:orgId" element={<OrgProfile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
