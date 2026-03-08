@@ -198,8 +198,8 @@ export default function AdminPanel() {
     if (data?.coins) setUserCoins(data.coins);
   }
 
-  async function loadAdminAlliances() {
-    if (alliancesLoaded) return;
+  async function loadAdminAlliances(force = false) {
+    if (alliancesLoaded && !force) return;
     setAlliancesLoaded(true);
     // Load alliances
     const { data: allianceData } = await supabase.from('alliances' as any).select('*').order('created_at', { ascending: false });
@@ -1162,15 +1162,65 @@ export default function AdminPanel() {
 
                           {/* Members */}
                           <div>
-                            <h5 className="text-xs font-semibold text-muted-foreground mb-2">Leden</h5>
+                            <div className="flex items-center justify-between mb-2">
+                              <h5 className="text-xs font-semibold text-muted-foreground">Leden</h5>
+                              <div className="flex items-center gap-2">
+                                <select
+                                  className="rounded-lg border border-border bg-background px-2 py-1 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                                  id={`add-org-${alliance.id}`}
+                                  defaultValue=""
+                                >
+                                  <option value="" disabled>Bedrijf toevoegen...</option>
+                                  {orgs.filter(o => !mems.some(m => m.organization_id === o.id)).map(o => (
+                                    <option key={o.id} value={o.id}>{o.name}</option>
+                                  ))}
+                                </select>
+                                <button
+                                  onClick={async () => {
+                                    const select = document.getElementById(`add-org-${alliance.id}`) as HTMLSelectElement;
+                                    const orgId = select?.value;
+                                    if (!orgId) return;
+                                    const { data, error } = await supabase.functions.invoke('admin-delete-resource', {
+                                      body: { type: 'alliance_add_member', target_id: alliance.id, org_id: orgId },
+                                    });
+                                    if (error || data?.error) {
+                                      toast({ title: 'Fout', description: error?.message || data?.error, variant: 'destructive' });
+                                    } else {
+                                      toast({ title: 'Bedrijf toegevoegd!' });
+                                      loadAdminAlliances(true);
+                                    }
+                                  }}
+                                  className="px-2 py-1 rounded-lg text-[11px] font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                                >
+                                  <Plus className="h-3 w-3" />
+                                </button>
+                              </div>
+                            </div>
                             <div className="space-y-1">
                               {mems.map(m => {
                                 const orgName = orgs.find(o => o.id === m.organization_id)?.name || m.organization_id.slice(0, 8);
                                 return (
                                   <div key={m.id} className="flex items-center gap-2 py-1.5 px-2 rounded-lg bg-background/50 text-sm">
                                     <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                                    <span className="text-foreground">{orgName}</span>
-                                    <span className="text-[10px] text-muted-foreground ml-auto">{new Date(m.joined_at).toLocaleDateString('nl-NL')}</span>
+                                    <span className="text-foreground flex-1">{orgName}</span>
+                                    <span className="text-[10px] text-muted-foreground">{new Date(m.joined_at).toLocaleDateString('nl-NL')}</span>
+                                    <button
+                                      onClick={async () => {
+                                        if (!confirm(`${orgName} verwijderen uit deze alliantie?`)) return;
+                                        const { data, error } = await supabase.functions.invoke('admin-delete-resource', {
+                                          body: { type: 'alliance_remove_member', target_id: m.id },
+                                        });
+                                        if (error || data?.error) {
+                                          toast({ title: 'Fout', description: error?.message || data?.error, variant: 'destructive' });
+                                        } else {
+                                          toast({ title: 'Bedrijf verwijderd uit alliantie' });
+                                          loadAdminAlliances(true);
+                                        }
+                                      }}
+                                      className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </button>
                                   </div>
                                 );
                               })}
