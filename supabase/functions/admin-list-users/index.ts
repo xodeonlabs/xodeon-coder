@@ -50,6 +50,7 @@ Deno.serve(async (req) => {
       email: u.email,
       created_at: u.created_at,
       last_sign_in_at: u.last_sign_in_at,
+      banned_until: u.banned_until || null,
     }));
 
     return new Response(JSON.stringify(result), {
