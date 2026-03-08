@@ -8,7 +8,8 @@ import { ArrowLeft, Calendar, Code2, Users, Eye, ExternalLink, Settings, Sparkle
 import { FriendButton } from '@/components/FriendButton';
 import { FriendsList } from '@/components/FriendsList';
 import { ActivityTimeline } from '@/components/ActivityTimeline';
-import { StatusDot, getOnlineStatus, getLastSeenText } from '@/components/StatusDot';
+import { StatusDot } from '@/components/StatusDot';
+import { useLastSeen } from '@/hooks/useLastSeen';
 import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -49,6 +50,7 @@ export default function Profile() {
   const { toast } = useToast();
 
   const isOwnProfile = session?.user?.id === profile?.id;
+  const { status: liveStatus, text: liveStatusText } = useLastSeen(profile?.id);
 
   useEffect(() => {
     if (!username) return;
@@ -306,7 +308,7 @@ export default function Profile() {
                   {initials}
                 </AvatarFallback>
               </Avatar>
-              <StatusDot status={getOnlineStatus(profile?.is_dnd ?? false, (profile as any)?.last_seen_at)} size="lg" className="absolute bottom-1 right-1" />
+              <StatusDot status={liveStatus} size="lg" className="absolute bottom-1 right-1" />
             </div>
 
             <div className="flex-1 text-center sm:text-left pb-2">
@@ -314,8 +316,8 @@ export default function Profile() {
                 {profile?.display_name || 'Anonieme gebruiker'}
               </h1>
               <p className="text-xs text-muted-foreground flex items-center gap-1.5 justify-center sm:justify-start mt-1">
-                <span className={`inline-block h-2 w-2 rounded-full ${getOnlineStatus(profile?.is_dnd ?? false, (profile as any)?.last_seen_at) === 'online' ? 'bg-emerald-500' : getOnlineStatus(profile?.is_dnd ?? false, (profile as any)?.last_seen_at) === 'dnd' ? 'bg-destructive' : 'bg-muted-foreground/50'}`} />
-                {getLastSeenText(getOnlineStatus(profile?.is_dnd ?? false, (profile as any)?.last_seen_at), (profile as any)?.last_seen_at)}
+                <span className={`inline-block h-2 w-2 rounded-full ${liveStatus === 'online' ? 'bg-emerald-500' : liveStatus === 'dnd' ? 'bg-destructive' : 'bg-muted-foreground/50'}`} />
+                {liveStatusText}
               </p>
               <p className="text-sm text-muted-foreground flex items-center gap-1.5 justify-center sm:justify-start mt-1.5">
                 <Calendar className="h-3.5 w-3.5" />
