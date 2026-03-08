@@ -366,8 +366,11 @@ export default function Dashboard() {
     if (!session?.user?.id) return;
     const cached = getCached<string>(CACHE_KEYS.displayName(session.user.id), CACHE_TTL.long);
     if (cached) { setDisplayName(cached); return; }
-    supabase.from('profiles').select('display_name').eq('id', session.user.id).single()
-      .then(({ data }) => { if (data?.display_name) { setDisplayName(data.display_name); setCache(CACHE_KEYS.displayName(session.user.id), data.display_name); } });
+    supabase.from('profiles').select('display_name, username').eq('id', session.user.id).single()
+      .then(({ data }) => {
+        if (data?.display_name) { setDisplayName(data.display_name); setCache(CACHE_KEYS.displayName(session.user.id), data.display_name); }
+        if ((data as any)?.username) setProfileUsername((data as any).username);
+      });
   }, [session?.user?.id]);
 
   async function deleteApp(id: string, name: string) {
