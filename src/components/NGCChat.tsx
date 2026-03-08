@@ -21,6 +21,7 @@ export function NGCChat({ appId }: NGCChatProps) {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
+  const [adminIds, setAdminIds] = useState<Set<string>>(new Set());
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Load messages and profiles
