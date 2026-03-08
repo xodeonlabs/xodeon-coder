@@ -210,6 +210,8 @@ function NGCNodeRenderer({
   const text = resolveVarRefs(rawText, runtime);
   const radius = node.properties.Hoekradius ? cleanStr(node.properties.Hoekradius) : '0';
 
+  const iconName = node.properties.Icoon ? cleanStr(node.properties.Icoon) : '';
+
   const baseStyle: React.CSSProperties = {
     position: 'absolute',
     left: pos.x,
