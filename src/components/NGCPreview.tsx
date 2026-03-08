@@ -29,9 +29,13 @@ function initRuntime(ast: NGCNode, runtime: NGCRuntime) {
     // Check for coins definition
     const coinsDef = parseCoinsCommand(ast.name);
     if (coinsDef && coinsDef.operation === 'Set') {
-      // Initialize the OWNER pool (not user balance)
+      // Initialize the OWNER pool (not user balance) — only for non-org apps
       if (!(coinsDef.name in runtime.ownerCoins)) {
         runtime.coinsOwnerSet(coinsDef.name, coinsDef.amount!);
+      }
+      // Initialize player with 100 coins if they have none
+      if (!(coinsDef.name in runtime.coins)) {
+        runtime.coinsSet(coinsDef.name, 100);
       }
     }
     // Check for coins code registration
