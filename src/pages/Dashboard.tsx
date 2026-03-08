@@ -15,6 +15,7 @@ interface App {
   owner_id: string;
   organization_id: string | null;
   slug: string | null;
+  chat_retention_hours: number;
 }
 
 interface Org {
