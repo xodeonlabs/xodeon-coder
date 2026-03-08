@@ -241,7 +241,7 @@ export function OrgUpgrades({ orgId, orgName, currentLevel, orgBalance, isOwner,
     });
   }
 
-  const nextLevel = currentLevel < 5 ? currentLevel + 1 : null;
+  const nextLevel = currentLevel < 10 ? currentLevel + 1 : null;
 
   return (
     <div className="space-y-4">
