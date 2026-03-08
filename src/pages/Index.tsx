@@ -684,6 +684,7 @@ const Index = () => {
               </button>
             </div>
 
+            {editorMode === 'code' && (
               <>
                 {sections.map(section => (
                   <button
