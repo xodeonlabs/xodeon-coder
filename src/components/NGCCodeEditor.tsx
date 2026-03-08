@@ -120,11 +120,16 @@ export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
     const ta = textareaRef.current;
     if (!ta) return;
     if (highlightRef.current) {
-      highlightRef.current.scrollTop = ta.scrollTop;
-      highlightRef.current.scrollLeft = ta.scrollLeft;
+      const inner = highlightRef.current.firstElementChild as HTMLElement | null;
+      if (inner) {
+        inner.style.transform = `translate(${-ta.scrollLeft}px, ${-ta.scrollTop}px)`;
+      }
     }
     if (gutterRef.current) {
-      gutterRef.current.scrollTop = ta.scrollTop;
+      const gInner = gutterRef.current.firstElementChild as HTMLElement | null;
+      if (gInner) {
+        gInner.style.transform = `translateY(${-ta.scrollTop}px)`;
+      }
     }
     setSuggestions([]);
   }, []);
