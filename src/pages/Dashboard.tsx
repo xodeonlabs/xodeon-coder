@@ -90,6 +90,7 @@ export default function Dashboard() {
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [unreadOrgMessages, setUnreadOrgMessages] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [iconPickerAppId, setIconPickerAppId] = useState<string | null>(null);
 
   useEffect(() => {
     try {
