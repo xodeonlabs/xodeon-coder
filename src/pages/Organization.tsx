@@ -138,6 +138,7 @@ export default function OrganizationPage() {
       toast({ title: 'Bedrijf aangemaakt!', description: `"${org.name}" is klaar met 1000 startcoins.` });
       setNewOrgName('');
       setShowCreate(false);
+      clearCache(`orgs-list:${session.user.id}`);
       fetchOrgs();
     } catch (err: any) {
       toast({ title: 'Fout', description: err.message || 'Onbekende fout', variant: 'destructive' });

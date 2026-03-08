@@ -37,19 +37,25 @@ export function NGCChat({ appId }: NGCChatProps) {
         setMessages(data as ChatMessage[]);
         const userIds = [...new Set(data.map(m => m.user_id))];
         if (userIds.length > 0) {
-          const { data: profs } = await supabase.from('profiles').select('id, display_name').in('id', userIds);
-          if (profs) {
-            const map: Record<string, string> = {};
-            for (const p of profs) { if (p.display_name) map[p.id] = p.display_name; }
-            setProfiles(map);
+          // Use cached profiles
+          const cachedProfiles = getCached<Record<string, string>>('app-chat-profiles', CACHE_TTL.long) || {};
+          const cachedAdmins = getCached<string[]>('app-chat-admins', CACHE_TTL.long) || [];
+          const needed = userIds.filter(id => !cachedProfiles[id]);
+          
+          if (needed.length > 0) {
+            const { data: profs } = await supabase.from('profiles').select('id, display_name').in('id', needed);
+            if (profs) {
+              for (const p of profs) { if (p.display_name) cachedProfiles[p.id] = p.display_name; }
+              setCache('app-chat-profiles', cachedProfiles);
+            }
+            for (const uid of needed) {
+              const { data: isAdmin } = await supabase.rpc('has_role', { _user_id: uid, _role: 'admin' });
+              if (isAdmin) cachedAdmins.push(uid);
+            }
+            setCache('app-chat-admins', cachedAdmins);
           }
-          // Check which senders are admins
-          const adminSet = new Set<string>();
-          for (const uid of userIds) {
-            const { data: isAdmin } = await supabase.rpc('has_role', { _user_id: uid, _role: 'admin' });
-            if (isAdmin) adminSet.add(uid);
-          }
-          setAdminIds(adminSet);
+          setProfiles(cachedProfiles);
+          setAdminIds(new Set(cachedAdmins));
         }
       });
   }, [appId]);
