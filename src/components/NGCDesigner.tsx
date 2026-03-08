@@ -55,6 +55,7 @@ function DraggableNode({
   onPositionChange,
   onSizeChange,
   onDelete,
+  onPropertyChange,
   children,
 }: {
   node: NGCNode;
