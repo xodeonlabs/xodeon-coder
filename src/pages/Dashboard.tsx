@@ -136,6 +136,7 @@ export default function Dashboard() {
   const [savingSlug, setSavingSlug] = useState(false);
   const [totalCoins, setTotalCoins] = useState(0);
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [profileUsername, setProfileUsername] = useState<string | null>(null);
   const [unreadOrgMessages, setUnreadOrgMessages] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [iconPickerAppId, setIconPickerAppId] = useState<string | null>(null);
@@ -366,8 +367,11 @@ export default function Dashboard() {
     if (!session?.user?.id) return;
     const cached = getCached<string>(CACHE_KEYS.displayName(session.user.id), CACHE_TTL.long);
     if (cached) { setDisplayName(cached); return; }
-    supabase.from('profiles').select('display_name').eq('id', session.user.id).single()
-      .then(({ data }) => { if (data?.display_name) { setDisplayName(data.display_name); setCache(CACHE_KEYS.displayName(session.user.id), data.display_name); } });
+    supabase.from('profiles').select('display_name, username').eq('id', session.user.id).single()
+      .then(({ data }) => {
+        if (data?.display_name) { setDisplayName(data.display_name); setCache(CACHE_KEYS.displayName(session.user.id), data.display_name); }
+        if ((data as any)?.username) setProfileUsername((data as any).username);
+      });
   }, [session?.user?.id]);
 
   async function deleteApp(id: string, name: string) {
@@ -546,12 +550,12 @@ export default function Dashboard() {
             <NavBtn onClick={() => navigate('/settings')} icon={<Settings className="h-4 w-4" />} label="Account" />
 
             <span
-              onClick={() => session?.user?.id && navigate(`/profiel/${session.user.id}`)}
+              onClick={() => navigate(`/profiel/${profileUsername || session?.user?.id}`)}
               className="hidden lg:inline text-xs text-muted-foreground truncate max-w-[140px] cursor-pointer hover:text-primary hover:underline transition-colors"
             >
               {displayName || session?.user?.email}
             </span>
-            <div onClick={() => session?.user?.id && navigate(`/profiel/${session.user.id}`)} className="cursor-pointer">
+            <div onClick={() => navigate(`/profiel/${profileUsername || session?.user?.id}`)} className="cursor-pointer">
               <ProfileAvatar size="sm" />
             </div>
             <button onClick={signOut} className="p-1.5 rounded-lg text-muted-foreground/60 hover:text-foreground hover:bg-secondary/50 transition-all" title="Uitloggen">

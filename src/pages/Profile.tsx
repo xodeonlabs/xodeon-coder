@@ -14,6 +14,7 @@ interface ProfileData {
   avatar_url: string | null;
   bio: string | null;
   created_at: string;
+  username: string | null;
 }
 
 interface ProfileStats {
@@ -23,7 +24,7 @@ interface ProfileStats {
 }
 
 export default function Profile() {
-  const { userId } = useParams<{ userId: string }>();
+  const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
   const { session } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -31,19 +32,37 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
-  const isOwnProfile = session?.user?.id === userId;
+  const isOwnProfile = session?.user?.id === profile?.id;
 
   useEffect(() => {
-    if (!userId) return;
+    if (!username) return;
 
     async function load() {
       setLoading(true);
 
-      const { data: prof, error } = await supabase
-        .from('profiles')
-        .select('id, display_name, avatar_url, bio, created_at')
-        .eq('id', userId)
-        .single();
+      // Try lookup by username first, then fallback to UUID
+      let prof: ProfileData | null = null;
+      let error: any = null;
+
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(username);
+
+      if (isUuid) {
+        const res = await supabase
+          .from('profiles')
+          .select('id, display_name, avatar_url, bio, created_at, username')
+          .eq('id', username)
+          .single();
+        prof = res.data as ProfileData | null;
+        error = res.error;
+      } else {
+        const res = await supabase
+          .from('profiles')
+          .select('id, display_name, avatar_url, bio, created_at, username')
+          .eq('username', username)
+          .single();
+        prof = res.data as ProfileData | null;
+        error = res.error;
+      }
 
       if (error || !prof) {
         setNotFound(true);
@@ -52,6 +71,7 @@ export default function Profile() {
       }
 
       setProfile(prof);
+      const userId = prof.id;
 
       const [appsRes, orgsRes] = await Promise.all([
         supabase
@@ -94,7 +114,7 @@ export default function Profile() {
     }
 
     load();
-  }, [userId]);
+  }, [username]);
 
   if (loading) {
     return (
@@ -225,7 +245,7 @@ export default function Profile() {
         </div>
 
         {/* Apps gallery */}
-        <PublicApps userId={userId!} />
+        <PublicApps userId={profile!.id} />
 
         {/* Footer spacer */}
         <div className="h-12" />

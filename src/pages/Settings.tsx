@@ -13,6 +13,7 @@ export default function Settings() {
   const { toast } = useToast();
 
   const [displayName, setDisplayName] = useState('');
+  const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -25,33 +26,37 @@ export default function Settings() {
     if (!session?.user) return;
     setEmail(session.user.email || '');
     const cacheKey = `profile:${session.user.id}`;
-    const cached = getCached<{ display_name: string | null; bio: string | null }>(cacheKey, CACHE_TTL.medium);
+    const cached = getCached<{ display_name: string | null; bio: string | null; username: string | null }>(cacheKey, CACHE_TTL.medium);
     if (cached) {
       if (cached.display_name) setDisplayName(cached.display_name);
       if (cached.bio) setBio(cached.bio);
+      if (cached.username) setUsername(cached.username);
       return;
     }
     supabase
       .from('profiles')
-      .select('display_name, bio')
+      .select('display_name, bio, username')
       .eq('id', session.user.id)
       .single()
       .then(({ data }) => {
         if (data?.display_name) setDisplayName(data.display_name);
         if ((data as any)?.bio) setBio((data as any).bio);
-        if (data) setCache(cacheKey, { display_name: data.display_name, bio: (data as any)?.bio });
+        if ((data as any)?.username) setUsername((data as any).username);
+        if (data) setCache(cacheKey, { display_name: data.display_name, bio: (data as any)?.bio, username: (data as any)?.username });
       });
   }, [session?.user]);
 
   async function saveProfile() {
     if (!session?.user?.id) return;
     setSaving(true);
+    const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
     const { error } = await supabase
       .from('profiles')
       .upsert({
         id: session.user.id,
         display_name: displayName.trim() || null,
         bio: bio.trim(),
+        username: cleanUsername || null,
         updated_at: new Date().toISOString(),
       } as any);
     if (error) {
@@ -124,6 +129,20 @@ export default function Settings() {
               <span className="text-[10px] text-muted-foreground">Klik om te wijzigen</span>
             </div>
             <div className="flex-1 w-full space-y-3">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Gebruikersnaam</label>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm text-muted-foreground">@</span>
+                  <input
+                    value={username}
+                    onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, ''))}
+                    placeholder="jouw.username"
+                    maxLength={30}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+                <span className="text-[10px] text-muted-foreground">Dit wordt je profiel-URL: /profiel/{username || '...'}</span>
+              </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1 block">Weergavenaam</label>
                 <input
