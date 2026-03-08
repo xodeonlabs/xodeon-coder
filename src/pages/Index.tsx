@@ -15,6 +15,8 @@ import { NGCNode, NGCNodeType, DEFAULT_PROPERTIES, generateId } from '@/lib/ngc-
 import { splitCodeIntoSections, mergeSections, CodeSection } from '@/lib/ngc-code-sections';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useLiveCursors } from '@/hooks/useLiveCursors';
+import { LiveCursors } from '@/components/LiveCursors';
 const FALLBACK_CODE = 'App:\n    Page Home:\n        Text Hello:\n            Tekst="Hallo!"\n            Positie="50,50"\n            Grootte="200,30"\n            Kleur="#ffffff"\n';
 function findNodeById(node: NGCNode, id: string): NGCNode | null {
   if (node.id === id) return node;
