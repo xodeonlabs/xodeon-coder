@@ -450,6 +450,38 @@ export default function AdminPanel() {
                             </button>
                           </div>
                         ))}
+                        {isUserBanned(profile.id) && (
+                          <span className="px-2 py-1 rounded-full bg-destructive/20 text-destructive text-xs font-medium">Geblokkeerd</span>
+                        )}
+                        {/* Ban/Unban & Delete - only show for non-self users */}
+                        {profile.id !== session?.user?.id && (
+                          <div className="flex items-center gap-1 ml-1">
+                            {isUserBanned(profile.id) ? (
+                              <button
+                                onClick={() => setConfirmAction({ userId: profile.id, action: 'unban', name: displayLabel })}
+                                className="p-1 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                                title="Deblokkeren"
+                              >
+                                <ShieldOff className="h-3.5 w-3.5" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => setConfirmAction({ userId: profile.id, action: 'ban', name: displayLabel })}
+                                className="p-1 rounded-lg text-muted-foreground hover:text-orange-500 hover:bg-orange-500/10 transition-colors"
+                                title="Blokkeren"
+                              >
+                                <Ban className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => setConfirmAction({ userId: profile.id, action: 'delete', name: displayLabel })}
+                              className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                              title="Verwijderen"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
