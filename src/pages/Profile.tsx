@@ -4,7 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Calendar, Code2, Users, Eye, ExternalLink, Settings, Sparkles, Mail, Globe } from 'lucide-react';
+import { ArrowLeft, Calendar, Code2, Users, Eye, ExternalLink, Settings, Sparkles, Mail, Globe, Heart } from 'lucide-react';
+import { FriendButton } from '@/components/FriendButton';
+import { FriendsList } from '@/components/FriendsList';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
@@ -24,6 +26,7 @@ interface ProfileStats {
   appCount: number;
   orgCount: number;
   totalViews: number;
+  friendCount: number;
 }
 
 export default function Profile() {
@@ -31,7 +34,7 @@ export default function Profile() {
   const navigate = useNavigate();
   const { session } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [stats, setStats] = useState<ProfileStats>({ appCount: 0, orgCount: 0, totalViews: 0 });
+  const [stats, setStats] = useState<ProfileStats>({ appCount: 0, orgCount: 0, totalViews: 0, friendCount: 0 });
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -76,7 +79,7 @@ export default function Profile() {
       setProfile(prof);
       const userId = prof.id;
 
-      const [appsRes, orgsRes] = await Promise.all([
+      const [appsRes, orgsRes, friendsRes] = await Promise.all([
         supabase
           .from('apps')
           .select('id', { count: 'exact', head: true })
@@ -86,6 +89,11 @@ export default function Profile() {
           .from('organization_members')
           .select('id', { count: 'exact', head: true })
           .eq('user_id', userId),
+        supabase
+          .from('friendships')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'accepted')
+          .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`),
       ]);
 
       const appCount = appsRes.count ?? 0;
@@ -111,6 +119,7 @@ export default function Profile() {
         appCount,
         orgCount: orgsRes.count ?? 0,
         totalViews,
+        friendCount: friendsRes.count ?? 0,
       });
 
       setLoading(false);
@@ -238,16 +247,24 @@ export default function Profile() {
               )}
               {/* Social links & email */}
               <SocialBar profile={profile!} />
+              {/* Friend button */}
+              <div className="mt-3 flex justify-center sm:justify-start">
+                <FriendButton targetUserId={profile!.id} />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Stats cards */}
-        <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-8 sm:mb-10">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8 sm:mb-10">
           <StatCard icon={<Code2 className="h-5 w-5 sm:h-6 sm:w-6" />} value={stats.appCount} label="Publieke apps" color="primary" />
           <StatCard icon={<Users className="h-5 w-5 sm:h-6 sm:w-6" />} value={stats.orgCount} label="Bedrijven" color="accent" />
+          <StatCard icon={<Heart className="h-5 w-5 sm:h-6 sm:w-6" />} value={stats.friendCount} label="Vrienden" color="accent" />
           <StatCard icon={<Eye className="h-5 w-5 sm:h-6 sm:w-6" />} value={stats.totalViews} label="App views" color="primary" />
         </div>
+
+        {/* Friends list */}
+        <FriendsList userId={profile!.id} />
 
         {/* Apps gallery */}
         <PublicApps userId={profile!.id} />
