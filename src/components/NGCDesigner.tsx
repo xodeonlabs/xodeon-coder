@@ -259,7 +259,7 @@ function DesignerNodeContent({ node, runtime }: { node: NGCNode; runtime: NGCRun
       );
     case 'Text':
       return (
-        <div style={{ width: '100%', height: '100%', color: color || '#fff', fontSize: 16, pointerEvents: 'none' }}>
+        <div style={{ width: '100%', height: '100%', color: color || 'rgb(255,255,255)', fontSize: 16, pointerEvents: 'none' }}>
           {text}
         </div>
       );
