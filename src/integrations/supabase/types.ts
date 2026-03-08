@@ -697,6 +697,7 @@ export type Database = {
       }
       organizations: {
         Row: {
+          bio: string
           created_at: string
           icon: string | null
           id: string
@@ -706,6 +707,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          bio?: string
           created_at?: string
           icon?: string | null
           id?: string
@@ -715,6 +717,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          bio?: string
           created_at?: string
           icon?: string | null
           id?: string
