@@ -8,6 +8,7 @@ import { ArrowLeft, Send, Plus, Users, Hash, UserPlus, Trash2, X, Search, Gamepa
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { SnakeGame } from '@/components/SnakeGame';
 import { StatusDot, getOnlineStatus } from '@/components/StatusDot';
+import { censorText } from '@/lib/profanity-filter';
 
 interface ChatGroup {
   id: string;
