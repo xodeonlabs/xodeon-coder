@@ -359,9 +359,9 @@ export default function OrganizationPage() {
                 style={{ background: 'hsl(var(--card))' }}
                 onClick={() => viewMembers(org)}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center shrink-0">
                       <Building2 className="h-5 w-5 text-accent" />
                     </div>
                     <div>
@@ -371,7 +371,7 @@ export default function OrganizationPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                  <div className="flex items-center gap-2 ml-13 sm:ml-0" onClick={e => e.stopPropagation()}>
                     <button
                       onClick={() => copyCode(org.join_code)}
                       className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-mono bg-secondary text-muted-foreground hover:text-foreground transition-colors"
