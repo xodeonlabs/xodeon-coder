@@ -77,8 +77,11 @@ export default function Alliances() {
   const [allOrgs, setAllOrgs] = useState<OrgInfo[]>([]);
   const [myOwnedOrgs, setMyOwnedOrgs] = useState<OrgInfo[]>([]);
   const [selectedOrgForCreate, setSelectedOrgForCreate] = useState('');
+  const [inviteOrgId, setInviteOrgId] = useState('');
   const [showAddOrg, setShowAddOrg] = useState(false);
   const [addOrgId, setAddOrgId] = useState('');
+  const [vaultAmount, setVaultAmount] = useState('');
+  const [vaultLoading, setVaultLoading] = useState(false);
 
   useEffect(() => {
     loadAlliances();
@@ -106,17 +109,55 @@ export default function Alliances() {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else if (inserted) {
       const allianceId = (inserted as any).id;
-      // Add coin pool
       await supabase.from('alliance_coins' as any).insert({ alliance_id: allianceId, balance: 0 } as any);
-      // Auto-add selected org as member
+      // Add own org
       await supabase.from('alliance_members' as any).insert({ alliance_id: allianceId, organization_id: selectedOrgForCreate } as any);
+      // Add partner org if selected
+      if (inviteOrgId && inviteOrgId !== selectedOrgForCreate) {
+        await supabase.from('alliance_members' as any).insert({ alliance_id: allianceId, organization_id: inviteOrgId } as any);
+      }
       toast({ title: '✅ Alliantie aangemaakt!' });
       setNewName('');
       setNewIcon('🤝');
+      setInviteOrgId('');
       setShowCreate(false);
       loadAlliances();
     }
     setCreating(false);
+  }
+
+  async function vaultTransaction(type: 'deposit' | 'withdraw') {
+    const amount = parseInt(vaultAmount);
+    if (!amount || amount <= 0 || !selectedAlliance || !userOrgId || vaultLoading) return;
+    setVaultLoading(true);
+    try {
+      // Get org coin balance
+      const { data: orgCoin } = await supabase.from('org_coins').select('id, balance').eq('organization_id', userOrgId).maybeSingle();
+      if (!orgCoin) { toast({ title: 'Fout', description: 'Geen kluis gevonden voor je bedrijf', variant: 'destructive' }); setVaultLoading(false); return; }
+
+      const allianceCoins = coins?.balance ?? 0;
+
+      if (type === 'deposit') {
+        if (orgCoin.balance < amount) { toast({ title: 'Onvoldoende saldo', description: `Je bedrijf heeft maar ${orgCoin.balance} coins.`, variant: 'destructive' }); setVaultLoading(false); return; }
+        // Deduct from org
+        await supabase.from('org_coins').update({ balance: orgCoin.balance - amount } as any).eq('id', orgCoin.id);
+        // Add to alliance
+        await supabase.from('alliance_coins' as any).update({ balance: allianceCoins + amount } as any).eq('alliance_id', selectedAlliance.id);
+        setCoins(coins ? { ...coins, balance: allianceCoins + amount } : null);
+      } else {
+        if (allianceCoins < amount) { toast({ title: 'Onvoldoende saldo', description: `De alliantie kluis heeft maar ${allianceCoins} coins.`, variant: 'destructive' }); setVaultLoading(false); return; }
+        // Deduct from alliance
+        await supabase.from('alliance_coins' as any).update({ balance: allianceCoins - amount } as any).eq('alliance_id', selectedAlliance.id);
+        // Add to org
+        await supabase.from('org_coins').update({ balance: orgCoin.balance + amount } as any).eq('id', orgCoin.id);
+        setCoins(coins ? { ...coins, balance: allianceCoins - amount } : null);
+      }
+      toast({ title: type === 'deposit' ? '💰 Gestort!' : '💸 Opgenomen!' });
+      setVaultAmount('');
+    } catch (err: any) {
+      toast({ title: 'Fout', description: err.message, variant: 'destructive' });
+    }
+    setVaultLoading(false);
   }
 
   async function deleteAlliance(id: string) {
@@ -348,13 +389,27 @@ export default function Alliances() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Jouw bedrijf in deze alliantie</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Jouw bedrijf</label>
                   <select
                     value={selectedOrgForCreate}
                     onChange={e => setSelectedOrgForCreate(e.target.value)}
                     className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
                   >
                     {myOwnedOrgs.map(o => (
+                      <option key={o.id} value={o.id}>{o.icon || '🏢'} {o.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Partner bedrijf (optioneel)</label>
+                  <select
+                    value={inviteOrgId}
+                    onChange={e => setInviteOrgId(e.target.value)}
+                    onFocus={() => { if (allOrgs.length === 0) loadAllOrgs(); }}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  >
+                    <option value="">Geen partner bedrijf</option>
+                    {allOrgs.filter(o => o.id !== selectedOrgForCreate).map(o => (
                       <option key={o.id} value={o.id}>{o.icon || '🏢'} {o.name}</option>
                     ))}
                   </select>
@@ -443,6 +498,41 @@ export default function Alliances() {
                   <StatCard label="Totaal Views" value={totalViews} icon="👁" />
                   <StatCard label="Alliantie Kluis" value={coins?.balance ?? 0} icon="🪙" />
                 </div>
+
+                {/* Vault */}
+                {userOrgId && (
+                  <div className="rounded-xl border border-border/40 p-5" style={{ background: 'hsl(var(--card))' }}>
+                    <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                      <Coins className="h-4 w-4 text-primary" /> Alliantie Kluis
+                    </h2>
+                    <p className="text-2xl font-bold text-foreground mb-4">{coins?.balance ?? 0} <span className="text-sm font-normal text-muted-foreground">coins</span></p>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="1"
+                        placeholder="Aantal"
+                        value={vaultAmount}
+                        onChange={e => setVaultAmount(e.target.value)}
+                        className="w-24 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      />
+                      <button
+                        onClick={() => vaultTransaction('deposit')}
+                        disabled={vaultLoading || !vaultAmount}
+                        className="px-3 py-2 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors"
+                      >
+                        Storten
+                      </button>
+                      <button
+                        onClick={() => vaultTransaction('withdraw')}
+                        disabled={vaultLoading || !vaultAmount}
+                        className="px-3 py-2 rounded-lg text-xs font-medium border border-border text-foreground hover:bg-secondary/50 disabled:opacity-40 transition-colors"
+                      >
+                        Opnemen
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-2">Storten/opnemen vanuit je bedrijfskluis</p>
+                  </div>
+                )}
 
                 {/* Member orgs */}
                 <div className="rounded-xl border border-border/40 p-5" style={{ background: 'hsl(var(--card))' }}>
