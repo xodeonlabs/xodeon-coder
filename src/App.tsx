@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Preview from "./pages/Preview";
 import Guest from "./pages/Guest";
+import PublicApp from "./pages/PublicApp";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/organization" element={<ProtectedRoute><Organization /></ProtectedRoute>} />
           <Route path="/editor/:appId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/preview/:appId" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
+          <Route path="/app/:slug" element={<PublicApp />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

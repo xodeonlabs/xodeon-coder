@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode } from 'lucide-react';
+import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, Link, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface App {
@@ -14,6 +14,7 @@ interface App {
   updated_at: string;
   owner_id: string;
   organization_id: string | null;
+  slug: string | null;
 }
 
 interface Org {
@@ -77,6 +78,9 @@ export default function Dashboard() {
   const [templateName, setTemplateName] = useState('');
   const [templateDesc, setTemplateDesc] = useState('');
   const [creatingTemplate, setCreatingTemplate] = useState(false);
+  const [publishAppId, setPublishAppId] = useState<string | null>(null);
+  const [slugValue, setSlugValue] = useState('');
+  const [savingSlug, setSavingSlug] = useState(false);
 
   useEffect(() => { fetchApps(); fetchOrgs(); }, []);
 
@@ -160,6 +164,36 @@ export default function Dashboard() {
     }
     setCreatingTemplate(false);
   }
+
+  function openPublishDialog(app: App) {
+    setPublishAppId(app.id);
+    setSlugValue(app.slug || app.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''));
+  }
+
+  async function saveSlug() {
+    if (!publishAppId || !slugValue.trim()) return;
+    const cleanSlug = slugValue.trim().toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/^-|-$/g, '');
+    if (!cleanSlug) { toast({ title: 'Ongeldige slug', variant: 'destructive' }); return; }
+    setSavingSlug(true);
+    const { error } = await supabase.from('apps').update({ slug: cleanSlug, is_public: true }).eq('id', publishAppId);
+    if (error) {
+      toast({ title: 'Fout', description: error.message?.includes('unique') ? 'Deze URL is al in gebruik. Kies een andere.' : error.message, variant: 'destructive' });
+    } else {
+      setApps(apps.map(a => a.id === publishAppId ? { ...a, slug: cleanSlug, is_public: true } : a));
+      toast({ title: 'Gepubliceerd!', description: `Je app is nu beschikbaar op /app/${cleanSlug}` });
+    }
+    setSavingSlug(false);
+  }
+
+  function getAppUrl(slug: string) {
+    return `${window.location.origin}/app/${slug}`;
+  }
+
+  async function copyAppLink(slug: string) {
+    await navigator.clipboard.writeText(getAppUrl(slug));
+    toast({ title: 'Link gekopieerd!' });
+  }
+
 
   async function deleteApp(id: string, name: string) {
     if (!confirm(`Weet je zeker dat je "${name}" wilt verwijderen?`)) return;
@@ -300,6 +334,16 @@ export default function Dashboard() {
                       {orgs.find(o => o.id === app.organization_id)?.name || 'Bedrijf'}
                     </span>
                   )}
+                  {app.slug && (
+                    <button
+                      onClick={e => { e.stopPropagation(); copyAppLink(app.slug!); }}
+                      className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary flex items-center gap-1 hover:bg-primary/20 transition-colors"
+                      title={getAppUrl(app.slug)}
+                    >
+                      <Link className="h-3 w-3" />
+                      /app/{app.slug}
+                    </button>
+                  )}
                 </div>
                 <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
                   {orgs.length > 0 && (
@@ -324,6 +368,9 @@ export default function Dashboard() {
                   </button>
                   <button onClick={() => { setInviteAppId(app.id); setInviteEmail(''); }} className="rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Samenwerker uitnodigen">
                     <UserPlus className="h-4 w-4" />
+                  </button>
+                  <button onClick={() => openPublishDialog(app)} className="rounded-lg p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors" title="Publiceren / Deel-link">
+                    <ExternalLink className="h-4 w-4" />
                   </button>
                   <button onClick={() => deleteApp(app.id, app.name)} className="rounded-lg p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors ml-auto" title="Verwijderen">
                     <Trash2 className="h-4 w-4" />
@@ -433,6 +480,63 @@ export default function Dashboard() {
               </button>
               <button onClick={createTemplate} disabled={creatingTemplate || !templateName.trim()} className="px-6 py-2.5 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all active:scale-95">
                 {creatingTemplate ? 'Aanmaken...' : 'Aanmaken'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Publish Dialog */}
+      {publishAppId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setPublishAppId(null)}>
+          <div className="rounded-2xl border border-border/50 p-8 w-full max-w-md shadow-2xl" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10"><ExternalLink className="h-5 w-5 text-primary" /></div>
+                App publiceren
+              </h3>
+              <button onClick={() => setPublishAppId(null)} className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg p-1.5 transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6">Kies een unieke URL voor je app. Iedereen met de link kan je app bekijken.</p>
+            <div className="mb-4">
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5">Publieke URL</label>
+              <div className="flex items-center gap-0 rounded-lg border border-border overflow-hidden bg-background">
+                <span className="px-3 py-3 text-xs text-muted-foreground bg-secondary/50 shrink-0 border-r border-border">{window.location.origin}/app/</span>
+                <input
+                  type="text"
+                  value={slugValue}
+                  onChange={e => setSlugValue(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                  className="flex-1 px-3 py-3 text-sm text-foreground bg-transparent focus:outline-none"
+                  placeholder="mijn-app"
+                  autoFocus
+                />
+              </div>
+              <p className="text-[10px] text-muted-foreground/60 mt-1.5">Alleen kleine letters, cijfers en streepjes.</p>
+            </div>
+
+            {apps.find(a => a.id === publishAppId)?.slug && (
+              <div className="mb-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
+                <p className="text-xs text-muted-foreground mb-2">Huidige link:</p>
+                <div className="flex items-center gap-2">
+                  <code className="text-xs text-primary flex-1 truncate">{getAppUrl(apps.find(a => a.id === publishAppId)!.slug!)}</code>
+                  <button onClick={() => copyAppLink(apps.find(a => a.id === publishAppId)!.slug!)} className="text-xs px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0">
+                    Kopieer
+                  </button>
+                  <a href={getAppUrl(apps.find(a => a.id === publishAppId)!.slug!)} target="_blank" rel="noopener noreferrer" className="text-xs px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0">
+                    Open
+                  </a>
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setPublishAppId(null)} className="px-5 py-2.5 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
+                Annuleren
+              </button>
+              <button onClick={saveSlug} disabled={savingSlug || !slugValue.trim()} className="px-6 py-2.5 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all active:scale-95">
+                {savingSlug ? 'Opslaan...' : 'Publiceren'}
               </button>
             </div>
           </div>

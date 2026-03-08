@@ -24,6 +24,7 @@ export type Database = {
           ngc_code: string
           organization_id: string | null
           owner_id: string
+          slug: string | null
           updated_at: string
         }
         Insert: {
@@ -35,6 +36,7 @@ export type Database = {
           ngc_code?: string
           organization_id?: string | null
           owner_id: string
+          slug?: string | null
           updated_at?: string
         }
         Update: {
@@ -46,6 +48,7 @@ export type Database = {
           ngc_code?: string
           organization_id?: string | null
           owner_id?: string
+          slug?: string | null
           updated_at?: string
         }
         Relationships: [
