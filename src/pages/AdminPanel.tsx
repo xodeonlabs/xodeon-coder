@@ -296,13 +296,16 @@ export default function AdminPanel() {
 
   async function toggleAdActive(ad: AdRow) {
     await (supabase.from('ads' as any) as any).update({ is_active: !ad.is_active }).eq('id', ad.id);
+    await logAction(ad.is_active ? 'Advertentie gedeactiveerd' : 'Advertentie geactiveerd', 'ad', ad.id, ad.title);
     setAds(ads.map(a => a.id === ad.id ? { ...a, is_active: !a.is_active } : a));
   }
 
   async function deleteAd(id: string) {
+    const ad = ads.find(a => a.id === id);
     const { error } = await (supabase.from('ads' as any) as any).delete().eq('id', id);
     if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     else {
+      await logAction('Advertentie verwijderd', 'ad', id, ad?.title || '');
       setAds(ads.filter(a => a.id !== id));
       toast({ title: 'Advertentie verwijderd' });
     }
