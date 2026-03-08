@@ -616,7 +616,7 @@ const Index = () => {
                           <span>💾 Data</span>
                         </div>
                         <div className="flex-1 overflow-y-auto min-h-0">
-                          <NGCDataPanel ast={ast} />
+                          <NGCDataPanel ast={ast} appId={appId} />
                         </div>
                       </div>
                     </ResizablePanel>
