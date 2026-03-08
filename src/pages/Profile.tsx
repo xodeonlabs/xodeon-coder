@@ -50,6 +50,7 @@ export default function Profile() {
   const { toast } = useToast();
 
   const isOwnProfile = session?.user?.id === profile?.id;
+  const { status: liveStatus, text: liveStatusText } = useLastSeen(profile?.id);
 
   useEffect(() => {
     if (!username) return;
