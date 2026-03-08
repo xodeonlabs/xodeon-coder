@@ -11,6 +11,7 @@ interface DesignerProps {
   onSizeChange: (nodeId: string, w: number, h: number) => void;
   onDropNew: (parentId: string, type: NGCNodeType, x: number, y: number) => void;
   onDelete?: (nodeId: string) => void;
+  onPropertyChange?: (nodeId: string, key: string, value: string) => void;
 }
 
 function cleanStr(val: string): string {
