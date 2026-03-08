@@ -423,7 +423,41 @@ export default function Alliances() {
 
                 {/* Member orgs */}
                 <div className="rounded-xl border border-border/40 p-5" style={{ background: 'hsl(var(--card))' }}>
-                  <h2 className="text-sm font-semibold text-foreground mb-4">Leden</h2>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-sm font-semibold text-foreground">Leden</h2>
+                    {isAdmin && (
+                      <button
+                        onClick={() => { setShowAddOrg(true); loadAllOrgs(); }}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                      >
+                        <UserPlus className="h-3 w-3" /> Bedrijf toevoegen
+                      </button>
+                    )}
+                  </div>
+
+                  {isAdmin && showAddOrg && (
+                    <div className="mb-4 p-3 rounded-lg border border-border/30 bg-secondary/20 space-y-2">
+                      <select
+                        value={addOrgId}
+                        onChange={e => setAddOrgId(e.target.value)}
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      >
+                        <option value="">Selecteer een bedrijf...</option>
+                        {allOrgs.filter(o => !members.some(m => m.organization_id === o.id)).map(o => (
+                          <option key={o.id} value={o.id}>{o.icon || '🏢'} {o.name}</option>
+                        ))}
+                      </select>
+                      <div className="flex gap-2">
+                        <button onClick={addOrgToAlliance} disabled={!addOrgId} className="px-3 py-1.5 rounded-lg text-[11px] font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors">
+                          Toevoegen
+                        </button>
+                        <button onClick={() => setShowAddOrg(false)} className="px-3 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors">
+                          Annuleren
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-3">
                     {members.map(m => {
                       const org = orgs[m.organization_id];
@@ -436,6 +470,15 @@ export default function Alliances() {
                             <p className="text-sm font-medium text-foreground truncate">{org?.name || 'Onbekend'}</p>
                             <p className="text-[10px] text-muted-foreground">Lid sinds {new Date(m.joined_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                           </div>
+                          {isAdmin && (
+                            <button
+                              onClick={() => removeOrgFromAlliance(m.id)}
+                              className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                              title="Verwijderen"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          )}
                         </div>
                       );
                     })}
