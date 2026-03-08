@@ -1450,7 +1450,7 @@ export default function Dashboard() {
             <DialogTitle>Nieuwe app aanmaken</DialogTitle>
             <DialogDescription>Hoe wil je beginnen?</DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-3 mt-2">
+          <div className="grid grid-cols-3 gap-3 mt-2">
             <button
               onClick={createApp}
               disabled={creating}
@@ -1461,7 +1461,7 @@ export default function Dashboard() {
               </div>
               <div className="text-center">
                 <p className="text-sm font-semibold text-foreground">Vanaf nul</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">Begin met een leeg project</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Leeg project</p>
               </div>
             </button>
             <button
@@ -1473,7 +1473,20 @@ export default function Dashboard() {
               </div>
               <div className="text-center">
                 <p className="text-sm font-semibold text-foreground">Template</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">Start vanuit een bestaand sjabloon</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Bestaand sjabloon</p>
+              </div>
+            </button>
+            <button
+              onClick={createTestApp}
+              disabled={creating}
+              className="flex flex-col items-center gap-3 p-6 rounded-xl border border-border/40 hover:border-amber-400/40 hover:bg-amber-400/5 transition-all group"
+            >
+              <div className="p-3 rounded-xl bg-amber-500/10 group-hover:bg-amber-500/20 transition-colors">
+                <Zap className="h-6 w-6 text-amber-400" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-semibold text-foreground">Test App</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Alle features testen</p>
               </div>
             </button>
           </div>
