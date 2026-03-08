@@ -182,7 +182,7 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
         <>
           {/* Backdrop to close menu */}
           <div className="fixed inset-0 z-40" onClick={() => setMobileMenuOpen(false)} />
-          <div className="absolute top-11 right-2 z-50 rounded-lg border border-border shadow-xl py-1 min-w-[160px]" style={{ background: 'hsl(var(--card))' }}>
+          <div className="fixed top-11 right-2 z-50 rounded-lg border border-border shadow-xl py-1 min-w-[160px]" style={{ background: 'hsl(var(--card))' }}>
             <button
               onClick={() => { 
                 const appIdMatch = window.location.pathname.match(/\/editor\/([^/]+)/);
