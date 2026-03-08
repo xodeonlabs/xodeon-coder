@@ -1,38 +1,44 @@
 
 
-# Ideeën voor NGC Studio
+# Volgende stappen voor NGC Studio
 
-Hier zijn enkele verbeteringen en nieuwe features die je kunt toevoegen:
+Op basis van de eerder goedgekeurde features, hier het implementatieplan in volgorde van prioriteit:
 
-**1. Realtime Samenwerking**
-- Live cursors van andere gebruikers in de editor
-- Simultaan bewerken van dezelfde app met meerdere teamleden
+---
 
-**2. AI Code Generator**
-- Natuurlijke taal naar NGC code: beschrijf wat je wilt en laat AI de code genereren
-- Code suggesties en autocomplete tijdens het typen
+## 1. Responsive Preview Modes (kleinste effort, direct visueel resultaat)
 
-**3. App Marketplace / Template Store**
-- Een publieke catalogus waar gebruikers hun templates kunnen delen en ontdekken
-- Categorieën, zoekfunctie en beoordelingen
+Voeg een device-switcher toe aan `Preview.tsx` met drie modes: telefoon (375px), tablet (768px) en desktop (100%). De preview wordt in een iframe-achtige container geplaatst met een device frame eromheen.
 
-**4. Versiebeheer & Rollback**
-- Visuele tijdlijn van alle wijzigingen
-- Eén klik om terug te gaan naar een eerdere versie
-- Vergelijk twee versies naast elkaar (diff view)
+**Bestanden:** `src/pages/Preview.tsx` (aanpassen)
 
-**5. Custom Domeinen**
-- Gebruikers kunnen hun gepubliceerde apps koppelen aan een eigen domein
+---
 
-**6. Responsive Preview Modes**
-- Preview schakelen tussen telefoon, tablet en desktop formaat
-- Device frames om het realistischer te maken
+## 2. Version Diff View (uitbreiding op bestaande functionaliteit)
 
-**7. Donkere/Lichte Thema Toggle**
-- Gebruikers laten kiezen tussen een licht en donker thema in de editor
+Voeg aan `NGCVersionPanel.tsx` een zij-aan-zij diff view toe. Wanneer een versie geselecteerd is, toon de huidige code naast de geselecteerde versie met gehighlighte verschillen (toevoegingen in groen, verwijderingen in rood). Puur client-side, geen database wijzigingen nodig.
 
-**8. Dashboard Statistieken**
-- Aantal views per gepubliceerde app
-- Grafieken van gebruik over tijd
-- Populairste templates
+**Bestanden:** `src/components/NGCVersionPanel.tsx` (aanpassen), nieuw `src/components/NGCDiffView.tsx`
+
+---
+
+## 3. Dashboard Statistieken (bestaande data, nieuwe visualisatie)
+
+De `app_views` tabel bestaat al. Voeg op het Dashboard mini-statistieken toe per app (totaal views) en breid de Analytics pagina uit met trendgrafieken (views per dag, per week). Recharts is al geïnstalleerd.
+
+**Bestanden:** `src/pages/Dashboard.tsx`, `src/pages/Analytics.tsx` (aanpassen)
+
+---
+
+## 4. Template Marketplace (grootste feature, nieuwe tabel nodig)
+
+Nieuwe `templates` tabel met velden: id, name, description, ngc_code, author_id, category, downloads, rating, is_published. Nieuwe pagina `/templates` met zoekfunctie, categorieën en een "Gebruik template" knop die een nieuwe app aanmaakt op basis van de template code.
+
+**Bestanden:** Nieuwe migratie, nieuwe `src/pages/Templates.tsx`, route toevoegen in `App.tsx`
+
+---
+
+## Aanbevolen aanpak
+
+Begin met **Responsive Preview** — het is de kleinste wijziging met direct zichtbaar resultaat. Daarna **Diff View**, dan **Dashboard Statistieken**, en tot slot de **Template Marketplace**.
 
