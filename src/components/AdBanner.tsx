@@ -27,20 +27,25 @@ export function AdBanner({ className = '', page, organizationId }: AdBannerProps
   const [ads, setAds] = useState<Ad[]>([]);
 
   useEffect(() => {
-    supabase
-      .from('ads' as any)
-      .select('id, emoji, title, description, url, gradient, pages')
+    let query = supabase
+      .from('ads')
+      .select('id, emoji, title, description, url, gradient, pages, organization_id')
       .eq('is_active', true)
-      .order('sort_order', { ascending: true })
-      .then(({ data }) => {
-        if (data && data.length > 0) {
-          const filtered = page
-            ? (data as any[]).filter((ad: any) => ad.pages && ad.pages.includes(page))
-            : (data as any[]);
-          setAds(filtered as Ad[]);
-        }
-      });
-  }, [page]);
+      .order('sort_order', { ascending: true });
+
+    if (organizationId) {
+      query = query.eq('organization_id', organizationId);
+    }
+
+    query.then(({ data }) => {
+      if (data && data.length > 0) {
+        const filtered = page
+          ? (data as any[]).filter((ad: any) => ad.pages && ad.pages.includes(page))
+          : (data as any[]);
+        setAds(filtered as Ad[]);
+      }
+    });
+  }, [page, organizationId]);
 
   const goTo = useCallback((index: number) => {
     if (isAnimating || ads.length === 0) return;
