@@ -124,6 +124,7 @@ export function AppSidebar() {
       });
     fetchUnreadGroups();
     fetchUnreadMessages();
+    return () => { cleanupCoins(); };
   }, [session?.user?.id, fetchUnreadGroups, fetchUnreadMessages]);
 
   // Realtime: listen for new group messages and friend messages
