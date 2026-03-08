@@ -350,6 +350,7 @@ export function NGCDesigner({ ast, selectedId, onSelect, onPositionChange, onSiz
     return () => window.removeEventListener('keydown', handler);
   }, [selectedId, onDelete]);
 
+  if (!ast) {
     return (
       <div className="flex h-full items-center justify-center">
         <p className="text-xs text-muted-foreground">Geen preview beschikbaar</p>
