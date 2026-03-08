@@ -732,13 +732,15 @@ export default function AdminPanel() {
                         {userRoles.length === 0 && (
                           <span className="text-xs text-muted-foreground italic">Geen rollen</span>
                         )}
-                        {userRoles.map(r => (
+                          {userRoles.map(r => (
                           <div key={r.id} className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-secondary text-xs font-medium text-foreground">
                             {roleIcon(r.role)}
                             {roleLabel(r.role)}
-                            <button onClick={() => removeRole(r.id)} className="ml-1 text-muted-foreground hover:text-destructive transition-colors">
-                              <Trash2 className="h-3 w-3" />
-                            </button>
+                            {r.role !== 'owner' && (
+                              <button onClick={() => removeRole(r.id)} className="ml-1 text-muted-foreground hover:text-destructive transition-colors">
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            )}
                           </div>
                         ))}
                         {isUserBanned(profile.id) && (
