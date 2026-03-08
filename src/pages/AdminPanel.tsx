@@ -103,11 +103,13 @@ export default function AdminPanel() {
   const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'chats' | 'activity' | 'coins' | 'alliances' | 'templates'>('users');
   
   // Templates management
-  const [adminTemplates, setAdminTemplates] = useState<{ id: string; name: string; category: string; author_id: string; downloads: number; is_published: boolean; created_at: string }[]>([]);
+  const [adminTemplates, setAdminTemplates] = useState<{ id: string; name: string; description: string; category: string; visibility: string; author_id: string; downloads: number; is_published: boolean; created_at: string }[]>([]);
   const [templatesLoaded, setTemplatesLoaded] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<string | null>(null);
   const [templateEditName, setTemplateEditName] = useState('');
   const [templateEditCategory, setTemplateEditCategory] = useState('');
+  const [templateEditDescription, setTemplateEditDescription] = useState('');
+  const [templateEditVisibility, setTemplateEditVisibility] = useState('public');
   
   // Alliances management
   const [adminAlliances, setAdminAlliances] = useState<any[]>([]);
