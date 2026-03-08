@@ -411,11 +411,11 @@ export default function OrganizationPage() {
             ) : (
               <div className="space-y-2">
                 {members.map(member => (
-                  <div key={member.id} className="flex items-center justify-between rounded-lg px-4 py-3 bg-background/50">
-                    <div className="flex items-center gap-3">
+                  <div key={member.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 bg-background/50">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                       {roleIcon(member.role)}
-                      <span className="text-sm text-foreground font-mono">{member.user_id.slice(0, 8)}...</span>
-                      <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-secondary">{roleLabel(member.role)}</span>
+                      <span className="text-sm text-foreground font-mono truncate">{member.user_id.slice(0, 8)}...</span>
+                      <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-secondary shrink-0">{roleLabel(member.role)}</span>
                     </div>
                     {selectedOrg.owner_id === session?.user?.id && member.role !== 'owner' && (
                       <div className="flex items-center gap-2">
