@@ -2,8 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { History, RotateCcw, Save, Trash2, X, GitCompare } from 'lucide-react';
-import { NGCDiffView } from './NGCDiffView';
+import { History, RotateCcw, Save, Trash2, X } from 'lucide-react';
 
 interface Version {
   id: string;
@@ -28,7 +27,6 @@ export function NGCVersionPanel({ appId, currentCode, onRestore }: NGCVersionPan
   const [label, setLabel] = useState('');
   const [showSaveForm, setShowSaveForm] = useState(false);
   const [previewId, setPreviewId] = useState<string | null>(null);
-  const [diffVersionId, setDiffVersionId] = useState<string | null>(null);
 
   const fetchVersions = useCallback(async () => {
     const { data } = await supabase
@@ -74,7 +72,6 @@ export function NGCVersionPanel({ appId, currentCode, onRestore }: NGCVersionPan
     if (!error) {
       setVersions(v => v.filter(ver => ver.id !== id));
       if (previewId === id) setPreviewId(null);
-      if (diffVersionId === id) setDiffVersionId(null);
     }
   };
 
@@ -85,24 +82,9 @@ export function NGCVersionPanel({ appId, currentCode, onRestore }: NGCVersionPan
   };
 
   const previewVersion = versions.find(v => v.id === previewId);
-  const diffVersion = versions.find(v => v.id === diffVersionId);
-
-  // Show diff view
-  if (diffVersion) {
-    return (
-      <NGCDiffView
-        oldCode={diffVersion.ngc_code}
-        newCode={currentCode}
-        oldLabel={diffVersion.label}
-        newLabel="Huidige versie"
-        onClose={() => setDiffVersionId(null)}
-      />
-    );
-  }
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
       <div className="ide-panel-header justify-between">
         <span className="flex items-center gap-1.5">
           <History className="h-3.5 w-3.5" />
@@ -117,7 +99,6 @@ export function NGCVersionPanel({ appId, currentCode, onRestore }: NGCVersionPan
         </button>
       </div>
 
-      {/* Save form */}
       {showSaveForm && (
         <div className="p-2.5 border-b border-border space-y-2" style={{ background: 'hsl(var(--ide-explorer-bg))' }}>
           <input
@@ -144,7 +125,6 @@ export function NGCVersionPanel({ appId, currentCode, onRestore }: NGCVersionPan
         </div>
       )}
 
-      {/* Version list */}
       <div className="flex-1 overflow-y-auto min-h-0">
         {loading ? (
           <div className="flex items-center justify-center py-8">
@@ -172,13 +152,6 @@ export function NGCVersionPanel({ appId, currentCode, onRestore }: NGCVersionPan
                   </div>
                   <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
-                      onClick={(e) => { e.stopPropagation(); setDiffVersionId(version.id); }}
-                      className="p-1 rounded text-accent hover:bg-accent/10 transition-colors"
-                      title="Vergelijk met huidige versie"
-                    >
-                      <GitCompare className="h-3 w-3" />
-                    </button>
-                    <button
                       onClick={(e) => { e.stopPropagation(); restoreVersion(version); }}
                       className="p-1 rounded text-primary hover:bg-primary/10 transition-colors"
                       title="Herstel deze versie"
@@ -200,18 +173,11 @@ export function NGCVersionPanel({ appId, currentCode, onRestore }: NGCVersionPan
         )}
       </div>
 
-      {/* Preview pane */}
       {previewVersion && (
         <div className="border-t border-border" style={{ background: 'hsl(var(--ide-editor-bg))' }}>
           <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/50">
             <span className="text-[10px] text-muted-foreground font-medium truncate">Preview: {previewVersion.label}</span>
             <div className="flex items-center gap-1">
-              <button
-                onClick={() => setDiffVersionId(previewVersion.id)}
-                className="text-[10px] px-2 py-0.5 rounded bg-accent/10 text-accent hover:bg-accent/20 transition-colors font-medium"
-              >
-                Vergelijk
-              </button>
               <button
                 onClick={() => restoreVersion(previewVersion)}
                 className="text-[10px] px-2 py-0.5 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
