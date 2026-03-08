@@ -1292,6 +1292,39 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Beschrijving</label>
+              <textarea
+                value={templateDialog.description}
+                onChange={e => setTemplateDialog(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Waar gaat deze template over..."
+                rows={2}
+                className="w-full px-3 py-2.5 rounded-xl border border-border/40 bg-card text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Zichtbaarheid</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: 'public', label: 'Publiek', icon: '🌍' },
+                  { value: 'friends', label: 'Vrienden', icon: '👥' },
+                  { value: 'org', label: 'Bedrijf', icon: '🏢' },
+                ].map(vis => (
+                  <button
+                    key={vis.value}
+                    onClick={() => setTemplateDialog(prev => ({ ...prev, visibility: vis.value }))}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition-all ${
+                      templateDialog.visibility === vis.value
+                        ? 'border-primary/40 bg-primary/10 text-primary'
+                        : 'border-border/40 text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                    }`}
+                  >
+                    <span>{vis.icon}</span>
+                    {vis.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => setTemplateDialog({ open: false, app: null, name: '', category: 'algemeen', description: '', visibility: 'public' })}
