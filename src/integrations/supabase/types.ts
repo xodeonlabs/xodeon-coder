@@ -618,6 +618,45 @@ export type Database = {
           },
         ]
       }
+      templates: {
+        Row: {
+          author_id: string
+          category: string
+          created_at: string
+          description: string
+          downloads: number
+          id: string
+          is_published: boolean
+          name: string
+          ngc_code: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          category?: string
+          created_at?: string
+          description?: string
+          downloads?: number
+          id?: string
+          is_published?: boolean
+          name: string
+          ngc_code?: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          category?: string
+          created_at?: string
+          description?: string
+          downloads?: number
+          id?: string
+          is_published?: boolean
+          name?: string
+          ngc_code?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_coins: {
         Row: {
           balance: number
