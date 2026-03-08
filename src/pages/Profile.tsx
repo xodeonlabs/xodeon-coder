@@ -68,7 +68,7 @@ export default function Profile() {
           .select('id, display_name, avatar_url, bio, created_at, username, social_links, show_email, public_email, is_dnd')
           .eq('username', username)
           .single();
-        prof = res.data ? { ...res.data, email: (res.data as any).public_email } as ProfileData : null;
+        prof = res.data ? { ...res.data, email: (res.data as any).public_email, is_dnd: (res.data as any).is_dnd } as ProfileData : null;
         error = res.error;
       }
 
