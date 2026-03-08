@@ -189,15 +189,26 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-background">
       <div className="relative h-48 sm:h-64 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5" />
-        <div className="absolute inset-0">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full bg-primary/10 blur-[100px]" />
-          <div className="absolute top-0 right-0 w-[400px] h-[200px] rounded-full bg-accent/8 blur-[80px]" />
-        </div>
+        {/* Banner image or gradient fallback */}
+        {profile?.banner_url ? (
+          <img src={profile.banner_url} alt="Profielbanner" className="absolute inset-0 w-full h-full object-cover" />
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5" />
+            <div className="absolute inset-0">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full bg-primary/10 blur-[100px]" />
+              <div className="absolute top-0 right-0 w-[400px] h-[200px] rounded-full bg-accent/8 blur-[80px]" />
+            </div>
+          </>
+        )}
+        {/* Overlay for readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
         <div className="absolute inset-0 opacity-[0.03]" style={{
           backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)',
           backgroundSize: '24px 24px',
         }} />
+
+        {/* Nav */}
         <div className="absolute top-0 left-0 right-0 px-4 sm:px-6 py-3 flex items-center justify-between z-20">
           <button
             onClick={() => navigate(-1)}
@@ -205,16 +216,41 @@ export default function Profile() {
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
-          {isOwnProfile && (
-            <button
-              onClick={() => navigate('/settings')}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-background/30 backdrop-blur-md text-foreground/80 hover:bg-background/50 hover:text-foreground transition-all border border-border/20 text-xs font-medium"
-            >
-              <Settings className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Bewerk profiel</span>
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {isOwnProfile && (
+              <button
+                onClick={() => bannerInputRef.current?.click()}
+                disabled={uploadingBanner}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-background/30 backdrop-blur-md text-foreground/80 hover:bg-background/50 hover:text-foreground transition-all border border-border/20 text-xs font-medium"
+              >
+                {uploadingBanner ? (
+                  <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-foreground/30 border-t-foreground" />
+                ) : (
+                  <Camera className="h-3.5 w-3.5" />
+                )}
+                <span className="hidden sm:inline">{profile?.banner_url ? 'Banner wijzigen' : 'Banner toevoegen'}</span>
+              </button>
+            )}
+            {isOwnProfile && (
+              <button
+                onClick={() => navigate('/settings')}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-background/30 backdrop-blur-md text-foreground/80 hover:bg-background/50 hover:text-foreground transition-all border border-border/20 text-xs font-medium"
+              >
+                <Settings className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Bewerk profiel</span>
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* Hidden file input */}
+        <input
+          ref={bannerInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleBannerUpload}
+        />
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
