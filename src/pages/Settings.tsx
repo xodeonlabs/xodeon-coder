@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
-import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff, Clock, Coins } from 'lucide-react';
+import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff, Clock, Coins, Pencil } from 'lucide-react';
+import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { getCached, setCache, clearCache, CACHE_TTL } from '@/lib/cache';
 
 interface RetentionItem {
@@ -403,10 +404,24 @@ export default function Settings() {
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span className={`text-xs font-semibold ${isUpgraded ? 'text-primary' : 'text-muted-foreground'}`}>
-                          {formatRetention(item.hours)}
-                        </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <ChatRetentionSelector
+                          currentHours={item.hours}
+                          onUpdate={async (hours) => {
+                            if (item.type === 'friend') {
+                              await supabase.from('profiles').update({ friend_chat_retention_hours: hours } as any).eq('id', session!.user.id);
+                            } else if (item.type === 'app' && item.id) {
+                              await supabase.from('apps').update({ chat_retention_hours: hours }).eq('id', item.id);
+                            } else if (item.type === 'org' && item.id) {
+                              await supabase.from('organizations').update({ chat_retention_hours: hours } as any).eq('id', item.id);
+                            } else if (item.type === 'alliance' && item.id) {
+                              await supabase.from('alliances').update({ chat_retention_hours: hours } as any).eq('id', item.id);
+                            } else if (item.type === 'group' && item.id) {
+                              await supabase.from('chat_groups' as any).update({ chat_retention_hours: hours }).eq('id', item.id);
+                            }
+                            await loadRetentionOverview();
+                          }}
+                        />
                         {cost > 0 ? (
                           <span className="text-[10px] font-bold text-yellow-500 flex items-center gap-0.5">
                             🪙 {cost}
