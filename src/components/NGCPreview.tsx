@@ -144,7 +144,7 @@ function evaluateVisibility(expr: string, runtime: NGCRuntime): boolean {
   return resolved !== '' && resolved !== '0' && resolved !== 'false';
 }
 
-
+interface CoinHandlers {
   add: (name: string, amount: number) => Promise<boolean> | boolean;
   remove: (name: string, amount: number) => Promise<boolean> | boolean;
 }
