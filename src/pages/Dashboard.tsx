@@ -535,11 +535,12 @@ export default function Dashboard() {
     const { error } = await supabase.from('templates').insert({
       author_id: session.user.id,
       name: templateDialog.name || templateDialog.app.name,
-      description: `Template op basis van "${templateDialog.app.name}"`,
+      description: templateDialog.description || `Template op basis van "${templateDialog.app.name}"`,
       ngc_code: templateDialog.app.ngc_code,
       category: templateDialog.category,
+      visibility: templateDialog.visibility,
       is_published: true,
-    });
+    } as any);
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
