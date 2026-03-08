@@ -966,6 +966,7 @@ export type Database = {
           friend_chat_retention_hours: number
           id: string
           is_dnd: boolean
+          last_seen_at: string | null
           public_email: string | null
           show_email: boolean | null
           social_links: Json | null
@@ -980,6 +981,7 @@ export type Database = {
           friend_chat_retention_hours?: number
           id: string
           is_dnd?: boolean
+          last_seen_at?: string | null
           public_email?: string | null
           show_email?: boolean | null
           social_links?: Json | null
@@ -994,6 +996,7 @@ export type Database = {
           friend_chat_retention_hours?: number
           id?: string
           is_dnd?: boolean
+          last_seen_at?: string | null
           public_email?: string | null
           show_email?: boolean | null
           social_links?: Json | null
