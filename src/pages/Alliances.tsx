@@ -67,6 +67,7 @@ export default function Alliances() {
   const [sharedApps, setSharedApps] = useState<{ id: string; name: string; org_name: string; views: number }[]>([]);
   const [orgStats, setOrgStats] = useState<{ name: string; views: number }[]>([]);
   const [userOrgId, setUserOrgId] = useState<string | null>(null);
+  const [creatorProfiles, setCreatorProfiles] = useState<Record<string, string>>({});
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
   // Org owner state (replaces admin-only)
