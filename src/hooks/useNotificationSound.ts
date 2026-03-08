@@ -2,6 +2,7 @@ import { useCallback, useRef } from 'react';
 
 const NOTIFICATION_SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
 const STORAGE_KEY = 'ngc-notification-sound';
+const TOAST_STORAGE_KEY = 'ngc-notification-toast';
 
 export function getNotificationSoundEnabled(): boolean {
   try {
@@ -15,6 +16,23 @@ export function getNotificationSoundEnabled(): boolean {
 export function setNotificationSoundEnabled(enabled: boolean) {
   try {
     localStorage.setItem(STORAGE_KEY, String(enabled));
+  } catch {
+    // ignore
+  }
+}
+
+export function getNotificationToastEnabled(): boolean {
+  try {
+    const val = localStorage.getItem(TOAST_STORAGE_KEY);
+    return val === null ? true : val === 'true';
+  } catch {
+    return true;
+  }
+}
+
+export function setNotificationToastEnabled(enabled: boolean) {
+  try {
+    localStorage.setItem(TOAST_STORAGE_KEY, String(enabled));
   } catch {
     // ignore
   }

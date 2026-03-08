@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useNotificationSound } from '@/hooks/useNotificationSound';
+import { useNotificationSound, getNotificationToastEnabled } from '@/hooks/useNotificationSound';
 import { toast } from 'sonner';
 import {
   LayoutDashboard, BarChart3, Building2, Handshake, Users,
@@ -96,18 +96,20 @@ export function AppSidebar() {
         const msg = payload.new as any;
         if (msg?.user_id !== session.user.id) {
           playNotification();
-          supabase.from('profiles').select('display_name').eq('id', msg.user_id).maybeSingle().then(({ data }) => {
-            const name = data?.display_name || 'Iemand';
-            toast(name, {
-              description: msg.content?.slice(0, 100) || 'Nieuw bericht',
-              position: 'bottom-right',
-              duration: 5000,
-              action: {
-                label: 'Bekijk',
-                onClick: () => navigate('/groepen'),
-              },
+          if (getNotificationToastEnabled()) {
+            supabase.from('profiles').select('display_name').eq('id', msg.user_id).maybeSingle().then(({ data }) => {
+              const name = data?.display_name || 'Iemand';
+              toast(name, {
+                description: msg.content?.slice(0, 100) || 'Nieuw bericht',
+                position: 'bottom-right',
+                duration: 5000,
+                action: {
+                  label: 'Bekijk',
+                  onClick: () => navigate('/groepen'),
+                },
+              });
             });
-          });
+          }
         }
         fetchUnreadGroups();
       })
@@ -115,19 +117,21 @@ export function AppSidebar() {
         const msg = payload.new as any;
         if (msg?.receiver_id === session.user.id) {
           playNotification();
-          supabase.from('profiles').select('display_name, username').eq('id', msg.sender_id).maybeSingle().then(({ data }) => {
-            const name = data?.display_name || 'Iemand';
-            const username = (data as any)?.username;
-            toast(name, {
-              description: msg.content?.slice(0, 100) || 'Nieuw bericht',
-              position: 'bottom-right',
-              duration: 5000,
-              action: {
-                label: 'Bekijk',
-                onClick: () => navigate(`/berichten/${username || msg.sender_id}`),
-              },
+          if (getNotificationToastEnabled()) {
+            supabase.from('profiles').select('display_name, username').eq('id', msg.sender_id).maybeSingle().then(({ data }) => {
+              const name = data?.display_name || 'Iemand';
+              const username = (data as any)?.username;
+              toast(name, {
+                description: msg.content?.slice(0, 100) || 'Nieuw bericht',
+                position: 'bottom-right',
+                duration: 5000,
+                action: {
+                  label: 'Bekijk',
+                  onClick: () => navigate(`/berichten/${username || msg.sender_id}`),
+                },
+              });
             });
-          });
+          }
         }
         fetchUnreadMessages();
       })
