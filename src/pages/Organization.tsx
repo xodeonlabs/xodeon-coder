@@ -179,7 +179,79 @@ export default function OrganizationPage() {
     setJoining(false);
   }
 
-  async function viewMembers(org: Organization) {
+  async function fetchMyRequests() {
+    if (!session?.user?.id) return;
+    const { data } = await supabase.from('org_join_requests' as any).select('id, organization_id, status').eq('user_id', session.user.id);
+    setMyRequests((data as any[]) || []);
+  }
+
+  async function loadPublicOrgs() {
+    // Load all orgs (we'll use admin edge function or just show orgs user is not in)
+    // For simplicity, load all org names via a search
+    const { data } = await supabase.from('organizations').select('id, name, join_code, owner_id, created_at, icon');
+    // Filter out orgs user is already in
+    const myOrgIds = new Set(orgs.map(o => o.id));
+    setAllPublicOrgs(((data as unknown as Organization[]) || []).filter(o => !myOrgIds.has(o.id)));
+  }
+
+  async function sendJoinRequest(orgId: string) {
+    if (!session?.user?.id || applying) return;
+    setApplying(orgId);
+    const { error } = await supabase.from('org_join_requests' as any).insert({
+      organization_id: orgId,
+      user_id: session.user.id,
+    } as any);
+    if (error) {
+      if (error.message.includes('duplicate') || error.message.includes('unique')) {
+        toast({ title: 'Al gesolliciteerd', description: 'Je hebt al een verzoek gestuurd.', variant: 'destructive' });
+      } else {
+        toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+      }
+    } else {
+      toast({ title: '📩 Verzoek verstuurd!', description: 'De eigenaar kan je verzoek accepteren.' });
+      fetchMyRequests();
+    }
+    setApplying(null);
+  }
+
+  async function loadJoinRequests(orgId: string) {
+    const { data } = await supabase.from('org_join_requests' as any).select('id, user_id, status, created_at').eq('organization_id', orgId).eq('status', 'pending');
+    const reqs = (data as any[]) || [];
+    setJoinRequests(reqs);
+    // Load profiles
+    const userIds = reqs.map((r: any) => r.user_id);
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase.from('profiles').select('id, display_name, avatar_url').in('id', userIds);
+      const map: Record<string, { display_name: string | null; avatar_url: string | null }> = {};
+      (profiles || []).forEach(p => { map[p.id] = { display_name: p.display_name, avatar_url: p.avatar_url }; });
+      setRequestProfiles(map);
+    }
+  }
+
+  async function handleJoinRequest(requestId: string, action: 'accepted' | 'rejected') {
+    const req = joinRequests.find(r => r.id === requestId);
+    if (!req || !selectedOrg) return;
+    
+    if (action === 'accepted') {
+      // Add user as member
+      const { error: memberErr } = await supabase.from('organization_members').insert({
+        organization_id: selectedOrg.id,
+        user_id: req.user_id,
+        role: 'member' as any,
+      });
+      if (memberErr) {
+        toast({ title: 'Fout', description: memberErr.message, variant: 'destructive' });
+        return;
+      }
+    }
+    
+    // Update request status
+    await supabase.from('org_join_requests' as any).update({ status: action, updated_at: new Date().toISOString() } as any).eq('id', requestId);
+    toast({ title: action === 'accepted' ? '✅ Geaccepteerd!' : '❌ Geweigerd' });
+    loadJoinRequests(selectedOrg.id);
+    if (action === 'accepted') viewMembers(selectedOrg);
+  }
+
     setSelectedOrg(org);
     setLoadingMembers(true);
     setShowDeposit(false);
