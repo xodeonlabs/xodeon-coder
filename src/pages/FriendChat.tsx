@@ -34,6 +34,7 @@ export default function FriendChatPage() {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [showGame, setShowGame] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const myId = session?.user?.id;
   const [myRetentionHours, setMyRetentionHours] = useState(24);
