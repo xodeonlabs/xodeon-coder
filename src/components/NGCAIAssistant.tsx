@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Bot, Send, Check, X, Loader2, Sparkles, Plus, MessageSquare, Trash2, ArrowLeft, Pencil } from 'lucide-react';
+import { Bot, Send, Check, X, Loader2, Sparkles, Plus, MessageSquare, Trash2, ArrowLeft, Pencil, Coins } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { CoinConfirmDialog } from '@/components/CoinConfirmDialog';
+import { useToast } from '@/hooks/use-toast';
 
 interface Message {
   id?: string;
@@ -31,6 +33,7 @@ function extractNGCCode(text: string): string | null {
 
 export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssistantProps) {
   const { session } = useAuth();
+  const { toast } = useToast();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConvoId, setActiveConvoId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -41,6 +44,7 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
   const [loadingConvos, setLoadingConvos] = useState(true);
   const [editingConvoId, setEditingConvoId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
+  const [coinConfirm, setCoinConfirm] = useState<{ open: boolean; amount: number; description: string; onConfirm: () => void }>({ open: false, amount: 0, description: '', onConfirm: () => {} });
   const editInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -240,12 +244,46 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
     }
   }, [input, messages, currentCode, isLoading, activeConvoId]);
 
-  const handleApply = () => {
-    if (pendingCode) {
+  const countAddedLines = useCallback((oldCode: string, newCode: string): number => {
+    const oldLines = oldCode.split('\n').length;
+    const newLines = newCode.split('\n').length;
+    return Math.max(0, newLines - oldLines);
+  }, []);
+
+  const handleApply = useCallback(() => {
+    if (!pendingCode || !session?.user?.id) return;
+
+    const addedLines = countAddedLines(currentCode, pendingCode);
+    const cost = addedLines; // 1 coin per added line
+
+    if (cost <= 0) {
+      // No added lines, apply for free
       onApplyCode(pendingCode);
       setPendingCode(null);
+      return;
     }
-  };
+
+    setCoinConfirm({
+      open: true,
+      amount: cost,
+      description: `De AI heeft ${addedLines} nieuwe regels code toegevoegd. Kosten: 1 coin per regel.`,
+      onConfirm: async () => {
+        const { data: coinRow } = await supabase.from('user_coins').select('id, balance').eq('user_id', session.user.id).maybeSingle();
+        const balance = (coinRow as any)?.balance ?? 0;
+
+        if (balance < cost) {
+          toast({ title: 'Niet genoeg coins', description: `Je hebt ${cost} coins nodig maar je hebt er ${balance}.`, variant: 'destructive' });
+          return;
+        }
+
+        await supabase.from('user_coins').update({ balance: balance - cost, updated_at: new Date().toISOString() } as any).eq('id', (coinRow as any).id);
+        toast({ title: `${cost} coins afgeschreven`, description: `${addedLines} regels code toegepast.` });
+        onApplyCode(pendingCode);
+        setPendingCode(null);
+        setCoinConfirm(prev => ({ ...prev, open: false }));
+      },
+    });
+  }, [pendingCode, currentCode, session?.user?.id, onApplyCode, toast, countAddedLines]);
 
   // Conversation list view
   if (view === 'list') {
@@ -399,28 +437,38 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
           </div>
         )}
 
-        {pendingCode && !isLoading && (
-          <div className="rounded-lg border border-primary/30 bg-primary/5 p-2 space-y-2">
-            <p className="text-[10px] text-foreground font-medium">AI heeft nieuwe code voorgesteld:</p>
-            <pre className="text-[9px] text-muted-foreground bg-background rounded p-1.5 max-h-24 overflow-y-auto font-mono">
-              {pendingCode.slice(0, 300)}{pendingCode.length > 300 ? '...' : ''}
-            </pre>
-            <div className="flex gap-1.5">
-              <button
-                onClick={handleApply}
-                className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium bg-accent text-accent-foreground hover:bg-accent/80 transition-colors"
-              >
-                <Check className="h-3 w-3" /> Toepassen
-              </button>
-              <button
-                onClick={() => setPendingCode(null)}
-                className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
-              >
-                <X className="h-3 w-3" /> Afwijzen
-              </button>
+        {pendingCode && !isLoading && (() => {
+          const addedLines = countAddedLines(currentCode, pendingCode);
+          const cost = addedLines;
+          return (
+            <div className="rounded-lg border border-primary/30 bg-primary/5 p-2 space-y-2">
+              <p className="text-[10px] text-foreground font-medium">AI heeft nieuwe code voorgesteld:</p>
+              <pre className="text-[9px] text-muted-foreground bg-background rounded p-1.5 max-h-24 overflow-y-auto font-mono">
+                {pendingCode.slice(0, 300)}{pendingCode.length > 300 ? '...' : ''}
+              </pre>
+              {cost > 0 && (
+                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                  <Coins className="h-3 w-3 text-accent" />
+                  <span>+{addedLines} regels = <strong className="text-accent">{cost} coins</strong></span>
+                </div>
+              )}
+              <div className="flex gap-1.5">
+                <button
+                  onClick={handleApply}
+                  className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium bg-accent text-accent-foreground hover:bg-accent/80 transition-colors"
+                >
+                  <Check className="h-3 w-3" /> {cost > 0 ? `Toepassen (${cost} 🪙)` : 'Toepassen'}
+                </button>
+                <button
+                  onClick={() => setPendingCode(null)}
+                  className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
+                >
+                  <X className="h-3 w-3" /> Afwijzen
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         <div ref={bottomRef} />
       </div>
@@ -443,6 +491,13 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
           <Send className="h-3.5 w-3.5" />
         </button>
       </div>
+      <CoinConfirmDialog
+        open={coinConfirm.open}
+        onOpenChange={(open) => setCoinConfirm(prev => ({ ...prev, open }))}
+        amount={coinConfirm.amount}
+        description={coinConfirm.description}
+        onConfirm={coinConfirm.onConfirm}
+      />
     </div>
   );
 }
