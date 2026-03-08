@@ -67,9 +67,14 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="hidden sm:flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white">
+          <button
+            onClick={() => onChangeIcon && setShowIconPicker(true)}
+            className={`w-6 h-6 rounded-md bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white ${onChangeIcon ? 'cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all' : ''}`}
+            title={onChangeIcon ? 'Icoon wijzigen' : undefined}
+            disabled={!onChangeIcon}
+          >
             <AppIcon iconName={appIcon || 'file-code'} size={14} />
-          </div>
+          </button>
           <span className="text-sm font-bold text-foreground font-mono">NGC</span>
         </div>
         <div className="hidden sm:block h-4 w-px bg-border/30"></div>
