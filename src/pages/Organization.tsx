@@ -101,7 +101,24 @@ export default function OrganizationPage() {
         .from('organization_members')
         .insert({ organization_id: org.id, user_id: session.user.id, role: 'owner' as any });
 
-      toast({ title: 'Bedrijf aangemaakt!', description: `"${org.name}" is klaar.` });
+      // Start bedrijf met 1000 coins
+      await supabase.from('org_coins').insert({
+        organization_id: org.id,
+        name: 'coins',
+        balance: 1000,
+      } as any);
+
+      // Log de initiële storting
+      await supabase.from('org_coin_transactions').insert({
+        organization_id: org.id,
+        coin_name: 'coins',
+        amount: 1000,
+        type: 'deposit',
+        user_id: session.user.id,
+        note: 'Startsaldo bedrijf',
+      } as any);
+
+      toast({ title: 'Bedrijf aangemaakt!', description: `"${org.name}" is klaar met 1000 startcoins.` });
       setNewOrgName('');
       setShowCreate(false);
       fetchOrgs();
@@ -472,12 +489,19 @@ export default function OrganizationPage() {
                 >
                   <ArrowDownCircle className="h-3.5 w-3.5" /> Storten
                 </button>
-                <button
-                  onClick={() => { setShowWithdraw(!showWithdraw); setShowDeposit(false); }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
-                >
-                  <ArrowUpCircle className="h-3.5 w-3.5" /> Opnemen
-                </button>
+                {/* Alleen admins/owners kunnen opnemen */}
+                {(() => {
+                  const myMember = members.find(m => m.user_id === session?.user?.id);
+                  const isAdminOrOwner = myMember && (myMember.role === 'owner' || myMember.role === 'admin');
+                  return isAdminOrOwner ? (
+                    <button
+                      onClick={() => { setShowWithdraw(!showWithdraw); setShowDeposit(false); }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                    >
+                      <ArrowUpCircle className="h-3.5 w-3.5" /> Opnemen
+                    </button>
+                  ) : null;
+                })()}
               </div>
             </div>
 

@@ -8,6 +8,7 @@ const PublicApp = () => {
   const { slug } = useParams<{ slug: string }>();
   const [code, setCode] = useState('');
   const [appName, setAppName] = useState('');
+  const [orgId, setOrgId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -15,7 +16,7 @@ const PublicApp = () => {
     if (!slug) return;
     supabase
       .from('apps')
-      .select('id, ngc_code, name')
+      .select('id, ngc_code, name, organization_id')
       .eq('slug', slug)
       .eq('is_public', true)
       .single()
@@ -25,6 +26,7 @@ const PublicApp = () => {
         } else {
           setCode(data.ngc_code || '');
           setAppName(data.name);
+          setOrgId((data as any).organization_id || null);
           // Record page view
           supabase.from('app_views').insert({
             app_id: data.id,
@@ -67,7 +69,7 @@ const PublicApp = () => {
         <span className="text-[10px] text-muted-foreground">Gemaakt met NGC Studio</span>
       </div>
       <div className="flex-1 overflow-auto">
-        <NGCPreview ast={ast} />
+        <NGCPreview ast={ast} organizationId={orgId} />
       </div>
     </div>
   );

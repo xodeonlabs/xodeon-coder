@@ -1,9 +1,11 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { NGCNode } from '@/lib/ngc-ast';
 import { createRuntime, NGCRuntime, resolveVarRefs, parseVarDefinition, parseListDefinition, parseDataCommand, parseCoinsCommand, clearPersistedState } from '@/lib/ngc-runtime';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PreviewProps {
   ast: NGCNode | null;
+  organizationId?: string | null;
 }
 
 function cleanStr(val: string): string {
@@ -27,9 +29,13 @@ function initRuntime(ast: NGCNode, runtime: NGCRuntime) {
     // Check for coins definition
     const coinsDef = parseCoinsCommand(ast.name);
     if (coinsDef && coinsDef.operation === 'Set') {
-      // Initialize the OWNER pool (not user balance)
+      // Initialize the OWNER pool (not user balance) — only for non-org apps
       if (!(coinsDef.name in runtime.ownerCoins)) {
         runtime.coinsOwnerSet(coinsDef.name, coinsDef.amount!);
+      }
+      // Initialize player with 100 coins if they have none
+      if (!(coinsDef.name in runtime.coins)) {
+        runtime.coinsSet(coinsDef.name, 100);
       }
     }
     // Check for coins code registration
@@ -88,8 +94,13 @@ function executeDataCommand(cmd: ReturnType<typeof parseDataCommand>, runtime: N
   }
 }
 
+interface CoinHandlers {
+  add: (name: string, amount: number) => Promise<boolean> | boolean;
+  remove: (name: string, amount: number) => Promise<boolean> | boolean;
+}
+
 /** Execute actions; returns a page name if GaNaar is encountered */
-function executeActions(eventNode: NGCNode, runtime: NGCRuntime): string | null {
+function executeActions(eventNode: NGCNode, runtime: NGCRuntime, coinHandlers?: CoinHandlers): string | null {
   let navigateTo: string | null = null;
 
   for (const child of eventNode.children) {
@@ -106,10 +117,18 @@ function executeActions(eventNode: NGCNode, runtime: NGCRuntime): string | null 
       if (coinsCmd) {
         switch (coinsCmd.operation) {
           case 'Add':
-            runtime.coinsAdd(coinsCmd.name, coinsCmd.amount!);
+            if (coinHandlers) {
+              coinHandlers.add(coinsCmd.name, coinsCmd.amount!);
+            } else {
+              runtime.coinsAdd(coinsCmd.name, coinsCmd.amount!);
+            }
             break;
           case 'Remove':
-            runtime.coinsRemove(coinsCmd.name, coinsCmd.amount!);
+            if (coinHandlers) {
+              coinHandlers.remove(coinsCmd.name, coinsCmd.amount!);
+            } else {
+              runtime.coinsRemove(coinsCmd.name, coinsCmd.amount!);
+            }
             break;
           case 'Code':
             if (coinsCmd.varName) {
@@ -167,11 +186,13 @@ function NGCNodeRenderer({
   runtime,
   onRuntimeChange,
   onNavigate,
+  coinHandlers,
 }: {
   node: NGCNode;
   runtime: NGCRuntime;
   onRuntimeChange: () => void;
   onNavigate: (pageName: string) => void;
+  coinHandlers?: CoinHandlers;
 }) {
   const pos = node.properties.Positie ? parsePosition(node.properties.Positie) : { x: 0, y: 0 };
   const size = node.properties.Grootte ? parseSize(node.properties.Grootte) : null;
@@ -190,7 +211,7 @@ function NGCNodeRenderer({
   const handleEvent = (eventName: string) => {
     const eventNode = node.children.find(c => c.type === 'Event' && c.name === eventName);
     if (eventNode) {
-      const target = executeActions(eventNode, runtime);
+      const target = executeActions(eventNode, runtime, coinHandlers);
       if (target) {
         onNavigate(target);
       }
@@ -203,7 +224,7 @@ function NGCNodeRenderer({
       return (
         <div style={{ ...baseStyle, background: color || '#1e293b', borderRadius: `${radius}px`, overflow: 'hidden' }}>
           {node.children.map(child => (
-            <NGCNodeRenderer key={child.id} node={child} runtime={runtime} onRuntimeChange={onRuntimeChange} onNavigate={onNavigate} />
+            <NGCNodeRenderer key={child.id} node={child} runtime={runtime} onRuntimeChange={onRuntimeChange} onNavigate={onNavigate} coinHandlers={coinHandlers} />
           ))}
         </div>
       );
@@ -301,6 +322,7 @@ function NGCNodeRenderer({
               runtime={runtime}
               onRuntimeChange={onRuntimeChange}
               onNavigate={onNavigate}
+              coinHandlers={coinHandlers}
             />
           ))}
         </div>
@@ -346,15 +368,69 @@ function DataTableView({ tableName, records }: { tableName: string; records: Arr
   );
 }
 
-export function NGCPreview({ ast }: PreviewProps) {
+export function NGCPreview({ ast, organizationId }: PreviewProps) {
   const [updateCount, forceUpdate] = useState(0);
   const [currentPage, setCurrentPage] = useState<string | null>(null);
+  const [orgBalance, setOrgBalance] = useState<number | null>(null);
 
   const runtime = useMemo(() => {
     const rt = createRuntime();
     if (ast) initRuntime(ast, rt);
     return rt;
   }, [ast]);
+
+  // Load org coin balance if app belongs to an org
+  useEffect(() => {
+    if (!organizationId) return;
+    supabase.from('org_coins').select('balance').eq('organization_id', organizationId).eq('name', 'coins').single()
+      .then(({ data }) => {
+        if (data) setOrgBalance((data as any).balance);
+      });
+  }, [organizationId, updateCount]);
+
+  // Org-aware coin operations
+  const orgCoinsAdd = useCallback(async (name: string, amount: number): Promise<boolean> => {
+    if (!organizationId) return runtime.coinsAdd(name, amount);
+    // Fetch current org balance
+    const { data } = await supabase.from('org_coins').select('id, balance').eq('organization_id', organizationId).eq('name', 'coins').single();
+    if (!data || (data as any).balance < amount) return false;
+    const newOrgBalance = (data as any).balance - amount;
+    await supabase.from('org_coins').update({ balance: newOrgBalance, updated_at: new Date().toISOString() } as any).eq('id', (data as any).id);
+    // Add to user
+    runtime.coins[name] = (runtime.coins[name] ?? 0) + amount;
+    // Log
+    const { data: authData } = await supabase.auth.getUser();
+    if (authData?.user) {
+      await supabase.from('org_coin_transactions').insert({
+        organization_id: organizationId, coin_name: 'coins', amount, type: 'withdraw',
+        user_id: authData.user.id, note: `App: Coins.Add(${name}, ${amount})`,
+      } as any);
+    }
+    setOrgBalance(newOrgBalance);
+    return true;
+  }, [organizationId, runtime]);
+
+  const orgCoinsRemove = useCallback(async (name: string, amount: number): Promise<boolean> => {
+    if (!organizationId) return runtime.coinsRemove(name, amount);
+    const current = runtime.coins[name] ?? 0;
+    if (current < amount) return false;
+    runtime.coins[name] = current - amount;
+    // Add back to org
+    const { data } = await supabase.from('org_coins').select('id, balance').eq('organization_id', organizationId).eq('name', 'coins').single();
+    if (data) {
+      const newOrgBalance = (data as any).balance + amount;
+      await supabase.from('org_coins').update({ balance: newOrgBalance, updated_at: new Date().toISOString() } as any).eq('id', (data as any).id);
+      setOrgBalance(newOrgBalance);
+    }
+    const { data: authData } = await supabase.auth.getUser();
+    if (authData?.user) {
+      await supabase.from('org_coin_transactions').insert({
+        organization_id: organizationId, coin_name: 'coins', amount, type: 'deposit',
+        user_id: authData.user.id, note: `App: Coins.Remove(${name}, ${amount})`,
+      } as any);
+    }
+    return true;
+  }, [organizationId, runtime]);
 
   // Get all pages from AST
   const pages = useMemo(() => {
@@ -385,6 +461,11 @@ export function NGCPreview({ ast }: PreviewProps) {
     forceUpdate(n => n + 1);
     window.location.reload();
   }, []);
+
+  const coinHandlers: CoinHandlers | undefined = organizationId ? {
+    add: orgCoinsAdd,
+    remove: orgCoinsRemove,
+  } : undefined;
 
   if (!ast) {
     return (
@@ -442,6 +523,7 @@ export function NGCPreview({ ast }: PreviewProps) {
                 runtime={runtime}
                 onRuntimeChange={handleRuntimeChange}
                 onNavigate={handleNavigate}
+                coinHandlers={coinHandlers}
               />
             ))}
           </div>
