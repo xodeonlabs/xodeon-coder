@@ -314,9 +314,12 @@ export default function AdminPanel() {
 
   async function deleteApp(id: string) {
     const app = apps.find(a => a.id === id);
-    const { error } = await supabase.from('apps').delete().eq('id', id);
-    if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
-    else {
+    const { data, error } = await supabase.functions.invoke('admin-delete-resource', {
+      body: { type: 'app', target_id: id },
+    });
+    if (error || data?.error) {
+      toast({ title: 'Fout', description: error?.message || data?.error, variant: 'destructive' });
+    } else {
       await logAction('App verwijderd', 'app', id, app?.name || '');
       setApps(apps.filter(a => a.id !== id));
       toast({ title: 'App verwijderd' });
@@ -325,9 +328,12 @@ export default function AdminPanel() {
 
   async function deleteOrg(id: string) {
     const org = orgs.find(o => o.id === id);
-    const { error } = await supabase.from('organizations').delete().eq('id', id);
-    if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
-    else {
+    const { data, error } = await supabase.functions.invoke('admin-delete-resource', {
+      body: { type: 'org', target_id: id },
+    });
+    if (error || data?.error) {
+      toast({ title: 'Fout', description: error?.message || data?.error, variant: 'destructive' });
+    } else {
       await logAction('Bedrijf verwijderd', 'org', id, org?.name || '');
       setOrgs(orgs.filter(o => o.id !== id));
       toast({ title: 'Bedrijf verwijderd' });
