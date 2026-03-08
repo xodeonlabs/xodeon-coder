@@ -205,6 +205,8 @@ export default function OrganizationPage() {
     setLoadingMembers(false);
   }
 
+  const [personalCoins, setPersonalCoins] = useState(0);
+  const [coinConfirm, setCoinConfirm] = useState<{ open: boolean; amount: number; description: string; onConfirm: () => void }>({ open: false, amount: 0, description: '', onConfirm: () => {} });
 
   async function fetchPersonalCoins() {
     if (!session?.user?.id) return;
