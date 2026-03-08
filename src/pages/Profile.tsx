@@ -4,7 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Calendar, Code2, Users, Eye, ExternalLink, Settings, Sparkles, Mail, Globe } from 'lucide-react';
+import { ArrowLeft, Calendar, Code2, Users, Eye, ExternalLink, Settings, Sparkles, Mail, Globe, Heart } from 'lucide-react';
+import { FriendButton } from '@/components/FriendButton';
+import { FriendsList } from '@/components/FriendsList';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
