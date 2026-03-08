@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle, MessageCircle } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { OrgChat } from '@/components/OrgChat';
+import { AdBanner } from '@/components/AdBanner';
 
 interface Organization {
   id: string;
