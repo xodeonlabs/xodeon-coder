@@ -456,12 +456,12 @@ const Index = () => {
         >
           <LiveCursors cursors={cursors.filter(c => c.section === activeTab)} containerRef={editorContainerRef} />
           {/* Mode toggle + Page Tabs */}
-          <div className="flex items-center border-b border-border shrink-0" style={{ background: 'hsl(var(--ide-explorer-bg))' }}>
+          <div className="flex items-center border-b border-border shrink-0 overflow-x-auto scrollbar-none" style={{ background: 'hsl(var(--ide-explorer-bg))' }}>
             {/* Mode toggle */}
-            <div className="flex items-center border-r border-border">
+            <div className="flex items-center border-r border-border shrink-0">
               <button
                 onClick={() => setEditorMode('code')}
-                className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium transition-colors ${
+                className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium transition-colors ${
                   editorMode === 'code'
                     ? 'text-foreground bg-background'
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40'
@@ -473,7 +473,7 @@ const Index = () => {
               </button>
               <button
                 onClick={() => setEditorMode('design')}
-                className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium transition-colors ${
+                className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium transition-colors ${
                   editorMode === 'design'
                     ? 'text-primary bg-primary/10'
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40'
@@ -491,7 +491,7 @@ const Index = () => {
                   <button
                     key={section.id}
                     onClick={() => setActiveTab(section.id)}
-                    className={`px-3 py-1.5 text-xs font-medium transition-colors border-b-2 ${
+                    className={`px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium transition-colors border-b-2 whitespace-nowrap shrink-0 ${
                       activeTab === section.id
                         ? 'border-primary text-foreground bg-background'
                         : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/40'
@@ -502,12 +502,12 @@ const Index = () => {
                 ))}
                 <button
                   onClick={handleAddPage}
-                  className="px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  className="px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0"
                   title="Nieuwe pagina toevoegen"
                 >
                   ➕
                 </button>
-                <span className="ml-auto pr-2 text-muted-foreground opacity-60 text-xs normal-case tracking-normal">
+                <span className="ml-auto pr-2 text-muted-foreground opacity-60 text-[10px] sm:text-xs normal-case tracking-normal hidden sm:inline shrink-0">
                   {activeSection ? (activeTab === 'global' ? 'app.ngc' : `${activeSection.label.toLowerCase()}.ngc`) : 'main.ngc'}
                 </span>
               </>
