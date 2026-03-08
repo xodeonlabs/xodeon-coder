@@ -478,8 +478,12 @@ export default function Dashboard() {
         {/* Create button */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 sm:mb-12">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Mijn Apps</h2>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">Maak en beheer je NGC applicaties</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              {getGreeting()}{displayName ? `, ${displayName}` : ''} 👋
+            </h2>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
+              {quote.emoji} <em>{quote.text}</em>
+            </p>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <button onClick={() => setShowTemplateDialog(true)} className="flex items-center gap-1.5 sm:gap-2 rounded-xl px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold transition-all border border-primary/30 text-primary hover:bg-primary/10 active:scale-95">
