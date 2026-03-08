@@ -1,0 +1,1 @@
+ALTER TABLE public.user_coins ADD COLUMN last_daily_bonus date DEFAULT NULL;
