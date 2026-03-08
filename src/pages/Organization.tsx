@@ -26,6 +26,24 @@ interface OrgApp {
   updated_at: string;
 }
 
+interface OrgCoin {
+  id: string;
+  organization_id: string;
+  name: string;
+  balance: number;
+  updated_at: string;
+}
+
+interface CoinTransaction {
+  id: string;
+  coin_name: string;
+  amount: number;
+  type: 'deposit' | 'withdraw';
+  user_id: string;
+  note: string;
+  created_at: string;
+}
+
 export default function OrganizationPage() {
   const { session } = useAuth();
   const navigate = useNavigate();
