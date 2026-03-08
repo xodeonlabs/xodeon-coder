@@ -247,6 +247,10 @@ export default function Profile() {
               )}
               {/* Social links & email */}
               <SocialBar profile={profile!} />
+              {/* Friend button */}
+              <div className="mt-3 flex justify-center sm:justify-start">
+                <FriendButton targetUserId={profile!.id} />
+              </div>
             </div>
           </div>
         </div>
