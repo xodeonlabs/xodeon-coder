@@ -370,7 +370,7 @@ function StatCard({ icon, value, label, color }: { icon: React.ReactNode; value:
   );
 }
 
-function PublicApps({ userId }: { userId: string }) {
+function PublicApps({ userId, isOwner = false }: { userId: string; isOwner?: boolean }) {
   const [apps, setApps] = useState<Array<{
     id: string;
     name: string;
@@ -378,11 +378,283 @@ function PublicApps({ userId }: { userId: string }) {
     slug: string | null;
     created_at: string;
     ngc_code: string;
+    banner_url: string | null;
   }>>([]);
   const [appImages, setAppImages] = useState<Record<string, string[]>>({});
   const [appViews, setAppViews] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [iconPickerApp, setIconPickerApp] = useState<string | null>(null);
+  const [uploadingBanner, setUploadingBanner] = useState<string | null>(null);
+  const bannerRef = useRef<HTMLInputElement>(null);
+  const [bannerAppId, setBannerAppId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    async function load() {
+      const { data } = await supabase
+        .from('apps')
+        .select('id, name, icon, slug, created_at, ngc_code, banner_url')
+        .eq('owner_id', userId)
+        .eq('is_public', true)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (!data || data.length === 0) {
+        setLoading(false);
+        return;
+      }
+      setApps(data as any);
+
+      const imageMap: Record<string, string[]> = {};
+      await Promise.all(
+        data.map(async (app) => {
+          const { data: files } = await supabase.storage
+            .from('app-images')
+            .list(app.id, { limit: 3, sortBy: { column: 'created_at', order: 'desc' } });
+          if (files && files.length > 0) {
+            imageMap[app.id] = files
+              .filter(f => f.name.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i))
+              .map(f => supabase.storage.from('app-images').getPublicUrl(`${app.id}/${f.name}`).data.publicUrl);
+          }
+        })
+      );
+      setAppImages(imageMap);
+
+      const appIds = data.map(a => a.id);
+      const viewMap: Record<string, number> = {};
+      await Promise.all(
+        appIds.map(async (id) => {
+          const { count } = await supabase
+            .from('app_views')
+            .select('id', { count: 'exact', head: true })
+            .eq('app_id', id);
+          viewMap[id] = count ?? 0;
+        })
+      );
+      setAppViews(viewMap);
+      setLoading(false);
+    }
+    load();
+  }, [userId]);
+
+  function extractDescription(code: string): string | null {
+    const match = code.match(/Tekst="([^"]{10,120})"/);
+    return match ? match[1] : null;
+  }
+
+  async function handleIconChange(appId: string, icon: string) {
+    const { error } = await supabase.from('apps').update({ icon }).eq('id', appId);
+    if (error) {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+      return;
+    }
+    setApps(prev => prev.map(a => a.id === appId ? { ...a, icon } : a));
+    toast({ title: '✅ Icoon bijgewerkt!' });
+  }
+
+  async function handleBannerUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !bannerAppId) return;
+
+    if (file.size > 4 * 1024 * 1024) {
+      toast({ title: 'Te groot', description: 'Maximaal 4MB', variant: 'destructive' });
+      return;
+    }
+
+    setUploadingBanner(bannerAppId);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${bannerAppId}/banner.${ext}`;
+
+      const { error: uploadErr } = await supabase.storage
+        .from('app-images')
+        .upload(path, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
+
+      const { data: urlData } = supabase.storage.from('app-images').getPublicUrl(path);
+      const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+
+      const { error: updateErr } = await supabase
+        .from('apps')
+        .update({ banner_url: publicUrl } as any)
+        .eq('id', bannerAppId);
+      if (updateErr) throw updateErr;
+
+      setApps(prev => prev.map(a => a.id === bannerAppId ? { ...a, banner_url: publicUrl } : a));
+      toast({ title: '✅ Banner bijgewerkt!' });
+    } catch (err: any) {
+      toast({ title: 'Fout', description: err.message, variant: 'destructive' });
+    }
+    setUploadingBanner(null);
+    setBannerAppId(null);
+    if (bannerRef.current) bannerRef.current.value = '';
+  }
+
+  if (loading) {
+    return (
+      <div>
+        <div className="flex items-center gap-2 mb-5">
+          <Sparkles className="h-4 w-4 text-primary" />
+          <h3 className="text-sm font-bold text-foreground font-display uppercase tracking-wider">Publieke Apps</h3>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map(i => (
+            <Skeleton key={i} className="h-64 rounded-2xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (apps.length === 0) {
+    return (
+      <div className="rounded-2xl border border-border/30 bg-card/50 p-8 sm:p-12 text-center">
+        <div className="text-4xl mb-3 opacity-40">📱</div>
+        <p className="text-sm text-muted-foreground">Nog geen publieke apps</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-5">
+        <Sparkles className="h-4 w-4 text-primary" />
+        <h3 className="text-sm font-bold text-foreground font-display uppercase tracking-wider">Publieke Apps</h3>
+        <span className="ml-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold tabular-nums">{apps.length}</span>
+      </div>
+
+      {/* Hidden file input for banner */}
+      <input
+        ref={bannerRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleBannerUpload}
+      />
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {apps.map((app, idx) => {
+          const images = appImages[app.id] || [];
+          const views = appViews[app.id] ?? 0;
+          const desc = extractDescription(app.ngc_code);
+          const date = new Date(app.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+          const bannerSrc = app.banner_url || (images.length > 0 ? images[0] : null);
+
+          return (
+            <div
+              key={app.id}
+              onClick={() => !iconPickerApp && app.slug ? navigate(`/app/${app.slug}`) : null}
+              className={`group relative rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1 ${app.slug && !iconPickerApp ? 'cursor-pointer' : ''} animate-slide-up`}
+              style={{ animationDelay: `${Math.min(idx * 80, 400)}ms` }}
+            >
+              {/* Banner area */}
+              {bannerSrc ? (
+                <div className="aspect-[16/10] bg-muted/20 overflow-hidden relative">
+                  <img
+                    src={bannerSrc}
+                    alt={`Banner van ${app.name}`}
+                    className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-card to-transparent" />
+                  {app.slug && (
+                    <div className="absolute top-3 left-3 p-1.5 rounded-lg bg-background/60 backdrop-blur-md text-foreground/70 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </div>
+                  )}
+                  {isOwner && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setBannerAppId(app.id); bannerRef.current?.click(); }}
+                      className="absolute top-3 right-3 p-2 rounded-lg bg-background/60 backdrop-blur-md text-foreground/70 hover:bg-background/80 hover:text-foreground transition-all opacity-0 group-hover:opacity-100"
+                      title="Banner wijzigen"
+                    >
+                      {uploadingBanner === app.id ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-muted-foreground/30 border-t-foreground" />
+                      ) : (
+                        <Camera className="h-4 w-4" />
+                      )}
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="aspect-[16/10] bg-gradient-to-br from-primary/8 via-accent/5 to-muted/10 flex items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 opacity-[0.03]" style={{
+                    backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)',
+                    backgroundSize: '20px 20px',
+                  }} />
+                  <AppIcon iconName={app.icon || 'file-code'} size={48} className="opacity-30 group-hover:scale-110 transition-transform duration-500 text-muted-foreground" />
+                  <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-card to-transparent" />
+                  {isOwner && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setBannerAppId(app.id); bannerRef.current?.click(); }}
+                      className="absolute top-3 right-3 p-2 rounded-lg bg-background/60 backdrop-blur-md text-foreground/70 hover:bg-background/80 hover:text-foreground transition-all opacity-0 group-hover:opacity-100"
+                      title="Banner toevoegen"
+                    >
+                      {uploadingBanner === app.id ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-muted-foreground/30 border-t-foreground" />
+                      ) : (
+                        <Camera className="h-4 w-4" />
+                      )}
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Content */}
+              <div className="p-4 sm:p-5">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div
+                    className={`relative w-8 h-8 rounded-xl bg-gradient-to-br from-primary/15 to-accent/10 border border-primary/10 flex items-center justify-center shrink-0 ${isOwner ? 'cursor-pointer hover:border-primary/40 transition-colors' : ''}`}
+                    onClick={(e) => { if (isOwner) { e.stopPropagation(); setIconPickerApp(app.id); } }}
+                    title={isOwner ? 'Icoon wijzigen' : undefined}
+                  >
+                    <AppIcon iconName={app.icon || 'file-code'} size={16} className="text-primary/70" />
+                    {isOwner && (
+                      <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-primary/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Pencil className="h-2 w-2 text-primary-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  <h4 className="text-sm font-bold text-foreground font-display truncate flex-1">{app.name}</h4>
+                </div>
+
+                {desc && (
+                  <p className="text-xs text-muted-foreground line-clamp-2 mb-3 leading-relaxed pl-[42px]">{desc}</p>
+                )}
+
+                <div className="flex items-center gap-3 text-[11px] text-muted-foreground pt-3 border-t border-border/30">
+                  <span className="flex items-center gap-1">
+                    <Eye className="h-3 w-3" />
+                    {views.toLocaleString('nl-NL')}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {date}
+                  </span>
+                  {app.slug && (
+                    <span className="ml-auto px-2 py-0.5 rounded-md bg-primary/8 text-primary/70 text-[10px] font-mono font-medium">
+                      /{app.slug}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Icon picker modal */}
+      {iconPickerApp && (
+        <IconPicker
+          value={apps.find(a => a.id === iconPickerApp)?.icon || 'file-code'}
+          onChange={(icon) => handleIconChange(iconPickerApp, icon)}
+          onClose={() => setIconPickerApp(null)}
+        />
+      )}
+    </div>
+  );
+}
 
   useEffect(() => {
     async function load() {
