@@ -4,11 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import {
   LayoutDashboard, BarChart3, Building2, Handshake, Users,
-  MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins,
+  MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins, PanelLeftClose, PanelLeftOpen,
 } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
-  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, SidebarTrigger, useSidebar,
 } from '@/components/ui/sidebar';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 
@@ -94,12 +94,15 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r border-border/30">
       <SidebarContent className="pt-3">
-        {/* Logo */}
-        <div className={`flex items-center gap-2.5 px-4 py-3 mb-2 ${collapsed ? 'justify-center px-2' : ''}`}>
+        {/* Logo + Toggle */}
+        <div className={`flex items-center gap-2.5 px-4 py-3 mb-2 ${collapsed ? 'flex-col justify-center px-2' : ''}`}>
           <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center border border-primary/10 shrink-0 overflow-hidden">
             <img src="/ngc-logo.png" alt="NGC" className="h-full w-full object-cover rounded-xl" />
           </div>
-          {!collapsed && <span className="text-base font-bold text-foreground font-display tracking-tight">NGC Studio</span>}
+          {!collapsed && <span className="text-base font-bold text-foreground font-display tracking-tight flex-1">NGC Studio</span>}
+          <SidebarTrigger className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all shrink-0">
+            {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+          </SidebarTrigger>
         </div>
 
         {/* Coins */}
