@@ -144,6 +144,14 @@ export default function Analytics() {
             <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Statistieken van je gepubliceerde apps</p>
           </div>
         </div>
+        <button
+          onClick={() => { if (session?.user?.id) loadAnalytics(); }}
+          disabled={loading}
+          className="ml-auto p-1.5 sm:p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all shrink-0 disabled:opacity-50"
+          title="Herladen"
+        >
+          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+        </button>
       </header>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
