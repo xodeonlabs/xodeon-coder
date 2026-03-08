@@ -198,38 +198,139 @@ export default function Profile() {
 }
 
 function PublicApps({ userId }: { userId: string }) {
-  const [apps, setApps] = useState<Array<{ id: string; name: string; icon: string | null; slug: string | null }>>([]);
+  const [apps, setApps] = useState<Array<{
+    id: string;
+    name: string;
+    icon: string | null;
+    slug: string | null;
+    created_at: string;
+    ngc_code: string;
+  }>>([]);
+  const [appImages, setAppImages] = useState<Record<string, string[]>>({});
+  const [appViews, setAppViews] = useState<Record<string, number>>({});
   const navigate = useNavigate();
 
   useEffect(() => {
-    supabase
-      .from('apps')
-      .select('id, name, icon, slug')
-      .eq('owner_id', userId)
-      .eq('is_public', true)
-      .order('created_at', { ascending: false })
-      .limit(20)
-      .then(({ data }) => {
-        if (data) setApps(data);
-      });
+    async function load() {
+      const { data } = await supabase
+        .from('apps')
+        .select('id, name, icon, slug, created_at, ngc_code')
+        .eq('owner_id', userId)
+        .eq('is_public', true)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (!data || data.length === 0) return;
+      setApps(data);
+
+      // Load screenshots from app-images bucket for each app
+      const imageMap: Record<string, string[]> = {};
+      await Promise.all(
+        data.map(async (app) => {
+          const { data: files } = await supabase.storage
+            .from('app-images')
+            .list(app.id, { limit: 3, sortBy: { column: 'created_at', order: 'desc' } });
+          if (files && files.length > 0) {
+            imageMap[app.id] = files
+              .filter(f => f.name.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i))
+              .map(f => supabase.storage.from('app-images').getPublicUrl(`${app.id}/${f.name}`).data.publicUrl);
+          }
+        })
+      );
+      setAppImages(imageMap);
+
+      // Load view counts
+      const appIds = data.map(a => a.id);
+      const viewMap: Record<string, number> = {};
+      await Promise.all(
+        appIds.map(async (id) => {
+          const { count } = await supabase
+            .from('app_views')
+            .select('id', { count: 'exact', head: true })
+            .eq('app_id', id);
+          viewMap[id] = count ?? 0;
+        })
+      );
+      setAppViews(viewMap);
+    }
+    load();
   }, [userId]);
 
   if (apps.length === 0) return null;
 
+  // Extract a simple description from NGC code (first Text element's Tekst value)
+  function extractDescription(code: string): string | null {
+    const match = code.match(/Tekst="([^"]{10,120})"/);
+    return match ? match[1] : null;
+  }
+
   return (
     <div>
-      <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Publieke Apps</h3>
-      <div className="grid gap-2">
-        {apps.map(app => (
-          <button
-            key={app.id}
-            onClick={() => app.slug ? navigate(`/app/${app.slug}`) : null}
-            className="flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-card hover:bg-secondary/30 transition-all text-left"
-          >
-            <Badge variant="secondary" className="text-base px-2 py-1">{app.icon || '📱'}</Badge>
-            <span className="text-sm font-medium text-foreground">{app.name}</span>
-          </button>
-        ))}
+      <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Publieke Apps</h3>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {apps.map(app => {
+          const images = appImages[app.id] || [];
+          const views = appViews[app.id] ?? 0;
+          const desc = extractDescription(app.ngc_code);
+          const date = new Date(app.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+
+          return (
+            <div
+              key={app.id}
+              onClick={() => app.slug ? navigate(`/app/${app.slug}`) : null}
+              className={`group rounded-xl border border-border/50 bg-card overflow-hidden transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 ${app.slug ? 'cursor-pointer' : ''}`}
+            >
+              {/* Screenshot area */}
+              {images.length > 0 ? (
+                <div className="aspect-video bg-muted/30 overflow-hidden relative">
+                  <img
+                    src={images[0]}
+                    alt={`Screenshot van ${app.name}`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  {images.length > 1 && (
+                    <div className="absolute bottom-2 right-2 flex gap-1">
+                      {images.slice(1, 3).map((img, i) => (
+                        <div key={i} className="w-8 h-8 rounded border border-background/80 overflow-hidden shadow-sm">
+                          <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="aspect-video bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center">
+                  <span className="text-4xl opacity-50">{app.icon || '📱'}</span>
+                </div>
+              )}
+
+              {/* Info */}
+              <div className="p-4">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <span className="text-lg">{app.icon || '📱'}</span>
+                  <h4 className="text-sm font-bold text-foreground truncate flex-1">{app.name}</h4>
+                </div>
+                {desc && (
+                  <p className="text-xs text-muted-foreground line-clamp-2 mb-3 leading-relaxed">{desc}</p>
+                )}
+                <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Eye className="h-3 w-3" />
+                    {views}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {date}
+                  </span>
+                  {app.slug && (
+                    <span className="ml-auto text-primary/60 text-[10px] font-mono">/{app.slug}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
