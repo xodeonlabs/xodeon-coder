@@ -8,7 +8,7 @@ import { ArrowLeft, Calendar, Code2, Users, Eye, ExternalLink, Settings, Sparkle
 import { FriendButton } from '@/components/FriendButton';
 import { FriendsList } from '@/components/FriendsList';
 import { ActivityTimeline } from '@/components/ActivityTimeline';
-import { StatusDot, getOnlineStatus } from '@/components/StatusDot';
+import { StatusDot, getOnlineStatus, getLastSeenText } from '@/components/StatusDot';
 import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
