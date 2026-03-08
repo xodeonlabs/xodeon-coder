@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle, MessageCircle } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { OrgChat } from '@/components/OrgChat';
+import { AdBanner } from '@/components/AdBanner';
 
 interface Organization {
   id: string;
@@ -349,6 +350,7 @@ export default function OrganizationPage() {
       </header>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
+        <AdBanner className="mb-6" />
         {/* Actions */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mb-6 sm:mb-10">
           <button

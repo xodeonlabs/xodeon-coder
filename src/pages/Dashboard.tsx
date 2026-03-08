@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, Link, ExternalLink, BarChart3, Coins, Clock, Settings } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
+import { AdBanner } from '@/components/AdBanner';
 
 interface App {
   id: string;
@@ -313,6 +314,7 @@ export default function Dashboard() {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
+        <AdBanner className="mb-6" />
         {/* Create button */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 sm:mb-12">
           <div>
