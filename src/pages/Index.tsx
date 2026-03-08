@@ -323,7 +323,35 @@ const Index = () => {
     }, 50);
   }, [sections]);
 
-  const selectedNode = useMemo(() => {
+  // Command palette items
+  const commandItems = useMemo(() => {
+    const items: { id: string; label: string; category: string; icon: JSX.Element; action: () => void }[] = [];
+    const pageNodes = ast?.children.filter(c => c.type === 'Page') ?? [];
+    pageNodes.forEach((p, i) => {
+      items.push({
+        id: `page-${i}`,
+        label: `Ga naar ${p.name}`,
+        category: 'Pagina',
+        icon: <FileCode className="h-4 w-4" />,
+        action: () => {
+          const section = sections.find(s => s.label === p.name);
+          if (section) setActiveTab(section.id);
+        },
+      });
+    });
+    items.push(
+      { id: 'zen', label: zenMode ? 'Zen mode uit' : 'Zen mode aan', category: 'Weergave', icon: <Eye className="h-4 w-4" />, action: toggleZenMode },
+      { id: 'fullscreen', label: isFullscreen ? 'Volledig scherm uit' : 'Volledig scherm', category: 'Weergave', icon: <Maximize className="h-4 w-4" />, action: toggleFullscreen },
+      { id: 'copy', label: 'Kopieer alle code', category: 'Bewerken', icon: <Copy className="h-4 w-4" />, action: handleCopyCode },
+      { id: 'undo', label: 'Ongedaan maken', category: 'Bewerken', icon: <Undo2 className="h-4 w-4" />, action: handleUndo },
+      { id: 'save', label: 'Nu opslaan', category: 'Bestand', icon: <FileCode className="h-4 w-4" />, action: () => { saveNow(); } },
+      { id: 'code-mode', label: 'Code modus', category: 'Modus', icon: <Code className="h-4 w-4" />, action: () => setEditorMode('code') },
+      { id: 'design-mode', label: 'Ontwerp modus', category: 'Modus', icon: <MousePointer className="h-4 w-4" />, action: () => setEditorMode('design') },
+      { id: 'new-page', label: 'Nieuwe pagina toevoegen', category: 'Bewerken', icon: <Plus className="h-4 w-4" />, action: handleAddPage },
+    );
+    return items;
+  }, [ast, sections, zenMode, isFullscreen, toggleZenMode, toggleFullscreen, handleCopyCode, handleUndo, saveNow, handleAddPage]);
+
     if (!ast || !selectedId) return null;
     return findNodeById(ast, selectedId);
   }, [ast, selectedId]);
