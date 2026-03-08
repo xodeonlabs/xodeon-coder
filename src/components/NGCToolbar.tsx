@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { ExternalLink, LogOut, AlertCircle, CheckCircle, ArrowLeft, Pencil, Share2, X, Menu } from 'lucide-react';
+import { ExternalLink, LogOut, AlertCircle, CheckCircle, ArrowLeft, Pencil, Share2, X, Menu, Download } from 'lucide-react';
+import { parseNGC } from '@/lib/ngc-parser';
+import { exportToHtml } from '@/lib/ngc-to-html';
 import { ParseError } from '@/lib/ngc-ast';
 import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { useNavigate } from 'react-router-dom';
