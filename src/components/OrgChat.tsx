@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Send, Check, CheckCheck } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { getCached, setCache, CACHE_TTL } from '@/lib/cache';
 
 interface OrgChatMessage {
   id: string;
@@ -67,19 +68,30 @@ export function OrgChat({ organizationId }: OrgChatProps) {
   async function loadProfiles(userIds: string[]) {
     const unique = [...new Set(userIds)];
     if (unique.length === 0) return;
-    const { data } = await supabase.from('profiles').select('id, display_name, avatar_url').in('id', unique);
-    if (data) {
-      setProfiles(prev => {
-        const map = { ...prev };
-        for (const p of data) {
-          map[p.id] = { display_name: p.display_name, avatar_url: p.avatar_url };
-        }
-        return map;
-      });
+    
+    // Check cache for already-loaded profiles
+    const cachedProfiles = getCached<Record<string, { display_name: string | null; avatar_url: string | null }>>('chat-profiles', CACHE_TTL.long) || {};
+    const cachedAdmins = getCached<string[]>('chat-admins', CACHE_TTL.long) || [];
+    const needed = unique.filter(id => !cachedProfiles[id]);
+    
+    if (needed.length === 0) {
+      setProfiles(prev => ({ ...prev, ...cachedProfiles }));
+      setAdminIds(prev => { const merged = new Set(prev); cachedAdmins.forEach(id => merged.add(id)); return merged; });
+      return;
     }
-    // Check which senders are admins
-    const adminSet = new Set<string>();
-    for (const uid of unique) {
+    
+    const { data } = await supabase.from('profiles').select('id, display_name, avatar_url').in('id', needed);
+    if (data) {
+      const newProfiles = { ...cachedProfiles };
+      for (const p of data) {
+        newProfiles[p.id] = { display_name: p.display_name, avatar_url: p.avatar_url };
+      }
+      setProfiles(prev => ({ ...prev, ...newProfiles }));
+      setCache('chat-profiles', newProfiles);
+    }
+    // Batch admin check - only for new users
+    const adminSet = new Set<string>(cachedAdmins);
+    for (const uid of needed) {
       const { data: isAdmin } = await supabase.rpc('has_role', { _user_id: uid, _role: 'admin' });
       if (isAdmin) adminSet.add(uid);
     }
@@ -88,6 +100,7 @@ export function OrgChat({ organizationId }: OrgChatProps) {
       adminSet.forEach(id => merged.add(id));
       return merged;
     });
+    setCache('chat-admins', Array.from(adminSet));
   }
 
   // Mark as read when viewing

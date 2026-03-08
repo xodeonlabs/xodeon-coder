@@ -1,6 +1,7 @@
 import { ExternalLink, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getCached, setCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache';
 
 interface Ad {
   id: string;
@@ -27,6 +28,10 @@ export function AdBanner({ className = '', page, organizationId }: AdBannerProps
   const [ads, setAds] = useState<Ad[]>([]);
 
   useEffect(() => {
+    const cacheKey = CACHE_KEYS.ads(page || 'all');
+    const cached = getCached<Ad[]>(cacheKey, CACHE_TTL.ads);
+    if (cached) { setAds(cached); return; }
+
     let query = supabase
       .from('ads')
       .select('id, emoji, title, description, url, gradient, pages, organization_id')
@@ -43,6 +48,7 @@ export function AdBanner({ className = '', page, organizationId }: AdBannerProps
           ? (data as any[]).filter((ad: any) => ad.pages && ad.pages.includes(page))
           : (data as any[]);
         setAds(filtered as Ad[]);
+        setCache(cacheKey, filtered as Ad[]);
       }
     });
   }, [page, organizationId]);

@@ -9,6 +9,7 @@ import { AdBanner } from '@/components/AdBanner';
 import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { CoinConfirmDialog } from '@/components/CoinConfirmDialog';
 import confetti from 'canvas-confetti';
+import { getCached, setCache, clearCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache';
 
 const APP_GRADIENTS = [
   'from-blue-500/15 to-cyan-500/5',
@@ -140,12 +141,17 @@ export default function Dashboard() {
   useEffect(() => {
     async function loadCoins() {
       if (!session?.user?.id) return;
+      const cached = getCached<number>(CACHE_KEYS.coins(session.user.id), CACHE_TTL.short);
+      if (cached !== null) { setTotalCoins(cached); return; }
       const { data } = await supabase.from('user_coins' as any).select('balance').eq('user_id', session.user.id).maybeSingle();
       if (data) {
-        setTotalCoins((data as any).balance ?? 100);
+        const bal = (data as any).balance ?? 100;
+        setTotalCoins(bal);
+        setCache(CACHE_KEYS.coins(session.user.id), bal);
       } else {
         await supabase.from('user_coins' as any).insert({ user_id: session.user.id, balance: 100 } as any);
         setTotalCoins(100);
+        setCache(CACHE_KEYS.coins(session.user.id), 100);
       }
     }
     loadCoins();
@@ -210,26 +216,36 @@ export default function Dashboard() {
 
   async function checkAdminRole() {
     if (!session?.user?.id) return;
+    const cached = getCached<boolean>(CACHE_KEYS.adminRole(session.user.id), CACHE_TTL.long);
+    if (cached !== null) { setIsAdmin(cached); return; }
     const { data } = await supabase.from('user_roles').select('role').eq('user_id', session.user.id).eq('role', 'admin' as any);
-    setIsAdmin(!!(data && data.length > 0));
+    const result = !!(data && data.length > 0);
+    setIsAdmin(result);
+    setCache(CACHE_KEYS.adminRole(session.user.id), result);
   }
 
   async function fetchOrgs() {
+    if (!session?.user?.id) return;
+    const cached = getCached<Org[]>(CACHE_KEYS.orgs(session.user.id), CACHE_TTL.medium);
+    if (cached) { setOrgs(cached); return; }
     const { data } = await supabase.from('organizations').select('id, name, icon' as any).order('name');
-    if (data) setOrgs(data as unknown as Org[]);
+    if (data) { setOrgs(data as unknown as Org[]); setCache(CACHE_KEYS.orgs(session.user.id), data as unknown as Org[]); }
   }
 
   async function fetchOrgMemberships() {
     if (!session?.user?.id) return;
+    const cached = getCached<OrgMembership[]>(CACHE_KEYS.orgMemberships(session.user.id), CACHE_TTL.medium);
+    if (cached) { setOrgMemberships(cached); return; }
     const { data } = await supabase.from('organization_members').select('organization_id, role').eq('user_id', session.user.id);
-    if (data) setOrgMemberships(data as unknown as OrgMembership[]);
+    if (data) { setOrgMemberships(data as unknown as OrgMembership[]); setCache(CACHE_KEYS.orgMemberships(session.user.id), data as unknown as OrgMembership[]); }
   }
 
   async function fetchContracts() {
     if (!session?.user?.id) return;
-    // Fetch contracts where user is owner or collaborator
+    const cached = getCached<Contract[]>(CACHE_KEYS.contracts(session.user.id), CACHE_TTL.short);
+    if (cached) { setContracts(cached); return; }
     const { data } = await supabase.from('collaborator_contracts' as any).select('*');
-    if (data) setContracts(data as unknown as Contract[]);
+    if (data) { setContracts(data as unknown as Contract[]); setCache(CACHE_KEYS.contracts(session.user.id), data as unknown as Contract[]); }
   }
 
   function isOrgAdmin(orgId: string): boolean {
@@ -242,6 +258,8 @@ export default function Dashboard() {
 
   async function fetchUnreadCount() {
     if (!session?.user?.id) return;
+    const cached = getCached<number>(CACHE_KEYS.unreadCount(session.user.id), CACHE_TTL.short);
+    if (cached !== null) { setUnreadOrgMessages(cached); return; }
     const { data: memberships } = await supabase.from('organization_members').select('organization_id').eq('user_id', session.user.id);
     if (!memberships || memberships.length === 0) return;
     const orgIds = memberships.map(m => m.organization_id);
@@ -257,6 +275,7 @@ export default function Dashboard() {
       if (count) total += count;
     }
     setUnreadOrgMessages(total);
+    setCache(CACHE_KEYS.unreadCount(session.user.id), total);
   }
 
   async function linkAppToOrg(appId: string, orgId: string | null) {
@@ -282,15 +301,19 @@ export default function Dashboard() {
   }, [session?.user?.id]);
 
   async function fetchApps() {
+    if (!session?.user?.id) { setLoading(false); return; }
+    const cached = getCached<App[]>(CACHE_KEYS.apps(session.user.id), CACHE_TTL.short);
+    if (cached) { setApps(cached); setLoading(false); return; }
     const { data, error } = await supabase.from('apps').select('*').order('updated_at', { ascending: false });
     if (error) { toast({ title: 'Fout bij laden', description: error.message, variant: 'destructive' }); }
-    else { setApps(data || []); }
+    else { setApps(data || []); setCache(CACHE_KEYS.apps(session.user.id), data || []); }
     setLoading(false);
   }
 
   async function createApp() {
     if (!session?.user?.id) return;
     setCreating(true);
+    clearCache(CACHE_KEYS.apps(session.user.id));
     const { data, error } = await supabase.from('apps').insert({ owner_id: session.user.id, name: 'Nieuwe App', ngc_code: DEFAULT_NGC_CODE }).select().single();
     if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
     else if (data) { navigate(`/editor/${data.id}`); }
@@ -337,15 +360,17 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!session?.user?.id) return;
+    const cached = getCached<string>(CACHE_KEYS.displayName(session.user.id), CACHE_TTL.long);
+    if (cached) { setDisplayName(cached); return; }
     supabase.from('profiles').select('display_name').eq('id', session.user.id).single()
-      .then(({ data }) => { if (data?.display_name) setDisplayName(data.display_name); });
+      .then(({ data }) => { if (data?.display_name) { setDisplayName(data.display_name); setCache(CACHE_KEYS.displayName(session.user.id), data.display_name); } });
   }, [session?.user?.id]);
 
   async function deleteApp(id: string, name: string) {
     if (!confirm(`Weet je zeker dat je \"${name}\" wilt verwijderen?`)) return;
     const { error } = await supabase.from('apps').delete().eq('id', id);
     if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
-    else { setApps(apps.filter(a => a.id !== id)); toast({ title: 'Verwijderd' }); }
+    else { setApps(apps.filter(a => a.id !== id)); clearCache(CACHE_KEYS.apps(session?.user?.id || '')); toast({ title: 'Verwijderd' }); }
   }
 
   async function togglePublic(app: App) {
@@ -430,6 +455,7 @@ export default function Dashboard() {
         setInviteEmail('');
         setInvitePercentage(10);
         setInviteAppId(null);
+        clearCache(CACHE_KEYS.contracts(session?.user?.id || ''));
         fetchContracts();
       }
     } catch (e) {
@@ -464,6 +490,7 @@ export default function Dashboard() {
       } as any).eq('id', contractId);
       toast({ title: 'Contract afgewezen' });
     }
+    clearCache(CACHE_KEYS.contracts(session?.user?.id || ''));
     fetchContracts();
   }
 
