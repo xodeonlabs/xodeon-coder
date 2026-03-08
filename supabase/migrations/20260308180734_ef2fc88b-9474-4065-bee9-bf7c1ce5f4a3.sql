@@ -1,0 +1,1 @@
+ALTER TABLE public.apps ADD COLUMN banner_url text DEFAULT NULL;
