@@ -48,7 +48,22 @@ const PublicApp = () => {
         }
         setLoading(false);
       });
-  }, [slug]);
+  }, [slug, session?.user?.id]);
+
+  const togglePin = async () => {
+    if (!session?.user?.id || !appId) return;
+    if (isPinned) {
+      await supabase.from('pinned_apps' as any).delete().eq('user_id', session.user.id).eq('app_id', appId);
+      setIsPinned(false);
+      window.dispatchEvent(new Event('pinned-apps-changed'));
+    } else {
+      const { data: existing } = await supabase.from('pinned_apps' as any).select('id').eq('user_id', session.user.id);
+      if (existing && (existing as any[]).length >= 3) return;
+      await supabase.from('pinned_apps' as any).insert({ user_id: session.user.id, app_id: appId, sort_order: (existing as any[])?.length || 0 } as any);
+      setIsPinned(true);
+      window.dispatchEvent(new Event('pinned-apps-changed'));
+    }
+  };
 
   const { ast } = useMemo(() => parseNGC(code), [code]);
 
