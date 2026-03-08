@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle, MessageCircle, Megaphone, Pencil } from 'lucide-react';
+import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle, MessageCircle, Megaphone, Pencil, Search, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { CoinConfirmDialog } from '@/components/CoinConfirmDialog';
 import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -79,7 +79,18 @@ export default function OrganizationPage() {
   const [adUrl, setAdUrl] = useState('');
   const [adSaving, setAdSaving] = useState(false);
 
-  useEffect(() => { fetchOrgs(); }, []);
+  // Solliciteren state
+  const [showApply, setShowApply] = useState(false);
+  const [allPublicOrgs, setAllPublicOrgs] = useState<Organization[]>([]);
+  const [applySearch, setApplySearch] = useState('');
+  const [applying, setApplying] = useState<string | null>(null);
+  const [myRequests, setMyRequests] = useState<{ id: string; organization_id: string; status: string }[]>([]);
+  
+  // Join requests for org owners/admins
+  const [joinRequests, setJoinRequests] = useState<{ id: string; user_id: string; status: string; created_at: string }[]>([]);
+  const [requestProfiles, setRequestProfiles] = useState<Record<string, { display_name: string | null; avatar_url: string | null }>>({});
+
+  useEffect(() => { fetchOrgs(); fetchMyRequests(); }, []);
 
   async function fetchOrgs() {
     const cacheKey = `orgs-list:${session?.user?.id}`;
@@ -168,6 +179,79 @@ export default function OrganizationPage() {
     setJoining(false);
   }
 
+  async function fetchMyRequests() {
+    if (!session?.user?.id) return;
+    const { data } = await supabase.from('org_join_requests' as any).select('id, organization_id, status').eq('user_id', session.user.id);
+    setMyRequests((data as any[]) || []);
+  }
+
+  async function loadPublicOrgs() {
+    // Load all orgs (we'll use admin edge function or just show orgs user is not in)
+    // For simplicity, load all org names via a search
+    const { data } = await supabase.from('organizations').select('id, name, join_code, owner_id, created_at, icon');
+    // Filter out orgs user is already in
+    const myOrgIds = new Set(orgs.map(o => o.id));
+    setAllPublicOrgs(((data as unknown as Organization[]) || []).filter(o => !myOrgIds.has(o.id)));
+  }
+
+  async function sendJoinRequest(orgId: string) {
+    if (!session?.user?.id || applying) return;
+    setApplying(orgId);
+    const { error } = await supabase.from('org_join_requests' as any).insert({
+      organization_id: orgId,
+      user_id: session.user.id,
+    } as any);
+    if (error) {
+      if (error.message.includes('duplicate') || error.message.includes('unique')) {
+        toast({ title: 'Al gesolliciteerd', description: 'Je hebt al een verzoek gestuurd.', variant: 'destructive' });
+      } else {
+        toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+      }
+    } else {
+      toast({ title: '📩 Verzoek verstuurd!', description: 'De eigenaar kan je verzoek accepteren.' });
+      fetchMyRequests();
+    }
+    setApplying(null);
+  }
+
+  async function loadJoinRequests(orgId: string) {
+    const { data } = await supabase.from('org_join_requests' as any).select('id, user_id, status, created_at').eq('organization_id', orgId).eq('status', 'pending');
+    const reqs = (data as any[]) || [];
+    setJoinRequests(reqs);
+    // Load profiles
+    const userIds = reqs.map((r: any) => r.user_id);
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase.from('profiles').select('id, display_name, avatar_url').in('id', userIds);
+      const map: Record<string, { display_name: string | null; avatar_url: string | null }> = {};
+      (profiles || []).forEach(p => { map[p.id] = { display_name: p.display_name, avatar_url: p.avatar_url }; });
+      setRequestProfiles(map);
+    }
+  }
+
+  async function handleJoinRequest(requestId: string, action: 'accepted' | 'rejected') {
+    const req = joinRequests.find(r => r.id === requestId);
+    if (!req || !selectedOrg) return;
+    
+    if (action === 'accepted') {
+      // Add user as member
+      const { error: memberErr } = await supabase.from('organization_members').insert({
+        organization_id: selectedOrg.id,
+        user_id: req.user_id,
+        role: 'member' as any,
+      });
+      if (memberErr) {
+        toast({ title: 'Fout', description: memberErr.message, variant: 'destructive' });
+        return;
+      }
+    }
+    
+    // Update request status
+    await supabase.from('org_join_requests' as any).update({ status: action, updated_at: new Date().toISOString() } as any).eq('id', requestId);
+    toast({ title: action === 'accepted' ? '✅ Geaccepteerd!' : '❌ Geweigerd' });
+    loadJoinRequests(selectedOrg.id);
+    if (action === 'accepted') viewMembers(selectedOrg);
+  }
+
   async function viewMembers(org: Organization) {
     setSelectedOrg(org);
     setLoadingMembers(true);
@@ -204,6 +288,8 @@ export default function OrganizationPage() {
     }
     setShowAdForm(false);
     setLoadingMembers(false);
+    // Load join requests for owner/admin
+    loadJoinRequests(org.id);
   }
 
   const [personalCoins, setPersonalCoins] = useState(0);
@@ -454,6 +540,13 @@ export default function OrganizationPage() {
           >
             <LogIn className="h-4 w-4" /> Bedrijf joinen
           </button>
+          <button
+            onClick={() => { setShowApply(true); setShowCreate(false); setShowJoin(false); loadPublicOrgs(); }}
+            disabled={orgs.length >= 3}
+            className="flex items-center justify-center gap-2 rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 text-sm font-semibold transition-all border border-border text-foreground hover:bg-secondary active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Search className="h-4 w-4" /> Solliciteren
+          </button>
           <div className="flex items-center gap-2 ml-auto">
             <div className="flex gap-1">
               {[0, 1, 2].map(i => (
@@ -513,7 +606,58 @@ export default function OrganizationPage() {
           </div>
         )}
 
-        {/* Organization list */}
+        {/* Solliciteren form */}
+        {showApply && (
+          <div className="rounded-xl border border-border/50 p-6 mb-8" style={{ background: 'hsl(var(--card))' }}>
+            <h3 className="text-lg font-bold text-foreground mb-4">Solliciteren bij een bedrijf</h3>
+            <input
+              autoFocus
+              placeholder="Zoek bedrijf op naam..."
+              value={applySearch}
+              onChange={e => setApplySearch(e.target.value)}
+              className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mb-4"
+            />
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {allPublicOrgs
+                .filter(o => !applySearch || o.name.toLowerCase().includes(applySearch.toLowerCase()))
+                .map(o => {
+                  const existing = myRequests.find(r => r.organization_id === o.id);
+                  return (
+                    <div key={o.id} className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-background/50">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">
+                        {o.icon || '🏢'}
+                      </div>
+                      <span className="text-sm font-medium text-foreground flex-1 truncate">{o.name}</span>
+                      {existing ? (
+                        <span className={`text-[11px] px-2 py-1 rounded-full font-medium ${
+                          existing.status === 'pending' ? 'bg-yellow-500/15 text-yellow-600' :
+                          existing.status === 'accepted' ? 'bg-green-500/15 text-green-600' :
+                          'bg-destructive/15 text-destructive'
+                        }`}>
+                          {existing.status === 'pending' ? '⏳ Wachtend' : existing.status === 'accepted' ? '✅ Geaccepteerd' : '❌ Geweigerd'}
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => sendJoinRequest(o.id)}
+                          disabled={applying === o.id}
+                          className="px-3 py-1.5 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors"
+                        >
+                          {applying === o.id ? 'Bezig...' : 'Solliciteren'}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              {allPublicOrgs.filter(o => !applySearch || o.name.toLowerCase().includes(applySearch.toLowerCase())).length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">Geen bedrijven gevonden.</p>
+              )}
+            </div>
+            <button onClick={() => setShowApply(false)} className="mt-4 px-5 py-2.5 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
+              Sluiten
+            </button>
+          </div>
+        )}
+
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary/20 border-t-primary" />
@@ -632,6 +776,51 @@ export default function OrganizationPage() {
               </div>
             )}
           </div>
+
+          {/* Join Requests */}
+          {joinRequests.length > 0 && (selectedOrg.owner_id === session?.user?.id || members.find(m => m.user_id === session?.user?.id && (m.role === 'owner' || m.role === 'admin'))) && (
+            <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+              <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                <Clock className="h-5 w-5 text-yellow-500" />
+                Sollicitaties ({joinRequests.length})
+              </h3>
+              <div className="space-y-2">
+                {joinRequests.map(req => {
+                  const profile = requestProfiles[req.user_id];
+                  return (
+                    <div key={req.id} className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-background/50">
+                      <Avatar className="h-7 w-7 border border-border/50 shrink-0">
+                        {profile?.avatar_url ? <AvatarImage src={profile.avatar_url} alt="" /> : null}
+                        <AvatarFallback className="text-[10px] font-bold bg-primary/20 text-primary">
+                          {(profile?.display_name || req.user_id).slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{profile?.display_name || `${req.user_id.slice(0, 8)}...`}</p>
+                        <p className="text-[10px] text-muted-foreground">{new Date(req.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleJoinRequest(req.id, 'accepted')}
+                          className="p-1.5 rounded-lg text-green-600 hover:bg-green-500/10 transition-colors"
+                          title="Accepteren"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleJoinRequest(req.id, 'rejected')}
+                          className="p-1.5 rounded-lg text-destructive hover:bg-destructive/10 transition-colors"
+                          title="Weigeren"
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
             <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
