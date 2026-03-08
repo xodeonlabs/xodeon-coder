@@ -13,6 +13,13 @@ interface UserProfile {
   bio: string | null;
 }
 
+interface AuthUser {
+  id: string;
+  email: string;
+  created_at: string;
+  last_sign_in_at: string | null;
+}
+
 interface UserRoleRow {
   id: string;
   user_id: string;
@@ -40,6 +47,7 @@ export default function AdminPanel() {
 
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
+  const [authUsers, setAuthUsers] = useState<AuthUser[]>([]);
   const [roles, setRoles] = useState<UserRoleRow[]>([]);
   const [apps, setApps] = useState<AppRow[]>([]);
   const [orgs, setOrgs] = useState<OrgRow[]>([]);
@@ -80,6 +88,15 @@ export default function AdminPanel() {
     if (rolesRes.data) setRoles(rolesRes.data as unknown as UserRoleRow[]);
     if (appsRes.data) setApps(appsRes.data as unknown as AppRow[]);
     if (orgsRes.data) setOrgs(orgsRes.data as unknown as OrgRow[]);
+
+    // Fetch auth users (emails) via edge function
+    try {
+      const { data: fnData, error: fnError } = await supabase.functions.invoke('admin-list-users');
+      if (!fnError && fnData) {
+        setAuthUsers(fnData as AuthUser[]);
+      }
+    } catch { /* ignore */ }
+
     setLoading(false);
   }
 
@@ -110,9 +127,16 @@ export default function AdminPanel() {
     setAddingRole(false);
   }
 
+  function getUserEmail(userId: string) {
+    return authUsers.find(u => u.id === userId)?.email || null;
+  }
+
   function getUserName(userId: string) {
     const p = profiles.find(p => p.id === userId);
-    return p?.display_name || `${userId.slice(0, 8)}...`;
+    if (p?.display_name) return p.display_name;
+    const email = getUserEmail(userId);
+    if (email) return email;
+    return `${userId.slice(0, 8)}...`;
   }
 
   function getUserAvatar(userId: string) {
@@ -205,9 +229,11 @@ export default function AdminPanel() {
                   className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
                   <option value="">Selecteer gebruiker...</option>
-                  {profiles.map(p => (
-                    <option key={p.id} value={p.id}>{p.display_name || p.id.slice(0, 12)}</option>
-                  ))}
+                  {profiles.map(p => {
+                    const email = getUserEmail(p.id);
+                    const label = p.display_name ? `${p.display_name} (${email || p.id.slice(0, 8)})` : email || p.id.slice(0, 12);
+                    return <option key={p.id} value={p.id}>{label}</option>;
+                  })}
                 </select>
                 <select
                   value={addRoleValue}
@@ -236,19 +262,26 @@ export default function AdminPanel() {
               <div className="space-y-2">
                 {profiles.map(profile => {
                   const userRoles = roles.filter(r => r.user_id === profile.id);
+                  const email = getUserEmail(profile.id);
+                  const authUser = authUsers.find(u => u.id === profile.id);
+                  const displayLabel = profile.display_name || email || `${profile.id.slice(0, 12)}...`;
+                  const initials = (profile.display_name || email || profile.id).slice(0, 2).toUpperCase();
                   return (
                     <div key={profile.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-lg px-4 py-3 bg-background/50">
                       <div className="flex items-center gap-3 min-w-0">
                         <Avatar className="h-8 w-8 border border-border/50 shrink-0">
                           {profile.avatar_url ? <AvatarImage src={profile.avatar_url} alt="" /> : null}
                           <AvatarFallback className="text-[10px] font-bold bg-primary/20 text-primary">
-                            {(profile.display_name || profile.id).slice(0, 2).toUpperCase()}
+                            {initials}
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-foreground truncate">{profile.display_name || `${profile.id.slice(0, 12)}...`}</p>
+                          <p className="text-sm font-semibold text-foreground truncate">{displayLabel}</p>
+                          {email && profile.display_name && <p className="text-[11px] text-muted-foreground truncate">{email}</p>}
                           {profile.bio && <p className="text-[11px] text-muted-foreground truncate">{profile.bio}</p>}
-                          <p className="text-[10px] text-muted-foreground font-mono">{profile.id.slice(0, 12)}...</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {authUser?.last_sign_in_at ? `Laatst actief: ${new Date(authUser.last_sign_in_at).toLocaleDateString('nl-NL', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}` : 'Nog niet ingelogd'}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-wrap">
