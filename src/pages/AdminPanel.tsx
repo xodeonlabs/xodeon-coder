@@ -88,6 +88,15 @@ export default function AdminPanel() {
     if (rolesRes.data) setRoles(rolesRes.data as unknown as UserRoleRow[]);
     if (appsRes.data) setApps(appsRes.data as unknown as AppRow[]);
     if (orgsRes.data) setOrgs(orgsRes.data as unknown as OrgRow[]);
+
+    // Fetch auth users (emails) via edge function
+    try {
+      const { data: fnData, error: fnError } = await supabase.functions.invoke('admin-list-users');
+      if (!fnError && fnData) {
+        setAuthUsers(fnData as AuthUser[]);
+      }
+    } catch { /* ignore */ }
+
     setLoading(false);
   }
 
