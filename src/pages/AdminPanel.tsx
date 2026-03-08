@@ -206,7 +206,7 @@ export default function AdminPanel() {
     setCoinSaving(false);
   }
 
-
+  async function logAction(action: string, targetType: string, targetId?: string, details?: string) {
     if (!session?.user?.id) return;
     await (supabase.from('admin_activity_log' as any) as any).insert({
       admin_id: session.user.id,
