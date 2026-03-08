@@ -79,7 +79,27 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ error: "Invalid type. Use: app, org, alliance" }), {
+    if (type === "alliance_add_member") {
+      const { org_id } = body;
+      if (!org_id || !uuidRegex.test(org_id)) {
+        return new Response(JSON.stringify({ error: "Invalid org_id" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const { error } = await adminClient.from("alliance_members").insert({ alliance_id: target_id, organization_id: org_id });
+      if (error) throw error;
+      return new Response(JSON.stringify({ success: true, message: "Member added" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (type === "alliance_remove_member") {
+      const { error } = await adminClient.from("alliance_members").delete().eq("id", target_id);
+      if (error) throw error;
+      return new Response(JSON.stringify({ success: true, message: "Member removed" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ error: "Invalid type" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
