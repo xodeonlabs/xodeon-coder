@@ -178,12 +178,11 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
         </button>
       </div>
 
-      {/* Mobile dropdown menu */}
-      {mobileMenuOpen && (
+      {/* Mobile dropdown menu — rendered via portal to escape overflow/stacking context */}
+      {mobileMenuOpen && createPortal(
         <>
-          {/* Backdrop to close menu */}
-          <div className="fixed inset-0 z-40" onClick={() => setMobileMenuOpen(false)} />
-          <div className="fixed top-11 right-2 z-50 rounded-lg border border-border shadow-xl py-1 min-w-[160px]" style={{ background: 'hsl(var(--card))' }}>
+          <div className="fixed inset-0 z-[9998]" onClick={() => setMobileMenuOpen(false)} />
+          <div className="fixed top-11 right-2 z-[9999] rounded-lg border border-border shadow-xl py-1 min-w-[160px]" style={{ background: 'hsl(var(--card))' }}>
             <button
               onClick={() => { 
                 const appIdMatch = window.location.pathname.match(/\/editor\/([^/]+)/);
@@ -217,7 +216,8 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
               </button>
             )}
           </div>
-        </>
+        </>,
+        document.body
       )}
 
       {/* Share Template Dialog */}
