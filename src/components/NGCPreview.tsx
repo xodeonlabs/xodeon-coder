@@ -206,9 +206,13 @@ function NGCNodeRenderer({
   const pos = node.properties.Positie ? parsePosition(node.properties.Positie) : { x: 0, y: 0 };
   const size = node.properties.Grootte ? parseSize(node.properties.Grootte) : null;
   const color = node.properties.Kleur ? cleanStr(node.properties.Kleur) : null;
+  const bg = node.properties.Achtergrond ? cleanStr(node.properties.Achtergrond) : null;
   const rawText = node.properties.Tekst ? cleanStr(node.properties.Tekst) : '';
   const text = resolveVarRefs(rawText, runtime);
-  const radius = node.properties.Hoekradius ? cleanStr(node.properties.Hoekradius) : '0';
+  const radius = node.properties.Hoekrond ? cleanStr(node.properties.Hoekrond) : (node.properties.Hoekradius ? cleanStr(node.properties.Hoekradius) : '0');
+  const fontSize = node.properties.Lettergrootte ? parseInt(cleanStr(node.properties.Lettergrootte)) : null;
+  const border = node.properties.Rand ? cleanStr(node.properties.Rand) : null;
+  const visible = node.properties.Zichtbaar ? cleanStr(node.properties.Zichtbaar) !== 'false' : true;
 
   const iconName = node.properties.Icoon ? cleanStr(node.properties.Icoon) : '';
 
