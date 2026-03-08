@@ -233,6 +233,13 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
           </div>
         </div>
       )}
+      {showIconPicker && onChangeIcon && (
+        <IconPicker
+          value={appIcon || 'file-code'}
+          onChange={(icon) => onChangeIcon(icon)}
+          onClose={() => setShowIconPicker(false)}
+        />
+      )}
     </div>
   );
 }
