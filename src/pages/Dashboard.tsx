@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, Link, ExternalLink, BarChart3, Coins } from 'lucide-react';
+import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, Link, ExternalLink, BarChart3, Coins, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface App {
@@ -15,6 +15,7 @@ interface App {
   owner_id: string;
   organization_id: string | null;
   slug: string | null;
+  chat_retention_hours: number;
 }
 
 interface Org {
@@ -230,6 +231,14 @@ export default function Dashboard() {
     if (!error) setApps(apps.map(a => a.id === app.id ? { ...a, is_remixable: !a.is_remixable } : a));
   }
 
+  async function updateRetention(id: string, hours: number) {
+    const { error } = await supabase.from('apps').update({ chat_retention_hours: hours } as any).eq('id', id);
+    if (!error) {
+      setApps(apps.map(a => a.id === id ? { ...a, chat_retention_hours: hours } : a));
+      toast({ title: 'Bewaartermijn bijgewerkt', description: `Chat wordt nu ${hours} uur bewaard` });
+    }
+  }
+
   async function renameApp(id: string, newName: string) {
     if (!newName.trim()) return;
     const { error } = await supabase.from('apps').update({ name: newName.trim() }).eq('id', id);
@@ -368,7 +377,7 @@ export default function Dashboard() {
                     </button>
                   )}
                 </div>
-                <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center gap-1.5 flex-wrap opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
                   {orgs.length > 0 && (
                     <select
                       value={app.organization_id || ''}
@@ -380,6 +389,20 @@ export default function Dashboard() {
                       {orgs.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
                     </select>
                   )}
+                  <select
+                    value={app.chat_retention_hours ?? 12}
+                    onChange={e => updateRetention(app.id, parseInt(e.target.value))}
+                    className="text-xs rounded-lg border border-border bg-background px-2 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 max-w-[100px]"
+                    title="Chat bewaartermijn"
+                  >
+                    <option value={1}>1 uur</option>
+                    <option value={6}>6 uur</option>
+                    <option value={12}>12 uur</option>
+                    <option value={24}>24 uur</option>
+                    <option value={48}>2 dagen</option>
+                    <option value={168}>1 week</option>
+                    <option value={720}>30 dagen</option>
+                  </select>
                   <button onClick={() => { setEditingNameId(app.id); setEditingNameValue(app.name); }} className="rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Naam wijzigen">
                     <Pencil className="h-4 w-4" />
                   </button>

@@ -153,6 +153,7 @@ export type Database = {
       }
       apps: {
         Row: {
+          chat_retention_hours: number
           created_at: string
           id: string
           is_public: boolean
@@ -165,6 +166,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          chat_retention_hours?: number
           created_at?: string
           id?: string
           is_public?: boolean
@@ -177,6 +179,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          chat_retention_hours?: number
           created_at?: string
           id?: string
           is_public?: boolean

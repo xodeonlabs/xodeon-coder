@@ -16,27 +16,47 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Delete chat messages older than 12 hours
-    const cutoff = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
+    // Get all apps with their retention settings
+    const { data: apps, error: appsError } = await supabase
+      .from("apps")
+      .select("id, chat_retention_hours");
 
-    const { data, error } = await supabase
-      .from("chat_messages")
-      .delete()
-      .lt("created_at", cutoff)
-      .select("id");
-
-    if (error) {
-      console.error("Error deleting old messages:", error);
-      return new Response(JSON.stringify({ error: error.message }), {
+    if (appsError) {
+      console.error("Error fetching apps:", appsError);
+      return new Response(JSON.stringify({ error: appsError.message }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const count = data?.length ?? 0;
-    console.log(`Deleted ${count} chat messages older than 12 hours`);
+    let totalDeleted = 0;
 
-    return new Response(JSON.stringify({ success: true, deleted: count }), {
+    for (const app of apps ?? []) {
+      const hours = app.chat_retention_hours ?? 12;
+      const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+
+      const { data, error } = await supabase
+        .from("chat_messages")
+        .delete()
+        .eq("app_id", app.id)
+        .lt("created_at", cutoff)
+        .select("id");
+
+      if (error) {
+        console.error(`Error deleting messages for app ${app.id}:`, error);
+        continue;
+      }
+
+      const count = data?.length ?? 0;
+      if (count > 0) {
+        console.log(`Deleted ${count} messages for app ${app.id} (retention: ${hours}h)`);
+      }
+      totalDeleted += count;
+    }
+
+    console.log(`Cleanup complete: ${totalDeleted} total messages deleted`);
+
+    return new Response(JSON.stringify({ success: true, deleted: totalDeleted }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
