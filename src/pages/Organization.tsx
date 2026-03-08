@@ -51,6 +51,7 @@ export default function OrganizationPage() {
   const [joining, setJoining] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [members, setMembers] = useState<OrgMember[]>([]);
+  const [memberProfiles, setMemberProfiles] = useState<Record<string, { display_name: string | null; avatar_url: string | null }>>({});
   const [orgApps, setOrgApps] = useState<OrgApp[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [orgCoins, setOrgCoins] = useState<OrgCoin[]>([]);
