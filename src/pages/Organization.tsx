@@ -9,6 +9,7 @@ import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { OrgChat } from '@/components/OrgChat';
 import { AdBanner } from '@/components/AdBanner';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { getCached, setCache, clearCache, CACHE_TTL } from '@/lib/cache';
 
 interface Organization {
