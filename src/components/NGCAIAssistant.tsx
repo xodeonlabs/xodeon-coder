@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Bot, Send, Check, X, Loader2, Sparkles, Plus, MessageSquare, Trash2, ArrowLeft } from 'lucide-react';
+import { Bot, Send, Check, X, Loader2, Sparkles, Plus, MessageSquare, Trash2, ArrowLeft, Pencil } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
