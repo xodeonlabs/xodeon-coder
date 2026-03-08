@@ -6,7 +6,7 @@ import { useNotificationSound, getNotificationToastEnabled, getDoNotDisturbEnabl
 import { toast } from 'sonner';
 import {
   LayoutDashboard, BarChart3, Building2, Handshake, Users,
-  MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins, PanelLeftClose, PanelLeftOpen, BellOff, Bell, Pin, PinOff,
+  MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins, PanelLeftClose, PanelLeftOpen, BellOff, Bell, Pin, PinOff, ArrowUp,
 } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -21,6 +21,7 @@ const NAV_ITEMS = [
   { title: 'Berichten', url: '/berichten', icon: MessageCircle },
   { title: 'Groepen', url: '/groepen', icon: Users },
   { title: 'Bedrijven', url: '/organization', icon: Building2 },
+  { title: 'Upgrades', url: '/upgrades', icon: ArrowUp },
   { title: 'Allianties', url: '/alliances', icon: Handshake },
   { title: 'Analytics', url: '/analytics', icon: BarChart3 },
   { title: 'Templates', url: '/templates', icon: LayoutGrid },
