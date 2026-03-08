@@ -35,6 +35,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <AppLayout>{children}</AppLayout>;
 }
 
+function ProtectedPreview() {
+  const { session, loading } = useAuth();
+  usePresence();
+  if (loading) return <div className="flex h-screen items-center justify-center" style={{ background: '#0a0e1a' }}><span className="text-sm text-muted-foreground">Laden...</span></div>;
+  if (!session) return <Navigate to="/auth" replace />;
+  return <Preview />;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
