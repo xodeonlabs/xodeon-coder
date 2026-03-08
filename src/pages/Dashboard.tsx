@@ -873,6 +873,14 @@ export default function Dashboard() {
           onClose={() => setIconPickerAppId(null)}
         />
       )}
+
+      <CoinConfirmDialog
+        open={coinConfirm.open}
+        onOpenChange={(open) => setCoinConfirm(prev => ({ ...prev, open }))}
+        amount={coinConfirm.amount}
+        description={coinConfirm.description}
+        onConfirm={() => { coinConfirm.onConfirm(); setCoinConfirm(prev => ({ ...prev, open: false })); }}
+      />
     </div>
   );
 }
