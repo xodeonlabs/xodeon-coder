@@ -88,8 +88,9 @@ export default function AdminPanel() {
   const [apps, setApps] = useState<AppRow[]>([]);
   const [orgs, setOrgs] = useState<OrgRow[]>([]);
   const [ads, setAds] = useState<AdRow[]>([]);
+  const [activityLogs, setActivityLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads'>('users');
+  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'activity'>('users');
 
   // Add role
   const [addRoleUserId, setAddRoleUserId] = useState('');
