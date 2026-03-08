@@ -322,6 +322,7 @@ function NGCNodeRenderer({
               runtime={runtime}
               onRuntimeChange={onRuntimeChange}
               onNavigate={onNavigate}
+              coinHandlers={coinHandlers}
             />
           ))}
         </div>
