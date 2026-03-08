@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { NGCNode } from '@/lib/ngc-ast';
-import { createRuntime, NGCRuntime, resolveVarRefs, parseVarDefinition, parseListDefinition, parseDataCommand, clearPersistedState } from '@/lib/ngc-runtime';
+import { createRuntime, NGCRuntime, resolveVarRefs, parseVarDefinition, parseListDefinition, parseDataCommand, parseCoinsCommand, clearPersistedState } from '@/lib/ngc-runtime';
 
 interface PreviewProps {
   ast: NGCNode | null;
@@ -24,8 +24,20 @@ function parseSize(size: string): { w: number; h: number } {
 
 function initRuntime(ast: NGCNode, runtime: NGCRuntime) {
   if (ast.type === 'Var') {
+    // Check for coins definition
+    const coinsDef = parseCoinsCommand(ast.name);
+    if (coinsDef && coinsDef.operation === 'Set') {
+      if (runtime.coinsGet(coinsDef.name) === 0 && !(coinsDef.name in runtime.coins)) {
+        runtime.coinsSet(coinsDef.name, coinsDef.amount!);
+      }
+    }
+    // Check for coins code registration
+    if (coinsDef && coinsDef.operation === 'RegisterCode') {
+      runtime.coinsRegisterCode(coinsDef.name, coinsDef.code!, coinsDef.amount!);
+    }
+
     const def = parseVarDefinition(ast.name);
-    if (def && !(def.varName in runtime.variables)) {
+    if (def && !(def.varName in runtime.variables) && !coinsDef) {
       runtime.setVar(def.varName, cleanStr(def.value));
     }
   }
@@ -88,6 +100,31 @@ function executeActions(eventNode: NGCNode, runtime: NGCRuntime): string | null 
     }
 
     if (child.type === 'Var') {
+      // Handle coins commands
+      const coinsCmd = parseCoinsCommand(child.name);
+      if (coinsCmd) {
+        switch (coinsCmd.operation) {
+          case 'Add':
+            runtime.coinsAdd(coinsCmd.name, coinsCmd.amount!);
+            break;
+          case 'Remove':
+            runtime.coinsRemove(coinsCmd.name, coinsCmd.amount!);
+            break;
+          case 'Code':
+            if (coinsCmd.varName) {
+              const codeValue = runtime.getVar(coinsCmd.varName);
+              const result = runtime.coinsRedeemCode(coinsCmd.name, codeValue);
+              runtime.setVar('_coins_result', result.success ? 'success' : 'invalid');
+              runtime.setVar('_coins_amount', String(result.amount));
+            }
+            break;
+          case 'RegisterCode':
+            runtime.coinsRegisterCode(coinsCmd.name, coinsCmd.code!, coinsCmd.amount!);
+            break;
+        }
+        continue;
+      }
+
       const def = parseVarDefinition(child.name);
       if (def) {
         const opMatch = child.name.match(/^(\w+)([+\-*/])(.+)$/);
