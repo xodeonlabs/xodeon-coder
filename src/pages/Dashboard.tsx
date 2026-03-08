@@ -369,7 +369,7 @@ export default function Dashboard() {
                     </button>
                   )}
                 </div>
-                <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center gap-1.5 flex-wrap opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
                   {orgs.length > 0 && (
                     <select
                       value={app.organization_id || ''}
@@ -381,6 +381,20 @@ export default function Dashboard() {
                       {orgs.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
                     </select>
                   )}
+                  <select
+                    value={app.chat_retention_hours ?? 12}
+                    onChange={e => updateRetention(app.id, parseInt(e.target.value))}
+                    className="text-xs rounded-lg border border-border bg-background px-2 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 max-w-[100px]"
+                    title="Chat bewaartermijn"
+                  >
+                    <option value={1}>1 uur</option>
+                    <option value={6}>6 uur</option>
+                    <option value={12}>12 uur</option>
+                    <option value={24}>24 uur</option>
+                    <option value={48}>2 dagen</option>
+                    <option value={168}>1 week</option>
+                    <option value={720}>30 dagen</option>
+                  </select>
                   <button onClick={() => { setEditingNameId(app.id); setEditingNameValue(app.name); }} className="rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Naam wijzigen">
                     <Pencil className="h-4 w-4" />
                   </button>
