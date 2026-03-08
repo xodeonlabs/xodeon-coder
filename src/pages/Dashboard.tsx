@@ -82,7 +82,6 @@ export default function Dashboard() {
   const [slugValue, setSlugValue] = useState('');
   const [savingSlug, setSavingSlug] = useState(false);
   const [totalCoins, setTotalCoins] = useState(0);
-  const [totalOwnerCoins, setTotalOwnerCoins] = useState(0);
 
   useEffect(() => {
     try {
@@ -92,10 +91,6 @@ export default function Dashboard() {
         if (state?.coins) {
           const sum = Object.values(state.coins as Record<string, number>).reduce((a: number, b: number) => a + b, 0);
           setTotalCoins(sum);
-        }
-        if (state?.ownerCoins) {
-          const sum = Object.values(state.ownerCoins as Record<string, number>).reduce((a: number, b: number) => a + b, 0);
-          setTotalOwnerCoins(sum);
         }
       }
     } catch { /* ignore */ }
@@ -282,11 +277,6 @@ export default function Dashboard() {
             <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-accent/10 text-accent" title="Jouw coins">
               <Coins className="h-4 w-4" />
               <span className="text-xs sm:text-sm font-semibold">{totalCoins}</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-primary/10 text-primary" title="Eigenaar pool">
-              <Coins className="h-4 w-4" />
-              <span className="text-xs sm:text-sm font-semibold">{totalOwnerCoins}</span>
-              <span className="text-[10px] text-muted-foreground">pool</span>
             </div>
           </div>
           <button onClick={() => navigate('/analytics')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">

@@ -21,7 +21,6 @@ export interface NGCRuntime {
   lists: Record<string, string[]>;
   data: Record<string, DataRecord[]>;
   coins: Record<string, number>;
-  ownerCoins: Record<string, number>;
   coinCodes: Record<string, CoinCode[]>;
   getVar: (name: string) => string;
   setVar: (name: string, value: string) => void;
@@ -35,13 +34,11 @@ export interface NGCRuntime {
   dataFind: (table: string, key: string, value: string) => DataRecord | undefined;
   dataClear: (table: string) => void;
   dataUpdate: (table: string, id: string, key: string, value: string) => void;
-  // Coins API — trade-based: coins transfer between owner pool and user
+  // Coins API — direct: add/remove from single balance
   coinsGet: (name: string) => number;
-  coinsOwnerGet: (name: string) => number;
   coinsSet: (name: string, amount: number) => void;
-  coinsOwnerSet: (name: string, amount: number) => void;
-  coinsAdd: (name: string, amount: number) => boolean; // owner→user transfer
-  coinsRemove: (name: string, amount: number) => boolean; // user→owner transfer
+  coinsAdd: (name: string, amount: number) => boolean;
+  coinsRemove: (name: string, amount: number) => boolean;
   coinsRegisterCode: (name: string, code: string, amount: number) => void;
   coinsRedeemCode: (name: string, code: string) => { success: boolean; amount: number };
 }
@@ -58,11 +55,10 @@ function saveState(
   lists: Record<string, string[]>,
   data: Record<string, DataRecord[]>,
   coins: Record<string, number>,
-  ownerCoins: Record<string, number>,
   coinCodes: Record<string, CoinCode[]>
 ) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ variables, lists, data, coins, ownerCoins, coinCodes }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ variables, lists, data, coins, coinCodes }));
   } catch { /* ignore quota errors */ }
 }
 
@@ -71,7 +67,6 @@ function loadState(): {
   lists: Record<string, string[]>;
   data: Record<string, DataRecord[]>;
   coins: Record<string, number>;
-  ownerCoins: Record<string, number>;
   coinCodes: Record<string, CoinCode[]>;
 } | null {
   try {
@@ -91,17 +86,15 @@ export function createRuntime(): NGCRuntime {
   const lists: Record<string, string[]> = saved?.lists ?? {};
   const data: Record<string, DataRecord[]> = saved?.data ?? {};
   const coins: Record<string, number> = saved?.coins ?? {};
-  const ownerCoins: Record<string, number> = saved?.ownerCoins ?? {};
   const coinCodes: Record<string, CoinCode[]> = saved?.coinCodes ?? {};
 
-  const save = () => saveState(variables, lists, data, coins, ownerCoins, coinCodes);
+  const save = () => saveState(variables, lists, data, coins, coinCodes);
 
   return {
     variables,
     lists,
     data,
     coins,
-    ownerCoins,
     coinCodes,
     getVar(name: string) {
       return variables[name] ?? '';
@@ -162,42 +155,30 @@ export function createRuntime(): NGCRuntime {
       }
     },
 
-    // Coins API — trade-based: transfers between owner pool and user
+    // Coins API — direct balance management
     coinsGet(name: string) {
       return coins[name] ?? 0;
-    },
-    coinsOwnerGet(name: string) {
-      return ownerCoins[name] ?? 0;
     },
     coinsSet(name: string, amount: number) {
       coins[name] = Math.max(0, amount);
       save();
     },
-    coinsOwnerSet(name: string, amount: number) {
-      ownerCoins[name] = Math.max(0, amount);
-      save();
-    },
-    // Coins.Add: transfer from owner → user
+    // Coins.Add: directly add to balance
     coinsAdd(name: string, amount: number) {
-      const ownerCurrent = ownerCoins[name] ?? 0;
-      if (ownerCurrent < amount) return false;
-      ownerCoins[name] = ownerCurrent - amount;
       coins[name] = (coins[name] ?? 0) + amount;
       save();
       return true;
     },
-    // Coins.Remove: transfer from user → owner
+    // Coins.Remove: remove from balance (fails if insufficient)
     coinsRemove(name: string, amount: number) {
       const current = coins[name] ?? 0;
       if (current < amount) return false;
       coins[name] = current - amount;
-      ownerCoins[name] = (ownerCoins[name] ?? 0) + amount;
       save();
       return true;
     },
     coinsRegisterCode(name: string, code: string, amount: number) {
       if (!coinCodes[name]) coinCodes[name] = [];
-      // Don't register duplicate codes
       if (!coinCodes[name].find(c => c.code === code)) {
         coinCodes[name].push({ code, amount, used: false });
         save();
@@ -221,7 +202,6 @@ export function resolveVarRefs(text: string, runtime: NGCRuntime): string {
   return text
     .replace(/Var\((\w+)\)/g, (_, name) => runtime.getVar(name))
     .replace(/Coins\((\w+)\)/g, (_, name) => String(runtime.coinsGet(name)))
-    .replace(/OwnerCoins\((\w+)\)/g, (_, name) => String(runtime.coinsOwnerGet(name)))
     .replace(/\{(\w+)\}/g, (_, name) => runtime.getVar(name));
 }
 
@@ -251,35 +231,29 @@ export interface CoinsCommand {
   name: string;
   amount?: number;
   code?: string;
-  varName?: string; // variable name for code input
+  varName?: string;
 }
 
 export function parseCoinsCommand(content: string): CoinsCommand | null {
-  // Coins(name)=100  →  Set initial value
   const setMatch = content.match(/^Coins\((\w+)\)\s*=\s*(\d+)$/);
   if (setMatch) return { operation: 'Set', name: setMatch[1], amount: parseInt(setMatch[2]) };
 
-  // Coins.Add(name, 50)  →  Add coins
   const addMatch = content.match(/^Coins\.Add\((\w+)\s*,\s*(\d+)\)$/);
   if (addMatch) return { operation: 'Add', name: addMatch[1], amount: parseInt(addMatch[2]) };
 
-  // Coins.Remove(name, 10)  →  Remove coins
   const removeMatch = content.match(/^Coins\.Remove\((\w+)\s*,\s*(\d+)\)$/);
   if (removeMatch) return { operation: 'Remove', name: removeMatch[1], amount: parseInt(removeMatch[2]) };
 
-  // Coins.Code(name, "BUY100", 100)  →  Register a redeemable code
   const codeMatch = content.match(/^Coins\.Code\((\w+)\s*,\s*"([^"]+)"\s*,\s*(\d+)\)$/);
   if (codeMatch) return { operation: 'RegisterCode', name: codeMatch[1], code: codeMatch[2], amount: parseInt(codeMatch[3]) };
 
-  // Coins.Redeem(name, varName)  →  Redeem code from variable
   const redeemMatch = content.match(/^Coins\.Redeem\((\w+)\s*,\s*(\w+)\)$/);
   if (redeemMatch) return { operation: 'Code', name: redeemMatch[1], varName: redeemMatch[2] };
 
   return null;
 }
 
-// Parse Data commands like Data.Add(table, key=value, key2=value2)
-// Data.Delete(table, id) / Data.Clear(table)
+// Parse Data commands
 export interface DataCommand {
   operation: 'Add' | 'Delete' | 'Clear' | 'Get';
   table: string;
