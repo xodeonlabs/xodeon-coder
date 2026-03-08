@@ -701,11 +701,7 @@ export default function OrganizationPage() {
                   <div className="flex items-center gap-3">
                     <div>
                       <label className="block text-xs font-medium text-muted-foreground mb-1">Emoji</label>
-                      <input
-                        value={adEmoji}
-                        onChange={e => setAdEmoji(e.target.value)}
-                        className="w-14 text-center text-lg rounded-lg border border-border bg-background px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary/50"
-                      />
+                      <EmojiPickerButton value={adEmoji} onChange={setAdEmoji} />
                     </div>
                     <div className="flex-1">
                       <label className="block text-xs font-medium text-muted-foreground mb-1">Titel *</label>
