@@ -100,9 +100,13 @@ export default function Dashboard() {
         if (state?.coins) {
           const sum = Object.values(state.coins as Record<string, number>).reduce((a: number, b: number) => a + b, 0);
           setTotalCoins(sum);
+        } else {
+          setTotalCoins(100);
         }
+      } else {
+        setTotalCoins(100);
       }
-    } catch { /* ignore */ }
+    } catch { setTotalCoins(100); }
   }, []);
 
   useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); }, []);
