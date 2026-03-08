@@ -406,12 +406,28 @@ export default function AdminPanel() {
     return authUsers.find(u => u.id === userId)?.email || null;
   }
 
-  function getUserName(userId: string) {
+  function getUserNameText(userId: string) {
     const p = profiles.find(p => p.id === userId);
     if (p?.display_name) return p.display_name;
     const email = getUserEmail(userId);
     if (email) return email;
     return `${userId.slice(0, 8)}...`;
+  }
+
+  function getUserName(userId: string) {
+    return getUserNameText(userId);
+  }
+
+  function UserLink({ userId, className }: { userId: string; className?: string }) {
+    const name = getUserNameText(userId);
+    return (
+      <span
+        onClick={(e) => { e.stopPropagation(); navigate(`/profiel/${userId}`); }}
+        className={`cursor-pointer hover:text-primary hover:underline transition-colors ${className || ''}`}
+      >
+        {name}
+      </span>
+    );
   }
 
   function getUserAvatar(userId: string) {
