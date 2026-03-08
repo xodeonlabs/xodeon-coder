@@ -120,11 +120,16 @@ export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
     const ta = textareaRef.current;
     if (!ta) return;
     if (highlightRef.current) {
-      highlightRef.current.scrollTop = ta.scrollTop;
-      highlightRef.current.scrollLeft = ta.scrollLeft;
+      const inner = highlightRef.current.firstElementChild as HTMLElement | null;
+      if (inner) {
+        inner.style.transform = `translate(${-ta.scrollLeft}px, ${-ta.scrollTop}px)`;
+      }
     }
     if (gutterRef.current) {
-      gutterRef.current.scrollTop = ta.scrollTop;
+      const gInner = gutterRef.current.firstElementChild as HTMLElement | null;
+      if (gInner) {
+        gInner.style.transform = `translateY(${-ta.scrollTop}px)`;
+      }
     }
     setSuggestions([]);
   }, []);
@@ -258,11 +263,15 @@ export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
         </div>
       </div>
 
-      {/* Syntax highlight layer — exact same box model as textarea */}
+      {/* Syntax highlight layer — exact same box model as textarea, scrolls via JS sync */}
       <div
         ref={highlightRef}
-        className="absolute top-0 right-0 bottom-0 overflow-hidden pointer-events-none"
-        style={{ left: GUTTER_WIDTH }}
+        className="absolute top-0 right-0 bottom-0 pointer-events-none"
+        style={{
+          left: GUTTER_WIDTH,
+          overflow: 'hidden',
+          width: `calc(100% - ${GUTTER_WIDTH}px)`,
+        }}
       >
         <div
           style={{
@@ -270,6 +279,7 @@ export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
             paddingLeft: PAD_LEFT,
             paddingRight: PAD_RIGHT,
             paddingBottom: PAD_BOTTOM,
+            willChange: 'transform',
           }}
         >
           {lines.map((line, i) => (
@@ -279,7 +289,7 @@ export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
               style={{
                 ...textStyle,
                 background: errorLines.has(i + 1) ? 'hsla(0, 65%, 50%, 0.1)' : 'transparent',
-                minHeight: LINE_HEIGHT,
+                height: LINE_HEIGHT,
               }}
             >
               {highlightLine(line)}
