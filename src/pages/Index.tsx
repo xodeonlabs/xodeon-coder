@@ -770,6 +770,12 @@ const Index = () => {
         </div>
       </div>
 
+      {/* Status Bar */}
+      <StatusBar code={code} saveStatus={saveStatus} lastSaved={lastSaved} />
+
+      {/* Command Palette */}
+      <CommandPalette open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} items={commandItems} />
+
       {/* Context Menu */}
       {contextMenu && contextNode && (
         <NGCContextMenu
