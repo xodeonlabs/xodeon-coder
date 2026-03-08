@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2 } from 'lucide-react';
+import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface App {
@@ -73,6 +73,10 @@ export default function Dashboard() {
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [editingNameValue, setEditingNameValue] = useState('');
   const [orgs, setOrgs] = useState<Org[]>([]);
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false);
+  const [templateName, setTemplateName] = useState('');
+  const [templateDesc, setTemplateDesc] = useState('');
+  const [creatingTemplate, setCreatingTemplate] = useState(false);
 
   useEffect(() => { fetchApps(); fetchOrgs(); }, []);
 
@@ -133,6 +137,28 @@ export default function Dashboard() {
       navigate(`/editor/${data.id}`);
     }
     setCreating(false);
+  }
+
+  async function createTemplate() {
+    if (!session?.user?.id || !templateName.trim()) return;
+    setCreatingTemplate(true);
+    const { data, error } = await supabase.from('apps').insert({
+      owner_id: session.user.id,
+      name: templateName.trim(),
+      ngc_code: DEFAULT_NGC_CODE,
+      is_public: true,
+      is_remixable: true,
+    }).select().single();
+    if (error) {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    } else if (data) {
+      toast({ title: 'Template aangemaakt', description: `"${templateName.trim()}" is publiek beschikbaar.` });
+      setShowTemplateDialog(false);
+      setTemplateName('');
+      setTemplateDesc('');
+      navigate(`/editor/${data.id}`);
+    }
+    setCreatingTemplate(false);
   }
 
   async function deleteApp(id: string, name: string) {
@@ -216,10 +242,16 @@ export default function Dashboard() {
             <h2 className="text-3xl font-bold text-foreground">Mijn Apps</h2>
             <p className="text-base text-muted-foreground mt-2">Maak en beheer je NGC applicaties</p>
           </div>
-          <button onClick={createApp} disabled={creating} className="flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 disabled:opacity-50 active:scale-95">
-            <Plus className="h-5 w-5" />
-            Nieuwe App
-          </button>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setShowTemplateDialog(true)} className="flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all border border-primary/30 text-primary hover:bg-primary/10 active:scale-95">
+              <FileCode className="h-5 w-5" />
+              Template aanmaken
+            </button>
+            <button onClick={createApp} disabled={creating} className="flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 disabled:opacity-50 active:scale-95">
+              <Plus className="h-5 w-5" />
+              Nieuwe App
+            </button>
+          </div>
         </div>
 
         {loading ? (
@@ -351,6 +383,56 @@ export default function Dashboard() {
               </button>
               <button onClick={inviteCollaborator} disabled={inviting || !inviteEmail.trim()} className="px-6 py-2.5 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all active:scale-95">
                 {inviting ? 'Uitnodigen...' : 'Uitnodigen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Template Dialog */}
+      {showTemplateDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowTemplateDialog(false)}>
+          <div className="rounded-2xl border border-border/50 p-8 w-full max-w-md shadow-2xl" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10"><FileCode className="h-5 w-5 text-primary" /></div>
+                Template aanmaken
+              </h3>
+              <button onClick={() => setShowTemplateDialog(false)} className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg p-1.5 transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6">Maak een publieke template die anderen kunnen remixen.</p>
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Naam</label>
+                <input
+                  type="text"
+                  placeholder="Mijn Template"
+                  value={templateName}
+                  onChange={e => setTemplateName(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && createTemplate()}
+                  className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Beschrijving (optioneel)</label>
+                <textarea
+                  placeholder="Korte beschrijving van de template..."
+                  value={templateDesc}
+                  onChange={e => setTemplateDesc(e.target.value)}
+                  rows={3}
+                  className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setShowTemplateDialog(false)} className="px-5 py-2.5 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
+                Annuleren
+              </button>
+              <button onClick={createTemplate} disabled={creatingTemplate || !templateName.trim()} className="px-6 py-2.5 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all active:scale-95">
+                {creatingTemplate ? 'Aanmaken...' : 'Aanmaken'}
               </button>
             </div>
           </div>
