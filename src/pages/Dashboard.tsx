@@ -1175,7 +1175,7 @@ export default function Dashboard() {
                 <div className="relative flex items-center gap-1.5 mb-3 flex-wrap">
                   {app.organization_id && (
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/10 text-accent/80 border border-accent/10 flex items-center gap-1">
-                      <AppIcon iconName={orgs.find(o => o.id === app.organization_id)?.icon || 'building-2'} size={10} />
+                      <span className="text-[10px]">{orgs.find(o => o.id === app.organization_id)?.icon || '🏢'}</span>
                       {orgs.find(o => o.id === app.organization_id)?.name || 'Bedrijf'}
                     </span>
                   )}
