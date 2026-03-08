@@ -349,7 +349,7 @@ export default function Dashboard() {
       {/* Header */}
       <header className="border-b border-border/50 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between backdrop-blur-sm gap-2" style={{ background: 'hsl(var(--ide-toolbar) / 0.8)' }}>
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-bold text-xs sm:text-sm shrink-0">N</div>
+          <img src="/ngc-logo.png" alt="NGC Logo" className="h-7 sm:h-8 object-contain shrink-0" />
           <h1 className="text-base sm:text-xl font-bold text-foreground tracking-tight truncate">NGC Studio</h1>
         </div>
         <div className="flex items-center gap-1 sm:gap-4">
