@@ -24,7 +24,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
           {showAd && (
             <div className="hidden lg:block px-4 sm:px-6 pb-4 pt-2">
-              <AdBanner page={location.pathname.replace('/', '') || 'dashboard'} />
+              <AdBanner />
             </div>
           )}
         </main>
