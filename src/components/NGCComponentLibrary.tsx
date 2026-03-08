@@ -770,11 +770,7 @@ export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => 
                               <div className="text-muted-foreground/60 text-[10px] truncate">{snippet.description}</div>
                             )}
                           </div>
-                          {isTemplates && onCreateTemplate ? (
-                            <div className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors">⚡</div>
-                          ) : (
-                            <Copy className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors" />
-                          )}
+                          <Copy className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors" />
                         </button>
                       ))}
                     </div>
