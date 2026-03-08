@@ -1420,43 +1420,5 @@ function ContractList({ contracts: items, currentUserId, onRespond, appNames, sh
         );
       })}
     </div>
-
-    {/* New App Dialog */}
-    <Dialog open={showNewAppDialog} onOpenChange={setShowNewAppDialog}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Nieuwe app aanmaken</DialogTitle>
-          <DialogDescription>Hoe wil je beginnen?</DialogDescription>
-        </DialogHeader>
-        <div className="grid grid-cols-2 gap-3 mt-2">
-          <button
-            onClick={createApp}
-            disabled={creating}
-            className="flex flex-col items-center gap-3 p-6 rounded-xl border border-border/40 hover:border-primary/40 hover:bg-primary/5 transition-all group"
-          >
-            <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-              <FileCode className="h-6 w-6 text-primary" />
-            </div>
-            <div className="text-center">
-              <p className="text-sm font-semibold text-foreground">Vanaf nul</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Begin met een leeg project</p>
-            </div>
-          </button>
-          <button
-            onClick={useTemplateFlow}
-            className="flex flex-col items-center gap-3 p-6 rounded-xl border border-border/40 hover:border-primary/40 hover:bg-primary/5 transition-all group"
-          >
-            <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-              <BookTemplate className="h-6 w-6 text-primary" />
-            </div>
-            <div className="text-center">
-              <p className="text-sm font-semibold text-foreground">Template</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Start vanuit een bestaand sjabloon</p>
-            </div>
-          </button>
-        </div>
-      </DialogContent>
-    </Dialog>
-    </>
   );
 }
