@@ -100,7 +100,14 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [chatReplyInputs, setChatReplyInputs] = useState<Record<string, string>>({});
   const [chatSending, setChatSending] = useState<string | null>(null);
-  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'chats' | 'activity'>('users');
+  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'chats' | 'activity' | 'coins'>('users');
+
+  // Coins management
+  const [userCoins, setUserCoins] = useState<{ user_id: string; balance: number }[]>([]);
+  const [coinUserId, setCoinUserId] = useState('');
+  const [coinAmount, setCoinAmount] = useState('');
+  const [coinAction, setCoinAction] = useState<'add' | 'set'>('add');
+  const [coinSaving, setCoinSaving] = useState(false);
   const [collabAppId, setCollabAppId] = useState<string | null>(null);
   const [collabEmail, setCollabEmail] = useState('');
   const [collabAdding, setCollabAdding] = useState(false);
