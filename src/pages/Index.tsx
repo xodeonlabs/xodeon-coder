@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useSwipe } from '@/hooks/useSwipe';
-import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Plus, Code, MousePointer, History, Maximize, Minimize, Eye, Copy, Undo2, FileCode, Search, Replace } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Plus, Code, MousePointer, History, Maximize, Minimize, Eye, Copy, Undo2, FileCode, Search, Replace, Sparkles, Blocks } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { NGCCodeEditor } from '@/components/NGCCodeEditor';
@@ -8,6 +8,7 @@ import { NGCExplorer } from '@/components/NGCExplorer';
 import { NGCComponentLibrary } from '@/components/NGCComponentLibrary';
 import { NGCDataPanel } from '@/components/NGCDataPanel';
 import { NGCChat } from '@/components/NGCChat';
+import { NGCAIAssistant } from '@/components/NGCAIAssistant';
 import { NGCContextMenu } from '@/components/NGCContextMenu';
 import { NGCToolbar } from '@/components/NGCToolbar';
 import { NGCDesigner } from '@/components/NGCDesigner';
@@ -100,6 +101,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<string>('global');
   const [editorMode, setEditorMode] = useState<'code' | 'design'>('code');
   const [leftTab, setLeftTab] = useState<'explorer' | 'versions'>('explorer');
+  const [rightTab, setRightTab] = useState<'components' | 'ai'>('components');
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const editorContainerRef = useRef<HTMLDivElement>(null);
   const { cursors, updateCursor } = useLiveCursors(appId);
@@ -786,12 +788,35 @@ const Index = () => {
         >
           {rightOpen && (
             <>
-              <div className="ide-panel-header">
-                <span>Componenten</span>
+              {/* Right panel tab switcher */}
+              <div className="flex border-b border-border shrink-0">
+                <button
+                  onClick={() => setRightTab('components')}
+                  className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
+                    rightTab === 'components' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Blocks className="h-3 w-3" /> Componenten
+                </button>
+                <button
+                  onClick={() => setRightTab('ai')}
+                  className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
+                    rightTab === 'ai' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Sparkles className="h-3 w-3" /> AI
+                </button>
               </div>
-              <div className="flex-1 overflow-auto">
-                <NGCComponentLibrary onInsert={handleInsertCode} />
-              </div>
+
+              {rightTab === 'components' ? (
+                <div className="flex-1 overflow-auto">
+                  <NGCComponentLibrary onInsert={handleInsertCode} />
+                </div>
+              ) : (
+                <div className="flex-1 overflow-hidden min-h-0">
+                  <NGCAIAssistant currentCode={code} onApplyCode={(newCode) => setCode(newCode)} />
+                </div>
+              )}
             </>
           )}
         </div>
