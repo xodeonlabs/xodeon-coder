@@ -13,6 +13,7 @@ import { NGCToolbar } from '@/components/NGCToolbar';
 import { NGCDesigner } from '@/components/NGCDesigner';
 import { NGCVersionPanel } from '@/components/NGCVersionPanel';
 import { CommandPalette } from '@/components/CommandPalette';
+import { SearchReplace } from '@/components/SearchReplace';
 import { StatusBar } from '@/components/StatusBar';
 import { parseNGC, astToNGC } from '@/lib/ngc-parser';
 import { NGCNode, NGCNodeType, DEFAULT_PROPERTIES, generateId } from '@/lib/ngc-ast';
