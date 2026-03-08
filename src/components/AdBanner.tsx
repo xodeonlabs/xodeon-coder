@@ -17,9 +17,10 @@ const ROTATE_INTERVAL = 6000;
 interface AdBannerProps {
   className?: string;
   page?: string;
+  organizationId?: string;
 }
 
-export function AdBanner({ className = '', page }: AdBannerProps) {
+export function AdBanner({ className = '', page, organizationId }: AdBannerProps) {
   const [dismissed, setDismissed] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
