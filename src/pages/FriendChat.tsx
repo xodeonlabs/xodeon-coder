@@ -41,6 +41,10 @@ export default function FriendChatPage() {
   useEffect(() => {
     if (!myId) return;
     loadFriends();
+    // Load own retention setting
+    supabase.from('profiles').select('friend_chat_retention_hours').eq('id', myId).maybeSingle().then(({ data }) => {
+      if (data) setMyRetentionHours((data as any).friend_chat_retention_hours ?? 24);
+    });
   }, [myId]);
 
   async function loadFriends() {
