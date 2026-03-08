@@ -137,6 +137,14 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
           </button>
         )}
         <button
+          onClick={handleExportHtml}
+          className="px-3 py-1.5 text-xs font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center gap-1.5"
+          title="Exporteer als HTML"
+        >
+          <Download className="h-3.5 w-3.5" />
+          Export
+        </button>
+        <button
           onClick={() => handleNavigate(window.location.pathname.replace('/editor/', '/preview/'))}
           className="px-3 py-1.5 text-xs font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center gap-1.5"
         >
