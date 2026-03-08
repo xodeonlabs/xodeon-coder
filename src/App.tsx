@@ -24,6 +24,7 @@ import OrgProfile from "./pages/OrgProfile";
 import NotFound from "./pages/NotFound";
 import FriendChat from "./pages/FriendChat";
 import GroupChats from "./pages/GroupChats";
+import Upgrades from "./pages/Upgrades";
 
 const queryClient = new QueryClient();
 
