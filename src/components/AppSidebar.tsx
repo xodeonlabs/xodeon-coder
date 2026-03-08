@@ -6,13 +6,14 @@ import { useNotificationSound, getNotificationToastEnabled, getDoNotDisturbEnabl
 import { toast } from 'sonner';
 import {
   LayoutDashboard, BarChart3, Building2, Handshake, Users,
-  MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins, PanelLeftClose, PanelLeftOpen, BellOff, Bell,
+  MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins, PanelLeftClose, PanelLeftOpen, BellOff, Bell, Pin, PinOff,
 } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, SidebarTrigger, useSidebar,
 } from '@/components/ui/sidebar';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
+import { AppIcon } from '@/components/IconPicker';
 
 const NAV_ITEMS = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard },
@@ -39,6 +40,33 @@ export function AppSidebar() {
   const [profileUsername, setProfileUsername] = useState<string | null>(null);
   const [unreadGroups, setUnreadGroups] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [pinnedApps, setPinnedApps] = useState<{ id: string; name: string; icon: string | null }[]>([]);
+
+  const fetchPinnedApps = useCallback(async () => {
+    if (!session?.user?.id) return;
+    const { data } = await supabase
+      .from('pinned_apps' as any)
+      .select('app_id, sort_order')
+      .eq('user_id', session.user.id)
+      .order('sort_order');
+    if (data && (data as any[]).length > 0) {
+      const appIds = (data as any[]).map((p: any) => p.app_id);
+      const { data: apps } = await supabase.from('apps').select('id, name, icon').in('id', appIds);
+      if (apps) {
+        const sorted = appIds.map((id: string) => apps.find((a: any) => a.id === id)).filter(Boolean) as any[];
+        setPinnedApps(sorted);
+      }
+    } else {
+      setPinnedApps([]);
+    }
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    fetchPinnedApps();
+    const handler = () => fetchPinnedApps();
+    window.addEventListener('pinned-apps-changed', handler);
+    return () => window.removeEventListener('pinned-apps-changed', handler);
+  }, [fetchPinnedApps]);
 
   const fetchUnreadGroups = useCallback(async () => {
     if (!session?.user?.id) return;
@@ -219,6 +247,37 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Pinned Apps */}
+        {pinnedApps.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>{collapsed ? '' : 'Vastgepind'}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {pinnedApps.map((app) => (
+                  <SidebarMenuItem key={app.id}>
+                    <SidebarMenuButton
+                      isActive={location.pathname === `/editor/${app.id}`}
+                      tooltip={collapsed ? app.name : undefined}
+                      onClick={() => navigate(`/editor/${app.id}`)}
+                      className={`flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                        location.pathname === `/editor/${app.id}`
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40'
+                      }`}
+                    >
+                      <AppIcon iconName={app.icon || 'file-code'} size={16} />
+                      <span className="flex-1 truncate">{app.name}</span>
+                      {!collapsed && (
+                        <Pin className="h-3 w-3 text-primary/50 shrink-0" />
+                      )}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border/20 p-3">

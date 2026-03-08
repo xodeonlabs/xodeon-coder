@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, FileText, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield, Sparkles, Zap, Handshake, Percent, LayoutGrid, Menu, MessageCircle } from 'lucide-react';
+import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, FileText, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield, Sparkles, Zap, Handshake, Percent, LayoutGrid, Menu, MessageCircle, Pin, PinOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { AdBanner } from '@/components/AdBanner';
@@ -145,6 +145,34 @@ export default function Dashboard() {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [contractAppId, setContractAppId] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [pinnedAppIds, setPinnedAppIds] = useState<string[]>([]);
+
+  // Load pinned apps
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    supabase.from('pinned_apps' as any).select('app_id, sort_order').eq('user_id', session.user.id).order('sort_order').then(({ data }) => {
+      if (data) setPinnedAppIds((data as any[]).map((p: any) => p.app_id));
+    });
+  }, [session?.user?.id]);
+
+  const togglePin = async (appId: string) => {
+    if (!session?.user?.id) return;
+    if (pinnedAppIds.includes(appId)) {
+      await supabase.from('pinned_apps' as any).delete().eq('user_id', session.user.id).eq('app_id', appId);
+      setPinnedAppIds(prev => prev.filter(id => id !== appId));
+      window.dispatchEvent(new Event('pinned-apps-changed'));
+      toast({ title: 'App losgemaakt' });
+    } else {
+      if (pinnedAppIds.length >= 3) {
+        toast({ title: 'Maximum 3 apps', description: 'Maak eerst een andere app los.', variant: 'destructive' });
+        return;
+      }
+      await supabase.from('pinned_apps' as any).insert({ user_id: session.user.id, app_id: appId, sort_order: pinnedAppIds.length } as any);
+      setPinnedAppIds(prev => [...prev, appId]);
+      window.dispatchEvent(new Event('pinned-apps-changed'));
+      toast({ title: 'App vastgepind!' });
+    }
+  };
 
   useEffect(() => {
     async function loadCoins() {
@@ -789,6 +817,7 @@ export default function Dashboard() {
                   <ActionBtn onClick={() => { setInviteAppId(app.id); setInviteEmail(''); setInvitePercentage(10); }} icon={<UserPlus className="h-3.5 w-3.5" />} title="Uitnodigen + Contract" />
                   <ActionBtn onClick={() => setContractAppId(app.id)} icon={<FileText className="h-3.5 w-3.5" />} title="Contracten bekijken" className="hover:text-accent" />
                   <ActionBtn onClick={() => openPublishDialog(app)} icon={<ExternalLink className="h-3.5 w-3.5" />} title="Publiceren" className="hover:text-primary" />
+                  <ActionBtn onClick={() => togglePin(app.id)} icon={pinnedAppIds.includes(app.id) ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />} title={pinnedAppIds.includes(app.id) ? 'Losmaken' : 'Vastpinnen'} className={pinnedAppIds.includes(app.id) ? 'text-primary hover:text-destructive' : 'hover:text-primary'} />
                   <ActionBtn onClick={() => deleteApp(app.id, app.name)} icon={<Trash2 className="h-3.5 w-3.5" />} title="Verwijderen" className="ml-auto hover:text-destructive hover:bg-destructive/10" />
                 </div>
               </div>
