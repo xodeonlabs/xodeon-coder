@@ -257,10 +257,10 @@ export default function AdminPanel() {
   function openAdForm(ad?: AdRow) {
     if (ad) {
       setEditingAd(ad);
-      setAdForm({ emoji: ad.emoji, title: ad.title, description: ad.description, url: ad.url, gradient: ad.gradient });
+      setAdForm({ emoji: ad.emoji, title: ad.title, description: ad.description, url: ad.url, gradient: ad.gradient, pages: ad.pages || ['dashboard', 'organizations'] });
     } else {
       setEditingAd(null);
-      setAdForm({ emoji: '🚀', title: '', description: '', url: '', gradient: 'linear-gradient(135deg, hsl(200 40% 14%), hsl(var(--secondary)))' });
+      setAdForm({ emoji: '🚀', title: '', description: '', url: '', gradient: 'linear-gradient(135deg, hsl(200 40% 14%), hsl(var(--secondary)))', pages: ['dashboard', 'organizations'] });
     }
     setShowAdForm(true);
   }
