@@ -531,6 +531,75 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
         </div>
       )}
 
+      {/* Coins display */}
+      {Object.keys(runtime.coins).length > 0 && (
+        <div style={{
+          position: 'sticky',
+          top: pages.length > 1 ? 34 : 0,
+          zIndex: 49,
+          display: 'flex',
+          gap: 8,
+          padding: '6px 12px',
+          background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+          borderBottom: '1px solid #334155',
+          alignItems: 'center',
+        }}>
+          {Object.entries(runtime.coins).map(([name, balance]) => (
+            <div key={name} style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              background: '#fbbf2420',
+              border: '1px solid #fbbf2440',
+              borderRadius: 20,
+              padding: '3px 10px 3px 6px',
+            }}>
+              <div style={{
+                width: 18,
+                height: 18,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 10,
+                fontWeight: 'bold',
+                color: '#78350f',
+              }}>¢</div>
+              <span style={{ fontSize: 11, color: '#fbbf24', fontWeight: 600 }}>{balance}</span>
+              <span style={{ fontSize: 10, color: '#94a3b8' }}>{name}</span>
+            </div>
+          ))}
+          {orgBalance !== null && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              background: '#3b82f620',
+              border: '1px solid #3b82f640',
+              borderRadius: 20,
+              padding: '3px 10px 3px 6px',
+              marginLeft: 'auto',
+            }}>
+              <div style={{
+                width: 18,
+                height: 18,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 10,
+                fontWeight: 'bold',
+                color: '#fff',
+              }}>🏢</div>
+              <span style={{ fontSize: 11, color: '#60a5fa', fontWeight: 600 }}>{orgBalance}</span>
+              <span style={{ fontSize: 10, color: '#94a3b8' }}>kluis</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Active page content */}
       <div className="relative w-full" style={{ minHeight: '300px' }}>
         {activePage && (
