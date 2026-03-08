@@ -11,6 +11,7 @@ interface OrgUpgradesProps {
   orgBalance: number;
   isOwner: boolean;
   levelPaidUntil?: string | null;
+  autoPay?: boolean;
   onUpgrade: (newLevel: number) => void;
 }
 
@@ -171,12 +172,31 @@ const LEVELS = [
 
 export { LEVELS, TAX_RATES, MONTHLY_COSTS };
 
-export function OrgUpgrades({ orgId, orgName, currentLevel, orgBalance, isOwner, levelPaidUntil, onUpgrade }: OrgUpgradesProps) {
+export function OrgUpgrades({ orgId, orgName, currentLevel, orgBalance, isOwner, levelPaidUntil, autoPay: initialAutoPay, onUpgrade }: OrgUpgradesProps) {
   const { toast } = useToast();
   const [upgrading, setUpgrading] = useState(false);
+  const [autoPayEnabled, setAutoPayEnabled] = useState(initialAutoPay ?? false);
+  const [togglingAutoPay, setTogglingAutoPay] = useState(false);
   const [coinConfirm, setCoinConfirm] = useState<{ open: boolean; amount: number; description: string; onConfirm: () => void }>({
     open: false, amount: 0, description: '', onConfirm: () => {},
   });
+
+  async function handleToggleAutoPay() {
+    if (!isOwner) {
+      toast({ title: 'Alleen de eigenaar kan dit wijzigen', variant: 'destructive' });
+      return;
+    }
+    setTogglingAutoPay(true);
+    const newValue = !autoPayEnabled;
+    const { error } = await supabase.from('organizations').update({ auto_pay: newValue } as any).eq('id', orgId);
+    if (error) {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    } else {
+      setAutoPayEnabled(newValue);
+      toast({ title: newValue ? '✅ Automatisch betalen ingeschakeld' : 'Automatisch betalen uitgeschakeld', duration: 2000 });
+    }
+    setTogglingAutoPay(false);
+  }
 
   const paidUntil = levelPaidUntil ? new Date(levelPaidUntil) : new Date();
   const now = new Date();
@@ -395,6 +415,29 @@ export function OrgUpgrades({ orgId, orgName, currentLevel, orgBalance, isOwner,
                 </button>
               )}
             </div>
+
+            {/* Auto-pay toggle */}
+            {isOwner && (
+              <div className="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-border/20">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-foreground">Automatisch betalen</p>
+                  <p className="text-[10px] text-muted-foreground leading-relaxed">
+                    Coins worden automatisch elke maand afgeschreven uit de kluis.
+                  </p>
+                </div>
+                <button
+                  onClick={handleToggleAutoPay}
+                  disabled={togglingAutoPay}
+                  className={`relative shrink-0 w-10 h-[22px] rounded-full transition-colors duration-200 ${
+                    autoPayEnabled ? 'bg-primary' : 'bg-secondary'
+                  }`}
+                >
+                  <span className={`absolute top-[3px] left-[3px] w-4 h-4 rounded-full bg-primary-foreground shadow-sm transition-transform duration-200 ${
+                    autoPayEnabled ? 'translate-x-[18px]' : 'translate-x-0'
+                  }`} />
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

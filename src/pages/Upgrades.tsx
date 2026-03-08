@@ -12,6 +12,7 @@ interface Org {
   owner_id: string;
   level: number;
   level_paid_until: string | null;
+  auto_pay: boolean;
   icon?: string;
 }
 
@@ -55,6 +56,7 @@ export default function Upgrades() {
       owner_id: o.owner_id,
       level: o.level ?? 1,
       level_paid_until: o.level_paid_until,
+      auto_pay: o.auto_pay ?? false,
       icon: o.icon,
     }));
     setOrgs(mapped);
@@ -163,6 +165,7 @@ export default function Upgrades() {
                   orgBalance={orgBalance}
                   isOwner={selectedOrg.owner_id === session?.user?.id}
                   levelPaidUntil={selectedOrg.level_paid_until}
+                  autoPay={selectedOrg.auto_pay}
                   onUpgrade={(newLevel) => {
                     setSelectedOrg({ ...selectedOrg, level: newLevel });
                     loadOrgs();
