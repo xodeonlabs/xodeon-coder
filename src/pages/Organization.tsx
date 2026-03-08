@@ -65,6 +65,7 @@ export default function OrganizationPage() {
   const [txAmount, setTxAmount] = useState('');
   const [txNote, setTxNote] = useState('');
   const [txProcessing, setTxProcessing] = useState(false);
+  const [iconPickerOrgId, setIconPickerOrgId] = useState<string | null>(null);
 
   useEffect(() => { fetchOrgs(); }, []);
 
