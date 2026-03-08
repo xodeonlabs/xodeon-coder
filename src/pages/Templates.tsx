@@ -218,10 +218,16 @@ export default function Templates() {
                     <h3 className="text-sm font-semibold text-foreground truncate">{template.name}</h3>
                     <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{template.description || 'Geen beschrijving'}</p>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground shrink-0 capitalize">
-                    {template.category}
-                  </span>
-                </div>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground shrink-0 capitalize">
+                      {template.category}
+                    </span>
+                    {(template as any).visibility && (template as any).visibility !== 'public' && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent/10 text-accent">
+                        {(template as any).visibility === 'friends' ? '👥' : '🏢'}
+                      </span>
+                    )}
+                  </div>
 
                 <div className="flex items-center justify-between mt-4">
                   <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
