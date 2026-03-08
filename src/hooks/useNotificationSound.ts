@@ -43,7 +43,7 @@ export function useNotificationSound() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const play = useCallback(() => {
-    if (!getNotificationSoundEnabled()) return;
+    if (getDoNotDisturbEnabled() || !getNotificationSoundEnabled()) return;
     try {
       if (!audioRef.current) {
         audioRef.current = new Audio(NOTIFICATION_SOUND_URL);
