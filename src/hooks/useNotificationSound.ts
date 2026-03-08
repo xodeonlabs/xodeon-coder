@@ -3,6 +3,7 @@ import { useCallback, useRef } from 'react';
 const NOTIFICATION_SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
 const STORAGE_KEY = 'ngc-notification-sound';
 const TOAST_STORAGE_KEY = 'ngc-notification-toast';
+const DND_STORAGE_KEY = 'ngc-do-not-disturb';
 
 export function getNotificationSoundEnabled(): boolean {
   try {
