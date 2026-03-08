@@ -312,6 +312,47 @@ export default function AdminPanel() {
     }
   }
 
+  async function deleteApp(id: string) {
+    const app = apps.find(a => a.id === id);
+    const { error } = await supabase.from('apps').delete().eq('id', id);
+    if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    else {
+      await logAction('App verwijderd', 'app', id, app?.name || '');
+      setApps(apps.filter(a => a.id !== id));
+      toast({ title: 'App verwijderd' });
+    }
+  }
+
+  async function deleteOrg(id: string) {
+    const org = orgs.find(o => o.id === id);
+    const { error } = await supabase.from('organizations').delete().eq('id', id);
+    if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    else {
+      await logAction('Bedrijf verwijderd', 'org', id, org?.name || '');
+      setOrgs(orgs.filter(o => o.id !== id));
+      toast({ title: 'Bedrijf verwijderd' });
+    }
+  }
+
+  async function handleConfirmAction() {
+    if (!confirmAction) return;
+    setManagingUser(true);
+    try {
+      if (confirmAction.type === 'user') {
+        await manageUser(confirmAction.id, confirmAction.action as 'ban' | 'unban' | 'delete');
+      } else if (confirmAction.type === 'app') {
+        await deleteApp(confirmAction.id);
+        setConfirmAction(null);
+      } else if (confirmAction.type === 'org') {
+        await deleteOrg(confirmAction.id);
+        setConfirmAction(null);
+      }
+    } catch (e: any) {
+      toast({ title: 'Fout', description: e.message, variant: 'destructive' });
+    }
+    setManagingUser(false);
+  }
+
   const GRADIENT_PRESETS = [
     { label: 'Groen', value: 'linear-gradient(135deg, hsl(145 40% 14%), hsl(var(--secondary)))' },
     { label: 'Blauw', value: 'linear-gradient(135deg, hsl(200 40% 14%), hsl(var(--secondary)))' },
