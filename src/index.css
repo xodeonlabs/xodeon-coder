@@ -123,6 +123,16 @@
   ::-webkit-scrollbar-thumb:hover {
     background: hsl(215 12% 40%);
   }
+
+  /* Code editor textarea selection - ensure selection highlight is visible */
+  textarea.caret-foreground::selection {
+    background: hsl(var(--ide-selection));
+    color: transparent;
+  }
+  textarea.caret-foreground::-moz-selection {
+    background: hsl(var(--ide-selection));
+    color: transparent;
+  }
 }
 
 @layer utilities {
