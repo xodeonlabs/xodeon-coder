@@ -214,7 +214,7 @@ const Auth = () => {
           )}
 
           {mode === 'login' && (
-            <div className="text-right">
+            <div className="text-center">
               <button type="button" onClick={() => switchMode('forgot')} className="text-xs underline" style={{ color: '#3b82f6' }}>
                 Wachtwoord vergeten?
               </button>
