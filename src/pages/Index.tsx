@@ -95,6 +95,7 @@ const Index = () => {
   const [rightOpen, setRightOpen] = useState(true);
   const [activeTab, setActiveTab] = useState<string>('global');
   const [editorMode, setEditorMode] = useState<'code' | 'design'>('code');
+  const [leftTab, setLeftTab] = useState<'explorer' | 'versions'>('explorer');
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const editorContainerRef = useRef<HTMLDivElement>(null);
   const { cursors, updateCursor } = useLiveCursors(appId);
