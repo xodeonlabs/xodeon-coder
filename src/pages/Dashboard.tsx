@@ -195,6 +195,7 @@ export default function Dashboard() {
   }
 
 
+  async function deleteApp(id: string, name: string) {
     if (!confirm(`Weet je zeker dat je "${name}" wilt verwijderen?`)) return;
     const { error } = await supabase.from('apps').delete().eq('id', id);
     if (error) {
