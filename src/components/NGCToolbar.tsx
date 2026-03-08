@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { ExternalLink, LogOut, AlertCircle, CheckCircle, ArrowLeft, Pencil, Share2, X, Menu } from 'lucide-react';
+import { ExternalLink, LogOut, AlertCircle, CheckCircle, ArrowLeft, Pencil, Share2, X, Menu, Download } from 'lucide-react';
+import { parseNGC } from '@/lib/ngc-parser';
+import { exportToHtml } from '@/lib/ngc-to-html';
 import { ParseError } from '@/lib/ngc-ast';
 import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { useNavigate } from 'react-router-dom';
@@ -55,6 +57,20 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
     } finally {
       setSharing(false);
     }
+  };
+
+  const handleExportHtml = () => {
+    if (!appCode) return;
+    const { ast } = parseNGC(appCode);
+    if (!ast) return;
+    const html = exportToHtml(ast, appName || 'App');
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(appName || 'app').replace(/\s+/g, '-').toLowerCase()}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -121,6 +137,14 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
           </button>
         )}
         <button
+          onClick={handleExportHtml}
+          className="px-3 py-1.5 text-xs font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center gap-1.5"
+          title="Exporteer als HTML"
+        >
+          <Download className="h-3.5 w-3.5" />
+          Export
+        </button>
+        <button
           onClick={() => handleNavigate(window.location.pathname.replace('/editor/', '/preview/'))}
           className="px-3 py-1.5 text-xs font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center gap-1.5"
         >
@@ -161,6 +185,12 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-secondary/50 transition-colors"
           >
             <ExternalLink className="h-4 w-4" /> Preview
+          </button>
+          <button
+            onClick={() => { handleExportHtml(); setMobileMenuOpen(false); }}
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-secondary/50 transition-colors"
+          >
+            <Download className="h-4 w-4" /> Export HTML
           </button>
           {onShareTemplate && (
             <button
