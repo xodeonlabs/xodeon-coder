@@ -89,6 +89,63 @@ export default function Alliances() {
     setIsAdmin(!!data);
   }
 
+  async function createAlliance() {
+    if (!newName.trim() || !session?.user?.id || creating) return;
+    setCreating(true);
+    const { error } = await supabase.from('alliances' as any).insert({
+      name: newName.trim(),
+      icon: newIcon,
+      created_by: session.user.id,
+    } as any);
+    if (error) {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    } else {
+      // Create coin pool
+      const { data: newAlliance } = await supabase.from('alliances' as any).select('id').eq('name', newName.trim()).order('created_at', { ascending: false }).limit(1).single();
+      if (newAlliance) {
+        await supabase.from('alliance_coins' as any).insert({ alliance_id: (newAlliance as any).id, balance: 0 } as any);
+      }
+      toast({ title: '✅ Alliantie aangemaakt!' });
+      setNewName('');
+      setNewIcon('🤝');
+      setShowCreate(false);
+      loadAlliances();
+    }
+    setCreating(false);
+  }
+
+  async function deleteAlliance(id: string) {
+    if (!confirm('Weet je zeker dat je deze alliantie wilt verwijderen?')) return;
+    const { error } = await supabase.from('alliances' as any).delete().eq('id', id);
+    if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    else { toast({ title: 'Alliantie verwijderd' }); loadAlliances(); }
+  }
+
+  async function loadAllOrgs() {
+    const { data } = await supabase.from('organizations').select('id, name, icon');
+    setAllOrgs((data as unknown as OrgInfo[]) || []);
+  }
+
+  async function addOrgToAlliance() {
+    if (!selectedAlliance || !addOrgId) return;
+    const { error } = await supabase.from('alliance_members' as any).insert({ alliance_id: selectedAlliance.id, organization_id: addOrgId } as any);
+    if (error) {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Bedrijf toegevoegd!' });
+      setAddOrgId('');
+      setShowAddOrg(false);
+      selectAlliance(selectedAlliance);
+    }
+  }
+
+  async function removeOrgFromAlliance(memberId: string) {
+    if (!confirm('Bedrijf verwijderen uit alliantie?')) return;
+    const { error } = await supabase.from('alliance_members' as any).delete().eq('id', memberId);
+    if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    else if (selectedAlliance) selectAlliance(selectedAlliance);
+  }
+
   async function loadAlliances() {
     if (!session?.user?.id) return;
     const { data } = await supabase.from('alliances' as any).select('*').order('created_at');
