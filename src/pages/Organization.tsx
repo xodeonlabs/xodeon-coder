@@ -160,7 +160,7 @@ export default function OrganizationPage() {
       supabase.from('organization_members').select('*').eq('organization_id', org.id).order('created_at', { ascending: true }),
       supabase.from('apps').select('id, name, updated_at').eq('organization_id', org.id as any).order('updated_at', { ascending: false }),
       supabase.from('org_coins').select('*').eq('organization_id', org.id),
-      supabase.from('ads').select('*').eq('organization_id' as any, org.id),
+      supabase.from('ads' as any).select('*').eq('organization_id', org.id),
     ]);
     if (!membersRes.error) {
       const mems = (membersRes.data as unknown as OrgMember[]) || [];
