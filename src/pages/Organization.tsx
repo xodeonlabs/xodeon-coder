@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle, MessageCircle, Megaphone, Pencil } from 'lucide-react';
+import { CoinConfirmDialog } from '@/components/CoinConfirmDialog';
 import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { OrgChat } from '@/components/OrgChat';
@@ -223,6 +224,7 @@ export default function OrganizationPage() {
   }
 
   const [personalCoins, setPersonalCoins] = useState(0);
+  const [coinConfirm, setCoinConfirm] = useState<{ open: boolean; amount: number; description: string; onConfirm: () => void }>({ open: false, amount: 0, description: '', onConfirm: () => {} });
   useEffect(() => {
     setPersonalCoins(getPersonalCoins());
   }, [showDeposit, showWithdraw, txProcessing]);
@@ -252,6 +254,21 @@ export default function OrganizationPage() {
       }
     }
 
+    // Show confirmation dialog before proceeding
+    const description = type === 'deposit'
+      ? `${amount} coins storten naar ${selectedOrg.name}`
+      : `${amount} coins opnemen uit ${selectedOrg.name}`;
+
+    setCoinConfirm({
+      open: true,
+      amount,
+      description,
+      onConfirm: () => executeCoinTransaction(type, amount),
+    });
+  }
+
+  async function executeCoinTransaction(type: 'deposit' | 'withdraw', amount: number) {
+    if (!selectedOrg || !session?.user?.id) return;
     setTxProcessing(true);
     try {
       // Get or create coin record
@@ -881,6 +898,14 @@ export default function OrganizationPage() {
           onClose={() => setIconPickerOrgId(null)}
         />
       )}
+
+      <CoinConfirmDialog
+        open={coinConfirm.open}
+        onOpenChange={(open) => { if (!open) setCoinConfirm(prev => ({ ...prev, open: false })); }}
+        amount={coinConfirm.amount}
+        description={coinConfirm.description}
+        onConfirm={() => { coinConfirm.onConfirm(); setCoinConfirm(prev => ({ ...prev, open: false })); }}
+      />
     </div>
   );
 }

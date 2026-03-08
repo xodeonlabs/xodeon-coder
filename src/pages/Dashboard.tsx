@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { AdBanner } from '@/components/AdBanner';
 import { AppIcon, IconPicker } from '@/components/IconPicker';
+import { CoinConfirmDialog } from '@/components/CoinConfirmDialog';
 import confetti from 'canvas-confetti';
 
 // 🎨 Surprise 10: Unique gradient accents per app card
@@ -353,6 +354,13 @@ export default function Dashboard() {
     if (!error) setApps(apps.map(a => a.id === app.id ? { ...a, is_remixable: !a.is_remixable } : a));
   }
 
+  // Coin confirm dialog state
+  const [coinConfirm, setCoinConfirm] = useState<{ open: boolean; amount: number; description: string; onConfirm: () => void }>({ open: false, amount: 0, description: '', onConfirm: () => {} });
+
+  function requestCoinConfirm(amount: number, description: string, onConfirm: () => void) {
+    setCoinConfirm({ open: true, amount, description, onConfirm });
+  }
+
   async function updateRetention(id: string, hours: number) {
     const app = apps.find(a => a.id === id);
     if (!app) return;
@@ -375,8 +383,16 @@ export default function Dashboard() {
           return;
         }
 
-        await supabase.from('user_coins').update({ balance: balance - cost, updated_at: new Date().toISOString() } as any).eq('id', (coinRow as any).id);
-        toast({ title: `${cost} coins afgeschreven`, description: `Bewaartijd verlengd naar ${hours >= 24 ? Math.round(hours / 24) + ' dag(en)' : hours + ' uur'}` });
+        // Show confirmation dialog
+        requestCoinConfirm(cost, `Bewaartijd verlengen naar ${hours >= 24 ? Math.round(hours / 24) + ' dag(en)' : hours + ' uur'}`, async () => {
+          await supabase.from('user_coins').update({ balance: balance - cost, updated_at: new Date().toISOString() } as any).eq('id', (coinRow as any).id);
+          toast({ title: `${cost} coins afgeschreven`, description: `Bewaartijd verlengd naar ${hours >= 24 ? Math.round(hours / 24) + ' dag(en)' : hours + ' uur'}` });
+          const { error } = await supabase.from('apps').update({ chat_retention_hours: hours } as any).eq('id', id);
+          if (!error) {
+            setApps(prev => prev.map(a => a.id === id ? { ...a, chat_retention_hours: hours } : a));
+          }
+        });
+        return;
       }
     }
 
@@ -857,6 +873,14 @@ export default function Dashboard() {
           onClose={() => setIconPickerAppId(null)}
         />
       )}
+
+      <CoinConfirmDialog
+        open={coinConfirm.open}
+        onOpenChange={(open) => setCoinConfirm(prev => ({ ...prev, open }))}
+        amount={coinConfirm.amount}
+        description={coinConfirm.description}
+        onConfirm={() => { coinConfirm.onConfirm(); setCoinConfirm(prev => ({ ...prev, open: false })); }}
+      />
     </div>
   );
 }

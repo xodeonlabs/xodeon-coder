@@ -1,7 +1,8 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { NGCNode } from '@/lib/ngc-ast';
 import { createRuntime, NGCRuntime, resolveVarRefs, parseVarDefinition, parseListDefinition, parseDataCommand, parseCoinsCommand, clearPersistedState } from '@/lib/ngc-runtime';
 import { supabase } from '@/integrations/supabase/client';
+import { CoinConfirmDialog } from '@/components/CoinConfirmDialog';
 import * as LucideIcons from 'lucide-react';
 
 function LucideIcon({ name, size = 16, color = 'currentColor' }: { name: string; size?: number; color?: string }) {
@@ -390,6 +391,7 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
   const [updateCount, forceUpdate] = useState(0);
   const [currentPage, setCurrentPage] = useState<string | null>(null);
   const [orgBalance, setOrgBalance] = useState<number | null>(null);
+  const [coinConfirm, setCoinConfirm] = useState<{ open: boolean; amount: number; description: string; onConfirm: () => void }>({ open: false, amount: 0, description: '', onConfirm: () => {} });
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const runtime = useMemo(() => {
@@ -451,12 +453,11 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
     return true;
   }, [organizationId, runtime]);
 
-  const dbCoinsRemove = useCallback(async (name: string, amount: number): Promise<boolean> => {
+  const dbCoinsRemoveInternal = useCallback(async (name: string, amount: number): Promise<boolean> => {
     const fee = Math.floor(amount * PLATFORM_FEE_RATE);
     const netReturn = amount - fee;
 
     if (organizationId) {
-      // Org path: remove full amount from user, org gets net back
       const current = runtime.coins[name] ?? 0;
       if (current < amount) return false;
       runtime.coins[name] = current - amount;
@@ -481,7 +482,6 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
       }
       return true;
     }
-    // Personal path: remove full amount, DB gets net back
     const success = runtime.coinsRemove(name, amount);
     if (!success) return false;
     const { data: authData } = await supabase.auth.getUser();
@@ -493,6 +493,31 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
     }
     return true;
   }, [organizationId, runtime]);
+
+  const dbCoinsRemove = useCallback((name: string, amount: number): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setCoinConfirm({
+        open: true,
+        amount,
+        description: `${amount} coins worden afgeschreven via Coins.Remove`,
+        onConfirm: async () => {
+          const result = await dbCoinsRemoveInternal(name, amount);
+          resolve(result);
+          forceUpdate(c => c + 1);
+        },
+      });
+      // If dialog is cancelled, resolve false
+      const checkClosed = setInterval(() => {
+        setCoinConfirm(prev => {
+          if (!prev.open) {
+            clearInterval(checkClosed);
+            resolve(false);
+          }
+          return prev;
+        });
+      }, 200);
+    });
+  }, [dbCoinsRemoveInternal]);
 
   const coinHandlers: CoinHandlers = {
     add: dbCoinsAdd,
@@ -661,6 +686,13 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
         )}
       </div>
 
+      <CoinConfirmDialog
+        open={coinConfirm.open}
+        onOpenChange={(open) => { if (!open) setCoinConfirm(prev => ({ ...prev, open: false })); }}
+        amount={coinConfirm.amount}
+        description={coinConfirm.description}
+        onConfirm={() => { coinConfirm.onConfirm(); setCoinConfirm(prev => ({ ...prev, open: false })); }}
+      />
     </div>
   );
 }
