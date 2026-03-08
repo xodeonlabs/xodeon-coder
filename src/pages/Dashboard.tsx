@@ -78,6 +78,9 @@ export default function Dashboard() {
   const [templateName, setTemplateName] = useState('');
   const [templateDesc, setTemplateDesc] = useState('');
   const [creatingTemplate, setCreatingTemplate] = useState(false);
+  const [publishAppId, setPublishAppId] = useState<string | null>(null);
+  const [slugValue, setSlugValue] = useState('');
+  const [savingSlug, setSavingSlug] = useState(false);
 
   useEffect(() => { fetchApps(); fetchOrgs(); }, []);
 
