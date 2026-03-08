@@ -410,6 +410,7 @@ const Index = () => {
         <div
           className={`shrink-0 border-r border-border flex-col transition-all duration-200 flex ${leftOpen ? 'w-56' : 'w-0 overflow-hidden border-r-0'}`}
           style={{ background: 'hsl(var(--ide-explorer-bg))' }}
+          {...leftPanelSwipe}
         >
           {leftOpen && (
             <>
