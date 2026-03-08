@@ -679,13 +679,16 @@ export default function OrganizationPage() {
                 .map(o => {
                   const existing = myRequests.find(r => r.organization_id === o.id);
                   return (
-                    <div key={o.id} className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-background/50">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">
+                    <div key={o.id} className="flex items-center gap-3 px-3 py-3 rounded-lg bg-background/50">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm shrink-0">
                         {o.icon || '🏢'}
                       </div>
-                      <span className="text-sm font-medium text-foreground flex-1 truncate">{o.name}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-medium text-foreground truncate block">{o.name}</span>
+                        {o.bio && <p className="text-[11px] text-muted-foreground leading-snug mt-0.5 line-clamp-2">{o.bio}</p>}
+                      </div>
                       {existing ? (
-                        <span className={`text-[11px] px-2 py-1 rounded-full font-medium ${
+                        <span className={`text-[11px] px-2 py-1 rounded-full font-medium shrink-0 ${
                           existing.status === 'pending' ? 'bg-yellow-500/15 text-yellow-600' :
                           existing.status === 'accepted' ? 'bg-green-500/15 text-green-600' :
                           'bg-destructive/15 text-destructive'
@@ -696,7 +699,7 @@ export default function OrganizationPage() {
                         <button
                           onClick={() => sendJoinRequest(o.id)}
                           disabled={applying === o.id}
-                          className="px-3 py-1.5 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors"
+                          className="px-3 py-1.5 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors shrink-0"
                         >
                           {applying === o.id ? 'Bezig...' : 'Solliciteren'}
                         </button>
