@@ -73,8 +73,14 @@ interface AdRow {
   gradient: string;
   is_active: boolean;
   sort_order: number;
+  pages: string[];
   created_at: string;
 }
+
+const PAGE_OPTIONS = [
+  { value: 'dashboard', label: 'Dashboard' },
+  { value: 'organizations', label: 'Bedrijven' },
+];
 
 export default function AdminPanel() {
   const { session, signOut } = useAuth();
