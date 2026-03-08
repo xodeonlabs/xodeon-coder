@@ -85,8 +85,9 @@ export default function Alliances() {
 
   async function checkAdmin() {
     if (!session?.user?.id) return;
-    const { data } = await supabase.from('user_roles').select('role').eq('user_id', session.user.id).eq('role', 'admin').maybeSingle();
-    setIsAdmin(!!data);
+    // Check if user owns any organization
+    const { data } = await supabase.from('organizations').select('id').eq('owner_id', session.user.id).limit(1);
+    setIsOrgOwner(!!(data && data.length > 0));
   }
 
   async function createAlliance() {
