@@ -49,6 +49,7 @@ interface App {
   slug: string | null;
   chat_retention_hours: number;
   icon: string | null;
+  ngc_code: string;
 }
 
 interface Org {
