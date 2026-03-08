@@ -551,6 +551,21 @@ export default function Dashboard() {
                     Open
                   </a>
                 </div>
+                <button
+                  onClick={async () => {
+                    const { error } = await supabase.from('apps').update({ is_public: false, slug: null }).eq('id', publishAppId!);
+                    if (!error) {
+                      setApps(apps.map(a => a.id === publishAppId ? { ...a, is_public: false, slug: null } : a));
+                      toast({ title: 'Publicatie ingetrokken', description: 'Je app is niet meer publiek toegankelijk.' });
+                      setPublishAppId(null);
+                    } else {
+                      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+                    }
+                  }}
+                  className="mt-3 w-full px-3 py-2 text-xs font-medium rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
+                >
+                  Publicatie intrekken
+                </button>
               </div>
             )}
 
