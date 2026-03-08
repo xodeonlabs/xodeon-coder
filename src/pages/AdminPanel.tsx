@@ -148,7 +148,7 @@ export default function AdminPanel() {
       .from('user_roles')
       .select('role')
       .eq('user_id', session.user.id)
-      .eq('role', 'admin' as any);
+      .in('role', ['admin', 'owner'] as any[]);
     const hasAdmin = (data && data.length > 0);
     setIsAdmin(hasAdmin);
     if (hasAdmin) fetchAll();
