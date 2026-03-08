@@ -229,9 +229,11 @@ export default function AdminPanel() {
                   className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
                   <option value="">Selecteer gebruiker...</option>
-                  {profiles.map(p => (
-                    <option key={p.id} value={p.id}>{p.display_name || p.id.slice(0, 12)}</option>
-                  ))}
+                  {profiles.map(p => {
+                    const email = getUserEmail(p.id);
+                    const label = p.display_name ? `${p.display_name} (${email || p.id.slice(0, 8)})` : email || p.id.slice(0, 12);
+                    return <option key={p.id} value={p.id}>{label}</option>;
+                  })}
                 </select>
                 <select
                   value={addRoleValue}
