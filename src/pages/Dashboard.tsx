@@ -589,6 +589,7 @@ export default function Dashboard() {
 
             <NavBtn onClick={() => navigate('/templates')} icon={<LayoutGrid className="h-4 w-4" />} label="Templates" />
             <NavBtn onClick={() => navigate('/berichten')} icon={<MessageCircle className="h-4 w-4" />} label="Berichten" />
+            <NavBtn onClick={() => navigate('/groepen')} icon={<Users className="h-4 w-4" />} label="Groepen" />
             <NavBtn onClick={() => navigate('/analytics')} icon={<BarChart3 className="h-4 w-4" />} label="Analytics" />
             <NavBtn onClick={() => navigate('/organization')} icon={<Building2 className="h-4 w-4" />} label="Bedrijven" badge={unreadOrgMessages} />
             <NavBtn onClick={() => navigate('/alliances')} icon={<Handshake className="h-4 w-4" />} label="Allianties" />
@@ -633,6 +634,7 @@ export default function Dashboard() {
             <div className="flex flex-col gap-1">
               <MobileNavItem onClick={() => { navigate('/templates'); setMobileMenuOpen(false); }} icon={<LayoutGrid className="h-4 w-4" />} label="Templates" />
               <MobileNavItem onClick={() => { navigate('/berichten'); setMobileMenuOpen(false); }} icon={<MessageCircle className="h-4 w-4" />} label="Berichten" />
+              <MobileNavItem onClick={() => { navigate('/groepen'); setMobileMenuOpen(false); }} icon={<Users className="h-4 w-4" />} label="Groepen" />
               <MobileNavItem onClick={() => { navigate('/analytics'); setMobileMenuOpen(false); }} icon={<BarChart3 className="h-4 w-4" />} label="Analytics" />
               <MobileNavItem onClick={() => { navigate('/organization'); setMobileMenuOpen(false); }} icon={<Building2 className="h-4 w-4" />} label="Bedrijven" badge={unreadOrgMessages} />
               <MobileNavItem onClick={() => { navigate('/alliances'); setMobileMenuOpen(false); }} icon={<Handshake className="h-4 w-4" />} label="Allianties" />

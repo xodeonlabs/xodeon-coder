@@ -20,6 +20,7 @@ import Alliances from "./pages/Alliances";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import FriendChat from "./pages/FriendChat";
+import GroupChats from "./pages/GroupChats";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
           <Route path="/preview/:appId" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
           <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
           <Route path="/berichten" element={<ProtectedRoute><FriendChat /></ProtectedRoute>} />
+          <Route path="/groepen" element={<ProtectedRoute><GroupChats /></ProtectedRoute>} />
           <Route path="/app/:slug" element={<PublicApp />} />
           <Route path="/profiel/:username" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
