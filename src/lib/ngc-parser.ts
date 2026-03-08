@@ -58,7 +58,19 @@ function parseNodeHeader(content: string): { type: string; name: string } | null
   // Data commands: Data.Add(...), Data.Delete(...), Data.Clear(...)
   const dataMatch = content.match(/^Data\.(Add|Delete|Clear|Get)\(.+\)$/);
   if (dataMatch) {
-    return { type: 'Var', name: content }; // Store as Var-like node with raw command as name
+    return { type: 'Var', name: content };
+  }
+
+  // Coins definition: Coins(name)=100
+  const coinsDefMatch = content.match(/^Coins\((\w+)\)\s*=\s*(\d+)$/);
+  if (coinsDefMatch) {
+    return { type: 'Var', name: content };
+  }
+
+  // Coins commands: Coins.Add(...), Coins.Remove(...), Coins.Code(...), Coins.Redeem(...)
+  const coinsMatch = content.match(/^Coins\.(Add|Remove|Code|Redeem)\(.+\)$/);
+  if (coinsMatch) {
+    return { type: 'Var', name: content };
   }
 
   // GaNaar command: GaNaar "PageName" or GaNaar PageName

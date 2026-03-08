@@ -1,4 +1,4 @@
-// NGC Runtime - manages variables, lists, data storage, and textbox bindings
+// NGC Runtime - manages variables, lists, data storage, coins, and textbox bindings
 
 export interface DataRecord {
   id: string;
@@ -10,10 +10,18 @@ export interface DataTable {
   records: DataRecord[];
 }
 
+export interface CoinCode {
+  code: string;
+  amount: number;
+  used: boolean;
+}
+
 export interface NGCRuntime {
   variables: Record<string, string>;
   lists: Record<string, string[]>;
   data: Record<string, DataRecord[]>;
+  coins: Record<string, number>;
+  coinCodes: Record<string, CoinCode[]>;
   getVar: (name: string) => string;
   setVar: (name: string, value: string) => void;
   getList: (name: string) => string[];
@@ -26,6 +34,13 @@ export interface NGCRuntime {
   dataFind: (table: string, key: string, value: string) => DataRecord | undefined;
   dataClear: (table: string) => void;
   dataUpdate: (table: string, id: string, key: string, value: string) => void;
+  // Coins API
+  coinsGet: (name: string) => number;
+  coinsSet: (name: string, amount: number) => void;
+  coinsAdd: (name: string, amount: number) => void;
+  coinsRemove: (name: string, amount: number) => boolean;
+  coinsRegisterCode: (name: string, code: string, amount: number) => void;
+  coinsRedeemCode: (name: string, code: string) => { success: boolean; amount: number };
 }
 
 const STORAGE_KEY = 'ngc_runtime_state';
@@ -35,13 +50,25 @@ function generateDataId(): string {
   return `rec_${Date.now()}_${dataIdCounter++}`;
 }
 
-function saveState(variables: Record<string, string>, lists: Record<string, string[]>, data: Record<string, DataRecord[]>) {
+function saveState(
+  variables: Record<string, string>,
+  lists: Record<string, string[]>,
+  data: Record<string, DataRecord[]>,
+  coins: Record<string, number>,
+  coinCodes: Record<string, CoinCode[]>
+) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ variables, lists, data }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ variables, lists, data, coins, coinCodes }));
   } catch { /* ignore quota errors */ }
 }
 
-function loadState(): { variables: Record<string, string>; lists: Record<string, string[]>; data: Record<string, DataRecord[]> } | null {
+function loadState(): {
+  variables: Record<string, string>;
+  lists: Record<string, string[]>;
+  data: Record<string, DataRecord[]>;
+  coins: Record<string, number>;
+  coinCodes: Record<string, CoinCode[]>;
+} | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
@@ -58,17 +85,23 @@ export function createRuntime(): NGCRuntime {
   const variables: Record<string, string> = saved?.variables ?? {};
   const lists: Record<string, string[]> = saved?.lists ?? {};
   const data: Record<string, DataRecord[]> = saved?.data ?? {};
+  const coins: Record<string, number> = saved?.coins ?? {};
+  const coinCodes: Record<string, CoinCode[]> = saved?.coinCodes ?? {};
+
+  const save = () => saveState(variables, lists, data, coins, coinCodes);
 
   return {
     variables,
     lists,
     data,
+    coins,
+    coinCodes,
     getVar(name: string) {
       return variables[name] ?? '';
     },
     setVar(name: string, value: string) {
       variables[name] = value;
-      saveState(variables, lists, data);
+      save();
     },
     getList(name: string) {
       if (!lists[name]) lists[name] = [];
@@ -77,27 +110,27 @@ export function createRuntime(): NGCRuntime {
     listAdd(name: string, value: string) {
       if (!lists[name]) lists[name] = [];
       lists[name].push(value);
-      saveState(variables, lists, data);
+      save();
     },
     listRemove(name: string, index: number) {
       if (lists[name]) {
         lists[name].splice(index, 1);
-        saveState(variables, lists, data);
+        save();
       }
     },
     listClear(name: string) {
       lists[name] = [];
-      saveState(variables, lists, data);
+      save();
     },
     dataAdd(table: string, record: Record<string, string>) {
       if (!data[table]) data[table] = [];
       data[table].push({ id: generateDataId(), ...record });
-      saveState(variables, lists, data);
+      save();
     },
     dataDelete(table: string, id: string) {
       if (data[table]) {
         data[table] = data[table].filter(r => r.id !== id);
-        saveState(variables, lists, data);
+        save();
       }
     },
     dataGet(table: string) {
@@ -110,24 +143,63 @@ export function createRuntime(): NGCRuntime {
     },
     dataClear(table: string) {
       data[table] = [];
-      saveState(variables, lists, data);
+      save();
     },
     dataUpdate(table: string, id: string, key: string, value: string) {
       if (data[table]) {
         const rec = data[table].find(r => r.id === id);
         if (rec) {
           rec[key] = value;
-          saveState(variables, lists, data);
+          save();
         }
       }
+    },
+
+    // Coins API
+    coinsGet(name: string) {
+      return coins[name] ?? 0;
+    },
+    coinsSet(name: string, amount: number) {
+      coins[name] = Math.max(0, amount);
+      save();
+    },
+    coinsAdd(name: string, amount: number) {
+      coins[name] = (coins[name] ?? 0) + amount;
+      save();
+    },
+    coinsRemove(name: string, amount: number) {
+      const current = coins[name] ?? 0;
+      if (current < amount) return false;
+      coins[name] = current - amount;
+      save();
+      return true;
+    },
+    coinsRegisterCode(name: string, code: string, amount: number) {
+      if (!coinCodes[name]) coinCodes[name] = [];
+      // Don't register duplicate codes
+      if (!coinCodes[name].find(c => c.code === code)) {
+        coinCodes[name].push({ code, amount, used: false });
+        save();
+      }
+    },
+    coinsRedeemCode(name: string, code: string) {
+      if (!coinCodes[name]) return { success: false, amount: 0 };
+      const entry = coinCodes[name].find(c => c.code === code && !c.used);
+      if (!entry) return { success: false, amount: 0 };
+      entry.used = true;
+      coins[name] = (coins[name] ?? 0) + entry.amount;
+      save();
+      return { success: true, amount: entry.amount };
     },
   };
 }
 
 // Resolve variable references in text like Var(name) or {name}
+// Also resolves Coins(name) to the current coin balance
 export function resolveVarRefs(text: string, runtime: NGCRuntime): string {
   return text
     .replace(/Var\((\w+)\)/g, (_, name) => runtime.getVar(name))
+    .replace(/Coins\((\w+)\)/g, (_, name) => String(runtime.coinsGet(name)))
     .replace(/\{(\w+)\}/g, (_, name) => runtime.getVar(name));
 }
 
@@ -151,6 +223,39 @@ export function parseListDefinition(name: string): { listName: string; items: st
   return { listName: name, items: [] };
 }
 
+// Parse Coins commands
+export interface CoinsCommand {
+  operation: 'Set' | 'Add' | 'Remove' | 'Code' | 'RegisterCode';
+  name: string;
+  amount?: number;
+  code?: string;
+  varName?: string; // variable name for code input
+}
+
+export function parseCoinsCommand(content: string): CoinsCommand | null {
+  // Coins(name)=100  →  Set initial value
+  const setMatch = content.match(/^Coins\((\w+)\)\s*=\s*(\d+)$/);
+  if (setMatch) return { operation: 'Set', name: setMatch[1], amount: parseInt(setMatch[2]) };
+
+  // Coins.Add(name, 50)  →  Add coins
+  const addMatch = content.match(/^Coins\.Add\((\w+)\s*,\s*(\d+)\)$/);
+  if (addMatch) return { operation: 'Add', name: addMatch[1], amount: parseInt(addMatch[2]) };
+
+  // Coins.Remove(name, 10)  →  Remove coins
+  const removeMatch = content.match(/^Coins\.Remove\((\w+)\s*,\s*(\d+)\)$/);
+  if (removeMatch) return { operation: 'Remove', name: removeMatch[1], amount: parseInt(removeMatch[2]) };
+
+  // Coins.Code(name, "BUY100", 100)  →  Register a redeemable code
+  const codeMatch = content.match(/^Coins\.Code\((\w+)\s*,\s*"([^"]+)"\s*,\s*(\d+)\)$/);
+  if (codeMatch) return { operation: 'RegisterCode', name: codeMatch[1], code: codeMatch[2], amount: parseInt(codeMatch[3]) };
+
+  // Coins.Redeem(name, varName)  →  Redeem code from variable
+  const redeemMatch = content.match(/^Coins\.Redeem\((\w+)\s*,\s*(\w+)\)$/);
+  if (redeemMatch) return { operation: 'Code', name: redeemMatch[1], varName: redeemMatch[2] };
+
+  return null;
+}
+
 // Parse Data commands like Data.Add(table, key=value, key2=value2)
 // Data.Delete(table, id) / Data.Clear(table)
 export interface DataCommand {
@@ -161,13 +266,11 @@ export interface DataCommand {
 }
 
 export function parseDataCommand(content: string): DataCommand | null {
-  // Data.Add(tableName, key="value", key2="value2")
   const addMatch = content.match(/^Data\.Add\((\w+)\s*,\s*(.+)\)$/);
   if (addMatch) {
     const table = addMatch[1];
     const fieldsStr = addMatch[2];
     const fields: Record<string, string> = {};
-    // Parse key=value pairs (value can be "string", word, or Var(name))
     const pairs = fieldsStr.match(/(\w+)\s*=\s*("[^"]*"|Var\(\w+\)|\w+)/g);
     if (pairs) {
       for (const pair of pairs) {
@@ -180,19 +283,16 @@ export function parseDataCommand(content: string): DataCommand | null {
     return { operation: 'Add', table, fields };
   }
 
-  // Data.Delete(tableName, id)
   const delMatch = content.match(/^Data\.Delete\((\w+)\s*,\s*(.+)\)$/);
   if (delMatch) {
     return { operation: 'Delete', table: delMatch[1], id: delMatch[2].replace(/^"|"$/g, '') };
   }
 
-  // Data.Clear(tableName)
   const clearMatch = content.match(/^Data\.Clear\((\w+)\)$/);
   if (clearMatch) {
     return { operation: 'Clear', table: clearMatch[1] };
   }
 
-  // Data.Get(tableName) - convert table records to list
   const getMatch = content.match(/^Data\.Get\((\w+)\)$/);
   if (getMatch) {
     return { operation: 'Get', table: getMatch[1] };
