@@ -90,7 +90,7 @@ export function NGCChat({ appId }: NGCChatProps) {
         )}
         {messages.map(msg => {
           const isMe = msg.user_id === currentUserId;
-          const shortName = msg.user_email.split('@')[0];
+          const shortName = profiles[msg.user_id] || msg.user_email.split('@')[0];
           return (
             <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
               <span className="text-[10px] text-muted-foreground mb-0.5 px-1">{shortName}</span>
