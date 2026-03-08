@@ -521,16 +521,16 @@ export default function Dashboard() {
                   <select
                     value={app.chat_retention_hours ?? 12}
                     onChange={e => updateRetention(app.id, parseInt(e.target.value))}
-                    className="text-xs rounded-lg border border-border bg-background px-2 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 max-w-[100px]"
+                    className="text-xs rounded-lg border border-border bg-background px-2 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 max-w-[120px]"
                     title="Chat bewaartermijn"
                   >
                     <option value={1}>1 uur</option>
                     <option value={6}>6 uur</option>
-                    <option value={12}>12 uur</option>
-                    <option value={24}>24 uur</option>
-                    <option value={48}>2 dagen</option>
-                    <option value={168}>1 week</option>
-                    <option value={720}>30 dagen</option>
+                    <option value={12}>12 uur (gratis)</option>
+                    <option value={24}>24 uur (5🪙)</option>
+                    <option value={48}>2 dagen (15🪙)</option>
+                    <option value={168}>1 week (65🪙)</option>
+                    <option value={720}>30 dagen (295🪙)</option>
                   </select>
                   <button onClick={() => { setEditingNameId(app.id); setEditingNameValue(app.name); }} className="rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Naam wijzigen">
                     <Pencil className="h-4 w-4" />
