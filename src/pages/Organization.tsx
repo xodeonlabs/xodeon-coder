@@ -822,6 +822,7 @@ export default function OrganizationPage() {
             </div>
           )}
 
+          <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
             <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
               <AppWindow className="h-5 w-5 text-accent" />
               Apps van {selectedOrg.name}
