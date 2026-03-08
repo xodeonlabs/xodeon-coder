@@ -104,6 +104,10 @@ export default function AdminPanel() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [emojiSearch, setEmojiSearch] = useState('');
 
+  // User management
+  const [confirmAction, setConfirmAction] = useState<{ userId: string; action: 'ban' | 'unban' | 'delete'; name: string } | null>(null);
+  const [managingUser, setManagingUser] = useState(false);
+
   useEffect(() => {
     checkAdmin();
   }, [session]);
