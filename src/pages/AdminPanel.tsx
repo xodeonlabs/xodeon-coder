@@ -106,7 +106,7 @@ export default function AdminPanel() {
   // Ad form
   const [showAdForm, setShowAdForm] = useState(false);
   const [editingAd, setEditingAd] = useState<AdRow | null>(null);
-  const [adForm, setAdForm] = useState({ emoji: '🚀', title: '', description: '', url: '', gradient: 'linear-gradient(135deg, hsl(200 40% 14%), hsl(var(--secondary)))' });
+  const [adForm, setAdForm] = useState({ emoji: '🚀', title: '', description: '', url: '', gradient: 'linear-gradient(135deg, hsl(200 40% 14%), hsl(var(--secondary)))', pages: ['dashboard', 'organizations'] as string[] });
   const [savingAd, setSavingAd] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [emojiSearch, setEmojiSearch] = useState('');
