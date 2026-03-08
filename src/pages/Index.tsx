@@ -665,7 +665,25 @@ const Index = () => {
               </button>
             </div>
 
-            {editorMode === 'code' && (
+            {/* Quick action buttons */}
+            <div className="flex items-center border-r border-border shrink-0 gap-0.5 px-1">
+              <button onClick={toggleZenMode} className={`p-1.5 rounded text-[10px] transition-colors ${zenMode ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`} title="Zen mode (Esc)">
+                <Eye className="h-3 w-3" />
+              </button>
+              <button onClick={toggleFullscreen} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors" title="Volledig scherm">
+                {isFullscreen ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
+              </button>
+              <button onClick={handleCopyCode} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors" title="Kopieer code">
+                <Copy className="h-3 w-3" />
+              </button>
+              <button onClick={handleUndo} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30" title="Ongedaan maken (Ctrl+Z)" disabled={undoStack.length < 2}>
+                <Undo2 className="h-3 w-3" />
+              </button>
+              <button onClick={() => setCommandPaletteOpen(true)} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors" title="Commandopalet (Ctrl+K)">
+                <span className="text-[10px] font-mono">⌘K</span>
+              </button>
+            </div>
+
               <>
                 {sections.map(section => (
                   <button
