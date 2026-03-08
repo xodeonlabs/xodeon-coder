@@ -103,7 +103,7 @@ export default function GroupChats() {
     if (ids.length > 0) {
       const { data: profs } = await supabase
         .from('profiles')
-        .select('id, display_name, avatar_url, username, is_dnd')
+        .select('id, display_name, avatar_url, username, is_dnd, last_seen_at')
         .in('id', ids);
       const map: Record<string, MemberProfile> = {};
       (profs || []).forEach(p => { map[p.id] = p; });
