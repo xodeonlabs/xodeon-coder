@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useSwipe } from '@/hooks/useSwipe';
 import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Plus, Code, MousePointer, History } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -101,6 +102,20 @@ const Index = () => {
   const { cursors, updateCursor } = useLiveCursors(appId);
 
   const isRemoteUpdate = useRef(false);
+
+  // Swipe gestures for mobile panel toggling
+  const leftPanelSwipe = useSwipe(
+    () => setLeftOpen(false),  // swipe left → close left panel
+    undefined
+  );
+  const rightPanelSwipe = useSwipe(
+    undefined,
+    () => setRightOpen(false)  // swipe right → close right panel
+  );
+  const editorSwipe = useSwipe(
+    () => setRightOpen(true),  // swipe left on editor → open right panel
+    () => setLeftOpen(true)    // swipe right on editor → open left panel
+  );
 
   // Load app from database
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -395,6 +410,7 @@ const Index = () => {
         <div
           className={`shrink-0 border-r border-border flex-col transition-all duration-200 flex ${leftOpen ? 'w-56' : 'w-0 overflow-hidden border-r-0'}`}
           style={{ background: 'hsl(var(--ide-explorer-bg))' }}
+          {...leftPanelSwipe}
         >
           {leftOpen && (
             <>
@@ -480,6 +496,7 @@ const Index = () => {
         <div
           ref={editorContainerRef}
           className="flex-1 flex flex-col min-w-0 relative"
+          {...editorSwipe}
           onMouseMove={(e) => {
             const rect = editorContainerRef.current?.getBoundingClientRect();
             if (rect) {
@@ -590,6 +607,7 @@ const Index = () => {
         {/* Right Panel: Component Library (hidden on mobile) */}
         <div
           className={`shrink-0 flex-col transition-all duration-200 flex ${rightOpen ? 'w-72' : 'w-0 overflow-hidden'}`}
+          {...rightPanelSwipe}
         >
           {rightOpen && (
             <>
