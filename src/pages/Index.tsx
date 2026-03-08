@@ -557,271 +557,281 @@ const Index = () => {
         onShareTemplate={handleShareTemplate}
       />
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Panel: Explorer + Data (hidden on mobile) */}
-        <div
-          className={`shrink-0 border-r border-border flex-col transition-all duration-200 flex ${leftOpen ? 'w-56' : 'w-0 overflow-hidden border-r-0'}`}
-          style={{ background: 'hsl(var(--ide-explorer-bg))' }}
-          {...leftPanelSwipe}
-        >
-          {leftOpen && (
-            <>
-              {/* Left panel tab switcher */}
-              <div className="flex border-b border-border shrink-0">
-                <button
-                  onClick={() => setLeftTab('explorer')}
-                  className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors ${
-                    leftTab === 'explorer' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  📂 Explorer
-                </button>
-                <button
-                  onClick={() => setLeftTab('versions')}
-                  className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
-                    leftTab === 'versions' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  <History className="h-3 w-3" /> Versies
-                </button>
-              </div>
-
-              {leftTab === 'explorer' ? (
-                <>
-                  {/* Explorer */}
-                  <div className="flex flex-col min-h-0" style={{ flex: '1 1 33%' }}>
-                    <div className="flex-1 overflow-y-auto min-h-0">
-                      <NGCExplorer
-                        ast={ast}
-                        selectedId={selectedId}
-                        onSelect={setSelectedId}
-                        onContextMenu={handleContextMenu}
-                        onRename={handleRename}
-                        onDelete={handleDelete}
-                      />
-                    </div>
-                  </div>
-                  {/* Data Panel */}
-                  <div className="flex flex-col min-h-0 border-t border-border" style={{ flex: '1 1 33%' }}>
-                    <div className="ide-panel-header">
-                      <span>💾 Data</span>
-                    </div>
-                    <div className="flex-1 overflow-y-auto min-h-0">
-                      <NGCDataPanel ast={ast} />
-                    </div>
-                  </div>
-                  {/* Chat Panel */}
-                  <div className="flex flex-col min-h-0 border-t border-border" style={{ flex: '1 1 34%' }}>
-                    <div className="ide-panel-header">
-                      <span>🗣️ Chat</span>
-                    </div>
-                    <div className="flex-1 overflow-hidden min-h-0">
-                      {appId && <NGCChat appId={appId} />}
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="flex-1 overflow-hidden min-h-0">
-                  {appId && (
-                    <NGCVersionPanel
-                      appId={appId}
-                      currentCode={code}
-                      onRestore={(restoredCode) => setCode(restoredCode)}
-                    />
-                  )}
+      <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden">
+        {/* Left Panel */}
+        {leftOpen && (
+          <>
+            <ResizablePanel defaultSize={15} minSize={10} maxSize={35} order={1}>
+              <div
+                className="h-full flex flex-col"
+                style={{ background: 'hsl(var(--ide-explorer-bg))' }}
+                {...leftPanelSwipe}
+              >
+                {/* Left panel tab switcher */}
+                <div className="flex border-b border-border shrink-0">
+                  <button
+                    onClick={() => setLeftTab('explorer')}
+                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors ${
+                      leftTab === 'explorer' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    📂 Explorer
+                  </button>
+                  <button
+                    onClick={() => setLeftTab('versions')}
+                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
+                      leftTab === 'versions' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <History className="h-3 w-3" /> Versies
+                  </button>
                 </div>
-              )}
-            </>
-          )}
-        </div>
 
-        {/* Collapse toggle for left panel (hidden on mobile) */}
+                {leftTab === 'explorer' ? (
+                  <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0">
+                    <ResizablePanel defaultSize={33} minSize={15}>
+                      <div className="h-full overflow-y-auto">
+                        <NGCExplorer
+                          ast={ast}
+                          selectedId={selectedId}
+                          onSelect={setSelectedId}
+                          onContextMenu={handleContextMenu}
+                          onRename={handleRename}
+                          onDelete={handleDelete}
+                        />
+                      </div>
+                    </ResizablePanel>
+                    <ResizableHandle />
+                    <ResizablePanel defaultSize={33} minSize={10}>
+                      <div className="h-full flex flex-col">
+                        <div className="ide-panel-header shrink-0">
+                          <span>💾 Data</span>
+                        </div>
+                        <div className="flex-1 overflow-y-auto min-h-0">
+                          <NGCDataPanel ast={ast} />
+                        </div>
+                      </div>
+                    </ResizablePanel>
+                    <ResizableHandle />
+                    <ResizablePanel defaultSize={34} minSize={10}>
+                      <div className="h-full flex flex-col">
+                        <div className="ide-panel-header shrink-0">
+                          <span>🗣️ Chat</span>
+                        </div>
+                        <div className="flex-1 overflow-hidden min-h-0">
+                          {appId && <NGCChat appId={appId} />}
+                        </div>
+                      </div>
+                    </ResizablePanel>
+                  </ResizablePanelGroup>
+                ) : (
+                  <div className="flex-1 overflow-hidden min-h-0">
+                    {appId && (
+                      <NGCVersionPanel
+                        appId={appId}
+                        currentCode={code}
+                        onRestore={(restoredCode) => setCode(restoredCode)}
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+          </>
+        )}
+
+        {/* Toggle left */}
         <button
           onClick={() => setLeftOpen(p => !p)}
           className="shrink-0 items-center justify-center w-5 hover:bg-secondary/60 transition-colors border-r border-border flex"
           title={leftOpen ? 'Paneel inklappen' : 'Paneel uitklappen'}
+          style={{ flexGrow: 0, flexShrink: 0, flexBasis: '20px' }}
         >
           {leftOpen ? <PanelLeftClose className="h-3.5 w-3.5 text-muted-foreground" /> : <PanelLeftOpen className="h-3.5 w-3.5 text-muted-foreground" />}
         </button>
 
-        {/* Code Editor / Designer */}
-        <div
-          ref={editorContainerRef}
-          className="flex-1 flex flex-col min-w-0 relative"
-          {...editorSwipe}
-          onMouseMove={(e) => {
-            const rect = editorContainerRef.current?.getBoundingClientRect();
-            if (rect) {
-              updateCursor(e.clientX - rect.left, e.clientY - rect.top, activeTab);
-            }
-          }}
-        >
-          <LiveCursors cursors={cursors.filter(c => c.section === activeTab)} containerRef={editorContainerRef} />
-          {/* Mode toggle + Page Tabs */}
-          <div className="flex items-center border-b border-border shrink-0 overflow-x-auto scrollbar-none" style={{ background: 'hsl(var(--ide-explorer-bg))' }}>
-            {/* Mode toggle */}
-            <div className="flex items-center border-r border-border shrink-0">
-              <button
-                onClick={() => setEditorMode('code')}
-                className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium transition-colors ${
-                  editorMode === 'code'
-                    ? 'text-foreground bg-background'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40'
-                }`}
-                title="Code modus"
-              >
-                <Code className="h-3 w-3" />
-                Code
-              </button>
-              <button
-                onClick={() => setEditorMode('design')}
-                className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium transition-colors ${
-                  editorMode === 'design'
-                    ? 'text-primary bg-primary/10'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40'
-                }`}
-                title="Ontwerp modus"
-              >
-                <MousePointer className="h-3 w-3" />
-                Ontwerp
-              </button>
-            </div>
-
-            {/* Quick action buttons */}
-            <div className="flex items-center border-r border-border shrink-0 gap-0.5 px-1">
-              <button onClick={toggleZenMode} className={`p-1.5 rounded text-[10px] transition-colors ${zenMode ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`} title="Zen mode (Esc)">
-                <Eye className="h-3 w-3" />
-              </button>
-              <button onClick={toggleFullscreen} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors" title="Volledig scherm">
-                {isFullscreen ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
-              </button>
-              <button onClick={handleCopyCode} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors" title="Kopieer code">
-                <Copy className="h-3 w-3" />
-              </button>
-              <button onClick={handleUndo} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30" title="Ongedaan maken (Ctrl+Z)" disabled={undoStack.length < 2}>
-                <Undo2 className="h-3 w-3" />
-              </button>
-              <button onClick={() => setCommandPaletteOpen(true)} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors" title="Commandopalet (Ctrl+K)">
-                <span className="text-[10px] font-mono">⌘K</span>
-              </button>
-            </div>
-
-            {editorMode === 'code' && (
-              <>
-                {sections.map(section => (
-                  <button
-                    key={section.id}
-                    onClick={() => setActiveTab(section.id)}
-                    className={`px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium transition-colors border-b-2 whitespace-nowrap shrink-0 ${
-                      activeTab === section.id
-                        ? 'border-primary text-foreground bg-background'
-                        : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/40'
-                    }`}
-                  >
-                    {section.id === 'global' ? '🌍 Globaal' : `📄 ${section.label}`}
-                  </button>
-                ))}
+        {/* Code Editor / Designer (center) */}
+        <ResizablePanel defaultSize={leftOpen && rightOpen ? 55 : leftOpen || rightOpen ? 70 : 90} minSize={30} order={2}>
+          <div
+            ref={editorContainerRef}
+            className="h-full flex flex-col min-w-0 relative"
+            {...editorSwipe}
+            onMouseMove={(e) => {
+              const rect = editorContainerRef.current?.getBoundingClientRect();
+              if (rect) {
+                updateCursor(e.clientX - rect.left, e.clientY - rect.top, activeTab);
+              }
+            }}
+          >
+            <LiveCursors cursors={cursors.filter(c => c.section === activeTab)} containerRef={editorContainerRef} />
+            {/* Mode toggle + Page Tabs */}
+            <div className="flex items-center border-b border-border shrink-0 overflow-x-auto scrollbar-none" style={{ background: 'hsl(var(--ide-explorer-bg))' }}>
+              {/* Mode toggle */}
+              <div className="flex items-center border-r border-border shrink-0">
                 <button
-                  onClick={handleAddPage}
-                  className="px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0"
-                  title="Nieuwe pagina toevoegen"
+                  onClick={() => setEditorMode('code')}
+                  className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium transition-colors ${
+                    editorMode === 'code'
+                      ? 'text-foreground bg-background'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40'
+                  }`}
+                  title="Code modus"
                 >
-                  ➕
+                  <Code className="h-3 w-3" />
+                  Code
                 </button>
-                <span className="ml-auto pr-2 text-muted-foreground opacity-60 text-[10px] sm:text-xs normal-case tracking-normal hidden sm:inline shrink-0">
-                  {activeSection ? (activeTab === 'global' ? 'app.ngc' : `${activeSection.label.toLowerCase()}.ngc`) : 'main.ngc'}
-                </span>
+                <button
+                  onClick={() => setEditorMode('design')}
+                  className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium transition-colors ${
+                    editorMode === 'design'
+                      ? 'text-primary bg-primary/10'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40'
+                  }`}
+                  title="Ontwerp modus"
+                >
+                  <MousePointer className="h-3 w-3" />
+                  Ontwerp
+                </button>
+              </div>
+
+              {/* Quick action buttons */}
+              <div className="flex items-center border-r border-border shrink-0 gap-0.5 px-1">
+                <button onClick={toggleZenMode} className={`p-1.5 rounded text-[10px] transition-colors ${zenMode ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`} title="Zen mode (Esc)">
+                  <Eye className="h-3 w-3" />
+                </button>
+                <button onClick={toggleFullscreen} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors" title="Volledig scherm">
+                  {isFullscreen ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
+                </button>
+                <button onClick={handleCopyCode} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors" title="Kopieer code">
+                  <Copy className="h-3 w-3" />
+                </button>
+                <button onClick={handleUndo} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30" title="Ongedaan maken (Ctrl+Z)" disabled={undoStack.length < 2}>
+                  <Undo2 className="h-3 w-3" />
+                </button>
+                <button onClick={() => setCommandPaletteOpen(true)} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors" title="Commandopalet (Ctrl+K)">
+                  <span className="text-[10px] font-mono">⌘K</span>
+                </button>
+              </div>
+
+              {editorMode === 'code' && (
+                <>
+                  {sections.map(section => (
+                    <button
+                      key={section.id}
+                      onClick={() => setActiveTab(section.id)}
+                      className={`px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium transition-colors border-b-2 whitespace-nowrap shrink-0 ${
+                        activeTab === section.id
+                          ? 'border-primary text-foreground bg-background'
+                          : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/40'
+                      }`}
+                    >
+                      {section.id === 'global' ? '🌍 Globaal' : `📄 ${section.label}`}
+                    </button>
+                  ))}
+                  <button
+                    onClick={handleAddPage}
+                    className="px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                    title="Nieuwe pagina toevoegen"
+                  >
+                    ➕
+                  </button>
+                  <span className="ml-auto pr-2 text-muted-foreground opacity-60 text-[10px] sm:text-xs normal-case tracking-normal hidden sm:inline shrink-0">
+                    {activeSection ? (activeTab === 'global' ? 'app.ngc' : `${activeSection.label.toLowerCase()}.ngc`) : 'main.ngc'}
+                  </span>
+                </>
+              )}
+            </div>
+
+            {editorMode === 'code' ? (
+              <>
+                <div className="flex-1 overflow-hidden relative">
+                  <SearchReplace
+                    open={searchOpen}
+                    onClose={() => setSearchOpen(false)}
+                    code={code}
+                    onCodeChange={setCode}
+                    showReplace={searchShowReplace}
+                  />
+                  <NGCCodeEditor code={activeSection?.code || ''} onChange={handleSectionCodeChange} errors={errors} />
+                </div>
+                {/* Error bar */}
+                {errors.length > 0 && (
+                  <div className="border-t border-border p-2 space-y-1" style={{ background: 'hsla(0, 65%, 50%, 0.08)' }}>
+                    {errors.map((err, i) => (
+                      <div key={i} className="text-xs text-destructive flex items-center gap-1">
+                        <span className="font-mono">Line {err.line}:</span>
+                        <span>{err.message}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </>
+            ) : (
+              <div className="flex-1 overflow-hidden">
+                <NGCDesigner
+                  ast={ast}
+                  selectedId={selectedId}
+                  onSelect={setSelectedId}
+                  onPositionChange={handlePositionChange}
+                  onSizeChange={handleSizeChange}
+                  onDropNew={handleDropNew}
+                />
+              </div>
             )}
           </div>
+        </ResizablePanel>
 
-          {editorMode === 'code' ? (
-            <>
-              <div className="flex-1 overflow-hidden relative">
-                <SearchReplace
-                  open={searchOpen}
-                  onClose={() => setSearchOpen(false)}
-                  code={code}
-                  onCodeChange={setCode}
-                  showReplace={searchShowReplace}
-                />
-                <NGCCodeEditor code={activeSection?.code || ''} onChange={handleSectionCodeChange} errors={errors} />
-              </div>
-              {/* Error bar */}
-              {errors.length > 0 && (
-                <div className="border-t border-border p-2 space-y-1" style={{ background: 'hsla(0, 65%, 50%, 0.08)' }}>
-                  {errors.map((err, i) => (
-                    <div key={i} className="text-xs text-destructive flex items-center gap-1">
-                      <span className="font-mono">Line {err.line}:</span>
-                      <span>{err.message}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="flex-1 overflow-hidden">
-              <NGCDesigner
-                ast={ast}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
-                onPositionChange={handlePositionChange}
-                onSizeChange={handleSizeChange}
-                onDropNew={handleDropNew}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Collapse toggle for right panel (hidden on mobile) */}
+        {/* Toggle right */}
         <button
           onClick={() => setRightOpen(p => !p)}
           className="shrink-0 items-center justify-center w-5 hover:bg-secondary/60 transition-colors border-l border-border flex"
           title={rightOpen ? 'Paneel inklappen' : 'Paneel uitklappen'}
+          style={{ flexGrow: 0, flexShrink: 0, flexBasis: '20px' }}
         >
           {rightOpen ? <PanelRightClose className="h-3.5 w-3.5 text-muted-foreground" /> : <PanelRightOpen className="h-3.5 w-3.5 text-muted-foreground" />}
         </button>
 
-        {/* Right Panel: Component Library (hidden on mobile) */}
-        <div
-          className={`shrink-0 flex-col transition-all duration-200 flex ${rightOpen ? 'w-72' : 'w-0 overflow-hidden'}`}
-          {...rightPanelSwipe}
-        >
-          {rightOpen && (
-            <>
-              {/* Right panel tab switcher */}
-              <div className="flex border-b border-border shrink-0">
-                <button
-                  onClick={() => setRightTab('components')}
-                  className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
-                    rightTab === 'components' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  <Blocks className="h-3 w-3" /> Componenten
-                </button>
-                <button
-                  onClick={() => setRightTab('ai')}
-                  className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
-                    rightTab === 'ai' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  <Sparkles className="h-3 w-3" /> AI
-                </button>
-              </div>
+        {/* Right Panel */}
+        {rightOpen && (
+          <>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={20} minSize={12} maxSize={40} order={3}>
+              <div className="h-full flex flex-col" {...rightPanelSwipe}>
+                {/* Right panel tab switcher */}
+                <div className="flex border-b border-border shrink-0">
+                  <button
+                    onClick={() => setRightTab('components')}
+                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
+                      rightTab === 'components' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Blocks className="h-3 w-3" /> Componenten
+                  </button>
+                  <button
+                    onClick={() => setRightTab('ai')}
+                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
+                      rightTab === 'ai' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Sparkles className="h-3 w-3" /> AI
+                  </button>
+                </div>
 
-              {rightTab === 'components' ? (
-                <div className="flex-1 overflow-auto">
-                  <NGCComponentLibrary onInsert={handleInsertCode} />
-                </div>
-              ) : (
-                <div className="flex-1 overflow-hidden min-h-0">
-                  <NGCAIAssistant appId={appId!} currentCode={code} onApplyCode={(newCode) => setCode(newCode)} />
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
+                {rightTab === 'components' ? (
+                  <div className="flex-1 overflow-auto">
+                    <NGCComponentLibrary onInsert={handleInsertCode} />
+                  </div>
+                ) : (
+                  <div className="flex-1 overflow-hidden min-h-0">
+                    <NGCAIAssistant appId={appId!} currentCode={code} onApplyCode={(newCode) => setCode(newCode)} />
+                  </div>
+                )}
+              </div>
+            </ResizablePanel>
+          </>
+        )}
+      </ResizablePanelGroup>
 
       {/* Status Bar */}
       <StatusBar code={code} saveStatus={saveStatus} lastSaved={lastSaved} />
