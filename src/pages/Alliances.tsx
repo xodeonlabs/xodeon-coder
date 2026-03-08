@@ -203,8 +203,18 @@ export default function Alliances() {
   async function loadAlliances() {
     if (!session?.user?.id) return;
     const { data } = await supabase.from('alliances' as any).select('*').order('created_at');
-    setAlliances((data as unknown as Alliance[]) || []);
+    const allianceList = (data as unknown as Alliance[]) || [];
+    setAlliances(allianceList);
     setLoading(false);
+
+    // Load creator profiles
+    const creatorIds = [...new Set(allianceList.map(a => a.created_by))];
+    if (creatorIds.length > 0) {
+      const { data: profileData } = await supabase.from('profiles').select('id, display_name').in('id', creatorIds);
+      const map: Record<string, string> = {};
+      (profileData || []).forEach(p => { map[p.id] = p.display_name || 'Onbekend'; });
+      setCreatorProfiles(map);
+    }
   }
 
   async function selectAlliance(alliance: Alliance) {
