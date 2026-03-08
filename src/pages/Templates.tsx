@@ -169,8 +169,88 @@ export default function Templates() {
     toast({ title: 'Template verwijderd' });
   }
 
+  async function createTemplate() {
+    if (!session?.user?.id) { navigate('/auth'); return; }
+    if (!createName.trim()) { toast({ title: 'Vul een naam in', variant: 'destructive' }); return; }
+    setCreating(true);
+    const { error } = await supabase.from('templates' as any).insert({
+      author_id: session.user.id,
+      name: createName.trim(),
+      description: createDescription.trim(),
+      ngc_code: createCode,
+      category: createCategory,
+      visibility: createVisibility,
+      is_published: false,
+    } as any);
+    setCreating(false);
+    if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); return; }
+    toast({ title: 'Template aangemaakt!', description: 'Je kunt hem nu bewerken en publiceren.' });
+    setShowCreateDialog(false);
+    setCreateName(''); setCreateDescription(''); setCreateCode('');
+    loadTemplates();
+  }
+
+  function openCreateForCategory(catValue: string) {
+    if (!session?.user?.id) { navigate('/auth'); return; }
+    setCreateCategory(catValue === 'alle' ? 'algemeen' : catValue);
+    setShowCreateDialog(true);
+  }
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Create Template Dialog */}
+      {showCreateDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowCreateDialog(false)}>
+          <div className="w-full max-w-md rounded-2xl border border-border/40 bg-card p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold text-foreground">Nieuwe template</h2>
+              <button onClick={() => setShowCreateDialog(false)} className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Naam *</label>
+                <input value={createName} onChange={e => setCreateName(e.target.value)} placeholder="Mijn template" className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Beschrijving</label>
+                <textarea value={createDescription} onChange={e => setCreateDescription(e.target.value)} placeholder="Wat doet deze template?" rows={2} className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Categorie</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {CATEGORIES.filter(c => c.value !== 'alle').map(cat => (
+                    <button key={cat.value} onClick={() => setCreateCategory(cat.value)} className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all ${createCategory === cat.value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}>
+                      <LucideIcon name={cat.icon} className="h-3 w-3" />
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Zichtbaarheid</label>
+                <div className="flex gap-1.5">
+                  {[{ v: 'public', l: '🌍 Publiek' }, { v: 'friends', l: '👥 Vrienden' }, { v: 'org', l: '🏢 Bedrijf' }].map(opt => (
+                    <button key={opt.v} onClick={() => setCreateVisibility(opt.v)} className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all ${createVisibility === opt.v ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary/50'}`}>
+                      {opt.l}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">NGC Code</label>
+                <textarea value={createCode} onChange={e => setCreateCode(e.target.value)} placeholder="Plak hier je NGC code..." rows={4} className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
+              </div>
+              <button onClick={createTemplate} disabled={creating} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
+                {creating ? <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground/20 border-t-primary-foreground" /> : <Plus className="h-4 w-4" />}
+                Aanmaken
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="lg:hidden border-b border-border/50 px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3" style={{ background: 'hsl(var(--ide-toolbar) / 0.8)' }}>
         <button onClick={() => navigate('/')} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all shrink-0">
