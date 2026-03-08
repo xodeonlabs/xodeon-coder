@@ -13,6 +13,13 @@ interface UserProfile {
   bio: string | null;
 }
 
+interface AuthUser {
+  id: string;
+  email: string;
+  created_at: string;
+  last_sign_in_at: string | null;
+}
+
 interface UserRoleRow {
   id: string;
   user_id: string;
