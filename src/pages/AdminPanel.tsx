@@ -205,6 +205,28 @@ export default function AdminPanel() {
     if (data?.coins) setUserCoins(data.coins);
   }
 
+  async function loadAdminTemplates(force = false) {
+    if (templatesLoaded && !force) return;
+    setTemplatesLoaded(true);
+    const { data } = await supabase.from('templates').select('id, name, category, author_id, downloads, is_published, created_at').order('created_at', { ascending: false });
+    setAdminTemplates((data as any[]) || []);
+  }
+
+  async function deleteTemplate(id: string, name: string) {
+    const { error } = await supabase.from('templates').delete().eq('id', id);
+    if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); return; }
+    setAdminTemplates(ts => ts.filter(t => t.id !== id));
+    toast({ title: 'Template verwijderd', description: `"${name}" is verwijderd.` });
+  }
+
+  async function saveTemplateEdit(id: string) {
+    const { error } = await supabase.from('templates').update({ name: templateEditName, category: templateEditCategory }).eq('id', id);
+    if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); return; }
+    setAdminTemplates(ts => ts.map(t => t.id === id ? { ...t, name: templateEditName, category: templateEditCategory } : t));
+    setEditingTemplate(null);
+    toast({ title: 'Template bijgewerkt' });
+  }
+
   async function loadAdminAlliances(force = false) {
     if (alliancesLoaded && !force) return;
     setAlliancesLoaded(true);
