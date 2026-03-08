@@ -221,6 +221,7 @@ export function resolveVarRefs(text: string, runtime: NGCRuntime): string {
   return text
     .replace(/Var\((\w+)\)/g, (_, name) => runtime.getVar(name))
     .replace(/Coins\((\w+)\)/g, (_, name) => String(runtime.coinsGet(name)))
+    .replace(/OwnerCoins\((\w+)\)/g, (_, name) => String(runtime.coinsOwnerGet(name)))
     .replace(/\{(\w+)\}/g, (_, name) => runtime.getVar(name));
 }
 
