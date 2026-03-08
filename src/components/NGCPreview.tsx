@@ -391,6 +391,7 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
   const [updateCount, forceUpdate] = useState(0);
   const [currentPage, setCurrentPage] = useState<string | null>(null);
   const [orgBalance, setOrgBalance] = useState<number | null>(null);
+  const [coinConfirm, setCoinConfirm] = useState<{ open: boolean; amount: number; description: string; onConfirm: () => void }>({ open: false, amount: 0, description: '', onConfirm: () => {} });
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const runtime = useMemo(() => {
