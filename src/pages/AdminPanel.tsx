@@ -1038,6 +1038,90 @@ export default function AdminPanel() {
           </div>
         )}
 
+        {/* Templates tab */}
+        {tab === 'templates' && (
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+              <BookTemplate className="h-4 w-4 text-primary" /> Templates ({adminTemplates.length})
+            </h3>
+            {adminTemplates.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Geen templates gevonden.</p>
+            ) : (
+              <div className="space-y-2">
+                {adminTemplates.map(t => (
+                  <div key={t.id} className="rounded-xl border border-border/50 p-4" style={{ background: 'hsl(var(--card))' }}>
+                    {editingTemplate === t.id ? (
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-[11px] text-muted-foreground mb-1 block">Naam</label>
+                          <input
+                            value={templateEditName}
+                            onChange={e => setTemplateEditName(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[11px] text-muted-foreground mb-1 block">Categorie</label>
+                          <div className="flex flex-wrap gap-1.5">
+                            {['algemeen', 'game', 'tool', 'shop', 'educatie'].map(cat => (
+                              <button
+                                key={cat}
+                                onClick={() => setTemplateEditCategory(cat)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                                  templateEditCategory === cat
+                                    ? 'border-primary/40 bg-primary/10 text-primary'
+                                    : 'border-border/40 text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                }`}
+                              >
+                                {cat}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button onClick={() => saveTemplateEdit(t.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors">
+                            <Save className="h-3.5 w-3.5" /> Opslaan
+                          </button>
+                          <button onClick={() => setEditingTemplate(null)} className="px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
+                            Annuleren
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-foreground truncate">{t.name}</span>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground capitalize">{t.category}</span>
+                            {!t.is_published && <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">Concept</span>}
+                          </div>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">{t.downloads} downloads · {new Date(t.created_at).toLocaleDateString('nl')}</p>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            onClick={() => { setEditingTemplate(t.id); setTemplateEditName(t.name); setTemplateEditCategory(t.category); }}
+                            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                            title="Bewerken"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            onClick={() => setConfirmAction({ id: t.id, action: 'delete', type: 'app', name: t.name })}
+                            className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                            title="Verwijderen"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Activity tab */}
         {tab === 'activity' && (
           <div className="rounded-xl border border-border/50 p-5" style={{ background: 'hsl(var(--card))' }}>
