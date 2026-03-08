@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { ArrowLeft, Send, Plus, Users, Hash, UserPlus, Trash2, X, Search, Gamepad2 } from 'lucide-react';
+import { ArrowLeft, Send, Plus, Users, Hash, UserPlus, Trash2, X, Search, Gamepad2, Check, CheckCheck } from 'lucide-react';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { SnakeGame } from '@/components/SnakeGame';
 
