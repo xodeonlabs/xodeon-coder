@@ -894,3 +894,31 @@ export default function OrganizationPage() {
     </div>
   );
 }
+
+const EMOJI_LIST = ['🚀','💡','🎯','🔥','⭐','💎','🎉','🏆','💰','🪙','📱','💻','🎮','🌟','❤️','👑','🎨','📢','🛒','🎁','✨','⚡','🌈','🍀','🏠','🔔','📊','🎵','🤖','🦄'];
+
+function EmojiPickerButton({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button className="w-14 h-10 text-center text-lg rounded-lg border border-border bg-background hover:bg-secondary/50 transition-colors focus:outline-none focus:ring-1 focus:ring-primary/50">
+          {value}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-64 p-2" align="start">
+        <div className="grid grid-cols-6 gap-1">
+          {EMOJI_LIST.map(e => (
+            <button
+              key={e}
+              onClick={() => { onChange(e); setOpen(false); }}
+              className={`w-9 h-9 text-lg rounded-lg hover:bg-secondary/70 transition-colors flex items-center justify-center ${e === value ? 'bg-primary/15 ring-1 ring-primary/40' : ''}`}
+            >
+              {e}
+            </button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
