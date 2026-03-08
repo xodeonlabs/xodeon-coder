@@ -4,8 +4,29 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
-import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff, Clock, Coins } from 'lucide-react';
 import { getCached, setCache, clearCache, CACHE_TTL } from '@/lib/cache';
+
+interface RetentionItem {
+  label: string;
+  icon: string;
+  hours: number;
+  type: 'app' | 'org' | 'alliance' | 'group' | 'friend';
+  id?: string;
+}
+
+function formatRetention(hours: number): string {
+  if (hours < 24) return `${hours} uur`;
+  if (hours < 168) return `${Math.round(hours / 24)} dag(en)`;
+  if (hours < 720) return `${Math.round(hours / 168)} week`;
+  return `${Math.round(hours / 720)} maand(en)`;
+}
+
+function retentionCostPerMonth(hours: number): number {
+  if (hours <= 12) return 0;
+  const blocks = Math.ceil((hours - 12) / 12);
+  return blocks * 5;
+}
 
 export default function Settings() {
   const { session } = useAuth();
@@ -25,6 +46,8 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [savingEmail, setSavingEmail] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
+  const [retentionItems, setRetentionItems] = useState<RetentionItem[]>([]);
+  const [retentionLoading, setRetentionLoading] = useState(true);
 
   useEffect(() => {
     if (!session?.user) return;
@@ -35,24 +58,66 @@ export default function Settings() {
       if (cached.display_name) setDisplayName(cached.display_name);
       if (cached.bio) setBio(cached.bio);
       if (cached.username) setUsername(cached.username);
-      return;
+    } else {
+      supabase
+        .from('profiles')
+        .select('display_name, bio, username, social_links, show_email, friend_chat_retention_hours')
+        .eq('id', session.user.id)
+        .single()
+        .then(({ data }) => {
+          if (data?.display_name) setDisplayName(data.display_name);
+          if ((data as any)?.bio) setBio((data as any).bio);
+          if ((data as any)?.username) setUsername((data as any).username);
+          if ((data as any)?.show_email) setShowEmail((data as any).show_email);
+          if ((data as any)?.social_links && typeof (data as any).social_links === 'object') {
+            setSocialLinks(prev => ({ ...prev, ...(data as any).social_links }));
+          }
+          if (data) setCache(cacheKey, { display_name: data.display_name, bio: (data as any)?.bio, username: (data as any)?.username });
+        });
     }
-    supabase
-      .from('profiles')
-      .select('display_name, bio, username, social_links, show_email')
-      .eq('id', session.user.id)
-      .single()
-      .then(({ data }) => {
-        if (data?.display_name) setDisplayName(data.display_name);
-        if ((data as any)?.bio) setBio((data as any).bio);
-        if ((data as any)?.username) setUsername((data as any).username);
-        if ((data as any)?.show_email) setShowEmail((data as any).show_email);
-        if ((data as any)?.social_links && typeof (data as any).social_links === 'object') {
-          setSocialLinks(prev => ({ ...prev, ...(data as any).social_links }));
-        }
-        if (data) setCache(cacheKey, { display_name: data.display_name, bio: (data as any)?.bio, username: (data as any)?.username });
-      });
+    loadRetentionOverview();
   }, [session?.user]);
+
+  async function loadRetentionOverview() {
+    if (!session?.user?.id) return;
+    setRetentionLoading(true);
+    const items: RetentionItem[] = [];
+
+    // Friend chat retention
+    const { data: profile } = await supabase.from('profiles').select('friend_chat_retention_hours').eq('id', session.user.id).maybeSingle();
+    items.push({ label: 'Vriendenberichten', icon: '💬', hours: (profile as any)?.friend_chat_retention_hours ?? 24, type: 'friend' });
+
+    // Apps
+    const { data: apps } = await supabase.from('apps').select('id, name, chat_retention_hours, icon').eq('owner_id', session.user.id);
+    for (const app of apps || []) {
+      items.push({ label: app.name, icon: app.icon || '📱', hours: app.chat_retention_hours ?? 12, type: 'app', id: app.id });
+    }
+
+    // Organizations owned/admin
+    const { data: memberships } = await supabase.from('organization_members').select('organization_id, role').eq('user_id', session.user.id);
+    const orgIds = (memberships || []).filter(m => m.role === 'owner' || m.role === 'admin').map(m => m.organization_id);
+    if (orgIds.length > 0) {
+      const { data: orgs } = await supabase.from('organizations').select('id, name, icon, chat_retention_hours').in('id', orgIds);
+      for (const org of orgs || []) {
+        items.push({ label: org.name, icon: org.icon || '🏢', hours: (org as any).chat_retention_hours ?? 48, type: 'org', id: org.id });
+      }
+    }
+
+    // Alliances created by user
+    const { data: alliances } = await supabase.from('alliances').select('id, name, icon, chat_retention_hours').eq('created_by', session.user.id);
+    for (const a of alliances || []) {
+      items.push({ label: a.name, icon: a.icon || '🤝', hours: (a as any).chat_retention_hours ?? 48, type: 'alliance', id: a.id });
+    }
+
+    // Groups created by user
+    const { data: groups } = await supabase.from('chat_groups' as any).select('id, name, icon, chat_retention_hours').eq('created_by', session.user.id);
+    for (const g of (groups as any[]) || []) {
+      items.push({ label: g.name, icon: g.icon || '👥', hours: g.chat_retention_hours ?? 48, type: 'group', id: g.id });
+    }
+
+    setRetentionItems(items);
+    setRetentionLoading(false);
+  }
 
   async function saveProfile() {
     if (!session?.user?.id) return;
@@ -300,6 +365,80 @@ export default function Settings() {
               {savingPassword ? 'Bezig...' : 'Wachtwoord wijzigen'}
             </button>
           </div>
+        </div>
+
+        {/* Bewaartermijnen overzicht */}
+        <div className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+          <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
+            <Clock className="h-5 w-5 text-primary" />
+            Bewaartermijnen
+          </h2>
+          <p className="text-xs text-muted-foreground mb-4">Overzicht van alle actieve chat-bewaartermijnen en kosten.</p>
+
+          {retentionLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+            </div>
+          ) : retentionItems.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">Geen actieve bewaartermijnen gevonden.</p>
+          ) : (
+            <>
+              <div className="space-y-1.5">
+                {retentionItems.map((item, i) => {
+                  const cost = retentionCostPerMonth(item.hours);
+                  const isUpgraded = item.hours > 12;
+                  return (
+                    <div
+                      key={`${item.type}-${item.id || i}`}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-colors ${
+                        isUpgraded ? 'border-primary/20 bg-primary/5' : 'border-border/30 bg-secondary/20'
+                      }`}
+                    >
+                      <span className="text-lg shrink-0">{item.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-foreground truncate">{item.label}</span>
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary/60 text-muted-foreground font-medium shrink-0">
+                            {item.type === 'app' ? '📱 App' : item.type === 'org' ? '🏢 Bedrijf' : item.type === 'alliance' ? '🤝 Alliantie' : item.type === 'group' ? '👥 Groep' : '💬 Privé'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className={`text-xs font-semibold ${isUpgraded ? 'text-primary' : 'text-muted-foreground'}`}>
+                          {formatRetention(item.hours)}
+                        </span>
+                        {cost > 0 ? (
+                          <span className="text-[10px] font-bold text-yellow-500 flex items-center gap-0.5">
+                            🪙 {cost}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-medium text-muted-foreground/60">Gratis</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Summary */}
+              {(() => {
+                const totalCost = retentionItems.reduce((sum, item) => sum + retentionCostPerMonth(item.hours), 0);
+                const upgradedCount = retentionItems.filter(item => item.hours > 12).length;
+                return (
+                  <div className="mt-4 pt-3 border-t border-border/30 flex items-center justify-between">
+                    <div className="text-xs text-muted-foreground">
+                      <span className="font-medium text-foreground">{upgradedCount}</span> van {retentionItems.length} chats met verlengde bewaring
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Coins className="h-3.5 w-3.5 text-yellow-500" />
+                      <span className="text-sm font-bold text-foreground">{totalCost}</span>
+                      <span className="text-[10px] text-muted-foreground">coins totaal</span>
+                    </div>
+                  </div>
+                );
+              })()}
+            </>
+          )}
         </div>
 
         {/* Danger zone */}
