@@ -624,6 +624,23 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* Pending contracts for me */}
+        {contracts.filter(c => c.collaborator_id === session?.user?.id && (c.status === 'pending' || c.status === 'counter')).length > 0 && (
+          <div className="mt-10 pt-8 border-t border-border/20">
+            <h2 className="text-xl font-bold text-foreground font-display mb-5 flex items-center gap-2.5">
+              <div className="p-1.5 rounded-lg bg-accent/10 border border-accent/10"><Handshake className="h-4 w-4 text-accent" /></div>
+              Openstaande contracten
+            </h2>
+            <ContractList
+              contracts={contracts.filter(c => c.collaborator_id === session?.user?.id && (c.status === 'pending' || c.status === 'counter'))}
+              currentUserId={session?.user?.id || ''}
+              onRespond={respondToContract}
+              appNames={Object.fromEntries(apps.map(a => [a.id, a.name]))}
+              showAppName
+            />
+          </div>
+        )}
+
         {/* Shared apps */}
         {sharedApps.length > 0 && (
           <div className="mt-12 pt-10 border-t border-border/20">
@@ -632,12 +649,21 @@ export default function Dashboard() {
               Gedeeld met mij
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {sharedApps.map(app => (
-                <div key={app.id} className="glass-card rounded-2xl p-5 transition-all hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 cursor-pointer hover:-translate-y-1" onClick={() => navigate(`/editor/${app.id}`)}>
-                  <h3 className="font-semibold text-sm text-foreground truncate mb-1.5">{app.name}</h3>
-                  <p className="text-[11px] text-muted-foreground/60">{new Date(app.updated_at).toLocaleDateString('nl-NL', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
-                </div>
-              ))}
+              {sharedApps.map(app => {
+                const appContract = contracts.find(c => c.app_id === app.id && c.collaborator_id === session?.user?.id && c.status === 'accepted');
+                return (
+                  <div key={app.id} className="glass-card rounded-2xl p-5 transition-all hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 cursor-pointer hover:-translate-y-1" onClick={() => navigate(`/editor/${app.id}`)}>
+                    <h3 className="font-semibold text-sm text-foreground truncate mb-1.5">{app.name}</h3>
+                    <p className="text-[11px] text-muted-foreground/60">{new Date(app.updated_at).toLocaleDateString('nl-NL', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                    {appContract && (
+                      <div className="mt-2 flex items-center gap-1.5 text-[10px] text-accent/80">
+                        <Handshake className="h-3 w-3" />
+                        <span>Contract: {appContract.percentage}% per transactie</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
