@@ -429,7 +429,7 @@ export function OrgUpgrades({ orgId, orgName, currentLevel, orgBalance, isOwner,
       </div>
 
       {/* Level cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
         {LEVELS.map((lvl) => {
           const isCurrent = lvl.level === currentLevel;
           const isUnlocked = lvl.level <= currentLevel;
