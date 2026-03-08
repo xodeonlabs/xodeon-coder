@@ -37,6 +37,7 @@ const App = () => (
           <Route path="/organization" element={<ProtectedRoute><Organization /></ProtectedRoute>} />
           <Route path="/editor/:appId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/preview/:appId" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
+          <Route path="/app/:slug" element={<PublicApp />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
