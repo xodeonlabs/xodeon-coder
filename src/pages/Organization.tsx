@@ -1131,6 +1131,7 @@ export default function OrganizationPage() {
                 currentLevel={(selectedOrg as any).level ?? 1}
                 orgBalance={orgCoins.reduce((sum, c) => sum + c.balance, 0)}
                 isOwner={selectedOrg.owner_id === session?.user?.id}
+                levelPaidUntil={(selectedOrg as any).level_paid_until}
                 onUpgrade={(newLevel) => {
                   setSelectedOrg({ ...selectedOrg, level: newLevel } as any);
                   viewMembers({ ...selectedOrg, level: newLevel } as any);
