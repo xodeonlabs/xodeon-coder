@@ -558,6 +558,10 @@ const Index = () => {
           setAppName(newName);
           if (appId) await supabase.from('apps').update({ name: newName }).eq('id', appId);
         }}
+        onChangeIcon={async (icon) => {
+          setAppIcon(icon);
+          if (appId) await supabase.from('apps').update({ icon }).eq('id', appId);
+        }}
         onShareTemplate={handleShareTemplate}
       />
 
