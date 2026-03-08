@@ -234,7 +234,7 @@ export default function FriendChatPage() {
               </div>
               <div className="min-w-0">
                 <h2 className="text-sm font-bold text-foreground truncate">{selectedFriend.display_name || 'Anoniem'}</h2>
-                {selectedFriend.username && <p className="text-[11px] text-muted-foreground">@{selectedFriend.username}</p>}
+                <p className="text-[10px] text-muted-foreground">{getLastSeenText(getOnlineStatus((selectedFriend as any).is_dnd ?? false, (selectedFriend as any).last_seen_at), (selectedFriend as any).last_seen_at)}</p>
               </div>
             </div>
           ) : (

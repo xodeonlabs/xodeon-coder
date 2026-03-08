@@ -2,6 +2,21 @@ import { Moon } from 'lucide-react';
 
 export type OnlineStatus = 'online' | 'dnd' | 'offline';
 
+/** Returns a human-readable "last seen" string in Dutch */
+export function getLastSeenText(status: OnlineStatus, lastSeenAt?: string | null): string {
+  if (status === 'online') return 'Online';
+  if (status === 'dnd') return 'Niet storen';
+  if (!lastSeenAt) return 'Offline';
+  const diff = Date.now() - new Date(lastSeenAt).getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return 'Zojuist gezien';
+  if (mins < 60) return `Laatst gezien ${mins} min geleden`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `Laatst gezien ${hours} uur geleden`;
+  const days = Math.floor(hours / 24);
+  return `Laatst gezien ${days} ${days === 1 ? 'dag' : 'dagen'} geleden`;
+}
+
 interface StatusDotProps {
   status: OnlineStatus;
   size?: 'sm' | 'md' | 'lg';
