@@ -6,7 +6,8 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ArrowLeft, Send, MessageCircle, Gamepad2 } from 'lucide-react';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { SnakeGame } from '@/components/SnakeGame';
-import { StatusDot, getOnlineStatus, getLastSeenText } from '@/components/StatusDot';
+import { StatusDot, getOnlineStatus } from '@/components/StatusDot';
+import { useLastSeen } from '@/hooks/useLastSeen';
 
 interface ChatFriend {
   id: string;
