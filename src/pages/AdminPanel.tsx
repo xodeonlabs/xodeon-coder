@@ -260,19 +260,26 @@ export default function AdminPanel() {
               <div className="space-y-2">
                 {profiles.map(profile => {
                   const userRoles = roles.filter(r => r.user_id === profile.id);
+                  const email = getUserEmail(profile.id);
+                  const authUser = authUsers.find(u => u.id === profile.id);
+                  const displayLabel = profile.display_name || email || `${profile.id.slice(0, 12)}...`;
+                  const initials = (profile.display_name || email || profile.id).slice(0, 2).toUpperCase();
                   return (
                     <div key={profile.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-lg px-4 py-3 bg-background/50">
                       <div className="flex items-center gap-3 min-w-0">
                         <Avatar className="h-8 w-8 border border-border/50 shrink-0">
                           {profile.avatar_url ? <AvatarImage src={profile.avatar_url} alt="" /> : null}
                           <AvatarFallback className="text-[10px] font-bold bg-primary/20 text-primary">
-                            {(profile.display_name || profile.id).slice(0, 2).toUpperCase()}
+                            {initials}
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-foreground truncate">{profile.display_name || `${profile.id.slice(0, 12)}...`}</p>
+                          <p className="text-sm font-semibold text-foreground truncate">{displayLabel}</p>
+                          {email && profile.display_name && <p className="text-[11px] text-muted-foreground truncate">{email}</p>}
                           {profile.bio && <p className="text-[11px] text-muted-foreground truncate">{profile.bio}</p>}
-                          <p className="text-[10px] text-muted-foreground font-mono">{profile.id.slice(0, 12)}...</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {authUser?.last_sign_in_at ? `Laatst actief: ${new Date(authUser.last_sign_in_at).toLocaleDateString('nl-NL', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}` : 'Nog niet ingelogd'}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-wrap">
