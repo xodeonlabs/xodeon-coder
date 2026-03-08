@@ -68,8 +68,8 @@ export default function Alliances() {
   const [userOrgId, setUserOrgId] = useState<string | null>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
-  // Admin state
-  const [isAdmin, setIsAdmin] = useState(false);
+  // Org owner state (replaces admin-only)
+  const [isOrgOwner, setIsOrgOwner] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [newIcon, setNewIcon] = useState('🤝');
