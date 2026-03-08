@@ -343,8 +343,13 @@ export default function Dashboard() {
           <button onClick={() => navigate('/analytics')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
             <BarChart3 className="h-4 w-4" /> <span className="hidden sm:inline">Analytics</span>
           </button>
-          <button onClick={() => navigate('/organization')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
+          <button onClick={() => navigate('/organization')} className="relative flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
             <Building2 className="h-4 w-4" /> <span className="hidden sm:inline">Bedrijven</span>
+            {unreadOrgMessages > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1 animate-scale-in">
+                {unreadOrgMessages > 99 ? '99+' : unreadOrgMessages}
+              </span>
+            )}
           </button>
           <button onClick={() => navigate('/settings')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all" title="Instellingen">
             <Settings className="h-4 w-4" /> <span className="hidden sm:inline">Account</span>
