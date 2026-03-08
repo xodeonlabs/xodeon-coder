@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, Megaphone, Plus, Eye, EyeOff, GripVertical } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface UserProfile {
@@ -40,6 +40,18 @@ interface OrgRow {
   owner_id: string;
 }
 
+interface AdRow {
+  id: string;
+  emoji: string;
+  title: string;
+  description: string;
+  url: string;
+  gradient: string;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+}
+
 export default function AdminPanel() {
   const { session, signOut } = useAuth();
   const navigate = useNavigate();
@@ -51,13 +63,20 @@ export default function AdminPanel() {
   const [roles, setRoles] = useState<UserRoleRow[]>([]);
   const [apps, setApps] = useState<AppRow[]>([]);
   const [orgs, setOrgs] = useState<OrgRow[]>([]);
+  const [ads, setAds] = useState<AdRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'users' | 'apps' | 'orgs'>('users');
+  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads'>('users');
 
   // Add role
   const [addRoleUserId, setAddRoleUserId] = useState('');
   const [addRoleValue, setAddRoleValue] = useState<'admin' | 'moderator' | 'user'>('user');
   const [addingRole, setAddingRole] = useState(false);
+
+  // Ad form
+  const [showAdForm, setShowAdForm] = useState(false);
+  const [editingAd, setEditingAd] = useState<AdRow | null>(null);
+  const [adForm, setAdForm] = useState({ emoji: '🚀', title: '', description: '', url: '', gradient: 'linear-gradient(135deg, hsl(200 40% 14%), hsl(var(--secondary)))' });
+  const [savingAd, setSavingAd] = useState(false);
 
   useEffect(() => {
     checkAdmin();
@@ -78,18 +97,19 @@ export default function AdminPanel() {
 
   async function fetchAll() {
     setLoading(true);
-    const [profilesRes, rolesRes, appsRes, orgsRes] = await Promise.all([
+    const [profilesRes, rolesRes, appsRes, orgsRes, adsRes] = await Promise.all([
       supabase.from('profiles').select('*'),
       supabase.from('user_roles').select('*'),
       supabase.from('apps').select('id, name, owner_id, is_public, updated_at').order('updated_at', { ascending: false }),
       supabase.from('organizations').select('id, name, owner_id'),
+      supabase.from('ads' as any).select('*').order('sort_order', { ascending: true }),
     ]);
     if (profilesRes.data) setProfiles(profilesRes.data as UserProfile[]);
     if (rolesRes.data) setRoles(rolesRes.data as unknown as UserRoleRow[]);
     if (appsRes.data) setApps(appsRes.data as unknown as AppRow[]);
     if (orgsRes.data) setOrgs(orgsRes.data as unknown as OrgRow[]);
+    if (adsRes.data) setAds(adsRes.data as unknown as AdRow[]);
 
-    // Fetch auth users (emails) via edge function
     try {
       const { data: fnData, error: fnError } = await supabase.functions.invoke('admin-list-users');
       if (!fnError && fnData) {
@@ -155,6 +175,71 @@ export default function AdminPanel() {
     return 'Gebruiker';
   };
 
+  // === Ad CRUD ===
+  function openAdForm(ad?: AdRow) {
+    if (ad) {
+      setEditingAd(ad);
+      setAdForm({ emoji: ad.emoji, title: ad.title, description: ad.description, url: ad.url, gradient: ad.gradient });
+    } else {
+      setEditingAd(null);
+      setAdForm({ emoji: '🚀', title: '', description: '', url: '', gradient: 'linear-gradient(135deg, hsl(200 40% 14%), hsl(var(--secondary)))' });
+    }
+    setShowAdForm(true);
+  }
+
+  async function saveAd() {
+    if (!adForm.title.trim()) return;
+    setSavingAd(true);
+    if (editingAd) {
+      const { error } = await (supabase.from('ads' as any) as any).update({
+        emoji: adForm.emoji,
+        title: adForm.title,
+        description: adForm.description,
+        url: adForm.url,
+        gradient: adForm.gradient,
+      }).eq('id', editingAd.id);
+      if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+      else toast({ title: 'Advertentie bijgewerkt!' });
+    } else {
+      const { error } = await (supabase.from('ads' as any) as any).insert({
+        emoji: adForm.emoji,
+        title: adForm.title,
+        description: adForm.description,
+        url: adForm.url,
+        gradient: adForm.gradient,
+        sort_order: ads.length,
+      });
+      if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+      else toast({ title: 'Advertentie toegevoegd!' });
+    }
+    setShowAdForm(false);
+    setSavingAd(false);
+    fetchAll();
+  }
+
+  async function toggleAdActive(ad: AdRow) {
+    await (supabase.from('ads' as any) as any).update({ is_active: !ad.is_active }).eq('id', ad.id);
+    setAds(ads.map(a => a.id === ad.id ? { ...a, is_active: !a.is_active } : a));
+  }
+
+  async function deleteAd(id: string) {
+    const { error } = await (supabase.from('ads' as any) as any).delete().eq('id', id);
+    if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    else {
+      setAds(ads.filter(a => a.id !== id));
+      toast({ title: 'Advertentie verwijderd' });
+    }
+  }
+
+  const GRADIENT_PRESETS = [
+    { label: 'Groen', value: 'linear-gradient(135deg, hsl(145 40% 14%), hsl(var(--secondary)))' },
+    { label: 'Blauw', value: 'linear-gradient(135deg, hsl(200 40% 14%), hsl(var(--secondary)))' },
+    { label: 'Paars', value: 'linear-gradient(135deg, hsl(280 40% 14%), hsl(var(--secondary)))' },
+    { label: 'Goud', value: 'linear-gradient(135deg, hsl(40 40% 14%), hsl(var(--secondary)))' },
+    { label: 'Rood', value: 'linear-gradient(135deg, hsl(0 40% 14%), hsl(var(--secondary)))' },
+    { label: 'Roze', value: 'linear-gradient(135deg, hsl(330 40% 14%), hsl(var(--secondary)))' },
+  ];
+
   if (isAdmin === null || loading) {
     return (
       <div className="flex h-screen items-center justify-center" style={{ background: 'hsl(var(--background))' }}>
@@ -193,31 +278,36 @@ export default function AdminPanel() {
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {/* Tabs */}
-        <div className="flex items-center gap-2 mb-6 border-b border-border/50 pb-3">
+        <div className="flex items-center gap-2 mb-6 border-b border-border/50 pb-3 overflow-x-auto">
           <button
             onClick={() => setTab('users')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${tab === 'users' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'users' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
             <Users className="h-4 w-4" /> Gebruikers & Rollen
           </button>
           <button
             onClick={() => setTab('apps')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${tab === 'apps' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'apps' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
             <AppWindow className="h-4 w-4" /> Apps
           </button>
           <button
             onClick={() => setTab('orgs')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${tab === 'orgs' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'orgs' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
             <Building2 className="h-4 w-4" /> Bedrijven
+          </button>
+          <button
+            onClick={() => setTab('ads')}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'ads' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
+          >
+            <Megaphone className="h-4 w-4" /> Advertenties
           </button>
         </div>
 
         {/* Users & Roles tab */}
         {tab === 'users' && (
           <div className="space-y-6">
-            {/* Add role form */}
             <div className="rounded-xl border border-border/50 p-5" style={{ background: 'hsl(var(--card))' }}>
               <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
                 <UserPlus className="h-4 w-4 text-primary" /> Rol toewijzen
@@ -254,7 +344,6 @@ export default function AdminPanel() {
               </div>
             </div>
 
-            {/* Profiles list */}
             <div className="rounded-xl border border-border/50 p-5" style={{ background: 'hsl(var(--card))' }}>
               <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
                 <Users className="h-4 w-4 text-primary" /> Alle gebruikers ({profiles.length})
@@ -355,8 +444,83 @@ export default function AdminPanel() {
           </div>
         )}
 
+        {/* Ads tab */}
+        {tab === 'ads' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                <Megaphone className="h-4 w-4 text-primary" /> Advertenties ({ads.length})
+              </h3>
+              <button
+                onClick={() => openAdForm()}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all active:scale-95"
+              >
+                <Plus className="h-4 w-4" /> Nieuwe ad
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {ads.map(ad => (
+                <div
+                  key={ad.id}
+                  className="rounded-xl border border-border/50 overflow-hidden"
+                  style={{ background: 'hsl(var(--card))' }}
+                >
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 text-lg"
+                      style={{ background: ad.gradient }}
+                    >
+                      {ad.emoji}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-foreground truncate">{ad.title}</p>
+                        {!ad.is_active && (
+                          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">Inactief</span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-muted-foreground truncate">{ad.description}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">{ad.url}</p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => toggleAdActive(ad)}
+                        className={`p-1.5 rounded-lg transition-colors ${ad.is_active ? 'text-primary hover:bg-primary/10' : 'text-muted-foreground hover:bg-secondary/50'}`}
+                        title={ad.is_active ? 'Deactiveren' : 'Activeren'}
+                      >
+                        {ad.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                      </button>
+                      <button
+                        onClick={() => openAdForm(ad)}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                        title="Bewerken"
+                      >
+                        <GripVertical className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteAd(ad.id)}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                        title="Verwijderen"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {ads.length === 0 && (
+                <div className="rounded-xl border border-border/50 p-8 text-center" style={{ background: 'hsl(var(--card))' }}>
+                  <Megaphone className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">Nog geen advertenties. Klik op "Nieuwe ad" om er een aan te maken.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3 mt-6">
+        <div className="grid grid-cols-4 gap-3 mt-6">
           <div className="rounded-xl border border-border/50 p-4 text-center" style={{ background: 'hsl(var(--card))' }}>
             <p className="text-2xl font-bold text-foreground font-mono">{profiles.length}</p>
             <p className="text-xs text-muted-foreground mt-1">Gebruikers</p>
@@ -369,8 +533,110 @@ export default function AdminPanel() {
             <p className="text-2xl font-bold text-foreground font-mono">{orgs.length}</p>
             <p className="text-xs text-muted-foreground mt-1">Bedrijven</p>
           </div>
+          <div className="rounded-xl border border-border/50 p-4 text-center" style={{ background: 'hsl(var(--card))' }}>
+            <p className="text-2xl font-bold text-foreground font-mono">{ads.filter(a => a.is_active).length}</p>
+            <p className="text-xs text-muted-foreground mt-1">Actieve ads</p>
+          </div>
         </div>
       </div>
+
+      {/* Ad form dialog */}
+      {showAdForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setShowAdForm(false)}>
+          <div className="rounded-2xl border border-border/50 p-5 sm:p-6 w-full max-w-lg shadow-2xl" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+              <Megaphone className="h-5 w-5 text-primary" />
+              {editingAd ? 'Advertentie bewerken' : 'Nieuwe advertentie'}
+            </h3>
+
+            {/* Preview */}
+            <div className="rounded-xl border border-border/50 overflow-hidden mb-4" style={{ background: adForm.gradient }}>
+              <div className="flex items-center gap-3 px-4 py-3">
+                <div className="w-9 h-9 rounded-lg bg-foreground/10 flex items-center justify-center shrink-0">
+                  <span className="text-lg">{adForm.emoji}</span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-foreground truncate">{adForm.title || 'Titel...'}</p>
+                  <p className="text-[11px] text-muted-foreground truncate">{adForm.description || 'Beschrijving...'}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <div className="w-20">
+                  <label className="text-xs font-medium text-foreground uppercase tracking-wide">Emoji</label>
+                  <input
+                    type="text"
+                    value={adForm.emoji}
+                    onChange={e => setAdForm({ ...adForm, emoji: e.target.value })}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground text-center focus:outline-none focus:ring-2 focus:ring-primary/50 mt-1"
+                    maxLength={4}
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="text-xs font-medium text-foreground uppercase tracking-wide">Titel</label>
+                  <input
+                    type="text"
+                    placeholder="Bv. Mijn Coole App"
+                    value={adForm.title}
+                    onChange={e => setAdForm({ ...adForm, title: e.target.value })}
+                    autoFocus
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-1"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground uppercase tracking-wide">Beschrijving</label>
+                <input
+                  type="text"
+                  placeholder="Korte beschrijving van de ad"
+                  value={adForm.description}
+                  onChange={e => setAdForm({ ...adForm, description: e.target.value })}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground uppercase tracking-wide">URL</label>
+                <input
+                  type="url"
+                  placeholder="https://..."
+                  value={adForm.url}
+                  onChange={e => setAdForm({ ...adForm, url: e.target.value })}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground uppercase tracking-wide">Kleur</label>
+                <div className="flex gap-2 mt-1.5">
+                  {GRADIENT_PRESETS.map(g => (
+                    <button
+                      key={g.label}
+                      onClick={() => setAdForm({ ...adForm, gradient: g.value })}
+                      className={`w-8 h-8 rounded-lg border-2 transition-all ${adForm.gradient === g.value ? 'border-primary ring-2 ring-primary/30' : 'border-border/50'}`}
+                      style={{ background: g.value }}
+                      title={g.label}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 mt-6">
+              <button onClick={() => setShowAdForm(false)} className="px-4 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
+                Annuleren
+              </button>
+              <button
+                onClick={saveAd}
+                disabled={savingAd || !adForm.title.trim()}
+                className="px-5 py-2 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all active:scale-95"
+              >
+                {savingAd ? 'Opslaan...' : editingAd ? 'Bijwerken' : 'Toevoegen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
