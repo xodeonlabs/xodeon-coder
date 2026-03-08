@@ -9,6 +9,7 @@ import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { OrgChat } from '@/components/OrgChat';
 import { AdBanner } from '@/components/AdBanner';
+import { getCached, setCache, clearCache, CACHE_TTL } from '@/lib/cache';
 
 interface Organization {
   id: string;
@@ -80,6 +81,9 @@ export default function OrganizationPage() {
   useEffect(() => { fetchOrgs(); }, []);
 
   async function fetchOrgs() {
+    const cacheKey = `orgs-list:${session?.user?.id}`;
+    const cached = getCached<Organization[]>(cacheKey, CACHE_TTL.medium);
+    if (cached) { setOrgs(cached); setLoading(false); return; }
     const { data, error } = await supabase
       .from('organizations')
       .select('*')
@@ -88,6 +92,7 @@ export default function OrganizationPage() {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
       setOrgs((data as unknown as Organization[]) || []);
+      setCache(cacheKey, (data as unknown as Organization[]) || []);
     }
     setLoading(false);
   }
@@ -133,6 +138,7 @@ export default function OrganizationPage() {
       toast({ title: 'Bedrijf aangemaakt!', description: `"${org.name}" is klaar met 1000 startcoins.` });
       setNewOrgName('');
       setShowCreate(false);
+      clearCache(`orgs-list:${session.user.id}`);
       fetchOrgs();
     } catch (err: any) {
       toast({ title: 'Fout', description: err.message || 'Onbekende fout', variant: 'destructive' });
@@ -153,6 +159,7 @@ export default function OrganizationPage() {
       toast({ title: 'Gejoind!', description: 'Je bent toegevoegd aan het bedrijf.' });
       setJoinCode('');
       setShowJoin(false);
+      clearCache(`orgs-list:${session?.user?.id}`);
       fetchOrgs();
     } catch (err: any) {
       toast({ title: 'Fout', description: err.message || 'Ongeldige code', variant: 'destructive' });
