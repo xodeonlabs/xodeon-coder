@@ -8,6 +8,7 @@ import { NGCExplorer } from '@/components/NGCExplorer';
 import { NGCComponentLibrary } from '@/components/NGCComponentLibrary';
 import { NGCDataPanel } from '@/components/NGCDataPanel';
 import { NGCChat } from '@/components/NGCChat';
+import { NGCAIAssistant } from '@/components/NGCAIAssistant';
 import { NGCContextMenu } from '@/components/NGCContextMenu';
 import { NGCToolbar } from '@/components/NGCToolbar';
 import { NGCDesigner } from '@/components/NGCDesigner';
