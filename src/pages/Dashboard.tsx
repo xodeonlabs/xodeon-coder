@@ -697,10 +697,6 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="flex items-center gap-2.5 shrink-0">
-            <button onClick={() => setShowTemplateDialog(true)} className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium transition-all border border-border/40 text-muted-foreground hover:text-foreground hover:border-border/60 hover:bg-secondary/30 active:scale-[0.98]">
-              <FileCode className="h-4 w-4" />
-              <span className="hidden sm:inline">Template</span>
-            </button>
             <button onClick={createApp} disabled={creating} className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs sm:text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 disabled:opacity-50 active:scale-[0.98]">
               <Plus className="h-4 w-4" />
               Nieuwe App
