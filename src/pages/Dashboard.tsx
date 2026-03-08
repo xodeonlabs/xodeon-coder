@@ -137,6 +137,7 @@ export default function Dashboard() {
   const [totalCoins, setTotalCoins] = useState(0);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [profileUsername, setProfileUsername] = useState<string | null>(null);
+  const [unreadOrgMessages, setUnreadOrgMessages] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [iconPickerAppId, setIconPickerAppId] = useState<string | null>(null);
   const [contracts, setContracts] = useState<Contract[]>([]);
