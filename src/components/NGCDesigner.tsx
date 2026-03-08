@@ -242,7 +242,7 @@ function DesignerNodeContent({ node, runtime }: { node: NGCNode; runtime: NGCRun
   switch (node.type) {
     case 'Frame':
       return (
-        <div style={{ width: '100%', height: '100%', background: color || '#1e293b', borderRadius: `${radius}px`, overflow: 'hidden', position: 'relative' }}>
+        <div style={{ width: '100%', height: '100%', background: color || 'rgb(30,41,59)', borderRadius: `${radius}px`, overflow: 'hidden', position: 'relative' }}>
         </div>
       );
     case 'Button':
