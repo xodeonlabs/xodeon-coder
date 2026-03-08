@@ -489,12 +489,19 @@ export default function OrganizationPage() {
                 >
                   <ArrowDownCircle className="h-3.5 w-3.5" /> Storten
                 </button>
-                <button
-                  onClick={() => { setShowWithdraw(!showWithdraw); setShowDeposit(false); }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
-                >
-                  <ArrowUpCircle className="h-3.5 w-3.5" /> Opnemen
-                </button>
+                {/* Alleen admins/owners kunnen opnemen */}
+                {(() => {
+                  const myMember = members.find(m => m.user_id === session?.user?.id);
+                  const isAdminOrOwner = myMember && (myMember.role === 'owner' || myMember.role === 'admin');
+                  return isAdminOrOwner ? (
+                    <button
+                      onClick={() => { setShowWithdraw(!showWithdraw); setShowDeposit(false); }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                    >
+                      <ArrowUpCircle className="h-3.5 w-3.5" /> Opnemen
+                    </button>
+                  ) : null;
+                })()}
               </div>
             </div>
 
