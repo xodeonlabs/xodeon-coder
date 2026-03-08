@@ -289,6 +289,7 @@ export default function AdminPanel() {
         description: adForm.description,
         url: adForm.url,
         gradient: adForm.gradient,
+        pages: adForm.pages,
         sort_order: ads.length,
       });
       if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
