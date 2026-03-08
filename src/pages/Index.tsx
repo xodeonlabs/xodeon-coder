@@ -439,47 +439,94 @@ const Index = () => {
           {leftOpen ? <PanelLeftClose className="h-3.5 w-3.5 text-muted-foreground" /> : <PanelLeftOpen className="h-3.5 w-3.5 text-muted-foreground" />}
         </button>
 
-        {/* Code Editor */}
+        {/* Code Editor / Designer */}
         <div className="flex-1 flex flex-col min-w-0">
-          {/* Page Tabs */}
+          {/* Mode toggle + Page Tabs */}
           <div className="flex items-center border-b border-border shrink-0" style={{ background: 'hsl(var(--ide-explorer-bg))' }}>
-            {sections.map(section => (
+            {/* Mode toggle */}
+            <div className="flex items-center border-r border-border">
               <button
-                key={section.id}
-                onClick={() => setActiveTab(section.id)}
-                className={`px-3 py-1.5 text-xs font-medium transition-colors border-b-2 ${
-                  activeTab === section.id
-                    ? 'border-primary text-foreground bg-background'
-                    : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/40'
+                onClick={() => setEditorMode('code')}
+                className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium transition-colors ${
+                  editorMode === 'code'
+                    ? 'text-foreground bg-background'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40'
                 }`}
+                title="Code modus"
               >
-                {section.id === 'global' ? '🌍 Globaal' : `📄 ${section.label}`}
+                <Code className="h-3 w-3" />
+                Code
               </button>
-            ))}
-            <button
-              onClick={handleAddPage}
-              className="px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-              title="Nieuwe pagina toevoegen"
-            >
-              ➕
-            </button>
-            <span className="ml-auto pr-2 text-muted-foreground opacity-60 text-xs normal-case tracking-normal">
-              {activeSection ? (activeTab === 'global' ? 'app.ngc' : `${activeSection.label.toLowerCase()}.ngc`) : 'main.ngc'}
-            </span>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <NGCCodeEditor code={activeSection?.code || ''} onChange={handleSectionCodeChange} errors={errors} />
+              <button
+                onClick={() => setEditorMode('design')}
+                className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium transition-colors ${
+                  editorMode === 'design'
+                    ? 'text-primary bg-primary/10'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40'
+                }`}
+                title="Ontwerp modus"
+              >
+                <MousePointer className="h-3 w-3" />
+                Ontwerp
+              </button>
+            </div>
+
+            {editorMode === 'code' && (
+              <>
+                {sections.map(section => (
+                  <button
+                    key={section.id}
+                    onClick={() => setActiveTab(section.id)}
+                    className={`px-3 py-1.5 text-xs font-medium transition-colors border-b-2 ${
+                      activeTab === section.id
+                        ? 'border-primary text-foreground bg-background'
+                        : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/40'
+                    }`}
+                  >
+                    {section.id === 'global' ? '🌍 Globaal' : `📄 ${section.label}`}
+                  </button>
+                ))}
+                <button
+                  onClick={handleAddPage}
+                  className="px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  title="Nieuwe pagina toevoegen"
+                >
+                  ➕
+                </button>
+                <span className="ml-auto pr-2 text-muted-foreground opacity-60 text-xs normal-case tracking-normal">
+                  {activeSection ? (activeTab === 'global' ? 'app.ngc' : `${activeSection.label.toLowerCase()}.ngc`) : 'main.ngc'}
+                </span>
+              </>
+            )}
           </div>
 
-          {/* Error bar */}
-          {errors.length > 0 && (
-            <div className="border-t border-border p-2 space-y-1" style={{ background: 'hsla(0, 65%, 50%, 0.08)' }}>
-              {errors.map((err, i) => (
-                <div key={i} className="text-xs text-destructive flex items-center gap-1">
-                  <span className="font-mono">Line {err.line}:</span>
-                  <span>{err.message}</span>
+          {editorMode === 'code' ? (
+            <>
+              <div className="flex-1 overflow-hidden">
+                <NGCCodeEditor code={activeSection?.code || ''} onChange={handleSectionCodeChange} errors={errors} />
+              </div>
+              {/* Error bar */}
+              {errors.length > 0 && (
+                <div className="border-t border-border p-2 space-y-1" style={{ background: 'hsla(0, 65%, 50%, 0.08)' }}>
+                  {errors.map((err, i) => (
+                    <div key={i} className="text-xs text-destructive flex items-center gap-1">
+                      <span className="font-mono">Line {err.line}:</span>
+                      <span>{err.message}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
+            </>
+          ) : (
+            <div className="flex-1 overflow-hidden">
+              <NGCDesigner
+                ast={ast}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                onPositionChange={handlePositionChange}
+                onSizeChange={handleSizeChange}
+                onDropNew={handleDropNew}
+              />
             </div>
           )}
         </div>
