@@ -918,6 +918,7 @@ export type Database = {
       }
       organizations: {
         Row: {
+          auto_pay: boolean
           bio: string
           chat_retention_hours: number
           created_at: string
@@ -931,6 +932,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          auto_pay?: boolean
           bio?: string
           chat_retention_hours?: number
           created_at?: string
@@ -944,6 +946,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          auto_pay?: boolean
           bio?: string
           chat_retention_hours?: number
           created_at?: string
