@@ -65,7 +65,7 @@ export default function Profile() {
       } else {
         const res = await supabase
           .from('profiles')
-          .select('id, display_name, avatar_url, bio, created_at, username, social_links, show_email, public_email')
+          .select('id, display_name, avatar_url, bio, created_at, username, social_links, show_email, public_email, is_dnd')
           .eq('username', username)
           .single();
         prof = res.data ? { ...res.data, email: (res.data as any).public_email } as ProfileData : null;
