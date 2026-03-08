@@ -202,6 +202,39 @@ export default function Settings() {
           </div>
         </div>
 
+        {/* Social media section */}
+        <div className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+          <h2 className="text-lg font-bold text-foreground mb-5 flex items-center gap-2">
+            <Share2 className="h-5 w-5 text-primary" />
+            Sociale media
+          </h2>
+          <div className="space-y-3">
+            {[
+              { key: 'instagram', label: 'Instagram', placeholder: 'jouw_username', prefix: '@' },
+              { key: 'twitter', label: 'X / Twitter', placeholder: 'jouw_username', prefix: '@' },
+              { key: 'github', label: 'GitHub', placeholder: 'jouw_username', prefix: '@' },
+              { key: 'linkedin', label: 'LinkedIn', placeholder: 'linkedin.com/in/...', prefix: '' },
+              { key: 'youtube', label: 'YouTube', placeholder: 'youtube.com/@...', prefix: '' },
+              { key: 'website', label: 'Website', placeholder: 'https://jouw-site.nl', prefix: '' },
+            ].map(({ key, label, placeholder, prefix }) => (
+              <div key={key}>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">{label}</label>
+                <div className="flex items-center gap-1">
+                  {prefix && <span className="text-sm text-muted-foreground">{prefix}</span>}
+                  <input
+                    value={socialLinks[key] || ''}
+                    onChange={e => setSocialLinks(prev => ({ ...prev, [key]: e.target.value }))}
+                    placeholder={placeholder}
+                    maxLength={100}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+              </div>
+            ))}
+            <p className="text-[10px] text-muted-foreground">Deze links worden getoond op je publieke profiel. Laat een veld leeg om het te verbergen.</p>
+          </div>
+        </div>
+
         {/* Email section */}
         <div className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
           <h2 className="text-lg font-bold text-foreground mb-5 flex items-center gap-2">
