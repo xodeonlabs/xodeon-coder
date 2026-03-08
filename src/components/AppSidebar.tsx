@@ -32,6 +32,7 @@ export function AppSidebar() {
   const collapsed = state === 'collapsed';
   const { play: playNotification } = useNotificationSound();
 
+  const [dndEnabled, setDndEnabled] = useState(() => getDoNotDisturbEnabled());
   const [isAdmin, setIsAdmin] = useState(false);
   const [coins, setCoins] = useState(0);
   const [displayName, setDisplayName] = useState<string | null>(null);
