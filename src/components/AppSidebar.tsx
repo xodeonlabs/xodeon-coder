@@ -81,23 +81,28 @@ export function AppSidebar() {
         if ((data as any)?.username) setProfileUsername((data as any).username);
       });
     fetchUnreadGroups();
-  }, [session?.user?.id, fetchUnreadGroups]);
+    fetchUnreadMessages();
+  }, [session?.user?.id, fetchUnreadGroups, fetchUnreadMessages]);
 
-  // Realtime: listen for new group messages
+  // Realtime: listen for new group messages and friend messages
   useEffect(() => {
     if (!session?.user?.id) return;
     const channel = supabase
-      .channel('sidebar-group-messages')
+      .channel('sidebar-unread-badges')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_group_messages' }, () => {
         fetchUnreadGroups();
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'friend_messages' }, () => {
+        fetchUnreadMessages();
+      })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [session?.user?.id, fetchUnreadGroups]);
+  }, [session?.user?.id, fetchUnreadGroups, fetchUnreadMessages]);
 
-  // Reset count when visiting /groepen
+  // Reset counts when visiting pages
   useEffect(() => {
     if (location.pathname === '/groepen') setUnreadGroups(0);
+    if (location.pathname === '/berichten') { setUnreadMessages(0); }
   }, [location.pathname]);
 
   const isActive = (path: string) => location.pathname === path;
