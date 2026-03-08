@@ -186,11 +186,13 @@ function NGCNodeRenderer({
   runtime,
   onRuntimeChange,
   onNavigate,
+  coinHandlers,
 }: {
   node: NGCNode;
   runtime: NGCRuntime;
   onRuntimeChange: () => void;
   onNavigate: (pageName: string) => void;
+  coinHandlers?: CoinHandlers;
 }) {
   const pos = node.properties.Positie ? parsePosition(node.properties.Positie) : { x: 0, y: 0 };
   const size = node.properties.Grootte ? parseSize(node.properties.Grootte) : null;
@@ -209,7 +211,7 @@ function NGCNodeRenderer({
   const handleEvent = (eventName: string) => {
     const eventNode = node.children.find(c => c.type === 'Event' && c.name === eventName);
     if (eventNode) {
-      const target = executeActions(eventNode, runtime);
+      const target = executeActions(eventNode, runtime, coinHandlers);
       if (target) {
         onNavigate(target);
       }
