@@ -594,6 +594,32 @@ export default function Dashboard() {
   const myApps = apps.filter(a => a.owner_id === session?.user?.id);
   const sharedApps = apps.filter(a => a.owner_id !== session?.user?.id);
 
+  // Stats
+  const stats = useMemo(() => {
+    const totalLines = myApps.reduce((sum, a) => sum + (a.ngc_code?.split('\n').length || 0), 0);
+    const publicApps = myApps.filter(a => a.is_public).length;
+    const thisWeek = myApps.filter(a => {
+      const d = new Date(a.updated_at);
+      const now = new Date();
+      return now.getTime() - d.getTime() < 7 * 24 * 60 * 60 * 1000;
+    }).length;
+    return { totalApps: myApps.length, totalLines, publicApps, activeThisWeek: thisWeek };
+  }, [myApps]);
+
+  // Typewriter effect for quote
+  const [typedText, setTypedText] = useState('');
+  const fullQuoteText = `${quote.emoji} ${quote.text}`;
+  useEffect(() => {
+    setTypedText('');
+    let i = 0;
+    const timer = setInterval(() => {
+      i++;
+      setTypedText(fullQuoteText.slice(0, i));
+      if (i >= fullQuoteText.length) clearInterval(timer);
+    }, 35);
+    return () => clearInterval(timer);
+  }, [fullQuoteText]);
+
   return (
     <div className="min-h-screen bg-background">
       {showBonusOverlay && !dailyBonus.loading && dailyBonus.claimed && (
