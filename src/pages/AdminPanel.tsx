@@ -886,7 +886,7 @@ export default function AdminPanel() {
                 <div key={org.id} className="flex items-center justify-between rounded-lg px-4 py-3 bg-background/50">
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-foreground truncate">{org.name}</p>
-                    <p className="text-[11px] text-muted-foreground">Eigenaar: {getUserName(org.owner_id)}</p>
+                    <p className="text-[11px] text-muted-foreground">Eigenaar: <UserLink userId={org.owner_id} /></p>
                   </div>
                   <button
                     onClick={() => setConfirmAction({ id: org.id, action: 'delete', type: 'org', name: org.name })}

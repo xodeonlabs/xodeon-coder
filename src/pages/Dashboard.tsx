@@ -545,8 +545,15 @@ export default function Dashboard() {
             {isAdmin && <NavBtn onClick={() => navigate('/admin')} icon={<Shield className="h-4 w-4" />} label="Admin" variant="destructive" />}
             <NavBtn onClick={() => navigate('/settings')} icon={<Settings className="h-4 w-4" />} label="Account" />
 
-            <span className="hidden lg:inline text-xs text-muted-foreground truncate max-w-[140px]">{displayName || session?.user?.email}</span>
-            <ProfileAvatar size="sm" editable />
+            <span
+              onClick={() => session?.user?.id && navigate(`/profiel/${session.user.id}`)}
+              className="hidden lg:inline text-xs text-muted-foreground truncate max-w-[140px] cursor-pointer hover:text-primary hover:underline transition-colors"
+            >
+              {displayName || session?.user?.email}
+            </span>
+            <div onClick={() => session?.user?.id && navigate(`/profiel/${session.user.id}`)} className="cursor-pointer">
+              <ProfileAvatar size="sm" />
+            </div>
             <button onClick={signOut} className="p-1.5 rounded-lg text-muted-foreground/60 hover:text-foreground hover:bg-secondary/50 transition-all" title="Uitloggen">
               <LogOut className="h-4 w-4" />
             </button>
