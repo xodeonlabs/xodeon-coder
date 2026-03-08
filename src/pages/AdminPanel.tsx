@@ -687,9 +687,39 @@ export default function AdminPanel() {
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
-                  </div>
                 </div>
               ))}
+              {/* Add collaborator inline form */}
+              {collabAppId && (
+                <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 mt-2">
+                  <p className="text-xs font-semibold text-foreground mb-2">
+                    Persoon toevoegen aan: <span className="text-primary">{apps.find(a => a.id === collabAppId)?.name}</span>
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      className="flex-1 rounded-lg bg-background border border-border px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      placeholder="E-mailadres van de gebruiker..."
+                      value={collabEmail}
+                      onChange={e => setCollabEmail(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && addCollaborator()}
+                      disabled={collabAdding}
+                    />
+                    <button
+                      onClick={addCollaborator}
+                      disabled={collabAdding || !collabEmail.trim()}
+                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors"
+                    >
+                      {collabAdding ? '...' : 'Toevoegen'}
+                    </button>
+                    <button
+                      onClick={() => setCollabAppId(null)}
+                      className="px-2 py-1.5 text-xs rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                    >
+                      Annuleer
+                    </button>
+                  </div>
+                </div>
+              )}
               {apps.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">Geen apps gevonden.</p>}
             </div>
           </div>
