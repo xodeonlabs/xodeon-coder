@@ -9,15 +9,17 @@ interface Ad {
   description: string;
   url: string;
   gradient: string;
+  pages: string[];
 }
 
 const ROTATE_INTERVAL = 6000;
 
 interface AdBannerProps {
   className?: string;
+  page?: string;
 }
 
-export function AdBanner({ className = '' }: AdBannerProps) {
+export function AdBanner({ className = '', page }: AdBannerProps) {
   const [dismissed, setDismissed] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -26,13 +28,18 @@ export function AdBanner({ className = '' }: AdBannerProps) {
   useEffect(() => {
     supabase
       .from('ads' as any)
-      .select('id, emoji, title, description, url, gradient')
+      .select('id, emoji, title, description, url, gradient, pages')
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
       .then(({ data }) => {
-        if (data && data.length > 0) setAds(data as any);
+        if (data && data.length > 0) {
+          const filtered = page
+            ? (data as any[]).filter((ad: any) => ad.pages && ad.pages.includes(page))
+            : (data as any[]);
+          setAds(filtered as Ad[]);
+        }
       });
-  }, []);
+  }, [page]);
 
   const goTo = useCallback((index: number) => {
     if (isAnimating || ads.length === 0) return;

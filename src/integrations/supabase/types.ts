@@ -52,6 +52,7 @@ export type Database = {
           gradient: string
           id: string
           is_active: boolean
+          pages: string[]
           sort_order: number
           title: string
           url: string
@@ -63,6 +64,7 @@ export type Database = {
           gradient?: string
           id?: string
           is_active?: boolean
+          pages?: string[]
           sort_order?: number
           title: string
           url?: string
@@ -74,6 +76,7 @@ export type Database = {
           gradient?: string
           id?: string
           is_active?: boolean
+          pages?: string[]
           sort_order?: number
           title?: string
           url?: string

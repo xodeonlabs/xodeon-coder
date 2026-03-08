@@ -73,8 +73,14 @@ interface AdRow {
   gradient: string;
   is_active: boolean;
   sort_order: number;
+  pages: string[];
   created_at: string;
 }
+
+const PAGE_OPTIONS = [
+  { value: 'dashboard', label: 'Dashboard' },
+  { value: 'organizations', label: 'Bedrijven' },
+];
 
 export default function AdminPanel() {
   const { session, signOut } = useAuth();
@@ -100,7 +106,7 @@ export default function AdminPanel() {
   // Ad form
   const [showAdForm, setShowAdForm] = useState(false);
   const [editingAd, setEditingAd] = useState<AdRow | null>(null);
-  const [adForm, setAdForm] = useState({ emoji: '🚀', title: '', description: '', url: '', gradient: 'linear-gradient(135deg, hsl(200 40% 14%), hsl(var(--secondary)))' });
+  const [adForm, setAdForm] = useState({ emoji: '🚀', title: '', description: '', url: '', gradient: 'linear-gradient(135deg, hsl(200 40% 14%), hsl(var(--secondary)))', pages: ['dashboard', 'organizations'] as string[] });
   const [savingAd, setSavingAd] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [emojiSearch, setEmojiSearch] = useState('');
@@ -251,10 +257,10 @@ export default function AdminPanel() {
   function openAdForm(ad?: AdRow) {
     if (ad) {
       setEditingAd(ad);
-      setAdForm({ emoji: ad.emoji, title: ad.title, description: ad.description, url: ad.url, gradient: ad.gradient });
+      setAdForm({ emoji: ad.emoji, title: ad.title, description: ad.description, url: ad.url, gradient: ad.gradient, pages: ad.pages || ['dashboard', 'organizations'] });
     } else {
       setEditingAd(null);
-      setAdForm({ emoji: '🚀', title: '', description: '', url: '', gradient: 'linear-gradient(135deg, hsl(200 40% 14%), hsl(var(--secondary)))' });
+      setAdForm({ emoji: '🚀', title: '', description: '', url: '', gradient: 'linear-gradient(135deg, hsl(200 40% 14%), hsl(var(--secondary)))', pages: ['dashboard', 'organizations'] });
     }
     setShowAdForm(true);
   }
@@ -269,6 +275,7 @@ export default function AdminPanel() {
         description: adForm.description,
         url: adForm.url,
         gradient: adForm.gradient,
+        pages: adForm.pages,
       }).eq('id', editingAd.id);
       if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
       else {
@@ -282,6 +289,7 @@ export default function AdminPanel() {
         description: adForm.description,
         url: adForm.url,
         gradient: adForm.gradient,
+        pages: adForm.pages,
         sort_order: ads.length,
       });
       if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
@@ -675,7 +683,13 @@ export default function AdminPanel() {
                         )}
                       </div>
                       <p className="text-[11px] text-muted-foreground truncate">{ad.description}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">{ad.url}</p>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        {(ad.pages || []).map(p => (
+                          <span key={p} className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">
+                            {PAGE_OPTIONS.find(o => o.value === p)?.label || p}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <button
@@ -885,6 +899,35 @@ export default function AdminPanel() {
                   onChange={e => setAdForm({ ...adForm, url: e.target.value })}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mt-1"
                 />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground uppercase tracking-wide">Pagina's</label>
+                <div className="flex flex-wrap gap-2 mt-1.5">
+                  {PAGE_OPTIONS.map(opt => {
+                    const checked = adForm.pages.includes(opt.value);
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          setAdForm({
+                            ...adForm,
+                            pages: checked
+                              ? adForm.pages.filter(p => p !== opt.value)
+                              : [...adForm.pages, opt.value],
+                          });
+                        }}
+                        className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
+                          checked
+                            ? 'bg-primary/10 border-primary text-primary ring-1 ring-primary/30'
+                            : 'border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
               <div>
                 <label className="text-xs font-medium text-foreground uppercase tracking-wide">Kleur</label>

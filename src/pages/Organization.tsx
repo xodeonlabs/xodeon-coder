@@ -350,7 +350,7 @@ export default function OrganizationPage() {
       </header>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
-        <AdBanner className="mb-6" />
+        <AdBanner className="mb-6" page="organizations" />
         {/* Actions */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mb-6 sm:mb-10">
           <button
