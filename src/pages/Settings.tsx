@@ -15,6 +15,10 @@ export default function Settings() {
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
+  const [showEmail, setShowEmail] = useState(false);
+  const [socialLinks, setSocialLinks] = useState<Record<string, string>>({
+    instagram: '', twitter: '', github: '', linkedin: '', youtube: '', website: '',
+  });
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
