@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, Link, ExternalLink, BarChart3, Coins, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ProfileAvatar } from '@/components/ProfileAvatar';
 
 interface App {
   id: string;
