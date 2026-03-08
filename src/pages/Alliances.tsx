@@ -109,17 +109,55 @@ export default function Alliances() {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else if (inserted) {
       const allianceId = (inserted as any).id;
-      // Add coin pool
       await supabase.from('alliance_coins' as any).insert({ alliance_id: allianceId, balance: 0 } as any);
-      // Auto-add selected org as member
+      // Add own org
       await supabase.from('alliance_members' as any).insert({ alliance_id: allianceId, organization_id: selectedOrgForCreate } as any);
+      // Add partner org if selected
+      if (inviteOrgId && inviteOrgId !== selectedOrgForCreate) {
+        await supabase.from('alliance_members' as any).insert({ alliance_id: allianceId, organization_id: inviteOrgId } as any);
+      }
       toast({ title: '✅ Alliantie aangemaakt!' });
       setNewName('');
       setNewIcon('🤝');
+      setInviteOrgId('');
       setShowCreate(false);
       loadAlliances();
     }
     setCreating(false);
+  }
+
+  async function vaultTransaction(type: 'deposit' | 'withdraw') {
+    const amount = parseInt(vaultAmount);
+    if (!amount || amount <= 0 || !selectedAlliance || !userOrgId || vaultLoading) return;
+    setVaultLoading(true);
+    try {
+      // Get org coin balance
+      const { data: orgCoin } = await supabase.from('org_coins').select('id, balance').eq('organization_id', userOrgId).maybeSingle();
+      if (!orgCoin) { toast({ title: 'Fout', description: 'Geen kluis gevonden voor je bedrijf', variant: 'destructive' }); setVaultLoading(false); return; }
+
+      const allianceCoins = coins?.balance ?? 0;
+
+      if (type === 'deposit') {
+        if (orgCoin.balance < amount) { toast({ title: 'Onvoldoende saldo', description: `Je bedrijf heeft maar ${orgCoin.balance} coins.`, variant: 'destructive' }); setVaultLoading(false); return; }
+        // Deduct from org
+        await supabase.from('org_coins').update({ balance: orgCoin.balance - amount } as any).eq('id', orgCoin.id);
+        // Add to alliance
+        await supabase.from('alliance_coins' as any).update({ balance: allianceCoins + amount } as any).eq('alliance_id', selectedAlliance.id);
+        setCoins(coins ? { ...coins, balance: allianceCoins + amount } : null);
+      } else {
+        if (allianceCoins < amount) { toast({ title: 'Onvoldoende saldo', description: `De alliantie kluis heeft maar ${allianceCoins} coins.`, variant: 'destructive' }); setVaultLoading(false); return; }
+        // Deduct from alliance
+        await supabase.from('alliance_coins' as any).update({ balance: allianceCoins - amount } as any).eq('alliance_id', selectedAlliance.id);
+        // Add to org
+        await supabase.from('org_coins').update({ balance: orgCoin.balance + amount } as any).eq('id', orgCoin.id);
+        setCoins(coins ? { ...coins, balance: allianceCoins - amount } : null);
+      }
+      toast({ title: type === 'deposit' ? '💰 Gestort!' : '💸 Opgenomen!' });
+      setVaultAmount('');
+    } catch (err: any) {
+      toast({ title: 'Fout', description: err.message, variant: 'destructive' });
+    }
+    setVaultLoading(false);
   }
 
   async function deleteAlliance(id: string) {
