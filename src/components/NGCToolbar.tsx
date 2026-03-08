@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ExternalLink, LogOut, AlertCircle, CheckCircle, ArrowLeft, Pencil, Share2, X, Menu } from 'lucide-react';
 import { ParseError } from '@/lib/ngc-ast';
-import { AppIcon } from '@/components/IconPicker';
+import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { useNavigate } from 'react-router-dom';
 
 interface ToolbarProps {
@@ -12,10 +12,11 @@ interface ToolbarProps {
   onSignOut?: () => void;
   onSave?: () => Promise<void> | void;
   onRename?: (newName: string) => void;
+  onChangeIcon?: (icon: string) => void;
   onShareTemplate?: (name: string, description: string, code: string) => Promise<void>;
 }
 
-export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSave, onRename, onShareTemplate }: ToolbarProps) {
+export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSave, onRename, onChangeIcon, onShareTemplate }: ToolbarProps) {
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [nameValue, setNameValue] = useState('');
@@ -24,6 +25,7 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
   const [templateDescription, setTemplateDescription] = useState('');
   const [sharing, setSharing] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showIconPicker, setShowIconPicker] = useState(false);
 
   const handleNavigate = async (path: string) => {
     if (onSave) await onSave();
@@ -65,9 +67,14 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="hidden sm:flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white">
+          <button
+            onClick={() => onChangeIcon && setShowIconPicker(true)}
+            className={`w-6 h-6 rounded-md bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white ${onChangeIcon ? 'cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all' : ''}`}
+            title={onChangeIcon ? 'Icoon wijzigen' : undefined}
+            disabled={!onChangeIcon}
+          >
             <AppIcon iconName={appIcon || 'file-code'} size={14} />
-          </div>
+          </button>
           <span className="text-sm font-bold text-foreground font-mono">NGC</span>
         </div>
         <div className="hidden sm:block h-4 w-px bg-border/30"></div>
@@ -225,6 +232,13 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
             </div>
           </div>
         </div>
+      )}
+      {showIconPicker && onChangeIcon && (
+        <IconPicker
+          value={appIcon || 'file-code'}
+          onChange={(icon) => onChangeIcon(icon)}
+          onClose={() => setShowIconPicker(false)}
+        />
       )}
     </div>
   );
