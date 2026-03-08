@@ -265,7 +265,8 @@ function NGCNodeRenderer({
 
     case 'Text':
       return (
-        <div style={{ ...baseStyle, color: color || '#fff', fontSize: 16, fontFamily: 'inherit' }}>
+        <div style={{ ...baseStyle, color: color || '#fff', fontSize: 16, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }}>
+          {iconName && <LucideIcon name={iconName} size={18} color={color || '#fff'} />}
           {text}
         </div>
       );
