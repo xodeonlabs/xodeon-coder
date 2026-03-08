@@ -614,7 +614,8 @@ export default function Dashboard() {
                   <ActionBtn onClick={() => { setEditingNameId(app.id); setEditingNameValue(app.name); }} icon={<Pencil className="h-3.5 w-3.5" />} title="Hernoemen" />
                   <ActionBtn onClick={() => togglePublic(app)} icon={app.is_public ? <Lock className="h-3.5 w-3.5" /> : <Globe className="h-3.5 w-3.5" />} title={app.is_public ? 'Maak privé' : 'Maak publiek'} />
                   <ActionBtn onClick={() => toggleRemixable(app)} icon={<Copy className="h-3.5 w-3.5" />} title={app.is_remixable ? 'Remix uit' : 'Remix aan'} />
-                  <ActionBtn onClick={() => { setInviteAppId(app.id); setInviteEmail(''); }} icon={<UserPlus className="h-3.5 w-3.5" />} title="Uitnodigen" />
+                  <ActionBtn onClick={() => { setInviteAppId(app.id); setInviteEmail(''); setInvitePercentage(10); }} icon={<UserPlus className="h-3.5 w-3.5" />} title="Uitnodigen + Contract" />
+                  <ActionBtn onClick={() => setContractAppId(app.id)} icon={<FileText className="h-3.5 w-3.5" />} title="Contracten bekijken" className="hover:text-accent" />
                   <ActionBtn onClick={() => openPublishDialog(app)} icon={<ExternalLink className="h-3.5 w-3.5" />} title="Publiceren" className="hover:text-primary" />
                   <ActionBtn onClick={() => deleteApp(app.id, app.name)} icon={<Trash2 className="h-3.5 w-3.5" />} title="Verwijderen" className="ml-auto hover:text-destructive hover:bg-destructive/10" />
                 </div>
