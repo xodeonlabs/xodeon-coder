@@ -534,18 +534,26 @@ export default function AdminPanel() {
               {apps.map(app => (
                 <div
                   key={app.id}
-                  onClick={() => navigate(`/editor/${app.id}`)}
-                  className="flex items-center justify-between rounded-lg px-4 py-3 bg-background/50 cursor-pointer hover:bg-secondary/30 transition-colors"
+                  className="flex items-center justify-between rounded-lg px-4 py-3 bg-background/50 hover:bg-secondary/30 transition-colors"
                 >
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1 cursor-pointer" onClick={() => navigate(`/editor/${app.id}`)}>
                     <p className="text-sm font-semibold text-foreground truncate">{app.name}</p>
                     <p className="text-[11px] text-muted-foreground">
                       Eigenaar: {getUserName(app.owner_id)} · {app.is_public ? '🌍 Publiek' : '🔒 Privé'}
                     </p>
                   </div>
-                  <span className="text-xs text-muted-foreground shrink-0">
-                    {new Date(app.updated_at).toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' })}
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(app.updated_at).toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' })}
+                    </span>
+                    <button
+                      onClick={() => setConfirmAction({ id: app.id, action: 'delete', type: 'app', name: app.name })}
+                      className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                      title="Verwijderen"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
               ))}
               {apps.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">Geen apps gevonden.</p>}
