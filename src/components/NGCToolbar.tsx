@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 interface ToolbarProps {
   errors: ParseError[];
   appName?: string;
+  appIcon?: string;
   appCode?: string;
   onSignOut?: () => void;
   onSave?: () => Promise<void> | void;

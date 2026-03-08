@@ -94,6 +94,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [code, setCode] = useState(FALLBACK_CODE);
   const [appName, setAppName] = useState('');
+  const [appIcon, setAppIcon] = useState('file-code');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
   const [loading, setLoading] = useState(true);
