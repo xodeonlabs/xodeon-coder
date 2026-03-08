@@ -66,7 +66,10 @@ const PublicApp = () => {
         style={{ background: 'hsl(var(--ide-toolbar))', borderBottom: '1px solid hsl(var(--border))' }}
       >
         <span className="text-xs font-medium text-foreground">{appName}</span>
-        <span className="text-[10px] text-muted-foreground">Gemaakt met NGC Studio</span>
+        <div className="flex items-center gap-1.5">
+          <img src="/ngc-logo.png" alt="NGC" className="h-4 object-contain" />
+          <span className="text-[10px] text-muted-foreground">NGC Studio</span>
+        </div>
       </div>
       <div className="flex-1 overflow-auto">
         <NGCPreview ast={ast} organizationId={orgId} />

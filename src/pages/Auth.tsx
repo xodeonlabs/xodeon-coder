@@ -197,7 +197,9 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0e1a' }}>
       <div className="w-full max-w-sm p-8 rounded-xl" style={{ background: '#151b2e', border: '1px solid #1e293b' }}>
-        <h1 className="text-2xl font-bold text-white mb-1 text-center">NGC Editor</h1>
+        <div className="flex justify-center mb-4">
+          <img src="/ngc-logo.png" alt="NGC Logo" className="h-12 object-contain" />
+        </div>
         <p className="text-sm text-center mb-6" style={{ color: '#64748b' }}>
           {mode === 'forgot' ? 'Wachtwoord herstellen' : mode === 'magic-link' ? 'Inloggen met link' : mode === 'login' ? 'Log in om verder te gaan' : 'Maak een account aan'}
         </p>

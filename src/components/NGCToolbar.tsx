@@ -91,7 +91,7 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
           >
             <AppIcon iconName={appIcon || 'file-code'} size={14} />
           </button>
-          <span className="text-sm font-bold text-foreground font-mono">NGC</span>
+          <img src="/ngc-logo.png" alt="NGC" className="h-5 object-contain" />
         </div>
         <div className="hidden sm:block h-4 w-px bg-border/30"></div>
         {editing ? (
