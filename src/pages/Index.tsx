@@ -13,6 +13,7 @@ import { NGCAIAssistant } from '@/components/NGCAIAssistant';
 import { NGCContextMenu } from '@/components/NGCContextMenu';
 import { NGCToolbar } from '@/components/NGCToolbar';
 import { NGCDesigner } from '@/components/NGCDesigner';
+import { KeyboardShortcuts } from '@/components/KeyboardShortcuts';
 import { NGCVersionPanel } from '@/components/NGCVersionPanel';
 import { CommandPalette } from '@/components/CommandPalette';
 import { SearchReplace } from '@/components/SearchReplace';
@@ -115,6 +116,7 @@ const Index = () => {
   const [zenMode, setZenMode] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [undoStack, setUndoStack] = useState<string[]>([]);
@@ -301,6 +303,11 @@ const Index = () => {
       // Escape — close zen mode
       if (e.key === 'Escape' && zenMode) {
         toggleZenMode();
+      }
+      // Ctrl+? or Ctrl+/ — keyboard shortcuts
+      if ((e.ctrlKey || e.metaKey) && (e.key === '?' || e.key === '/')) {
+        e.preventDefault();
+        setShortcutsOpen(o => !o);
       }
     };
     window.addEventListener('keydown', handler);
@@ -859,6 +866,7 @@ const Index = () => {
 
       {/* Command Palette */}
       <CommandPalette open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} items={commandItems} />
+      <KeyboardShortcuts open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
 
       {/* Context Menu */}
       {contextMenu && contextNode && (

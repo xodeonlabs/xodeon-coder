@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, FileText, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield, Sparkles, Zap, Handshake, Percent, LayoutGrid, Menu, MessageCircle, Pin, PinOff } from 'lucide-react';
+import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, FileText, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield, Sparkles, Zap, Handshake, Percent, LayoutGrid, Menu, MessageCircle, Pin, PinOff, CopyPlus, Code, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 
@@ -49,6 +49,7 @@ interface App {
   slug: string | null;
   chat_retention_hours: number;
   icon: string | null;
+  ngc_code: string;
 }
 
 interface Org {
@@ -398,6 +399,21 @@ export default function Dashboard() {
     setCreating(false);
   }
 
+  async function duplicateApp(app: App) {
+    if (!session?.user?.id) return;
+    clearCache(CACHE_KEYS.apps(session.user.id));
+    const { data, error } = await supabase.from('apps').insert({
+      owner_id: session.user.id,
+      name: `${app.name} (kopie)`,
+      ngc_code: app.ngc_code,
+    }).select().single();
+    if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
+    else if (data) {
+      setApps(prev => [data as App, ...prev]);
+      toast({ title: '📋 App gedupliceerd!', description: `"${app.name}" is gekopieerd.` });
+    }
+  }
+
   async function createTemplate() {
     if (!session?.user?.id || !templateName.trim()) return;
     setCreatingTemplate(true);
@@ -578,6 +594,32 @@ export default function Dashboard() {
   const myApps = apps.filter(a => a.owner_id === session?.user?.id);
   const sharedApps = apps.filter(a => a.owner_id !== session?.user?.id);
 
+  // Stats
+  const stats = useMemo(() => {
+    const totalLines = myApps.reduce((sum, a) => sum + (a.ngc_code?.split('\n').length || 0), 0);
+    const publicApps = myApps.filter(a => a.is_public).length;
+    const thisWeek = myApps.filter(a => {
+      const d = new Date(a.updated_at);
+      const now = new Date();
+      return now.getTime() - d.getTime() < 7 * 24 * 60 * 60 * 1000;
+    }).length;
+    return { totalApps: myApps.length, totalLines, publicApps, activeThisWeek: thisWeek };
+  }, [myApps]);
+
+  // Typewriter effect for quote
+  const [typedText, setTypedText] = useState('');
+  const fullQuoteText = `${quote.emoji} ${quote.text}`;
+  useEffect(() => {
+    setTypedText('');
+    let i = 0;
+    const timer = setInterval(() => {
+      i++;
+      setTypedText(fullQuoteText.slice(0, i));
+      if (i >= fullQuoteText.length) clearInterval(timer);
+    }, 35);
+    return () => clearInterval(timer);
+  }, [fullQuoteText]);
+
   return (
     <div className="min-h-screen bg-background">
       {showBonusOverlay && !dailyBonus.loading && dailyBonus.claimed && (
@@ -667,8 +709,8 @@ export default function Dashboard() {
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground font-display tracking-tight">
               {getGreeting()}{displayName ? `, ${displayName}` : ''} 👋
             </h2>
-            <p className="text-sm text-muted-foreground mt-1.5 italic">
-              {quote.emoji} {quote.text}
+            <p className="text-sm text-muted-foreground mt-1.5 italic min-h-[1.5em]">
+              {typedText}<span className="animate-pulse">|</span>
             </p>
           </div>
           <div className="flex items-center gap-2.5 shrink-0">
@@ -678,6 +720,28 @@ export default function Dashboard() {
             </button>
           </div>
         </div>
+
+        {/* Stats widget */}
+        {!loading && myApps.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 animate-slide-up" style={{ animationDelay: '100ms' }}>
+            {[
+              { icon: <FileCode className="h-4 w-4" />, label: 'Apps', value: stats.totalApps, color: 'primary' },
+              { icon: <Code className="h-4 w-4" />, label: 'Regels code', value: stats.totalLines.toLocaleString(), color: 'accent' },
+              { icon: <Globe className="h-4 w-4" />, label: 'Publiek', value: stats.publicApps, color: 'primary' },
+              { icon: <TrendingUp className="h-4 w-4" />, label: 'Actief (7d)', value: stats.activeThisWeek, color: 'accent' },
+            ].map(stat => (
+              <div key={stat.label} className="glass-card rounded-xl p-3 sm:p-4 flex items-center gap-3">
+                <div className={`p-2 rounded-lg bg-${stat.color}/10 text-${stat.color}`}>
+                  {stat.icon}
+                </div>
+                <div>
+                  <p className="text-lg sm:text-xl font-bold text-foreground tabular-nums">{stat.value}</p>
+                  <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Content */}
         {loading ? (
@@ -789,6 +853,7 @@ export default function Dashboard() {
                   <ActionBtn onClick={() => setContractAppId(app.id)} icon={<FileText className="h-3.5 w-3.5" />} title="Contracten bekijken" className="hover:text-accent" />
                   <ActionBtn onClick={() => openPublishDialog(app)} icon={<ExternalLink className="h-3.5 w-3.5" />} title="Publiceren" className="hover:text-primary" />
                   <ActionBtn onClick={() => togglePin(app.id)} icon={pinnedAppIds.includes(app.id) ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />} title={pinnedAppIds.includes(app.id) ? 'Losmaken' : 'Vastpinnen'} className={pinnedAppIds.includes(app.id) ? 'text-primary hover:text-destructive' : 'hover:text-primary'} />
+                  <ActionBtn onClick={() => duplicateApp(app)} icon={<CopyPlus className="h-3.5 w-3.5" />} title="Dupliceren" className="hover:text-accent" />
                   <ActionBtn onClick={() => deleteApp(app.id, app.name)} icon={<Trash2 className="h-3.5 w-3.5" />} title="Verwijderen" className="ml-auto hover:text-destructive hover:bg-destructive/10" />
                 </div>
               </div>
