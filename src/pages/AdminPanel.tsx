@@ -1208,7 +1208,7 @@ export default function AdminPanel() {
           </div>
         )}
 
-
+        {tab === 'chats' && (
           <div className="space-y-6">
             {/* App chats grouped by app */}
             <div>
