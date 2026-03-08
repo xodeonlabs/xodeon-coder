@@ -734,7 +734,14 @@ const Index = () => {
 
           {editorMode === 'code' ? (
             <>
-              <div className="flex-1 overflow-hidden">
+              <div className="flex-1 overflow-hidden relative">
+                <SearchReplace
+                  open={searchOpen}
+                  onClose={() => setSearchOpen(false)}
+                  code={code}
+                  onCodeChange={setCode}
+                  showReplace={searchShowReplace}
+                />
                 <NGCCodeEditor code={activeSection?.code || ''} onChange={handleSectionCodeChange} errors={errors} />
               </div>
               {/* Error bar */}
