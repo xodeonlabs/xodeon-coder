@@ -358,6 +358,11 @@ export default function Dashboard() {
               </span>
             )}
           </button>
+          {isAdmin && (
+            <button onClick={() => navigate('/admin')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-destructive hover:text-destructive hover:bg-destructive/10 transition-all" title="Admin Paneel">
+              <Shield className="h-4 w-4" /> <span className="hidden sm:inline">Admin</span>
+            </button>
+          )}
           <button onClick={() => navigate('/settings')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all" title="Instellingen">
             <Settings className="h-4 w-4" /> <span className="hidden sm:inline">Account</span>
           </button>
