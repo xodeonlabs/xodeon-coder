@@ -185,6 +185,29 @@ export default function AdminPanel() {
     });
   }
 
+  async function handleAdminChatSend(type: 'app' | 'org', targetId: string, replyKey: string) {
+    const content = (chatReplyInputs[replyKey] || '').trim();
+    if (!content) return;
+    setChatSending(replyKey);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-send-chat', {
+        body: { type, target_id: targetId, content },
+      });
+      if (error) throw error;
+      setChatReplyInputs(prev => ({ ...prev, [replyKey]: '' }));
+      // Refresh chats
+      const { data: chatData } = await supabase.functions.invoke('admin-list-chats');
+      if (chatData) {
+        setAppChats(chatData.app_chats || []);
+        setOrgChats(chatData.org_chats || []);
+      }
+      toast({ title: 'Bericht verstuurd' });
+    } catch (e: any) {
+      toast({ title: 'Fout', description: e.message, variant: 'destructive' });
+    }
+    setChatSending(null);
+  }
+
   async function removeRole(roleId: string) {
     const { error } = await supabase.from('user_roles').delete().eq('id', roleId);
     if (error) {
