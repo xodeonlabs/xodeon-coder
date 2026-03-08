@@ -465,7 +465,7 @@ export default function Dashboard() {
                 <div className="flex items-center gap-2 mb-3">
                   {app.organization_id && (
                     <span className="text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent flex items-center gap-1">
-                      <Building2 className="h-3 w-3" />
+                      <AppIcon iconName={orgs.find(o => o.id === app.organization_id)?.icon || 'building-2'} size={12} />
                       {orgs.find(o => o.id === app.organization_id)?.name || 'Bedrijf'}
                     </span>
                   )}
