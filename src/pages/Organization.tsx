@@ -539,13 +539,14 @@ export default function OrganizationPage() {
       is_active: true,
       pages: ['dashboard', 'organizations'],
     };
-    if (orgAd) {
-      const { error } = await supabase.from('ads' as any).update(adData).eq('id', orgAd.id);
+    if (editingAdId) {
+      const { error } = await supabase.from('ads' as any).update(adData).eq('id', editingAdId);
       if (error) {
         toast({ title: 'Fout', description: error.message, variant: 'destructive' });
       } else {
-        setOrgAd({ id: orgAd.id, ...adData });
+        setOrgAds(orgAds.map(a => a.id === editingAdId ? { id: editingAdId, ...adData } : a));
         setShowAdForm(false);
+        setEditingAdId(null);
         toast({ title: 'Advertentie bijgewerkt!' });
       }
     } else {
@@ -553,7 +554,7 @@ export default function OrganizationPage() {
       if (error) {
         toast({ title: 'Fout', description: error.message, variant: 'destructive' });
       } else if (data) {
-        setOrgAd({ id: (data as any).id, ...adData });
+        setOrgAds([...orgAds, { id: (data as any).id, ...adData }]);
         setShowAdForm(false);
         toast({ title: 'Advertentie aangemaakt!' });
       }
@@ -561,13 +562,11 @@ export default function OrganizationPage() {
     setAdSaving(false);
   }
 
-  async function deleteOrgAd() {
-    if (!orgAd) return;
+  async function deleteOrgAd(adId: string) {
     if (!confirm('Weet je zeker dat je de advertentie wilt verwijderen?')) return;
-    const { error } = await supabase.from('ads' as any).delete().eq('id', orgAd.id);
+    const { error } = await supabase.from('ads' as any).delete().eq('id', adId);
     if (!error) {
-      setOrgAd(null);
-      setShowAdForm(false);
+      setOrgAds(orgAds.filter(a => a.id !== adId));
       toast({ title: 'Advertentie verwijderd' });
     }
   }
