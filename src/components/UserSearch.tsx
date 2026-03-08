@@ -278,7 +278,7 @@ export function UserSearch() {
                       onClick={() => { navigate('/organization'); setOpen(false); clear(); }}
                     >
                       <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center text-accent-foreground shrink-0">
-                        <AppIcon iconName={org.icon || 'building-2'} size={14} />
+                        <span className="text-base">{org.icon || '🏢'}</span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{org.name}</p>

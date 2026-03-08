@@ -5,7 +5,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle, MessageCircle, Megaphone, Pencil, Search, CheckCircle, XCircle, Clock, Link, Globe, ArrowUp } from 'lucide-react';
 import { CoinConfirmDialog } from '@/components/CoinConfirmDialog';
-import { AppIcon, IconPicker } from '@/components/IconPicker';
+import { AppIcon } from '@/components/IconPicker';
+import { EmojiPicker } from '@/components/EmojiPicker';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { OrgChat } from '@/components/OrgChat';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
@@ -779,7 +780,7 @@ export default function OrganizationPage() {
                       className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center shrink-0 text-accent hover:from-accent/30 hover:to-accent/10 transition-colors"
                       title="Icoon wijzigen"
                     >
-                      <AppIcon iconName={org.icon || 'building-2'} size={20} />
+                      <span className="text-xl">{org.icon || '🏢'}</span>
                     </button>
                     <div>
                       <h3 className="font-semibold text-foreground">{org.name}</h3>
@@ -1262,9 +1263,9 @@ export default function OrganizationPage() {
         )}
       </div>
       {iconPickerOrgId && (
-        <IconPicker
-          value={orgs.find(o => o.id === iconPickerOrgId)?.icon || 'building-2'}
-          onChange={(icon) => changeOrgIcon(iconPickerOrgId, icon)}
+        <EmojiPicker
+          value={orgs.find(o => o.id === iconPickerOrgId)?.icon || '🏢'}
+          onChange={(emoji) => changeOrgIcon(iconPickerOrgId, emoji)}
           onClose={() => setIconPickerOrgId(null)}
         />
       )}
