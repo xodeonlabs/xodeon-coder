@@ -13,6 +13,7 @@ import { getCached, setCache, clearCache, CACHE_KEYS, CACHE_TTL } from '@/lib/ca
 import { useDailyBonus } from '@/hooks/useDailyBonus';
 import { DailyBonusOverlay } from '@/components/DailyBonusOverlay';
 import { FriendRequests } from '@/components/FriendRequests';
+import { UserSearch } from '@/components/UserSearch';
 
 const APP_GRADIENTS = [
   'from-blue-500/15 to-cyan-500/5',
@@ -647,6 +648,11 @@ export default function Dashboard() {
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <AdBanner className="mb-6" page="dashboard" />
         <FriendRequests />
+
+        {/* User search */}
+        <div className="mb-6">
+          <UserSearch />
+        </div>
 
         {/* Hero section */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-10 animate-slide-up">
