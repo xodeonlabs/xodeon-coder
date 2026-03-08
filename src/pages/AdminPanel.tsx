@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, Megaphone, Plus, Eye, EyeOff, Pencil, Ban, ShieldOff, Activity, MessageCircle, Send, Coins, Handshake, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, Megaphone, Plus, Eye, EyeOff, Pencil, Ban, ShieldOff, Activity, MessageCircle, Send, Coins, Handshake, BarChart3, Globe, Lock } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const EMOJI_LIST = [
@@ -822,6 +822,24 @@ export default function AdminPanel() {
                     <span className="text-xs text-muted-foreground">
                       {new Date(app.updated_at).toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' })}
                     </span>
+                    <button
+                      onClick={async () => {
+                        const { data, error } = await supabase.functions.invoke('admin-delete-resource', {
+                          body: { type: 'toggle_public', target_id: app.id },
+                        });
+                        if (error || data?.error) {
+                          toast({ title: 'Fout', description: error?.message || data?.error, variant: 'destructive' });
+                        } else {
+                          setApps(apps.map(a => a.id === app.id ? { ...a, is_public: data.is_public } : a));
+                          await logAction(data.is_public ? 'App publiek gemaakt' : 'App privé gemaakt', 'app', app.id, app.name);
+                          toast({ title: data.is_public ? '🌍 App is nu publiek' : '🔒 App is nu privé' });
+                        }
+                      }}
+                      className={`p-1 rounded-lg transition-colors ${app.is_public ? 'text-emerald-500 hover:text-muted-foreground hover:bg-secondary/50' : 'text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10'}`}
+                      title={app.is_public ? 'Maak privé' : 'Maak publiek'}
+                    >
+                      {app.is_public ? <Globe className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                    </button>
                     <button
                       onClick={() => { setCollabAppId(app.id); setCollabEmail(''); }}
                       className="p-1 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"

@@ -53,6 +53,18 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Invalid ID format" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    if (type === "toggle_public") {
+      const { data: appData } = await adminClient.from("apps").select("is_public").eq("id", target_id).single();
+      if (!appData) {
+        return new Response(JSON.stringify({ error: "App not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const { error } = await adminClient.from("apps").update({ is_public: !appData.is_public }).eq("id", target_id);
+      if (error) throw error;
+      return new Response(JSON.stringify({ success: true, is_public: !appData.is_public }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (type === "app") {
       const { error } = await adminClient.from("apps").delete().eq("id", target_id);
       if (error) throw error;
