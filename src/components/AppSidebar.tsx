@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -33,6 +33,30 @@ export function AppSidebar() {
   const [coins, setCoins] = useState(0);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [profileUsername, setProfileUsername] = useState<string | null>(null);
+  const [unreadGroups, setUnreadGroups] = useState(0);
+
+  const fetchUnreadGroups = useCallback(async () => {
+    if (!session?.user?.id) return;
+    // Get all groups user is member of
+    const { data: memberships } = await supabase
+      .from('chat_group_members')
+      .select('group_id, joined_at')
+      .eq('user_id', session.user.id);
+    if (!memberships || memberships.length === 0) { setUnreadGroups(0); return; }
+
+    let unread = 0;
+    for (const m of memberships) {
+      // Check if there are messages after the user last visited (use joined_at as baseline)
+      const { count } = await supabase
+        .from('chat_group_messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('group_id', m.group_id)
+        .neq('user_id', session.user.id)
+        .gt('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+      if (count && count > 0) unread++;
+    }
+    setUnreadGroups(unread);
+  }, [session?.user?.id]);
 
   useEffect(() => {
     if (!session?.user?.id) return;
@@ -45,7 +69,25 @@ export function AppSidebar() {
         if (data?.display_name) setDisplayName(data.display_name);
         if ((data as any)?.username) setProfileUsername((data as any).username);
       });
-  }, [session?.user?.id]);
+    fetchUnreadGroups();
+  }, [session?.user?.id, fetchUnreadGroups]);
+
+  // Realtime: listen for new group messages
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    const channel = supabase
+      .channel('sidebar-group-messages')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_group_messages' }, () => {
+        fetchUnreadGroups();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [session?.user?.id, fetchUnreadGroups]);
+
+  // Reset count when visiting /groepen
+  useEffect(() => {
+    if (location.pathname === '/groepen') setUnreadGroups(0);
+  }, [location.pathname]);
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -86,6 +128,12 @@ export function AppSidebar() {
                       }`}
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span className="flex-1">{item.title}</span>}
+                      {item.url === '/groepen' && unreadGroups > 0 && (
+                        <span className="ml-auto min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1">
+                          {unreadGroups > 9 ? '9+' : unreadGroups}
+                        </span>
+                      )}
                       {!collapsed && <span>{item.title}</span>}
                     </button>
                   </SidebarMenuButton>
