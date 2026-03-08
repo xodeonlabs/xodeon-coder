@@ -336,7 +336,20 @@ export function NGCDesigner({ ast, selectedId, onSelect, onPositionChange, onSiz
     e.dataTransfer.dropEffect = 'copy';
   }, []);
 
-  if (!ast) {
+  // Keyboard delete
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId && onDelete) {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        e.preventDefault();
+        onDelete(selectedId);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [selectedId, onDelete]);
+
     return (
       <div className="flex h-full items-center justify-center">
         <p className="text-xs text-muted-foreground">Geen preview beschikbaar</p>
