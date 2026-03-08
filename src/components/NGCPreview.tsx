@@ -2,13 +2,18 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { NGCNode } from '@/lib/ngc-ast';
 import { createRuntime, NGCRuntime, resolveVarRefs, parseVarDefinition, parseListDefinition, parseDataCommand, parseCoinsCommand, clearPersistedState } from '@/lib/ngc-runtime';
 import { supabase } from '@/integrations/supabase/client';
-import { DynamicIcon } from 'lucide-react/dynamic';
+import * as LucideIcons from 'lucide-react';
 
 function LucideIcon({ name, size = 16, color = 'currentColor' }: { name: string; size?: number; color?: string }) {
   if (!name) return null;
-  // DynamicIcon expects kebab-case names like "heart", "arrow-left"
-  const kebabName = name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-  return <DynamicIcon name={kebabName as any} size={size} color={color} />;
+  // Convert kebab-case "arrow-left" to PascalCase "ArrowLeft"
+  const pascalName = name
+    .split('-')
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
+  const IconComponent = (LucideIcons as any)[pascalName];
+  if (!IconComponent || typeof IconComponent !== 'function') return null;
+  return <IconComponent size={size} color={color} />;
 }
 
 interface PreviewProps {
