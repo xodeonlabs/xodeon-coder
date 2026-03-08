@@ -805,7 +805,7 @@ const Index = () => {
         {rightOpen && (
           <>
             <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={20} minSize={12} maxSize={40} order={3}>
+            <ResizablePanel defaultSize={20} minSize={10} maxSize={50} order={3}>
               <div className="h-full flex flex-col" {...rightPanelSwipe}>
                 {/* Right panel tab switcher */}
                 <div className="flex border-b border-border shrink-0">
