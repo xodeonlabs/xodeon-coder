@@ -15,7 +15,7 @@ const PublicApp = () => {
     if (!slug) return;
     supabase
       .from('apps')
-      .select('ngc_code, name')
+      .select('id, ngc_code, name')
       .eq('slug', slug)
       .eq('is_public', true)
       .single()
@@ -25,6 +25,11 @@ const PublicApp = () => {
         } else {
           setCode(data.ngc_code || '');
           setAppName(data.name);
+          // Record page view
+          supabase.from('app_views').insert({
+            app_id: data.id,
+            referrer: document.referrer || null,
+          }).then(() => {});
         }
         setLoading(false);
       });

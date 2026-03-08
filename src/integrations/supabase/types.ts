@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_views: {
+        Row: {
+          app_id: string
+          id: string
+          referrer: string | null
+          user_agent: string | null
+          viewed_at: string
+          visitor_ip: string | null
+        }
+        Insert: {
+          app_id: string
+          id?: string
+          referrer?: string | null
+          user_agent?: string | null
+          viewed_at?: string
+          visitor_ip?: string | null
+        }
+        Update: {
+          app_id?: string
+          id?: string
+          referrer?: string | null
+          user_agent?: string | null
+          viewed_at?: string
+          visitor_ip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_views_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       apps: {
         Row: {
           created_at: string
