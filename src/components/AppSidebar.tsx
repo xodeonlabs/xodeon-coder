@@ -96,13 +96,16 @@ export function AppSidebar() {
         const msg = payload.new as any;
         if (msg?.user_id !== session.user.id) {
           playNotification();
-          // Fetch sender name for toast
           supabase.from('profiles').select('display_name').eq('id', msg.user_id).maybeSingle().then(({ data }) => {
             const name = data?.display_name || 'Iemand';
             toast(name, {
               description: msg.content?.slice(0, 100) || 'Nieuw bericht',
               position: 'bottom-right',
               duration: 5000,
+              action: {
+                label: 'Bekijk',
+                onClick: () => navigate('/groepen'),
+              },
             });
           });
         }
@@ -112,12 +115,17 @@ export function AppSidebar() {
         const msg = payload.new as any;
         if (msg?.receiver_id === session.user.id) {
           playNotification();
-          supabase.from('profiles').select('display_name').eq('id', msg.sender_id).maybeSingle().then(({ data }) => {
+          supabase.from('profiles').select('display_name, username').eq('id', msg.sender_id).maybeSingle().then(({ data }) => {
             const name = data?.display_name || 'Iemand';
+            const username = (data as any)?.username;
             toast(name, {
               description: msg.content?.slice(0, 100) || 'Nieuw bericht',
               position: 'bottom-right',
               duration: 5000,
+              action: {
+                label: 'Bekijk',
+                onClick: () => navigate(`/berichten/${username || msg.sender_id}`),
+              },
             });
           });
         }
