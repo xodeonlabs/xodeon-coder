@@ -169,6 +169,8 @@ export default function AdminPanel() {
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
+      const roleName = roles.find(r => r.id === roleId);
+      await logAction('Rol verwijderd', 'user', roleName?.user_id, `Rol: ${roleName?.role}`);
       setRoles(roles.filter(r => r.id !== roleId));
       toast({ title: 'Rol verwijderd' });
     }
