@@ -64,6 +64,7 @@ function DraggableNode({
   onPositionChange: (nodeId: string, x: number, y: number) => void;
   onSizeChange: (nodeId: string, w: number, h: number) => void;
   onDelete?: (nodeId: string) => void;
+  onPropertyChange?: (nodeId: string, key: string, value: string) => void;
   children: React.ReactNode;
 }) {
   const pos = node.properties.Positie ? parsePosition(node.properties.Positie) : { x: 0, y: 0 };
