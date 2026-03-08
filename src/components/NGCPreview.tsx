@@ -1,7 +1,8 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { NGCNode } from '@/lib/ngc-ast';
 import { createRuntime, NGCRuntime, resolveVarRefs, parseVarDefinition, parseListDefinition, parseDataCommand, parseCoinsCommand, clearPersistedState } from '@/lib/ngc-runtime';
 import { supabase } from '@/integrations/supabase/client';
+import { CoinConfirmDialog } from '@/components/CoinConfirmDialog';
 import * as LucideIcons from 'lucide-react';
 
 function LucideIcon({ name, size = 16, color = 'currentColor' }: { name: string; size?: number; color?: string }) {
