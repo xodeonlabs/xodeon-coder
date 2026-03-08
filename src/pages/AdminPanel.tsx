@@ -1097,7 +1097,118 @@ export default function AdminPanel() {
           </div>
         )}
 
-        {tab === 'chats' && (
+        {/* Alliances tab */}
+        {tab === 'alliances' && (
+          <div className="space-y-6">
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+              <Handshake className="h-4 w-4 text-primary" /> Allianties ({adminAlliances.length})
+            </h3>
+
+            {adminAlliances.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Geen allianties gevonden.</p>
+            ) : (
+              <div className="space-y-4">
+                {adminAlliances.map(alliance => {
+                  const mems = adminAllianceMembers[alliance.id] || [];
+                  const coinBalance = adminAllianceCoins[alliance.id] ?? 0;
+                  const chats = adminAllianceChats[alliance.id] || [];
+                  const stats = adminAllianceStats[alliance.id] || { apps: 0, views: 0 };
+                  const isExpanded = selectedAdminAlliance === alliance.id;
+
+                  return (
+                    <div key={alliance.id} className="rounded-xl border border-border/50 overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
+                      {/* Alliance header */}
+                      <div
+                        className="flex items-center gap-3 p-4 cursor-pointer hover:bg-secondary/20 transition-colors"
+                        onClick={() => setSelectedAdminAlliance(isExpanded ? null : alliance.id)}
+                      >
+                        <span className="text-xl">{alliance.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-semibold text-foreground">{alliance.name}</h4>
+                          <p className="text-[10px] text-muted-foreground">
+                            Door {getUserName(alliance.created_by)} · {mems.length} bedrijven · {coinBalance} coins · {stats.apps} apps · {stats.views} views
+                          </p>
+                        </div>
+                        <button
+                          onClick={e => { e.stopPropagation(); setConfirmAction({ id: alliance.id, action: 'delete', type: 'alliance', name: alliance.name }); }}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+
+                      {/* Expanded details */}
+                      {isExpanded && (
+                        <div className="border-t border-border/30 p-4 space-y-4">
+                          {/* Stats */}
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div className="rounded-lg p-3 bg-secondary/20">
+                              <p className="text-[10px] text-muted-foreground">Bedrijven</p>
+                              <p className="text-lg font-bold text-foreground">{mems.length}</p>
+                            </div>
+                            <div className="rounded-lg p-3 bg-secondary/20">
+                              <p className="text-[10px] text-muted-foreground">Kluis</p>
+                              <p className="text-lg font-bold text-foreground">{coinBalance}</p>
+                            </div>
+                            <div className="rounded-lg p-3 bg-secondary/20">
+                              <p className="text-[10px] text-muted-foreground">Apps</p>
+                              <p className="text-lg font-bold text-foreground">{stats.apps}</p>
+                            </div>
+                            <div className="rounded-lg p-3 bg-secondary/20">
+                              <p className="text-[10px] text-muted-foreground">Views</p>
+                              <p className="text-lg font-bold text-foreground">{stats.views}</p>
+                            </div>
+                          </div>
+
+                          {/* Members */}
+                          <div>
+                            <h5 className="text-xs font-semibold text-muted-foreground mb-2">Leden</h5>
+                            <div className="space-y-1">
+                              {mems.map(m => {
+                                const orgName = orgs.find(o => o.id === m.organization_id)?.name || m.organization_id.slice(0, 8);
+                                return (
+                                  <div key={m.id} className="flex items-center gap-2 py-1.5 px-2 rounded-lg bg-background/50 text-sm">
+                                    <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                                    <span className="text-foreground">{orgName}</span>
+                                    <span className="text-[10px] text-muted-foreground ml-auto">{new Date(m.joined_at).toLocaleDateString('nl-NL')}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Chat messages */}
+                          <div>
+                            <h5 className="text-xs font-semibold text-muted-foreground mb-2">
+                              <MessageCircle className="h-3 w-3 inline mr-1" />
+                              Chat ({chats.length} berichten)
+                            </h5>
+                            {chats.length === 0 ? (
+                              <p className="text-xs text-muted-foreground">Geen berichten.</p>
+                            ) : (
+                              <div className="max-h-[200px] overflow-y-auto space-y-1.5 rounded-lg border border-border/30 p-3 bg-background/50">
+                                {chats.map(msg => (
+                                  <div key={msg.id} className="text-xs">
+                                    <span className="font-medium text-primary">{getUserName(msg.user_id)}</span>
+                                    <span className="text-muted-foreground mx-1">·</span>
+                                    <span className="text-muted-foreground">{new Date(msg.created_at).toLocaleString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                                    <p className="text-foreground mt-0.5">{msg.content}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+
           <div className="space-y-6">
             {/* App chats grouped by app */}
             <div>
