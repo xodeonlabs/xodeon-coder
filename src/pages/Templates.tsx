@@ -14,6 +14,7 @@ interface Template {
   category: string;
   downloads: number;
   is_published: boolean;
+  visibility: string;
   created_at: string;
 }
 
@@ -35,8 +36,10 @@ export default function Templates() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('alle');
   const [showMine, setShowMine] = useState(false);
+  const [friends, setFriends] = useState<string[]>([]);
+  const [userOrgs, setUserOrgs] = useState<string[]>([]);
 
-  useEffect(() => { loadTemplates(); }, []);
+  useEffect(() => { loadTemplates(); loadRelations(); }, [session?.user?.id]);
 
   async function loadTemplates() {
     setLoading(true);
@@ -48,12 +51,39 @@ export default function Templates() {
     setLoading(false);
   }
 
+  async function loadRelations() {
+    if (!session?.user?.id) return;
+    // Load friends
+    const { data: friendData } = await supabase.from('friendships').select('sender_id, receiver_id').eq('status', 'accepted');
+    const friendIds = (friendData || []).map(f => f.sender_id === session.user.id ? f.receiver_id : f.sender_id);
+    setFriends(friendIds);
+    // Load user's org author IDs
+    const { data: orgMembers } = await supabase.from('organization_members').select('organization_id').eq('user_id', session.user.id);
+    if (orgMembers && orgMembers.length > 0) {
+      const orgIds = orgMembers.map(m => m.organization_id);
+      const { data: coMembers } = await supabase.from('organization_members').select('user_id, organization_id').in('organization_id', orgIds);
+      const orgUserIds = [...new Set((coMembers || []).map(m => m.user_id))];
+      setUserOrgs(orgUserIds);
+    }
+  }
+
   const filtered = useMemo(() => {
     let result = templates;
     if (showMine && session?.user?.id) {
       result = result.filter(t => t.author_id === session.user.id);
     } else {
-      result = result.filter(t => t.is_published || t.author_id === session?.user?.id);
+      result = result.filter(t => {
+        // Own templates always visible
+        if (t.author_id === session?.user?.id) return true;
+        // Must be published
+        if (!t.is_published) return false;
+        // Visibility check
+        const vis = (t as any).visibility || 'public';
+        if (vis === 'public') return true;
+        if (vis === 'friends' && friends.includes(t.author_id)) return true;
+        if (vis === 'org' && userOrgs.includes(t.author_id)) return true;
+        return false;
+      });
     }
     if (category !== 'alle') {
       result = result.filter(t => t.category === category);
@@ -63,7 +93,7 @@ export default function Templates() {
       result = result.filter(t => t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
     }
     return result;
-  }, [templates, search, category, showMine, session?.user?.id]);
+  }, [templates, search, category, showMine, session?.user?.id, friends, userOrgs]);
 
   async function useTemplate(template: Template) {
     if (!session?.user?.id) { navigate('/auth'); return; }
@@ -188,9 +218,16 @@ export default function Templates() {
                     <h3 className="text-sm font-semibold text-foreground truncate">{template.name}</h3>
                     <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{template.description || 'Geen beschrijving'}</p>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground shrink-0 capitalize">
-                    {template.category}
-                  </span>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground shrink-0 capitalize">
+                      {template.category}
+                    </span>
+                    {(template as any).visibility && (template as any).visibility !== 'public' && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent/10 text-accent">
+                        {(template as any).visibility === 'friends' ? '👥' : '🏢'}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between mt-4">

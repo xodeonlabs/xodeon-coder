@@ -1052,6 +1052,7 @@ export type Database = {
           name: string
           ngc_code: string
           updated_at: string
+          visibility: string
         }
         Insert: {
           author_id: string
@@ -1064,6 +1065,7 @@ export type Database = {
           name: string
           ngc_code?: string
           updated_at?: string
+          visibility?: string
         }
         Update: {
           author_id?: string
@@ -1076,6 +1078,7 @@ export type Database = {
           name?: string
           ngc_code?: string
           updated_at?: string
+          visibility?: string
         }
         Relationships: []
       }

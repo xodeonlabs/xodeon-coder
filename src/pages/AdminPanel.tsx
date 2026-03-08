@@ -103,11 +103,13 @@ export default function AdminPanel() {
   const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'chats' | 'activity' | 'coins' | 'alliances' | 'templates'>('users');
   
   // Templates management
-  const [adminTemplates, setAdminTemplates] = useState<{ id: string; name: string; category: string; author_id: string; downloads: number; is_published: boolean; created_at: string }[]>([]);
+  const [adminTemplates, setAdminTemplates] = useState<{ id: string; name: string; description: string; category: string; visibility: string; author_id: string; downloads: number; is_published: boolean; created_at: string }[]>([]);
   const [templatesLoaded, setTemplatesLoaded] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<string | null>(null);
   const [templateEditName, setTemplateEditName] = useState('');
   const [templateEditCategory, setTemplateEditCategory] = useState('');
+  const [templateEditDescription, setTemplateEditDescription] = useState('');
+  const [templateEditVisibility, setTemplateEditVisibility] = useState('public');
   
   // Alliances management
   const [adminAlliances, setAdminAlliances] = useState<any[]>([]);
@@ -208,7 +210,7 @@ export default function AdminPanel() {
   async function loadAdminTemplates(force = false) {
     if (templatesLoaded && !force) return;
     setTemplatesLoaded(true);
-    const { data } = await supabase.from('templates').select('id, name, category, author_id, downloads, is_published, created_at').order('created_at', { ascending: false });
+    const { data } = await supabase.from('templates').select('id, name, description, category, author_id, downloads, is_published, created_at, visibility' as any).order('created_at', { ascending: false });
     setAdminTemplates((data as any[]) || []);
   }
 
@@ -220,9 +222,9 @@ export default function AdminPanel() {
   }
 
   async function saveTemplateEdit(id: string) {
-    const { error } = await supabase.from('templates').update({ name: templateEditName, category: templateEditCategory }).eq('id', id);
+    const { error } = await supabase.from('templates').update({ name: templateEditName, category: templateEditCategory, description: templateEditDescription, visibility: templateEditVisibility } as any).eq('id', id);
     if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); return; }
-    setAdminTemplates(ts => ts.map(t => t.id === id ? { ...t, name: templateEditName, category: templateEditCategory } : t));
+    setAdminTemplates(ts => ts.map(t => t.id === id ? { ...t, name: templateEditName, category: templateEditCategory, description: templateEditDescription, visibility: templateEditVisibility } : t));
     setEditingTemplate(null);
     toast({ title: 'Template bijgewerkt' });
   }
@@ -1081,6 +1083,37 @@ export default function AdminPanel() {
                             ))}
                           </div>
                         </div>
+                        <div>
+                          <label className="text-[11px] text-muted-foreground mb-1 block">Beschrijving</label>
+                          <textarea
+                            value={templateEditDescription}
+                            onChange={e => setTemplateEditDescription(e.target.value)}
+                            rows={2}
+                            className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[11px] text-muted-foreground mb-1 block">Zichtbaarheid</label>
+                          <div className="flex flex-wrap gap-1.5">
+                            {[
+                              { value: 'public', label: '🌍 Publiek' },
+                              { value: 'friends', label: '👥 Vrienden' },
+                              { value: 'org', label: '🏢 Bedrijf' },
+                            ].map(vis => (
+                              <button
+                                key={vis.value}
+                                onClick={() => setTemplateEditVisibility(vis.value)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                                  templateEditVisibility === vis.value
+                                    ? 'border-primary/40 bg-primary/10 text-primary'
+                                    : 'border-border/40 text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                }`}
+                              >
+                                {vis.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                         <div className="flex gap-2">
                           <button onClick={() => saveTemplateEdit(t.id)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors">
                             <Save className="h-3.5 w-3.5" /> Opslaan
@@ -1096,13 +1129,14 @@ export default function AdminPanel() {
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-semibold text-foreground truncate">{t.name}</span>
                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground capitalize">{t.category}</span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent/10 text-accent capitalize">{t.visibility === 'friends' ? '👥 Vrienden' : t.visibility === 'org' ? '🏢 Bedrijf' : '🌍 Publiek'}</span>
                             {!t.is_published && <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">Concept</span>}
                           </div>
-                          <p className="text-[11px] text-muted-foreground mt-0.5">{t.downloads} downloads · {new Date(t.created_at).toLocaleDateString('nl')}</p>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">{t.description ? `${t.description.slice(0, 60)}${t.description.length > 60 ? '...' : ''} · ` : ''}{t.downloads} downloads · {new Date(t.created_at).toLocaleDateString('nl')}</p>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
                           <button
-                            onClick={() => { setEditingTemplate(t.id); setTemplateEditName(t.name); setTemplateEditCategory(t.category); }}
+                            onClick={() => { setEditingTemplate(t.id); setTemplateEditName(t.name); setTemplateEditCategory(t.category); setTemplateEditDescription(t.description || ''); setTemplateEditVisibility(t.visibility || 'public'); }}
                             className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
                             title="Bewerken"
                           >

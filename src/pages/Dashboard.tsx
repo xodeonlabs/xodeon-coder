@@ -223,7 +223,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showNewAppDialog, setShowNewAppDialog] = useState(false);
-  const [templateDialog, setTemplateDialog] = useState<{ open: boolean; app: App | null; name: string; category: string }>({ open: false, app: null, name: '', category: 'algemeen' });
+  const [templateDialog, setTemplateDialog] = useState<{ open: boolean; app: App | null; name: string; category: string; description: string; visibility: string }>({ open: false, app: null, name: '', category: 'algemeen', description: '', visibility: 'public' });
   const [inviteAppId, setInviteAppId] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
   const [invitePercentage, setInvitePercentage] = useState(10);
@@ -527,7 +527,7 @@ export default function Dashboard() {
   }
 
   function openTemplateDialog(app: App) {
-    setTemplateDialog({ open: true, app, name: app.name, category: 'algemeen' });
+    setTemplateDialog({ open: true, app, name: app.name, category: 'algemeen', description: '', visibility: 'public' });
   }
 
   async function confirmConvertToTemplate() {
@@ -535,18 +535,19 @@ export default function Dashboard() {
     const { error } = await supabase.from('templates').insert({
       author_id: session.user.id,
       name: templateDialog.name || templateDialog.app.name,
-      description: `Template op basis van "${templateDialog.app.name}"`,
+      description: templateDialog.description || `Template op basis van "${templateDialog.app.name}"`,
       ngc_code: templateDialog.app.ngc_code,
       category: templateDialog.category,
+      visibility: templateDialog.visibility,
       is_published: true,
-    });
+    } as any);
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
       toast({ title: '📦 Template aangemaakt!', description: `"${templateDialog.name}" is nu beschikbaar als template.` });
       confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
     }
-    setTemplateDialog({ open: false, app: null, name: '', category: 'algemeen' });
+    setTemplateDialog({ open: false, app: null, name: '', category: 'algemeen', description: '', visibility: 'public' });
   }
 
   async function createTemplate() {
@@ -1291,9 +1292,42 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Beschrijving</label>
+              <textarea
+                value={templateDialog.description}
+                onChange={e => setTemplateDialog(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Waar gaat deze template over..."
+                rows={2}
+                className="w-full px-3 py-2.5 rounded-xl border border-border/40 bg-card text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Zichtbaarheid</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: 'public', label: 'Publiek', icon: '🌍' },
+                  { value: 'friends', label: 'Vrienden', icon: '👥' },
+                  { value: 'org', label: 'Bedrijf', icon: '🏢' },
+                ].map(vis => (
+                  <button
+                    key={vis.value}
+                    onClick={() => setTemplateDialog(prev => ({ ...prev, visibility: vis.value }))}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition-all ${
+                      templateDialog.visibility === vis.value
+                        ? 'border-primary/40 bg-primary/10 text-primary'
+                        : 'border-border/40 text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                    }`}
+                  >
+                    <span>{vis.icon}</span>
+                    {vis.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="flex justify-end gap-2 pt-2">
               <button
-                onClick={() => setTemplateDialog({ open: false, app: null, name: '', category: 'algemeen' })}
+                onClick={() => setTemplateDialog({ open: false, app: null, name: '', category: 'algemeen', description: '', visibility: 'public' })}
                 className="px-4 py-2 text-sm font-medium rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/30 transition-colors"
               >
                 Annuleren
