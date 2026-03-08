@@ -119,6 +119,7 @@ export default function Profile() {
         appCount,
         orgCount: orgsRes.count ?? 0,
         totalViews,
+        friendCount: friendsRes.count ?? 0,
       });
 
       setLoading(false);
