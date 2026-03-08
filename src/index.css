@@ -130,6 +130,14 @@
     font-family: 'JetBrains Mono', 'Fira Code', monospace;
   }
 
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   .ide-panel {
     @apply bg-card border-border;
   }

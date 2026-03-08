@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ExternalLink, LogOut, AlertCircle, CheckCircle, ArrowLeft, Pencil, Share2, X } from 'lucide-react';
+import { ExternalLink, LogOut, AlertCircle, CheckCircle, ArrowLeft, Pencil, Share2, X, Menu } from 'lucide-react';
 import { ParseError } from '@/lib/ngc-ast';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,6 +21,7 @@ export function NGCToolbar({ errors, appName, appCode, onSignOut, onSave, onRena
   const [templateName, setTemplateName] = useState('');
   const [templateDescription, setTemplateDescription] = useState('');
   const [sharing, setSharing] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleNavigate = async (path: string) => {
     if (onSave) await onSave();
@@ -54,22 +55,22 @@ export function NGCToolbar({ errors, appName, appCode, onSignOut, onSave, onRena
 
   return (
     <div
-      className="flex items-center justify-between px-4 border-b border-border/50 h-12 shrink-0 backdrop-blur-sm"
+      className="flex items-center justify-between px-2 sm:px-4 border-b border-border/50 h-11 sm:h-12 shrink-0 backdrop-blur-sm"
       style={{ background: 'hsl(var(--ide-toolbar) / 0.85)' }}
     >
-      <div className="flex items-center gap-3">
-        <button onClick={() => handleNavigate('/')} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors" title="Terug naar dashboard">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <button onClick={() => handleNavigate('/')} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors shrink-0" title="Terug naar dashboard">
           <ArrowLeft className="h-4 w-4" />
         </button>
-        <div className="flex items-center gap-2.5">
+        <div className="hidden sm:flex items-center gap-2.5">
           <div className="w-6 h-6 rounded-md bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-bold text-xs">N</div>
           <span className="text-sm font-bold text-foreground font-mono">NGC</span>
         </div>
-        <div className="h-4 w-px bg-border/30"></div>
+        <div className="hidden sm:block h-4 w-px bg-border/30"></div>
         {editing ? (
           <input
             autoFocus
-            className="text-sm text-foreground bg-background border border-primary/30 rounded-lg px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="text-sm text-foreground bg-background border border-primary/30 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary/50 w-32 sm:w-auto"
             value={nameValue}
             onChange={e => setNameValue(e.target.value)}
             onBlur={commitName}
@@ -77,41 +78,42 @@ export function NGCToolbar({ errors, appName, appCode, onSignOut, onSave, onRena
           />
         ) : (
           appName && (
-            <button onClick={startEditing} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group" title="Naam wijzigen">
-              {appName}
-              <Pencil className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <button onClick={startEditing} className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors group truncate min-w-0" title="Naam wijzigen">
+              <span className="truncate">{appName}</span>
+              <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
             </button>
           )
         )}
       </div>
 
-      <div className="flex items-center gap-3">
+      {/* Desktop actions */}
+      <div className="hidden sm:flex items-center gap-2 sm:gap-3">
         {errors.length > 0 ? (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive">
-            <AlertCircle className="h-4 w-4" />
-            <span className="text-sm font-medium">{errors.length} error{errors.length > 1 ? 's' : ''}</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-destructive/10 text-destructive">
+            <AlertCircle className="h-3.5 w-3.5" />
+            <span className="text-xs font-medium">{errors.length} error{errors.length > 1 ? 's' : ''}</span>
           </div>
         ) : (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-ide-success/10 text-ide-success">
-            <CheckCircle className="h-4 w-4" />
-            <span className="text-sm font-medium">Ready</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[hsl(var(--ide-success))]/10 text-[hsl(var(--ide-success))]">
+            <CheckCircle className="h-3.5 w-3.5" />
+            <span className="text-xs font-medium">Ready</span>
           </div>
         )}
         {onShareTemplate && (
           <button
             onClick={() => setShowShareDialog(true)}
-            className="px-4 py-1.5 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center gap-2"
+            className="px-3 py-1.5 text-xs font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center gap-1.5"
             title="Deel als template"
           >
-            <Share2 className="h-4 w-4" />
+            <Share2 className="h-3.5 w-3.5" />
             Template
           </button>
         )}
         <button
           onClick={() => handleNavigate(window.location.pathname.replace('/editor/', '/preview/'))}
-          className="px-4 py-1.5 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center gap-2"
+          className="px-3 py-1.5 text-xs font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center gap-1.5"
         >
-          <ExternalLink className="h-4 w-4" />
+          <ExternalLink className="h-3.5 w-3.5" />
           Preview
         </button>
         {onSignOut && (
@@ -125,12 +127,55 @@ export function NGCToolbar({ errors, appName, appCode, onSignOut, onSave, onRena
         )}
       </div>
 
+      {/* Mobile actions */}
+      <div className="flex sm:hidden items-center gap-2">
+        {errors.length > 0 ? (
+          <span className="flex items-center gap-1 text-destructive">
+            <AlertCircle className="h-3.5 w-3.5" />
+            <span className="text-[10px] font-medium">{errors.length}</span>
+          </span>
+        ) : (
+          <CheckCircle className="h-3.5 w-3.5 text-[hsl(var(--ide-success))]" />
+        )}
+        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition-colors">
+          <Menu className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Mobile dropdown menu */}
+      {mobileMenuOpen && (
+        <div className="absolute top-11 right-2 z-50 rounded-lg border border-border shadow-xl py-1 min-w-[160px]" style={{ background: 'hsl(var(--card))' }}>
+          <button
+            onClick={() => { handleNavigate(window.location.pathname.replace('/editor/', '/preview/')); setMobileMenuOpen(false); }}
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-secondary/50 transition-colors"
+          >
+            <ExternalLink className="h-4 w-4" /> Preview
+          </button>
+          {onShareTemplate && (
+            <button
+              onClick={() => { setShowShareDialog(true); setMobileMenuOpen(false); }}
+              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-secondary/50 transition-colors"
+            >
+              <Share2 className="h-4 w-4" /> Template
+            </button>
+          )}
+          {onSignOut && (
+            <button
+              onClick={() => { onSignOut(); setMobileMenuOpen(false); }}
+              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-destructive hover:bg-secondary/50 transition-colors"
+            >
+              <LogOut className="h-4 w-4" /> Uitloggen
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Share Template Dialog */}
       {showShareDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowShareDialog(false)}>
-          <div className="rounded-2xl border border-border/50 p-6 w-full max-w-md shadow-2xl" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setShowShareDialog(false)}>
+          <div className="rounded-2xl border border-border/50 p-5 sm:p-6 w-full max-w-md shadow-2xl" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
+              <h3 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10"><Share2 className="h-5 w-5 text-primary" /></div>
                 Deel als template
               </h3>
@@ -154,7 +199,7 @@ export function NGCToolbar({ errors, appName, appCode, onSignOut, onSave, onRena
               <div>
                 <label className="text-xs font-medium text-foreground uppercase tracking-wide">Beschrijving (optioneel)</label>
                 <textarea
-                  placeholder="Wat doet deze template? Welke features heeft het?"
+                  placeholder="Wat doet deze template?"
                   value={templateDescription}
                   onChange={e => setTemplateDescription(e.target.value)}
                   rows={2}
@@ -166,8 +211,8 @@ export function NGCToolbar({ errors, appName, appCode, onSignOut, onSave, onRena
               <button onClick={() => setShowShareDialog(false)} className="px-4 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
                 Annuleren
               </button>
-              <button 
-                onClick={handleShareTemplate} 
+              <button
+                onClick={handleShareTemplate}
                 disabled={sharing || !templateName.trim()}
                 className="px-5 py-2 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all active:scale-95"
               >
