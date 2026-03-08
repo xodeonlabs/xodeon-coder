@@ -144,7 +144,7 @@ const Index = () => {
       return;
     }
 
-    supabase.from('apps').select('ngc_code, name').eq('id', appId).single().then(({ data, error }) => {
+    supabase.from('apps').select('ngc_code, name, icon').eq('id', appId).single().then(({ data, error }) => {
       if (error || !data) {
         const msg = error ? error.message : 'App niet gevonden';
         setLoadError(msg);
@@ -152,6 +152,7 @@ const Index = () => {
       } else {
         setCode(data.ngc_code || FALLBACK_CODE);
         setAppName(data.name);
+        setAppIcon((data as any).icon || 'file-code');
         setLoading(false);
       }
     });
