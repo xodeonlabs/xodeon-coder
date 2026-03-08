@@ -304,6 +304,11 @@ const Index = () => {
       if (e.key === 'Escape' && zenMode) {
         toggleZenMode();
       }
+      // Ctrl+? or Ctrl+/ — keyboard shortcuts
+      if ((e.ctrlKey || e.metaKey) && (e.key === '?' || e.key === '/')) {
+        e.preventDefault();
+        setShortcutsOpen(o => !o);
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
