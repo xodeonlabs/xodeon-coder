@@ -13,6 +13,7 @@ import { getCached, setCache, clearCache, CACHE_KEYS, CACHE_TTL } from '@/lib/ca
 import { useDailyBonus } from '@/hooks/useDailyBonus';
 import { DailyBonusOverlay } from '@/components/DailyBonusOverlay';
 import { FriendRequests } from '@/components/FriendRequests';
+import { UserSearch } from '@/components/UserSearch';
 
 const APP_GRADIENTS = [
   'from-blue-500/15 to-cyan-500/5',
