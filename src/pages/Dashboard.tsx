@@ -378,11 +378,58 @@ export default function Dashboard() {
       const { data, error } = await supabase.functions.invoke('invite-collaborator', { body: { email: inviteEmail.trim(), app_id: inviteAppId } });
       if (error) throw error;
       if (data?.error) { toast({ title: 'Fout', description: data.error, variant: 'destructive' }); }
-      else { toast({ title: 'Verstuurd' }); setInviteEmail(''); setInviteAppId(null); }
+      else {
+        // Create contract for the collaborator
+        if (data?.collaborator_id && invitePercentage > 0) {
+          await supabase.from('collaborator_contracts' as any).insert({
+            app_id: inviteAppId,
+            collaborator_id: data.collaborator_id,
+            proposed_by: session?.user?.id,
+            percentage: invitePercentage,
+            status: 'pending',
+          } as any);
+          toast({ title: 'Uitgenodigd met contract', description: `${invitePercentage}% voorstel verstuurd.` });
+        } else {
+          toast({ title: 'Verstuurd' });
+        }
+        setInviteEmail('');
+        setInvitePercentage(10);
+        setInviteAppId(null);
+        fetchContracts();
+      }
     } catch (e) {
       toast({ title: 'Fout', description: e instanceof Error ? e.message : 'Onbekende fout', variant: 'destructive' });
     }
     setInviting(false);
+  }
+
+  async function respondToContract(contractId: string, action: 'accepted' | 'rejected' | 'counter', counterPct?: number) {
+    if (action === 'counter' && counterPct) {
+      await supabase.from('collaborator_contracts' as any).update({
+        status: 'counter',
+        counter_percentage: counterPct,
+        updated_at: new Date().toISOString(),
+      } as any).eq('id', contractId);
+      toast({ title: 'Tegenvoorstel verstuurd', description: `${counterPct}% voorgesteld.` });
+    } else if (action === 'accepted') {
+      const contract = contracts.find(c => c.id === contractId);
+      // If there's a counter, accept the counter percentage
+      const finalPct = contract?.counter_percentage || contract?.percentage || 10;
+      await supabase.from('collaborator_contracts' as any).update({
+        status: 'accepted',
+        percentage: finalPct,
+        counter_percentage: null,
+        updated_at: new Date().toISOString(),
+      } as any).eq('id', contractId);
+      toast({ title: 'Contract geaccepteerd', description: `${finalPct}% per transactie.` });
+    } else {
+      await supabase.from('collaborator_contracts' as any).update({
+        status: 'rejected',
+        updated_at: new Date().toISOString(),
+      } as any).eq('id', contractId);
+      toast({ title: 'Contract afgewezen' });
+    }
+    fetchContracts();
   }
 
   const myApps = apps.filter(a => a.owner_id === session?.user?.id);
