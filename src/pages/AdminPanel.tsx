@@ -759,6 +759,10 @@ export default function AdminPanel() {
             <BookTemplate className="h-4 w-4" /> Templates
           </button>
           <button
+            onClick={() => { setTab('categories'); loadAdminCategories(); }}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'categories' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
+          >
+          <button
             onClick={() => setTab('activity')}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'activity' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
