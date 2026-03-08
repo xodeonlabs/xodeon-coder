@@ -46,6 +46,8 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [savingEmail, setSavingEmail] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
+  const [retentionItems, setRetentionItems] = useState<RetentionItem[]>([]);
+  const [retentionLoading, setRetentionLoading] = useState(true);
 
   useEffect(() => {
     if (!session?.user) return;
