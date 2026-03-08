@@ -307,7 +307,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'n') { e.preventDefault(); createApp(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') { e.preventDefault(); handleNewAppClick(); }
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); navigate('/analytics'); }
     };
     window.addEventListener('keydown', handler);
