@@ -176,6 +176,24 @@ const Auth = () => {
     }
   };
 
+  const handleAppleLogin = async () => {
+    setError('');
+    setMessage('');
+    setLoading(true);
+
+    try {
+      const result = await lovable.auth.signInWithOAuth('apple', {
+        redirect_uri: window.location.origin,
+      });
+
+      if (result?.error) throw result.error;
+    } catch (err: unknown) {
+      setError(getErrorText(err, 'Apple inloggen is mislukt. Probeer het opnieuw.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0e1a' }}>
       <div className="w-full max-w-sm p-8 rounded-xl" style={{ background: '#151b2e', border: '1px solid #1e293b' }}>
