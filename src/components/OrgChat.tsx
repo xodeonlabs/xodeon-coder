@@ -5,6 +5,7 @@ import { Send, Check, CheckCheck, Gamepad2 } from 'lucide-react';
 import { SnakeGame } from '@/components/SnakeGame';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { getCached, setCache, CACHE_TTL } from '@/lib/cache';
+import { censorText } from '@/lib/profanity-filter';
 
 interface OrgChatMessage {
   id: string;
@@ -222,7 +223,7 @@ export function OrgChat({ organizationId }: OrgChatProps) {
                         : 'bg-secondary text-secondary-foreground'
                     }`}
                   >
-                    {msg.content}
+                    {censorText(msg.content)}
                   </div>
                   <div className="flex items-center gap-1 mt-0.5 px-1">
                     <span className="text-[9px] text-muted-foreground">

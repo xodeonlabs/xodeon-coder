@@ -8,6 +8,7 @@ import { ArrowLeft, Send, Plus, Users, Hash, UserPlus, Trash2, X, Search, Gamepa
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { SnakeGame } from '@/components/SnakeGame';
 import { StatusDot, getOnlineStatus } from '@/components/StatusDot';
+import { censorText } from '@/lib/profanity-filter';
 
 interface ChatGroup {
   id: string;
@@ -524,7 +525,7 @@ export default function GroupChats() {
                             ? 'bg-primary text-primary-foreground rounded-br-md'
                             : 'bg-secondary/60 text-foreground rounded-bl-md'
                         }`}>
-                          {msg.content}
+                          {censorText(msg.content)}
                         </div>
                         {isMine && totalOthers > 0 && (
                           <div className="flex items-center gap-1 mt-0.5 px-1">

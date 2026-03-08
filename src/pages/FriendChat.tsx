@@ -6,6 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ArrowLeft, Send, MessageCircle, Gamepad2 } from 'lucide-react';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { SnakeGame } from '@/components/SnakeGame';
+import { censorText } from '@/lib/profanity-filter';
 import { StatusDot, getOnlineStatus } from '@/components/StatusDot';
 import { useLastSeen } from '@/hooks/useLastSeen';
 
@@ -357,7 +358,7 @@ export default function FriendChatPage() {
                             : 'bg-secondary/60 text-foreground rounded-bl-md'
                         }`}
                       >
-                        {msg.content}
+                        {censorText(msg.content)}
                       </div>
                     </div>
                   </div>
