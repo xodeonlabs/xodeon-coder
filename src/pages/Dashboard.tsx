@@ -145,6 +145,34 @@ export default function Dashboard() {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [contractAppId, setContractAppId] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [pinnedAppIds, setPinnedAppIds] = useState<string[]>([]);
+
+  // Load pinned apps
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    supabase.from('pinned_apps' as any).select('app_id, sort_order').eq('user_id', session.user.id).order('sort_order').then(({ data }) => {
+      if (data) setPinnedAppIds((data as any[]).map((p: any) => p.app_id));
+    });
+  }, [session?.user?.id]);
+
+  const togglePin = async (appId: string) => {
+    if (!session?.user?.id) return;
+    if (pinnedAppIds.includes(appId)) {
+      await supabase.from('pinned_apps' as any).delete().eq('user_id', session.user.id).eq('app_id', appId);
+      setPinnedAppIds(prev => prev.filter(id => id !== appId));
+      window.dispatchEvent(new Event('pinned-apps-changed'));
+      toast({ title: 'App losgemaakt' });
+    } else {
+      if (pinnedAppIds.length >= 3) {
+        toast({ title: 'Maximum 3 apps', description: 'Maak eerst een andere app los.', variant: 'destructive' });
+        return;
+      }
+      await supabase.from('pinned_apps' as any).insert({ user_id: session.user.id, app_id: appId, sort_order: pinnedAppIds.length } as any);
+      setPinnedAppIds(prev => [...prev, appId]);
+      window.dispatchEvent(new Event('pinned-apps-changed'));
+      toast({ title: 'App vastgepind!' });
+    }
+  };
 
   useEffect(() => {
     async function loadCoins() {
