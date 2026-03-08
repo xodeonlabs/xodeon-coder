@@ -85,7 +85,7 @@ export function createRuntime(): NGCRuntime {
   const variables: Record<string, string> = saved?.variables ?? {};
   const lists: Record<string, string[]> = saved?.lists ?? {};
   const data: Record<string, DataRecord[]> = saved?.data ?? {};
-  const coins: Record<string, number> = saved?.coins ?? {};
+  const coins: Record<string, number> = saved?.coins ?? { wallet: 100 };
   const coinCodes: Record<string, CoinCode[]> = saved?.coinCodes ?? {};
 
   const save = () => saveState(variables, lists, data, coins, coinCodes);
