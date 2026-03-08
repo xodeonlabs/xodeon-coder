@@ -723,6 +723,18 @@ export default function OrganizationPage() {
               <Users className="h-5 w-5 text-primary" />
               Leden van {selectedOrg.name}
             </h3>
+            {/* Bio */}
+            {(selectedOrg.bio || selectedOrg.owner_id === session?.user?.id || members.find(m => m.user_id === session?.user?.id && (m.role === 'owner' || m.role === 'admin'))) && (
+              <OrgBioSection
+                bio={selectedOrg.bio || ''}
+                canEdit={selectedOrg.owner_id === session?.user?.id || !!members.find(m => m.user_id === session?.user?.id && (m.role === 'owner' || m.role === 'admin'))}
+                onSave={async (newBio: string) => {
+                  const { error } = await supabase.from('organizations').update({ bio: newBio } as any).eq('id', selectedOrg.id);
+                  if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
+                  else { setSelectedOrg({ ...selectedOrg, bio: newBio }); toast({ title: '✅ Bio opgeslagen!' }); }
+                }}
+              />
+            )}
             <p className="text-sm text-muted-foreground mb-6">
               Deel de code <span className="font-mono bg-secondary px-2 py-0.5 rounded text-foreground">{selectedOrg.join_code}</span> om anderen uit te nodigen.
             </p>
