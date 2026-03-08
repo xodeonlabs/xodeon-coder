@@ -73,6 +73,10 @@ export default function Dashboard() {
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [editingNameValue, setEditingNameValue] = useState('');
   const [orgs, setOrgs] = useState<Org[]>([]);
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false);
+  const [templateName, setTemplateName] = useState('');
+  const [templateDesc, setTemplateDesc] = useState('');
+  const [creatingTemplate, setCreatingTemplate] = useState(false);
 
   useEffect(() => { fetchApps(); fetchOrgs(); }, []);
 
