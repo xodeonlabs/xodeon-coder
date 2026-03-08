@@ -14,6 +14,7 @@ interface Template {
   category: string;
   downloads: number;
   is_published: boolean;
+  visibility: string;
   created_at: string;
 }
 
