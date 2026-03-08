@@ -13,6 +13,7 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, SidebarTrigger, useSidebar,
 } from '@/components/ui/sidebar';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
+import { AppIcon } from '@/components/IconPicker';
 
 const NAV_ITEMS = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard },
