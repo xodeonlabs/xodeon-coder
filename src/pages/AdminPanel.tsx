@@ -753,7 +753,7 @@ export default function AdminPanel() {
             <Handshake className="h-4 w-4" /> Allianties
           </button>
           <button
-            onClick={() => { setTab('templates'); loadAdminTemplates(); }}
+            onClick={() => { setTab('templates'); loadAdminTemplates(); loadAdminCategories(); }}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'templates' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
             <BookTemplate className="h-4 w-4" /> Templates
