@@ -540,6 +540,12 @@ export default function OrganizationPage() {
           >
             <LogIn className="h-4 w-4" /> Bedrijf joinen
           </button>
+          <button
+            onClick={() => { setShowApply(true); setShowCreate(false); setShowJoin(false); loadPublicOrgs(); }}
+            disabled={orgs.length >= 3}
+            className="flex items-center justify-center gap-2 rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 text-sm font-semibold transition-all border border-border text-foreground hover:bg-secondary active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Search className="h-4 w-4" /> Solliciteren
           <div className="flex items-center gap-2 ml-auto">
             <div className="flex gap-1">
               {[0, 1, 2].map(i => (
