@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { NGCPreview } from '@/components/NGCPreview';
 import { parseNGC } from '@/lib/ngc-parser';
+import { AdBanner } from '@/components/AdBanner';
 
 const PublicApp = () => {
   const { slug } = useParams<{ slug: string }>();
