@@ -32,9 +32,9 @@ export function AdBanner({ className = '', page, organizationId }: AdBannerProps
   const navigate = useNavigate();
 
   useEffect(() => {
-    const cacheKey = CACHE_KEYS.ads(page || 'all');
+    const cacheKey = CACHE_KEYS.ads((page || 'all') + '_v2');
     const cached = getCached<Ad[]>(cacheKey, CACHE_TTL.ads);
-    if (cached) { setAds(cached); return; }
+    if (cached && cached.length > 0 && cached.some(a => !a.organization_id || a.org_name)) { setAds(cached); return; }
 
     let query = supabase
       .from('ads')
