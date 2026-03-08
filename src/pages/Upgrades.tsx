@@ -12,6 +12,7 @@ interface Org {
   owner_id: string;
   level: number;
   level_paid_until: string | null;
+  auto_pay: boolean;
   icon?: string;
 }
 
