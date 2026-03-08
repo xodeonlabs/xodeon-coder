@@ -29,11 +29,21 @@ function retentionCostPerMonth(hours: number): number {
   return blocks * 5;
 }
 
+const SECTIONS = [
+  { id: 'profile', label: 'Profiel', icon: User },
+  { id: 'social', label: 'Sociale media', icon: Share2 },
+  { id: 'email', label: 'E-mailadres', icon: Mail },
+  { id: 'password', label: 'Wachtwoord', icon: Lock },
+  { id: 'retention', label: 'Bewaartermijnen', icon: Clock },
+  { id: 'danger', label: 'Gevarenzone', icon: Trash2 },
+] as const;
+
 export default function Settings() {
   const { session } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const [activeSection, setActiveSection] = useState('profile');
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
@@ -49,6 +59,11 @@ export default function Settings() {
   const [savingPassword, setSavingPassword] = useState(false);
   const [retentionItems, setRetentionItems] = useState<RetentionItem[]>([]);
   const [retentionLoading, setRetentionLoading] = useState(true);
+
+  function scrollToSection(id: string) {
+    setActiveSection(id);
+    document.getElementById(`settings-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
   useEffect(() => {
     if (!session?.user) return;
@@ -196,9 +211,28 @@ export default function Settings() {
         <h1 className="text-base sm:text-xl font-bold text-foreground tracking-tight">Account Instellingen</h1>
       </header>
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 flex gap-8">
+        {/* Desktop sidebar navigation */}
+        <nav className="hidden lg:flex flex-col gap-1 w-52 shrink-0 sticky top-8 self-start">
+          {SECTIONS.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => scrollToSection(id)}
+              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left ${
+                activeSection === id
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+              }`}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              {label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="flex-1 min-w-0 space-y-6">
         {/* Profile section */}
-        <div className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+        <div id="settings-profile" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
           <h2 className="text-lg font-bold text-foreground mb-5 flex items-center gap-2">
             <User className="h-5 w-5 text-primary" />
             Profiel
@@ -270,7 +304,7 @@ export default function Settings() {
         </div>
 
         {/* Social media section */}
-        <div className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+        <div id="settings-social" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
           <h2 className="text-lg font-bold text-foreground mb-5 flex items-center gap-2">
             <Share2 className="h-5 w-5 text-primary" />
             Sociale media
@@ -303,7 +337,7 @@ export default function Settings() {
         </div>
 
         {/* Email section */}
-        <div className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+        <div id="settings-email" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
           <h2 className="text-lg font-bold text-foreground mb-5 flex items-center gap-2">
             <Mail className="h-5 w-5 text-primary" />
             E-mailadres
@@ -331,7 +365,7 @@ export default function Settings() {
         </div>
 
         {/* Password section */}
-        <div className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+        <div id="settings-password" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
           <h2 className="text-lg font-bold text-foreground mb-5 flex items-center gap-2">
             <Lock className="h-5 w-5 text-primary" />
             Wachtwoord wijzigen
@@ -369,7 +403,7 @@ export default function Settings() {
         </div>
 
         {/* Bewaartermijnen overzicht */}
-        <div className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+        <div id="settings-retention" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
           <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
             Bewaartermijnen
@@ -457,7 +491,7 @@ export default function Settings() {
         </div>
 
         {/* Danger zone */}
-        <div className="rounded-xl border border-destructive/30 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+        <div id="settings-danger" className="rounded-xl border border-destructive/30 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
           <h2 className="text-lg font-bold text-destructive mb-2 flex items-center gap-2">
             <Trash2 className="h-5 w-5" />
             Gevarenzone
@@ -470,6 +504,7 @@ export default function Settings() {
             <Trash2 className="h-3.5 w-3.5" />
             Account verwijderen
           </button>
+        </div>
         </div>
       </div>
     </div>
