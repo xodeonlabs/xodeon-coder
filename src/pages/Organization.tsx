@@ -42,6 +42,61 @@ interface OrgCoin {
   balance: number;
   updated_at: string;
 }
+function OrgBioSection({ bio, canEdit, onSave }: { bio: string; canEdit: boolean; onSave: (bio: string) => Promise<void> }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(bio);
+  const [saving, setSaving] = useState(false);
+
+  if (!canEdit && !bio) return null;
+
+  return (
+    <div className="mb-4">
+      {editing ? (
+        <div className="space-y-2">
+          <textarea
+            autoFocus
+            value={value}
+            onChange={e => setValue(e.target.value)}
+            placeholder="Schrijf een korte beschrijving over dit bedrijf..."
+            rows={3}
+            maxLength={500}
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+          />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={async () => { setSaving(true); await onSave(value.trim()); setSaving(false); setEditing(false); }}
+              disabled={saving}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors"
+            >
+              {saving ? 'Opslaan...' : 'Opslaan'}
+            </button>
+            <button onClick={() => { setValue(bio); setEditing(false); }} className="px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
+              Annuleren
+            </button>
+            <span className="text-[10px] text-muted-foreground ml-auto">{value.length}/500</span>
+          </div>
+        </div>
+      ) : (
+        <div className="group">
+          {bio ? (
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {bio}
+              {canEdit && (
+                <button onClick={() => setEditing(true)} className="ml-2 text-[10px] text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                  Bewerken
+                </button>
+              )}
+            </p>
+          ) : canEdit ? (
+            <button onClick={() => setEditing(true)} className="text-xs text-muted-foreground hover:text-primary transition-colors">
+              + Bio toevoegen
+            </button>
+          ) : null}
+        </div>
+      )}
+    </div>
+  );
+}
 
 
 export default function OrganizationPage() {
