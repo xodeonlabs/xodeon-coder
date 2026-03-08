@@ -94,9 +94,20 @@ const PublicApp = () => {
         style={{ background: 'hsl(var(--ide-toolbar))', borderBottom: '1px solid hsl(var(--border))' }}
       >
         <span className="text-xs font-medium text-foreground">{appName}</span>
-        <div className="flex items-center gap-1.5">
-          <div className="h-4 w-4 rounded-sm overflow-hidden shrink-0"><img src="/ngc-logo.png" alt="NGC" className="h-full w-full object-cover" /></div>
-          <span className="text-[10px] text-muted-foreground">NGC Studio</span>
+        <div className="flex items-center gap-2">
+          {session?.user?.id && (
+            <button
+              onClick={togglePin}
+              className={`p-1 rounded-md transition-colors ${isPinned ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+              title={isPinned ? 'Losmaken' : 'Vastpinnen'}
+            >
+              {isPinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+            </button>
+          )}
+          <div className="flex items-center gap-1.5">
+            <div className="h-4 w-4 rounded-sm overflow-hidden shrink-0"><img src="/ngc-logo.png" alt="NGC" className="h-full w-full object-cover" /></div>
+            <span className="text-[10px] text-muted-foreground">NGC Studio</span>
+          </div>
         </div>
       </div>
       {orgId && (
