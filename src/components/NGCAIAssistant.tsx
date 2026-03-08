@@ -469,7 +469,6 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
             </div>
           );
         })()}
-        )}
 
         <div ref={bottomRef} />
       </div>
