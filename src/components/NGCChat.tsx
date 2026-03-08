@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Send } from 'lucide-react';
 import { getCached, setCache, CACHE_TTL } from '@/lib/cache';
+import { censorText } from '@/lib/profanity-filter';
 
 interface ChatMessage {
   id: string;
