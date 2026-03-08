@@ -370,7 +370,7 @@ export default function Dashboard() {
     if (!confirm(`Weet je zeker dat je \"${name}\" wilt verwijderen?`)) return;
     const { error } = await supabase.from('apps').delete().eq('id', id);
     if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
-    else { setApps(apps.filter(a => a.id !== id)); toast({ title: 'Verwijderd' }); }
+    else { setApps(apps.filter(a => a.id !== id)); clearCache(CACHE_KEYS.apps(session?.user?.id || '')); toast({ title: 'Verwijderd' }); }
   }
 
   async function togglePublic(app: App) {
