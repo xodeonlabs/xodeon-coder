@@ -9,7 +9,7 @@ import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { OrgChat } from '@/components/OrgChat';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
-import { AdBanner } from '@/components/AdBanner';
+
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { getCached, setCache, clearCache, CACHE_TTL } from '@/lib/cache';
 
@@ -613,7 +613,7 @@ export default function OrganizationPage() {
       </header>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
-        <AdBanner className="mb-6" page="organizations" />
+        
         {/* Actions */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mb-6 sm:mb-10">
           <button
