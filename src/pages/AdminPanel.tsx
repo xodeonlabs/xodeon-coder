@@ -177,7 +177,30 @@ export default function AdminPanel() {
     setAddingRole(false);
   }
 
-  function getUserEmail(userId: string) {
+  async function manageUser(userId: string, action: 'ban' | 'unban' | 'delete') {
+    setManagingUser(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-manage-user', {
+        body: { target_user_id: userId, action },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const messages = { ban: 'Gebruiker geblokkeerd', unban: 'Gebruiker gedeblokkeerd', delete: 'Gebruiker verwijderd' };
+      toast({ title: messages[action] });
+      setConfirmAction(null);
+      fetchAll();
+    } catch (e: any) {
+      toast({ title: 'Fout', description: e.message, variant: 'destructive' });
+    }
+    setManagingUser(false);
+  }
+
+  function isUserBanned(userId: string): boolean {
+    const authUser = authUsers.find(u => u.id === userId);
+    return !!(authUser as any)?.banned_until && new Date((authUser as any).banned_until) > new Date();
+  }
+
     return authUsers.find(u => u.id === userId)?.email || null;
   }
 
