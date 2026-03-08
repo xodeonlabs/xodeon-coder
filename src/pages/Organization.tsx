@@ -67,6 +67,15 @@ export default function OrganizationPage() {
   const [txProcessing, setTxProcessing] = useState(false);
   const [iconPickerOrgId, setIconPickerOrgId] = useState<string | null>(null);
 
+  // Ad management
+  const [orgAd, setOrgAd] = useState<{ id: string; emoji: string; title: string; description: string; url: string } | null>(null);
+  const [showAdForm, setShowAdForm] = useState(false);
+  const [adEmoji, setAdEmoji] = useState('🚀');
+  const [adTitle, setAdTitle] = useState('');
+  const [adDescription, setAdDescription] = useState('');
+  const [adUrl, setAdUrl] = useState('');
+  const [adSaving, setAdSaving] = useState(false);
+
   useEffect(() => { fetchOrgs(); }, []);
 
   async function fetchOrgs() {
