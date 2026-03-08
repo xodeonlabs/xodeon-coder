@@ -16,7 +16,7 @@ const PublicApp = () => {
     if (!slug) return;
     supabase
       .from('apps')
-      .select('id, ngc_code, name')
+      .select('id, ngc_code, name, organization_id')
       .eq('slug', slug)
       .eq('is_public', true)
       .single()
