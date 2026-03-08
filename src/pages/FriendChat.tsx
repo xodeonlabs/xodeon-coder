@@ -6,7 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ArrowLeft, Send, MessageCircle, Gamepad2 } from 'lucide-react';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { SnakeGame } from '@/components/SnakeGame';
-import { StatusDot, getOnlineStatus } from '@/components/StatusDot';
+import { StatusDot, getOnlineStatus, getLastSeenText } from '@/components/StatusDot';
 
 interface ChatFriend {
   id: string;
@@ -234,7 +234,7 @@ export default function FriendChatPage() {
               </div>
               <div className="min-w-0">
                 <h2 className="text-sm font-bold text-foreground truncate">{selectedFriend.display_name || 'Anoniem'}</h2>
-                {selectedFriend.username && <p className="text-[11px] text-muted-foreground">@{selectedFriend.username}</p>}
+                <p className="text-[10px] text-muted-foreground">{getLastSeenText(getOnlineStatus((selectedFriend as any).is_dnd ?? false, (selectedFriend as any).last_seen_at), (selectedFriend as any).last_seen_at)}</p>
               </div>
             </div>
           ) : (

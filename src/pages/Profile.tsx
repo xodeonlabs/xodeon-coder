@@ -8,7 +8,7 @@ import { ArrowLeft, Calendar, Code2, Users, Eye, ExternalLink, Settings, Sparkle
 import { FriendButton } from '@/components/FriendButton';
 import { FriendsList } from '@/components/FriendsList';
 import { ActivityTimeline } from '@/components/ActivityTimeline';
-import { StatusDot, getOnlineStatus } from '@/components/StatusDot';
+import { StatusDot, getOnlineStatus, getLastSeenText } from '@/components/StatusDot';
 import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -304,6 +304,10 @@ export default function Profile() {
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground font-display tracking-tight">
                 {profile?.display_name || 'Anonieme gebruiker'}
               </h1>
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5 justify-center sm:justify-start mt-1">
+                <span className={`inline-block h-2 w-2 rounded-full ${getOnlineStatus(profile?.is_dnd ?? false, (profile as any)?.last_seen_at) === 'online' ? 'bg-emerald-500' : getOnlineStatus(profile?.is_dnd ?? false, (profile as any)?.last_seen_at) === 'dnd' ? 'bg-destructive' : 'bg-muted-foreground/50'}`} />
+                {getLastSeenText(getOnlineStatus(profile?.is_dnd ?? false, (profile as any)?.last_seen_at), (profile as any)?.last_seen_at)}
+              </p>
               <p className="text-sm text-muted-foreground flex items-center gap-1.5 justify-center sm:justify-start mt-1.5">
                 <Calendar className="h-3.5 w-3.5" />
                 Lid sinds {memberSince}
