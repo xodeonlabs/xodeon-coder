@@ -589,7 +589,16 @@ export default function Alliances() {
                       return (
                         <div key={m.id} className="flex items-center gap-3 py-2">
                           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/15 to-accent/5 border border-primary/10 flex items-center justify-center text-sm">
-                            {org?.icon || '🏢'}
+                            {(() => {
+                              const iconName = org?.icon;
+                              if (!iconName) return '🏢';
+                              // Check if it's an emoji (not a lucide name)
+                              if (/\p{Emoji}/u.test(iconName) && !iconName.match(/^[a-z-]+$/)) return iconName;
+                              // Render lucide icon
+                              const pascalName = iconName.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('') as keyof typeof icons;
+                              const LucideIcon = icons[pascalName];
+                              return LucideIcon ? <LucideIcon className="h-4 w-4 text-primary" /> : '🏢';
+                            })()}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-foreground truncate">{org?.name || 'Onbekend'}</p>
