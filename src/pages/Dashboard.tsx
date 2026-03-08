@@ -490,6 +490,7 @@ export default function Dashboard() {
       } as any).eq('id', contractId);
       toast({ title: 'Contract afgewezen' });
     }
+    clearCache(CACHE_KEYS.contracts(session?.user?.id || ''));
     fetchContracts();
   }
 
