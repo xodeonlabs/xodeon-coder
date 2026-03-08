@@ -471,7 +471,7 @@ export default function Alliances() {
                             <p className="text-sm font-medium text-foreground truncate">{org?.name || 'Onbekend'}</p>
                             <p className="text-[10px] text-muted-foreground">Lid sinds {new Date(m.joined_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                           </div>
-                          {isAdmin && (
+                          {isOrgOwner && (
                             <button
                               onClick={() => removeOrgFromAlliance(m.id)}
                               className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
