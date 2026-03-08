@@ -254,8 +254,22 @@ export default function OrganizationPage() {
       }
     }
 
+    // Show confirmation dialog before proceeding
+    const description = type === 'deposit'
+      ? `${amount} coins storten naar ${selectedOrg.name}`
+      : `${amount} coins opnemen uit ${selectedOrg.name}`;
+
+    setCoinConfirm({
+      open: true,
+      amount,
+      description,
+      onConfirm: () => executeCoinTransaction(type, amount),
+    });
+  }
+
+  async function executeCoinTransaction(type: 'deposit' | 'withdraw', amount: number) {
+    if (!selectedOrg || !session?.user?.id) return;
     setTxProcessing(true);
-    try {
       // Get or create coin record
       let coin = orgCoins.find(c => c.name === 'coins');
       if (!coin) {
