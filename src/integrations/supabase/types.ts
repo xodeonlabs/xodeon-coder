@@ -898,7 +898,7 @@ export type Database = {
       join_organization_by_code: { Args: { _code: string }; Returns: string }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "owner"
       org_role: "owner" | "admin" | "member"
     }
     CompositeTypes: {
@@ -1027,7 +1027,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "owner"],
       org_role: ["owner", "admin", "member"],
     },
   },

@@ -47,7 +47,7 @@ interface AuthUser {
 interface UserRoleRow {
   id: string;
   user_id: string;
-  role: 'admin' | 'moderator' | 'user';
+  role: 'owner' | 'admin' | 'moderator' | 'user';
 }
 
 interface AppRow {
@@ -148,7 +148,7 @@ export default function AdminPanel() {
       .from('user_roles')
       .select('role')
       .eq('user_id', session.user.id)
-      .eq('role', 'admin' as any);
+      .in('role', ['admin', 'owner'] as any[]);
     const hasAdmin = (data && data.length > 0);
     setIsAdmin(hasAdmin);
     if (hasAdmin) fetchAll();
@@ -344,12 +344,16 @@ export default function AdminPanel() {
   }
 
   async function removeRole(roleId: string) {
+    const role = roles.find(r => r.id === roleId);
+    if (role?.role === 'owner') {
+      toast({ title: 'Niet toegestaan', description: 'De owner rol kan niet worden verwijderd.', variant: 'destructive' });
+      return;
+    }
     const { error } = await supabase.from('user_roles').delete().eq('id', roleId);
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
-      const roleName = roles.find(r => r.id === roleId);
-      await logAction('Rol verwijderd', 'user', roleName?.user_id, `Rol: ${roleName?.role}`);
+      await logAction('Rol verwijderd', 'user', role?.user_id, `Rol: ${role?.role}`);
       setRoles(roles.filter(r => r.id !== roleId));
       toast({ title: 'Rol verwijderd' });
     }
@@ -415,12 +419,14 @@ export default function AdminPanel() {
   }
 
   const roleIcon = (role: string) => {
+    if (role === 'owner') return <Crown className="h-4 w-4 text-amber-500" />;
     if (role === 'admin') return <Crown className="h-4 w-4 text-yellow-400" />;
     if (role === 'moderator') return <ShieldCheck className="h-4 w-4 text-primary" />;
     return <User className="h-4 w-4 text-muted-foreground" />;
   };
 
   const roleLabel = (role: string) => {
+    if (role === 'owner') return 'Owner';
     if (role === 'admin') return 'Admin';
     if (role === 'moderator') return 'Moderator';
     return 'Gebruiker';
@@ -726,13 +732,15 @@ export default function AdminPanel() {
                         {userRoles.length === 0 && (
                           <span className="text-xs text-muted-foreground italic">Geen rollen</span>
                         )}
-                        {userRoles.map(r => (
+                          {userRoles.map(r => (
                           <div key={r.id} className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-secondary text-xs font-medium text-foreground">
                             {roleIcon(r.role)}
                             {roleLabel(r.role)}
-                            <button onClick={() => removeRole(r.id)} className="ml-1 text-muted-foreground hover:text-destructive transition-colors">
-                              <Trash2 className="h-3 w-3" />
-                            </button>
+                            {r.role !== 'owner' && (
+                              <button onClick={() => removeRole(r.id)} className="ml-1 text-muted-foreground hover:text-destructive transition-colors">
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            )}
                           </div>
                         ))}
                         {isUserBanned(profile.id) && (
