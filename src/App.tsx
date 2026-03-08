@@ -13,6 +13,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Preview from "./pages/Preview";
 import Guest from "./pages/Guest";
 import PublicApp from "./pages/PublicApp";
+import Templates from "./pages/Templates";
 import Settings from "./pages/Settings";
 import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
           <Route path="/editor/:appId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/preview/:appId" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
+          <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
           <Route path="/app/:slug" element={<PublicApp />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
