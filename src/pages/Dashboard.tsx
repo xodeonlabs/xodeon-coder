@@ -141,12 +141,17 @@ export default function Dashboard() {
   useEffect(() => {
     async function loadCoins() {
       if (!session?.user?.id) return;
+      const cached = getCached<number>(CACHE_KEYS.coins(session.user.id), CACHE_TTL.short);
+      if (cached !== null) { setTotalCoins(cached); return; }
       const { data } = await supabase.from('user_coins' as any).select('balance').eq('user_id', session.user.id).maybeSingle();
       if (data) {
-        setTotalCoins((data as any).balance ?? 100);
+        const bal = (data as any).balance ?? 100;
+        setTotalCoins(bal);
+        setCache(CACHE_KEYS.coins(session.user.id), bal);
       } else {
         await supabase.from('user_coins' as any).insert({ user_id: session.user.id, balance: 100 } as any);
         setTotalCoins(100);
+        setCache(CACHE_KEYS.coins(session.user.id), 100);
       }
     }
     loadCoins();
