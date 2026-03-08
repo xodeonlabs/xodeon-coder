@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useSwipe } from '@/hooks/useSwipe';
-import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Plus, Code, MousePointer, History } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Plus, Code, MousePointer, History, Maximize, Minimize, Eye, Copy, Undo2, FileCode } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { NGCCodeEditor } from '@/components/NGCCodeEditor';
@@ -12,6 +12,8 @@ import { NGCContextMenu } from '@/components/NGCContextMenu';
 import { NGCToolbar } from '@/components/NGCToolbar';
 import { NGCDesigner } from '@/components/NGCDesigner';
 import { NGCVersionPanel } from '@/components/NGCVersionPanel';
+import { CommandPalette } from '@/components/CommandPalette';
+import { StatusBar } from '@/components/StatusBar';
 import { parseNGC, astToNGC } from '@/lib/ngc-parser';
 import { NGCNode, NGCNodeType, DEFAULT_PROPERTIES, generateId } from '@/lib/ngc-ast';
 import { splitCodeIntoSections, mergeSections, CodeSection } from '@/lib/ngc-code-sections';
@@ -103,6 +105,15 @@ const Index = () => {
 
   const isRemoteUpdate = useRef(false);
 
+  // Feature states
+  const [zenMode, setZenMode] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [undoStack, setUndoStack] = useState<string[]>([]);
+  const undoRef = useRef<string[]>([]);
+
   // Swipe gestures for mobile panel toggling
   const leftPanelSwipe = useSwipe(
     () => setLeftOpen(false),  // swipe left → close left panel
@@ -173,18 +184,108 @@ const Index = () => {
   const saveNow = useCallback(async () => {
     if (!appId) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
+    setSaveStatus('saving');
     await supabase.from('apps').update({ ngc_code: code }).eq('id', appId);
-  }, [code, appId]);
+    setSaveStatus('saved');
+    setLastSaved(new Date());
+    toast({ title: '✓ Opgeslagen', description: 'Je code is opgeslagen', duration: 1500 });
+  }, [code, appId, toast]);
 
   // Auto-save to database with debounce (skip remote updates)
   useEffect(() => {
     if (loading || !appId || isRemoteUpdate.current) return;
+    setSaveStatus('unsaved');
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => {
-      supabase.from('apps').update({ ngc_code: code }).eq('id', appId);
+    saveTimer.current = setTimeout(async () => {
+      setSaveStatus('saving');
+      await supabase.from('apps').update({ ngc_code: code }).eq('id', appId);
+      setSaveStatus('saved');
+      setLastSaved(new Date());
     }, 1500);
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
   }, [code, appId, loading]);
+
+  // Undo tracking — push to stack on code changes (debounced)
+  useEffect(() => {
+    if (loading) return;
+    const timer = setTimeout(() => {
+      const stack = undoRef.current;
+      if (stack.length === 0 || stack[stack.length - 1] !== code) {
+        const newStack = [...stack.slice(-50), code];
+        undoRef.current = newStack;
+        setUndoStack(newStack);
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [code, loading]);
+
+  const handleUndo = useCallback(() => {
+    const stack = undoRef.current;
+    if (stack.length < 2) return;
+    const prev = stack[stack.length - 2];
+    undoRef.current = stack.slice(0, -1);
+    setUndoStack(undoRef.current);
+    setCode(prev);
+  }, []);
+
+  // Copy code to clipboard
+  const handleCopyCode = useCallback(async () => {
+    await navigator.clipboard.writeText(code);
+    toast({ title: '📋 Gekopieerd', description: 'Code naar klembord gekopieerd', duration: 1500 });
+  }, [code, toast]);
+
+  // Fullscreen toggle
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  }, []);
+
+  // Zen mode — hide all panels
+  const toggleZenMode = useCallback(() => {
+    setZenMode(z => {
+      if (!z) {
+        setLeftOpen(false);
+        setRightOpen(false);
+      } else {
+        setLeftOpen(true);
+        setRightOpen(true);
+      }
+      return !z;
+    });
+  }, []);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // Ctrl+S — save
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        saveNow();
+      }
+      // Ctrl+K — command palette
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(o => !o);
+      }
+      // Ctrl+Z — undo (only when not in textarea)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !(e.target instanceof HTMLTextAreaElement)) {
+        e.preventDefault();
+        handleUndo();
+      }
+      // Escape — close zen mode
+      if (e.key === 'Escape' && zenMode) {
+        toggleZenMode();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [saveNow, handleUndo, zenMode, toggleZenMode]);
+
 
   const parseResult = useMemo(() => parseNGC(code), [code]);
   const { ast, errors } = parseResult;
@@ -221,6 +322,35 @@ const Index = () => {
       setActiveTab(`page_${existingNames.length}_${newPageName}`);
     }, 50);
   }, [sections]);
+
+  // Command palette items
+  const commandItems = useMemo(() => {
+    const items: { id: string; label: string; category: string; icon: JSX.Element; action: () => void }[] = [];
+    const pageNodes = ast?.children.filter(c => c.type === 'Page') ?? [];
+    pageNodes.forEach((p, i) => {
+      items.push({
+        id: `page-${i}`,
+        label: `Ga naar ${p.name}`,
+        category: 'Pagina',
+        icon: <FileCode className="h-4 w-4" />,
+        action: () => {
+          const section = sections.find(s => s.label === p.name);
+          if (section) setActiveTab(section.id);
+        },
+      });
+    });
+    items.push(
+      { id: 'zen', label: zenMode ? 'Zen mode uit' : 'Zen mode aan', category: 'Weergave', icon: <Eye className="h-4 w-4" />, action: toggleZenMode },
+      { id: 'fullscreen', label: isFullscreen ? 'Volledig scherm uit' : 'Volledig scherm', category: 'Weergave', icon: <Maximize className="h-4 w-4" />, action: toggleFullscreen },
+      { id: 'copy', label: 'Kopieer alle code', category: 'Bewerken', icon: <Copy className="h-4 w-4" />, action: handleCopyCode },
+      { id: 'undo', label: 'Ongedaan maken', category: 'Bewerken', icon: <Undo2 className="h-4 w-4" />, action: handleUndo },
+      { id: 'save', label: 'Nu opslaan', category: 'Bestand', icon: <FileCode className="h-4 w-4" />, action: () => { saveNow(); } },
+      { id: 'code-mode', label: 'Code modus', category: 'Modus', icon: <Code className="h-4 w-4" />, action: () => setEditorMode('code') },
+      { id: 'design-mode', label: 'Ontwerp modus', category: 'Modus', icon: <MousePointer className="h-4 w-4" />, action: () => setEditorMode('design') },
+      { id: 'new-page', label: 'Nieuwe pagina toevoegen', category: 'Bewerken', icon: <Plus className="h-4 w-4" />, action: handleAddPage },
+    );
+    return items;
+  }, [ast, sections, zenMode, isFullscreen, toggleZenMode, toggleFullscreen, handleCopyCode, handleUndo, saveNow, handleAddPage]);
 
   const selectedNode = useMemo(() => {
     if (!ast || !selectedId) return null;
@@ -535,6 +665,25 @@ const Index = () => {
               </button>
             </div>
 
+            {/* Quick action buttons */}
+            <div className="flex items-center border-r border-border shrink-0 gap-0.5 px-1">
+              <button onClick={toggleZenMode} className={`p-1.5 rounded text-[10px] transition-colors ${zenMode ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`} title="Zen mode (Esc)">
+                <Eye className="h-3 w-3" />
+              </button>
+              <button onClick={toggleFullscreen} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors" title="Volledig scherm">
+                {isFullscreen ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
+              </button>
+              <button onClick={handleCopyCode} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors" title="Kopieer code">
+                <Copy className="h-3 w-3" />
+              </button>
+              <button onClick={handleUndo} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30" title="Ongedaan maken (Ctrl+Z)" disabled={undoStack.length < 2}>
+                <Undo2 className="h-3 w-3" />
+              </button>
+              <button onClick={() => setCommandPaletteOpen(true)} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors" title="Commandopalet (Ctrl+K)">
+                <span className="text-[10px] font-mono">⌘K</span>
+              </button>
+            </div>
+
             {editorMode === 'code' && (
               <>
                 {sections.map(section => (
@@ -621,6 +770,12 @@ const Index = () => {
           )}
         </div>
       </div>
+
+      {/* Status Bar */}
+      <StatusBar code={code} saveStatus={saveStatus} lastSaved={lastSaved} />
+
+      {/* Command Palette */}
+      <CommandPalette open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} items={commandItems} />
 
       {/* Context Menu */}
       {contextMenu && contextNode && (
