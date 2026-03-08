@@ -523,6 +523,7 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
                 runtime={runtime}
                 onRuntimeChange={handleRuntimeChange}
                 onNavigate={handleNavigate}
+                coinHandlers={coinHandlers}
               />
             ))}
           </div>
