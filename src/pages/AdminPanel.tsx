@@ -809,82 +809,146 @@ export default function AdminPanel() {
         {/* Chats tab */}
         {tab === 'chats' && (
           <div className="space-y-6">
-            {/* App chats */}
+            {/* App chats grouped by app */}
             <div>
               <h3 className="text-sm font-bold text-foreground flex items-center gap-2 mb-3">
                 <AppWindow className="h-4 w-4 text-primary" /> App Chats ({appChats.length})
               </h3>
-              {appChats.length > 0 ? (
-                <div className="rounded-xl border border-border/50 overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
-                  <div className="max-h-[400px] overflow-y-auto divide-y divide-border/30">
-                    {appChats.map(msg => {
-                      const appName = apps.find(a => a.id === msg.app_id)?.name || msg.app_id?.slice(0, 8);
-                      const timeStr = new Date(msg.created_at).toLocaleString('nl-NL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-                      return (
-                        <div key={msg.id} className="px-4 py-2.5 flex items-start gap-3">
-                          <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                            <MessageCircle className="h-3.5 w-3.5 text-primary" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-xs font-semibold text-foreground">{msg.user_email || 'Onbekend'}</span>
-                              <span className="text-[10px] text-muted-foreground">in</span>
-                              <span className="text-[10px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded">{appName}</span>
-                              <span className="text-[10px] text-muted-foreground ml-auto shrink-0">{timeStr}</span>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-0.5 break-words">{msg.content}</p>
-                          </div>
-                        </div>
-                      );
-                    })}
+              {(() => {
+                const grouped: Record<string, any[]> = {};
+                appChats.forEach(msg => {
+                  if (!grouped[msg.app_id]) grouped[msg.app_id] = [];
+                  grouped[msg.app_id].push(msg);
+                });
+                const appIds = Object.keys(grouped);
+                if (appIds.length === 0) return (
+                  <div className="rounded-xl border border-border/50 p-8 text-center" style={{ background: 'hsl(var(--card))' }}>
+                    <MessageCircle className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">Geen app-chatberichten gevonden.</p>
                   </div>
-                </div>
-              ) : (
-                <div className="rounded-xl border border-border/50 p-8 text-center" style={{ background: 'hsl(var(--card))' }}>
-                  <MessageCircle className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground">Geen app-chatberichten gevonden.</p>
-                </div>
-              )}
+                );
+                return appIds.map(appId => {
+                  const appName = apps.find(a => a.id === appId)?.name || appId.slice(0, 8);
+                  const msgs = grouped[appId].sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+                  const replyKey = `app-${appId}`;
+                  return (
+                    <div key={appId} className="rounded-xl border border-border/50 overflow-hidden mb-3" style={{ background: 'hsl(var(--card))' }}>
+                      <div className="px-4 py-2 border-b border-border/30 flex items-center gap-2">
+                        <AppWindow className="h-3.5 w-3.5 text-primary" />
+                        <span className="text-xs font-semibold text-foreground">{appName}</span>
+                      </div>
+                      <div className="max-h-[300px] overflow-y-auto divide-y divide-border/30">
+                        {msgs.map((msg: any) => {
+                          const timeStr = new Date(msg.created_at).toLocaleString('nl-NL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                          return (
+                            <div key={msg.id} className="px-4 py-2 flex items-start gap-3">
+                              <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                                <MessageCircle className="h-3 w-3 text-primary" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[11px] font-semibold text-foreground">{msg.user_email || 'Onbekend'}</span>
+                                  <span className="text-[10px] text-muted-foreground ml-auto">{timeStr}</span>
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-0.5 break-words">{msg.content}</p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="border-t border-border/30 p-2 flex gap-1.5">
+                        <input
+                          className="flex-1 rounded-lg bg-background border border-border px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                          placeholder="Typ een bericht als admin..."
+                          value={chatReplyInputs[replyKey] || ''}
+                          onChange={e => setChatReplyInputs(prev => ({ ...prev, [replyKey]: e.target.value }))}
+                          onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleAdminChatSend('app', appId, replyKey)}
+                          disabled={chatSending === replyKey}
+                        />
+                        <button
+                          onClick={() => handleAdminChatSend('app', appId, replyKey)}
+                          disabled={chatSending === replyKey || !(chatReplyInputs[replyKey] || '').trim()}
+                          className="rounded-lg p-1.5 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors"
+                        >
+                          <Send className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
             </div>
 
-            {/* Org chats */}
+            {/* Org chats grouped by org */}
             <div>
               <h3 className="text-sm font-bold text-foreground flex items-center gap-2 mb-3">
                 <Building2 className="h-4 w-4 text-primary" /> Bedrijf Chats ({orgChats.length})
               </h3>
-              {orgChats.length > 0 ? (
-                <div className="rounded-xl border border-border/50 overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
-                  <div className="max-h-[400px] overflow-y-auto divide-y divide-border/30">
-                    {orgChats.map(msg => {
-                      const orgName = orgs.find(o => o.id === msg.organization_id)?.name || msg.organization_id?.slice(0, 8);
-                      const profile = profiles.find(p => p.id === msg.user_id);
-                      const senderName = profile?.display_name || msg.user_id?.slice(0, 8);
-                      const timeStr = new Date(msg.created_at).toLocaleString('nl-NL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-                      return (
-                        <div key={msg.id} className="px-4 py-2.5 flex items-start gap-3">
-                          <div className="w-7 h-7 rounded-lg bg-secondary/60 flex items-center justify-center shrink-0 mt-0.5">
-                            <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-xs font-semibold text-foreground">{senderName}</span>
-                              <span className="text-[10px] text-muted-foreground">in</span>
-                              <span className="text-[10px] font-medium text-foreground bg-secondary px-1.5 py-0.5 rounded">{orgName}</span>
-                              <span className="text-[10px] text-muted-foreground ml-auto shrink-0">{timeStr}</span>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-0.5 break-words">{msg.content}</p>
-                          </div>
-                        </div>
-                      );
-                    })}
+              {(() => {
+                const grouped: Record<string, any[]> = {};
+                orgChats.forEach(msg => {
+                  if (!grouped[msg.organization_id]) grouped[msg.organization_id] = [];
+                  grouped[msg.organization_id].push(msg);
+                });
+                const orgIds = Object.keys(grouped);
+                if (orgIds.length === 0) return (
+                  <div className="rounded-xl border border-border/50 p-8 text-center" style={{ background: 'hsl(var(--card))' }}>
+                    <Building2 className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">Geen bedrijf-chatberichten gevonden.</p>
                   </div>
-                </div>
-              ) : (
-                <div className="rounded-xl border border-border/50 p-8 text-center" style={{ background: 'hsl(var(--card))' }}>
-                  <Building2 className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground">Geen bedrijf-chatberichten gevonden.</p>
-                </div>
-              )}
+                );
+                return orgIds.map(orgId => {
+                  const orgName = orgs.find(o => o.id === orgId)?.name || orgId.slice(0, 8);
+                  const msgs = grouped[orgId].sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+                  const replyKey = `org-${orgId}`;
+                  return (
+                    <div key={orgId} className="rounded-xl border border-border/50 overflow-hidden mb-3" style={{ background: 'hsl(var(--card))' }}>
+                      <div className="px-4 py-2 border-b border-border/30 flex items-center gap-2">
+                        <Building2 className="h-3.5 w-3.5 text-primary" />
+                        <span className="text-xs font-semibold text-foreground">{orgName}</span>
+                      </div>
+                      <div className="max-h-[300px] overflow-y-auto divide-y divide-border/30">
+                        {msgs.map((msg: any) => {
+                          const profile = profiles.find(p => p.id === msg.user_id);
+                          const senderName = profile?.display_name || msg.user_id?.slice(0, 8);
+                          const timeStr = new Date(msg.created_at).toLocaleString('nl-NL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                          return (
+                            <div key={msg.id} className="px-4 py-2 flex items-start gap-3">
+                              <div className="w-6 h-6 rounded-lg bg-secondary/60 flex items-center justify-center shrink-0 mt-0.5">
+                                <Building2 className="h-3 w-3 text-muted-foreground" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[11px] font-semibold text-foreground">{senderName}</span>
+                                  <span className="text-[10px] text-muted-foreground ml-auto">{timeStr}</span>
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-0.5 break-words">{msg.content}</p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="border-t border-border/30 p-2 flex gap-1.5">
+                        <input
+                          className="flex-1 rounded-lg bg-background border border-border px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                          placeholder="Typ een bericht als admin..."
+                          value={chatReplyInputs[replyKey] || ''}
+                          onChange={e => setChatReplyInputs(prev => ({ ...prev, [replyKey]: e.target.value }))}
+                          onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleAdminChatSend('org', orgId, replyKey)}
+                          disabled={chatSending === replyKey}
+                        />
+                        <button
+                          onClick={() => handleAdminChatSend('org', orgId, replyKey)}
+                          disabled={chatSending === replyKey || !(chatReplyInputs[replyKey] || '').trim()}
+                          className="rounded-lg p-1.5 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors"
+                        >
+                          <Send className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           </div>
         )}
