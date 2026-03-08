@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Send, Check, CheckCheck } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { getCached, setCache, CACHE_TTL } from '@/lib/cache';
 
 interface OrgChatMessage {
   id: string;
