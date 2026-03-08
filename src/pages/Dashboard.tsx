@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, Link, ExternalLink, BarChart3, Coins, Clock, Settings } from 'lucide-react';
+import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { AdBanner } from '@/components/AdBanner';
@@ -87,6 +87,7 @@ export default function Dashboard() {
   const [totalCoins, setTotalCoins] = useState(0);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [unreadOrgMessages, setUnreadOrgMessages] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     try {
@@ -101,7 +102,13 @@ export default function Dashboard() {
     } catch { /* ignore */ }
   }, []);
 
-  useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); }, []);
+  useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); checkAdminRole(); }, []);
+
+  async function checkAdminRole() {
+    if (!session?.user?.id) return;
+    const { data } = await supabase.from('user_roles').select('role').eq('user_id', session.user.id).eq('role', 'admin' as any);
+    setIsAdmin(!!(data && data.length > 0));
+  }
 
   async function fetchOrgs() {
     const { data } = await supabase.from('organizations').select('id, name').order('name');
@@ -351,6 +358,11 @@ export default function Dashboard() {
               </span>
             )}
           </button>
+          {isAdmin && (
+            <button onClick={() => navigate('/admin')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-destructive hover:text-destructive hover:bg-destructive/10 transition-all" title="Admin Paneel">
+              <Shield className="h-4 w-4" /> <span className="hidden sm:inline">Admin</span>
+            </button>
+          )}
           <button onClick={() => navigate('/settings')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all" title="Instellingen">
             <Settings className="h-4 w-4" /> <span className="hidden sm:inline">Account</span>
           </button>
