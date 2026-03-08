@@ -1009,6 +1009,23 @@ function NavBtn({ onClick, icon, label, badge, variant }: { onClick: () => void;
   );
 }
 
+function MobileNavItem({ onClick, icon, label, badge, variant }: { onClick: () => void; icon: React.ReactNode; label: string; badge?: number; variant?: 'destructive' }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all active:scale-[0.98] ${variant === 'destructive' ? 'text-destructive hover:bg-destructive/10' : 'text-foreground/80 hover:text-foreground hover:bg-secondary/40'}`}
+    >
+      {icon}
+      <span className="flex-1 text-left">{label}</span>
+      {!!badge && badge > 0 && (
+        <span className="min-w-[20px] h-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1.5">
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
+    </button>
+  );
+}
+
 function ActionBtn({ onClick, icon, title, className = '' }: { onClick: () => void; icon: React.ReactNode; title: string; className?: string }) {
   return (
     <button onClick={onClick} className={`rounded-lg p-1.5 text-muted-foreground/60 hover:text-foreground hover:bg-secondary/50 transition-colors ${className}`} title={title}>
