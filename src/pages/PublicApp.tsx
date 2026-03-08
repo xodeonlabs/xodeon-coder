@@ -1,9 +1,11 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { NGCPreview } from '@/components/NGCPreview';
 import { parseNGC } from '@/lib/ngc-parser';
 import { AdBanner } from '@/components/AdBanner';
+import { Pin, PinOff } from 'lucide-react';
 
 const PublicApp = () => {
   const { slug } = useParams<{ slug: string }>();
