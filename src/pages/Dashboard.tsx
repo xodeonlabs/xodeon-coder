@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, FileText, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield, Sparkles, Zap, Handshake, Percent, LayoutGrid, Menu, MessageCircle, Pin, PinOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
-import { AdBanner } from '@/components/AdBanner';
+
 import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { CoinConfirmDialog } from '@/components/CoinConfirmDialog';
 import confetti from 'canvas-confetti';
