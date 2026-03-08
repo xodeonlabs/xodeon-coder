@@ -465,9 +465,9 @@ export default function OrganizationPage() {
           </div>
 
           {/* Bedrijfskluis */}
-          <div className="mt-6 rounded-xl border border-border/50 p-6" style={{ background: 'hsl(var(--card))' }}>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+          <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
                 <Coins className="h-5 w-5 text-yellow-400" />
                 Bedrijfskluis
               </h3>
@@ -478,7 +478,6 @@ export default function OrganizationPage() {
                 >
                   <ArrowDownCircle className="h-3.5 w-3.5" /> Storten
                 </button>
-                {/* Alleen admins/owners kunnen opnemen */}
                 {(() => {
                   const myMember = members.find(m => m.user_id === session?.user?.id);
                   const isAdminOrOwner = myMember && (myMember.role === 'owner' || myMember.role === 'admin');
