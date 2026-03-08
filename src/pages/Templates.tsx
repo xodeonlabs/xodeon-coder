@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Search, Download, Plus, Trash2, Eye, EyeOff, Sparkles, LayoutGrid, Code, Gamepad2, ShoppingCart, BookOpen } from 'lucide-react';
+import { ArrowLeft, Search, Download, Plus, Trash2, Eye, EyeOff, Sparkles, LayoutGrid, Code, Gamepad2, ShoppingCart, BookOpen, X } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 
 interface Template {
