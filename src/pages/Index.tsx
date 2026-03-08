@@ -275,6 +275,18 @@ const Index = () => {
         e.preventDefault();
         setCommandPaletteOpen(o => !o);
       }
+      // Ctrl+F — search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        setSearchShowReplace(false);
+        setSearchOpen(true);
+      }
+      // Ctrl+H — search & replace
+      if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+        e.preventDefault();
+        setSearchShowReplace(true);
+        setSearchOpen(true);
+      }
       // Ctrl+Z — undo (only when not in textarea)
       if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !(e.target instanceof HTMLTextAreaElement)) {
         e.preventDefault();
