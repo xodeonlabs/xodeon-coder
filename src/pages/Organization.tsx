@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface Organization {
   id: string;
@@ -50,6 +51,7 @@ export default function OrganizationPage() {
   const [joining, setJoining] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [members, setMembers] = useState<OrgMember[]>([]);
+  const [memberProfiles, setMemberProfiles] = useState<Record<string, { display_name: string | null; avatar_url: string | null }>>({});
   const [orgApps, setOrgApps] = useState<OrgApp[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [orgCoins, setOrgCoins] = useState<OrgCoin[]>([]);
@@ -145,7 +147,22 @@ export default function OrganizationPage() {
       supabase.from('apps').select('id, name, updated_at').eq('organization_id', org.id as any).order('updated_at', { ascending: false }),
       supabase.from('org_coins').select('*').eq('organization_id', org.id),
     ]);
-    if (!membersRes.error) setMembers((membersRes.data as unknown as OrgMember[]) || []);
+    if (!membersRes.error) {
+      const mems = (membersRes.data as unknown as OrgMember[]) || [];
+      setMembers(mems);
+      // Fetch profiles for all members
+      const userIds = mems.map(m => m.user_id);
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase.from('profiles').select('id, display_name, avatar_url').in('id', userIds);
+        if (profiles) {
+          const map: Record<string, { display_name: string | null; avatar_url: string | null }> = {};
+          for (const p of profiles) {
+            map[p.id] = { display_name: p.display_name, avatar_url: p.avatar_url };
+          }
+          setMemberProfiles(map);
+        }
+      }
+    }
     if (!appsRes.error) setOrgApps((appsRes.data as unknown as OrgApp[]) || []);
     if (!coinsRes.error) setOrgCoins((coinsRes.data as unknown as OrgCoin[]) || []);
     setLoadingMembers(false);
@@ -467,8 +484,18 @@ export default function OrganizationPage() {
                 {members.map(member => (
                   <div key={member.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 bg-background/50">
                     <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                      <Avatar className="h-7 w-7 border border-border/50 shrink-0">
+                        {memberProfiles[member.user_id]?.avatar_url ? (
+                          <AvatarImage src={memberProfiles[member.user_id].avatar_url!} alt="" />
+                        ) : null}
+                        <AvatarFallback className="text-[10px] font-bold bg-primary/20 text-primary">
+                          {(memberProfiles[member.user_id]?.display_name || member.user_id).slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
                       {roleIcon(member.role)}
-                      <span className="text-sm text-foreground font-mono truncate">{member.user_id.slice(0, 8)}...</span>
+                      <span className="text-sm text-foreground truncate">
+                        {memberProfiles[member.user_id]?.display_name || `${member.user_id.slice(0, 8)}...`}
+                      </span>
                       <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-secondary shrink-0">{roleLabel(member.role)}</span>
                     </div>
                     {selectedOrg.owner_id === session?.user?.id && member.role !== 'owner' && (
