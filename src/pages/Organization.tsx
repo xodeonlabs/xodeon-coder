@@ -657,10 +657,15 @@ export default function OrganizationPage() {
           {(selectedOrg.owner_id === session?.user?.id || members.find(m => m.user_id === session?.user?.id && m.role === 'admin')) && (
             <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                  <Megaphone className="h-5 w-5 text-accent" />
-                  Advertentie
-                </h3>
+                <div>
+                  <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                    <Megaphone className="h-5 w-5 text-accent" />
+                    Advertentie
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
+                    <Coins className="h-3 w-3" /> 10 coins per maand per actieve advertentie
+                  </p>
+                </div>
                 {orgAd && !showAdForm && (
                   <div className="flex items-center gap-2">
                     <button

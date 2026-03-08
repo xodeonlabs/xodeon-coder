@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { NGCPreview } from '@/components/NGCPreview';
 import { parseNGC } from '@/lib/ngc-parser';
+import { AdBanner } from '@/components/AdBanner';
 
 const PublicApp = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -71,6 +72,11 @@ const PublicApp = () => {
           <span className="text-[10px] text-muted-foreground">NGC Studio</span>
         </div>
       </div>
+      {orgId && (
+        <div className="px-4 py-2 shrink-0">
+          <AdBanner page="public" organizationId={orgId} />
+        </div>
+      )}
       <div className="flex-1 overflow-auto">
         <NGCPreview ast={ast} organizationId={orgId} />
       </div>
