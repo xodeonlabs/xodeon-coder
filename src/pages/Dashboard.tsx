@@ -529,7 +529,8 @@ export default function Dashboard() {
       confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
     }
   }
-    if (!session?.user?.id || !templateName.trim()) return;
+
+  async function createTemplate() {
     setCreatingTemplate(true);
     const { data, error } = await supabase.from('apps').insert({ owner_id: session.user.id, name: templateName.trim(), ngc_code: DEFAULT_NGC_CODE, is_public: true, is_remixable: true }).select().single();
     if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
