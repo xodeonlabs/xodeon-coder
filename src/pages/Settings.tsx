@@ -491,7 +491,7 @@ export default function Settings() {
         </div>
 
         {/* Danger zone */}
-        <div className="rounded-xl border border-destructive/30 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+        <div id="settings-danger" className="rounded-xl border border-destructive/30 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
           <h2 className="text-lg font-bold text-destructive mb-2 flex items-center gap-2">
             <Trash2 className="h-5 w-5" />
             Gevarenzone
