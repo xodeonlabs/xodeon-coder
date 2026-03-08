@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, forwardRef } from 'react';
 import { icons } from 'lucide-react';
 import { X } from 'lucide-react';
 
