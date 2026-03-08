@@ -70,7 +70,7 @@ export default function FriendChatPage() {
 
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, display_name, avatar_url, username')
+      .select('id, display_name, avatar_url, username, is_dnd')
       .in('id', friendIds);
 
     if (!profiles) { setLoading(false); return; }
