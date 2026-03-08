@@ -100,7 +100,7 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [chatReplyInputs, setChatReplyInputs] = useState<Record<string, string>>({});
   const [chatSending, setChatSending] = useState<string | null>(null);
-  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'chats' | 'activity' | 'coins' | 'alliances' | 'templates'>('users');
+  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'chats' | 'activity' | 'coins' | 'alliances' | 'templates' | 'categories'>('users');
   
   // Templates management
   const [adminTemplates, setAdminTemplates] = useState<{ id: string; name: string; description: string; category: string; visibility: string; author_id: string; downloads: number; is_published: boolean; created_at: string }[]>([]);
