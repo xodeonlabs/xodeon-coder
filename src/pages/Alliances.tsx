@@ -68,8 +68,8 @@ export default function Alliances() {
   const [userOrgId, setUserOrgId] = useState<string | null>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
-  // Admin state
-  const [isAdmin, setIsAdmin] = useState(false);
+  // Org owner state (replaces admin-only)
+  const [isOrgOwner, setIsOrgOwner] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [newIcon, setNewIcon] = useState('🤝');
@@ -85,8 +85,9 @@ export default function Alliances() {
 
   async function checkAdmin() {
     if (!session?.user?.id) return;
-    const { data } = await supabase.from('user_roles').select('role').eq('user_id', session.user.id).eq('role', 'admin').maybeSingle();
-    setIsAdmin(!!data);
+    // Check if user owns any organization
+    const { data } = await supabase.from('organizations').select('id').eq('owner_id', session.user.id).limit(1);
+    setIsOrgOwner(!!(data && data.length > 0));
   }
 
   async function createAlliance() {
@@ -315,7 +316,7 @@ export default function Alliances() {
         {!selectedAlliance ? (
           /* Alliance list */
           <>
-            {isAdmin && !showCreate && (
+            {isOrgOwner && !showCreate && (
               <button
                 onClick={() => setShowCreate(true)}
                 className="mb-6 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
@@ -324,7 +325,7 @@ export default function Alliances() {
               </button>
             )}
 
-            {isAdmin && showCreate && (
+            {isOrgOwner && showCreate && (
               <div className="mb-6 rounded-xl border border-border/40 p-5 space-y-3" style={{ background: 'hsl(var(--card))' }}>
                 <h3 className="text-sm font-semibold text-foreground">Nieuwe alliantie</h3>
                 <div className="flex items-center gap-3">
@@ -351,7 +352,7 @@ export default function Alliances() {
               <div className="text-center py-20">
                 <p className="text-5xl mb-4">🤝</p>
                 <h2 className="text-lg font-bold text-foreground mb-2">Geen allianties</h2>
-                <p className="text-sm text-muted-foreground">{isAdmin ? 'Maak een alliantie aan met de knop hierboven.' : 'Een platform-admin kan allianties aanmaken tussen bedrijven.'}</p>
+                <p className="text-sm text-muted-foreground">{isOrgOwner ? 'Maak een alliantie aan met de knop hierboven.' : 'Eigenaren van een bedrijf kunnen allianties aanmaken.'}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -365,7 +366,7 @@ export default function Alliances() {
                     <div className="flex items-center gap-3 mb-3">
                       <span className="text-2xl">{alliance.icon}</span>
                       <h3 className="text-sm font-semibold text-foreground flex-1">{alliance.name}</h3>
-                      {isAdmin && (
+                      {isOrgOwner && (
                         <button
                           onClick={e => { e.stopPropagation(); deleteAlliance(alliance.id); }}
                           className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
@@ -425,7 +426,7 @@ export default function Alliances() {
                 <div className="rounded-xl border border-border/40 p-5" style={{ background: 'hsl(var(--card))' }}>
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-sm font-semibold text-foreground">Leden</h2>
-                    {isAdmin && (
+                    {isOrgOwner && (
                       <button
                         onClick={() => { setShowAddOrg(true); loadAllOrgs(); }}
                         className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
@@ -435,7 +436,7 @@ export default function Alliances() {
                     )}
                   </div>
 
-                  {isAdmin && showAddOrg && (
+                  {isOrgOwner && showAddOrg && (
                     <div className="mb-4 p-3 rounded-lg border border-border/30 bg-secondary/20 space-y-2">
                       <select
                         value={addOrgId}
@@ -470,7 +471,7 @@ export default function Alliances() {
                             <p className="text-sm font-medium text-foreground truncate">{org?.name || 'Onbekend'}</p>
                             <p className="text-[10px] text-muted-foreground">Lid sinds {new Date(m.joined_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                           </div>
-                          {isAdmin && (
+                          {isOrgOwner && (
                             <button
                               onClick={() => removeOrgFromAlliance(m.id)}
                               className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
