@@ -126,20 +126,20 @@ export default function Upgrades() {
           <>
             {/* Org selector */}
             {orgs.length > 1 && (
-              <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto pb-1 -mx-1 px-1">
                 {orgs.map(org => (
                   <button
                     key={org.id}
                     onClick={() => selectOrg(org)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap border transition-all ${
+                    className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-medium whitespace-nowrap border transition-all shrink-0 ${
                       selectedOrg?.id === org.id
                         ? 'border-primary/40 bg-primary/10 text-primary shadow-sm'
                         : 'border-border/40 text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                     }`}
                   >
-                    <span className="text-base">{org.icon || '🏢'}</span>
-                    {org.name}
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground font-mono">Lv{org.level}</span>
+                    <span className="text-sm sm:text-base">{org.icon || '🏢'}</span>
+                    <span className="max-w-[80px] sm:max-w-none truncate">{org.name}</span>
+                    <span className="text-[9px] sm:text-[10px] px-1 py-0.5 rounded bg-secondary text-muted-foreground font-mono">L{org.level}</span>
                   </button>
                 ))}
               </div>
@@ -147,7 +147,7 @@ export default function Upgrades() {
 
             {/* Upgrades panel */}
             {selectedOrg && (
-              <div className="rounded-2xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+              <div className="rounded-2xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-2xl">{selectedOrg.icon || '🏢'}</span>
                   <div>
