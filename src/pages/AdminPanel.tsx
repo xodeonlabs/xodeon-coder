@@ -683,7 +683,13 @@ export default function AdminPanel() {
                         )}
                       </div>
                       <p className="text-[11px] text-muted-foreground truncate">{ad.description}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">{ad.url}</p>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        {(ad.pages || []).map(p => (
+                          <span key={p} className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">
+                            {PAGE_OPTIONS.find(o => o.value === p)?.label || p}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <button
