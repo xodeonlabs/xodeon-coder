@@ -42,8 +42,9 @@ export default function Settings() {
       .upsert({
         id: session.user.id,
         display_name: displayName.trim() || null,
+        bio: bio.trim(),
         updated_at: new Date().toISOString(),
-      });
+      } as any);
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
