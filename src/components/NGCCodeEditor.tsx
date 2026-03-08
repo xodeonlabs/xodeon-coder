@@ -311,7 +311,9 @@ export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
           paddingLeft: PAD_LEFT,
           paddingRight: PAD_RIGHT,
           paddingBottom: PAD_BOTTOM,
-          // Ensure the textarea selection color is visible
+          whiteSpace: 'pre',
+          overflowX: 'auto',
+          overflowY: 'auto',
           WebkitTextFillColor: 'transparent',
           caretColor: 'hsl(var(--foreground))',
         }}
