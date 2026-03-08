@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, FileText, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield, Sparkles, Zap, Handshake, Percent, LayoutGrid, Menu, MessageCircle, Pin, PinOff, CopyPlus, Code, TrendingUp } from 'lucide-react';
+import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, FileText, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield, Sparkles, Zap, Handshake, Percent, LayoutGrid, Menu, MessageCircle, Pin, PinOff, CopyPlus, Code, TrendingUp, BookTemplate } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 
@@ -513,8 +513,24 @@ export default function Dashboard() {
     }
   }
 
+  async function convertToTemplate(app: App) {
+    if (!session?.user?.id) return;
+    const { error } = await supabase.from('templates').insert({
+      author_id: session.user.id,
+      name: app.name,
+      description: `Template op basis van "${app.name}"`,
+      ngc_code: app.ngc_code,
+      is_published: true,
+    });
+    if (error) {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: '📦 Template aangemaakt!', description: `"${app.name}" is nu beschikbaar als template.` });
+      confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
+    }
+  }
+
   async function createTemplate() {
-    if (!session?.user?.id || !templateName.trim()) return;
     setCreatingTemplate(true);
     const { data, error } = await supabase.from('apps').insert({ owner_id: session.user.id, name: templateName.trim(), ngc_code: DEFAULT_NGC_CODE, is_public: true, is_remixable: true }).select().single();
     if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
@@ -952,6 +968,7 @@ export default function Dashboard() {
                   <ActionBtn onClick={() => setContractAppId(app.id)} icon={<FileText className="h-3.5 w-3.5" />} title="Contracten bekijken" className="hover:text-accent" />
                   <ActionBtn onClick={() => openPublishDialog(app)} icon={<ExternalLink className="h-3.5 w-3.5" />} title="Publiceren" className="hover:text-primary" />
                   <ActionBtn onClick={() => togglePin(app.id)} icon={pinnedAppIds.includes(app.id) ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />} title={pinnedAppIds.includes(app.id) ? 'Losmaken' : 'Vastpinnen'} className={pinnedAppIds.includes(app.id) ? 'text-primary hover:text-destructive' : 'hover:text-primary'} />
+                  <ActionBtn onClick={() => convertToTemplate(app)} icon={<BookTemplate className="h-3.5 w-3.5" />} title="Maak template" className="hover:text-primary" />
                   <ActionBtn onClick={() => duplicateApp(app)} icon={<CopyPlus className="h-3.5 w-3.5" />} title="Dupliceren" className="hover:text-accent" />
                   <ActionBtn onClick={() => deleteApp(app.id, app.name)} icon={<Trash2 className="h-3.5 w-3.5" />} title="Verwijderen" className="ml-auto hover:text-destructive hover:bg-destructive/10" />
                 </div>
