@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
-import { ArrowLeft, Save, Mail, User, Lock, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff } from 'lucide-react';
 import { getCached, setCache, clearCache, CACHE_TTL } from '@/lib/cache';
 
 export default function Settings() {
