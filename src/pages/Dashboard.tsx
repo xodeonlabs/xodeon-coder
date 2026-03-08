@@ -549,12 +549,12 @@ export default function Dashboard() {
             <NavBtn onClick={() => navigate('/settings')} icon={<Settings className="h-4 w-4" />} label="Account" />
 
             <span
-              onClick={() => session?.user?.id && navigate(`/profiel/${session.user.id}`)}
+              onClick={() => navigate(`/profiel/${profileUsername || session?.user?.id}`)}
               className="hidden lg:inline text-xs text-muted-foreground truncate max-w-[140px] cursor-pointer hover:text-primary hover:underline transition-colors"
             >
               {displayName || session?.user?.email}
             </span>
-            <div onClick={() => session?.user?.id && navigate(`/profiel/${session.user.id}`)} className="cursor-pointer">
+            <div onClick={() => navigate(`/profiel/${profileUsername || session?.user?.id}`)} className="cursor-pointer">
               <ProfileAvatar size="sm" />
             </div>
             <button onClick={signOut} className="p-1.5 rounded-lg text-muted-foreground/60 hover:text-foreground hover:bg-secondary/50 transition-all" title="Uitloggen">
