@@ -97,6 +97,7 @@ const DEFAULT_NGC_CODE = `App:
                 Kleur="rgb(59,130,246)"
                 Hoekradius="10"
                 Click:
+                    Data.Get(gebruikers)
                     GaNaar Home
             Button NaarRegistreer:
                 Tekst="Account aanmaken →"
@@ -156,8 +157,8 @@ const DEFAULT_NGC_CODE = `App:
             Grootte="500,400"
             Kleur="rgb(15,23,42)"
         Frame HomeBox:
-            Positie="100,80"
-            Grootte="300,220"
+            Positie="100,60"
+            Grootte="300,280"
             Kleur="rgb(30,41,59)"
             Hoekradius="16"
             Text Welkom:
@@ -170,9 +171,14 @@ const DEFAULT_NGC_CODE = `App:
                 Positie="20,55"
                 Grootte="260,20"
                 Kleur="rgb(148,163,184)"
+            Text DataInfo:
+                Tekst="Geregistreerde accounts staan in Data."
+                Positie="20,80"
+                Grootte="260,20"
+                Kleur="rgb(100,116,139)"
             Button UitlogBtn:
                 Tekst="Uitloggen"
-                Positie="20,100"
+                Positie="20,120"
                 Grootte="260,42"
                 Kleur="rgb(239,68,68)"
                 Hoekradius="10"
@@ -180,6 +186,14 @@ const DEFAULT_NGC_CODE = `App:
                     Var(gebruiker)=""
                     Var(wachtwoord)=""
                     GaNaar Login
+            Button WisDataBtn:
+                Tekst="🗑 Alle accounts wissen"
+                Positie="20,175"
+                Grootte="260,36"
+                Kleur="rgb(51,65,85)"
+                Hoekradius="8"
+                Click:
+                    Data.Clear(gebruikers)
 `;
 
 interface OrgMembership {
