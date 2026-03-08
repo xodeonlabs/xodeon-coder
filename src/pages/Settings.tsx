@@ -49,12 +49,14 @@ export default function Settings() {
   async function saveProfile() {
     if (!session?.user?.id) return;
     setSaving(true);
+    const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
     const { error } = await supabase
       .from('profiles')
       .upsert({
         id: session.user.id,
         display_name: displayName.trim() || null,
         bio: bio.trim(),
+        username: cleanUsername || null,
         updated_at: new Date().toISOString(),
       } as any);
     if (error) {
