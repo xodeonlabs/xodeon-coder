@@ -234,6 +234,7 @@ function NGCNodeRenderer({
     case 'Frame':
       return (
         <div style={{ ...baseStyle, background: color || '#1e293b', borderRadius: `${radius}px`, overflow: 'hidden' }}>
+          {iconName && <div style={{ padding: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LucideIcon name={iconName} size={24} color={color || '#fff'} /></div>}
           {node.children.map(child => (
             <NGCNodeRenderer key={child.id} node={child} runtime={runtime} onRuntimeChange={onRuntimeChange} onNavigate={onNavigate} coinHandlers={coinHandlers} />
           ))}
