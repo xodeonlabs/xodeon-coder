@@ -211,6 +211,11 @@ export default function Dashboard() {
     toast({ title: 'Link gekopieerd!' });
   }
 
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    supabase.from('profiles').select('display_name').eq('id', session.user.id).single()
+      .then(({ data }) => { if (data?.display_name) setDisplayName(data.display_name); });
+  }, [session?.user?.id]);
 
   async function deleteApp(id: string, name: string) {
     if (!confirm(`Weet je zeker dat je "${name}" wilt verwijderen?`)) return;
