@@ -21,6 +21,7 @@ interface ProfileData {
   social_links: Record<string, string> | null;
   show_email: boolean;
   email?: string;
+  is_dnd?: boolean;
 }
 
 interface ProfileStats {
