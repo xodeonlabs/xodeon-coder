@@ -6,7 +6,7 @@ import { useNotificationSound, getNotificationToastEnabled, getDoNotDisturbEnabl
 import { toast } from 'sonner';
 import {
   LayoutDashboard, BarChart3, Building2, Handshake, Users,
-  MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins, PanelLeftClose, PanelLeftOpen, BellOff, Bell,
+  MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins, PanelLeftClose, PanelLeftOpen, BellOff, Bell, Pin, PinOff,
 } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
