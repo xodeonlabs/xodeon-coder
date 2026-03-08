@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useNotificationSound, getNotificationToastEnabled, getDoNotDisturbEnabled } from '@/hooks/useNotificationSound';
+import { useNotificationSound, getNotificationToastEnabled, getDoNotDisturbEnabled, setDoNotDisturbEnabled } from '@/hooks/useNotificationSound';
 import { toast } from 'sonner';
 import {
   LayoutDashboard, BarChart3, Building2, Handshake, Users,
