@@ -226,11 +226,9 @@ export default function OrganizationPage() {
       return;
     }
 
-    const currentPersonal = getPersonalCoins();
-
     // Check personal balance for deposits
-    if (type === 'deposit' && currentPersonal < amount) {
-      toast({ title: 'Onvoldoende persoonlijk saldo', description: `Je hebt maar ${currentPersonal} coins`, variant: 'destructive' });
+    if (type === 'deposit' && personalCoins < amount) {
+      toast({ title: 'Onvoldoende persoonlijk saldo', description: `Je hebt maar ${personalCoins} coins`, variant: 'destructive' });
       return;
     }
 
