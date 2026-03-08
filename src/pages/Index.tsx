@@ -15,6 +15,8 @@ import { NGCNode, NGCNodeType, DEFAULT_PROPERTIES, generateId } from '@/lib/ngc-
 import { splitCodeIntoSections, mergeSections, CodeSection } from '@/lib/ngc-code-sections';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useLiveCursors } from '@/hooks/useLiveCursors';
+import { LiveCursors } from '@/components/LiveCursors';
 const FALLBACK_CODE = 'App:\n    Page Home:\n        Text Hello:\n            Tekst="Hallo!"\n            Positie="50,50"\n            Grootte="200,30"\n            Kleur="#ffffff"\n';
 function findNodeById(node: NGCNode, id: string): NGCNode | null {
   if (node.id === id) return node;
@@ -93,6 +95,8 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<string>('global');
   const [editorMode, setEditorMode] = useState<'code' | 'design'>('code');
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const editorContainerRef = useRef<HTMLDivElement>(null);
+  const { cursors, updateCursor } = useLiveCursors(appId);
 
   const isRemoteUpdate = useRef(false);
 
@@ -440,7 +444,17 @@ const Index = () => {
         </button>
 
         {/* Code Editor / Designer */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div
+          ref={editorContainerRef}
+          className="flex-1 flex flex-col min-w-0 relative"
+          onMouseMove={(e) => {
+            const rect = editorContainerRef.current?.getBoundingClientRect();
+            if (rect) {
+              updateCursor(e.clientX - rect.left, e.clientY - rect.top, activeTab);
+            }
+          }}
+        >
+          <LiveCursors cursors={cursors.filter(c => c.section === activeTab)} containerRef={editorContainerRef} />
           {/* Mode toggle + Page Tabs */}
           <div className="flex items-center border-b border-border shrink-0" style={{ background: 'hsl(var(--ide-explorer-bg))' }}>
             {/* Mode toggle */}
