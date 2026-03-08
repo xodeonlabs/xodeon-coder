@@ -513,7 +513,22 @@ export default function Dashboard() {
     }
   }
 
-  async function createTemplate() {
+  async function convertToTemplate(app: App) {
+    if (!session?.user?.id) return;
+    const { error } = await supabase.from('templates').insert({
+      author_id: session.user.id,
+      name: app.name,
+      description: `Template op basis van "${app.name}"`,
+      ngc_code: app.ngc_code,
+      is_published: true,
+    });
+    if (error) {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: '📦 Template aangemaakt!', description: `"${app.name}" is nu beschikbaar als template.` });
+      confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
+    }
+  }
     if (!session?.user?.id || !templateName.trim()) return;
     setCreatingTemplate(true);
     const { data, error } = await supabase.from('apps').insert({ owner_id: session.user.id, name: templateName.trim(), ngc_code: DEFAULT_NGC_CODE, is_public: true, is_remixable: true }).select().single();
