@@ -446,7 +446,26 @@ export default function Settings() {
             Notificaties
           </h2>
           <p className="text-xs text-muted-foreground mb-4">Beheer je notificatie-instellingen.</p>
-          <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-secondary/30 border border-border/30">
+          <div className={`flex items-center justify-between py-3 px-4 rounded-xl border border-border/30 mb-3 ${dndEnabled ? 'bg-destructive/10 border-destructive/30' : 'bg-secondary/30'}`}>
+            <div className="flex items-center gap-3">
+              <BellOff className={`h-5 w-5 ${dndEnabled ? 'text-destructive' : 'text-muted-foreground'}`} />
+              <div>
+                <p className="text-sm font-bold text-foreground">Niet storen</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Schakelt geluid én pop-ups tegelijk uit</p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                const next = !dndEnabled;
+                setDndEnabled(next);
+                setDoNotDisturbEnabled(next);
+              }}
+              className={`relative w-11 h-6 rounded-full transition-colors ${dndEnabled ? 'bg-destructive' : 'bg-muted'}`}
+            >
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${dndEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+            </button>
+          </div>
+          <div className={`flex items-center justify-between py-3 px-4 rounded-xl bg-secondary/30 border border-border/30 ${dndEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
             <div>
               <p className="text-sm font-medium text-foreground">Notificatiegeluid</p>
               <p className="text-xs text-muted-foreground mt-0.5">Speel een geluid af bij nieuwe berichten</p>
