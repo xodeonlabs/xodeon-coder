@@ -256,19 +256,24 @@ const Index = () => {
     }
   }, []);
 
-  // Zen mode — hide all panels
+  // Zen mode — hide all panels + toggle DND
   const toggleZenMode = useCallback(() => {
     setZenMode(z => {
-      if (!z) {
+      const newZen = !z;
+      if (newZen) {
         setLeftOpen(false);
         setRightOpen(false);
       } else {
         setLeftOpen(true);
         setRightOpen(true);
       }
-      return !z;
+      // Sync DND status with zen mode
+      if (session?.user?.id) {
+        supabase.from('profiles').update({ is_dnd: newZen }).eq('id', session.user.id).then(() => {});
+      }
+      return newZen;
     });
-  }, []);
+  }, [session?.user?.id]);
 
   // Keyboard shortcuts
   useEffect(() => {
