@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, Megaphone, Plus, Eye, EyeOff, Pencil, Ban, ShieldOff, Activity } from 'lucide-react';
+import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, Megaphone, Plus, Eye, EyeOff, Pencil, Ban, ShieldOff, Activity, MessageCircle } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const EMOJI_LIST = [
@@ -95,8 +95,10 @@ export default function AdminPanel() {
   const [orgs, setOrgs] = useState<OrgRow[]>([]);
   const [ads, setAds] = useState<AdRow[]>([]);
   const [activityLogs, setActivityLogs] = useState<any[]>([]);
+  const [appChats, setAppChats] = useState<any[]>([]);
+  const [orgChats, setOrgChats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'activity'>('users');
+  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'chats' | 'activity'>('users');
 
   // Add role
   const [addRoleUserId, setAddRoleUserId] = useState('');
@@ -148,6 +150,17 @@ export default function AdminPanel() {
     if (orgsRes.data) setOrgs(orgsRes.data as unknown as OrgRow[]);
     if (adsRes.data) setAds(adsRes.data as unknown as AdRow[]);
     if (logsRes.data) setActivityLogs(logsRes.data as any[]);
+
+    // Fetch chats via edge function
+    try {
+      const { data: chatData } = await supabase.functions.invoke('admin-list-chats');
+      if (chatData) {
+        setAppChats(chatData.app_chats || []);
+        setOrgChats(chatData.org_chats || []);
+      }
+    } catch (e) {
+      console.error('Failed to fetch chats:', e);
+    }
 
     try {
       const { data: fnData, error: fnError } = await supabase.functions.invoke('admin-list-users');
@@ -451,6 +464,12 @@ export default function AdminPanel() {
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'ads' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
             <Megaphone className="h-4 w-4" /> Advertenties
+          </button>
+          <button
+            onClick={() => setTab('chats')}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'chats' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
+          >
+            <MessageCircle className="h-4 w-4" /> Chats
           </button>
           <button
             onClick={() => setTab('activity')}
@@ -785,7 +804,89 @@ export default function AdminPanel() {
           </div>
         )}
 
-        {/* Stats */}
+        {/* Chats tab */}
+        {tab === 'chats' && (
+          <div className="space-y-6">
+            {/* App chats */}
+            <div>
+              <h3 className="text-sm font-bold text-foreground flex items-center gap-2 mb-3">
+                <AppWindow className="h-4 w-4 text-primary" /> App Chats ({appChats.length})
+              </h3>
+              {appChats.length > 0 ? (
+                <div className="rounded-xl border border-border/50 overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
+                  <div className="max-h-[400px] overflow-y-auto divide-y divide-border/30">
+                    {appChats.map(msg => {
+                      const appName = apps.find(a => a.id === msg.app_id)?.name || msg.app_id?.slice(0, 8);
+                      const timeStr = new Date(msg.created_at).toLocaleString('nl-NL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                      return (
+                        <div key={msg.id} className="px-4 py-2.5 flex items-start gap-3">
+                          <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                            <MessageCircle className="h-3.5 w-3.5 text-primary" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs font-semibold text-foreground">{msg.user_email || 'Onbekend'}</span>
+                              <span className="text-[10px] text-muted-foreground">in</span>
+                              <span className="text-[10px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded">{appName}</span>
+                              <span className="text-[10px] text-muted-foreground ml-auto shrink-0">{timeStr}</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-0.5 break-words">{msg.content}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-border/50 p-8 text-center" style={{ background: 'hsl(var(--card))' }}>
+                  <MessageCircle className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">Geen app-chatberichten gevonden.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Org chats */}
+            <div>
+              <h3 className="text-sm font-bold text-foreground flex items-center gap-2 mb-3">
+                <Building2 className="h-4 w-4 text-primary" /> Bedrijf Chats ({orgChats.length})
+              </h3>
+              {orgChats.length > 0 ? (
+                <div className="rounded-xl border border-border/50 overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
+                  <div className="max-h-[400px] overflow-y-auto divide-y divide-border/30">
+                    {orgChats.map(msg => {
+                      const orgName = orgs.find(o => o.id === msg.organization_id)?.name || msg.organization_id?.slice(0, 8);
+                      const profile = profiles.find(p => p.id === msg.user_id);
+                      const senderName = profile?.display_name || msg.user_id?.slice(0, 8);
+                      const timeStr = new Date(msg.created_at).toLocaleString('nl-NL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                      return (
+                        <div key={msg.id} className="px-4 py-2.5 flex items-start gap-3">
+                          <div className="w-7 h-7 rounded-lg bg-secondary/60 flex items-center justify-center shrink-0 mt-0.5">
+                            <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs font-semibold text-foreground">{senderName}</span>
+                              <span className="text-[10px] text-muted-foreground">in</span>
+                              <span className="text-[10px] font-medium text-foreground bg-secondary px-1.5 py-0.5 rounded">{orgName}</span>
+                              <span className="text-[10px] text-muted-foreground ml-auto shrink-0">{timeStr}</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-0.5 break-words">{msg.content}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-border/50 p-8 text-center" style={{ background: 'hsl(var(--card))' }}>
+                  <Building2 className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">Geen bedrijf-chatberichten gevonden.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-4 gap-3 mt-6">
           <div className="rounded-xl border border-border/50 p-4 text-center" style={{ background: 'hsl(var(--card))' }}>
             <p className="text-2xl font-bold text-foreground font-mono">{profiles.length}</p>
