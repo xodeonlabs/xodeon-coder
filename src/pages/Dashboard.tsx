@@ -509,8 +509,8 @@ export default function Dashboard() {
       <header className="sticky top-0 z-40 border-b border-border/30 px-4 sm:px-6 py-3 glass-card">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 shrink-0">
-            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center border border-primary/10 shrink-0">
-              <img src="/ngc-logo.png" alt="NGC" className="h-5 object-contain" />
+            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center border border-primary/10 shrink-0 overflow-hidden">
+              <img src="/ngc-logo.png" alt="NGC" className="h-full w-full object-cover rounded-xl" />
             </div>
             <h1 className="hidden sm:block text-lg font-bold text-foreground font-display tracking-tight">NGC Studio</h1>
           </div>
