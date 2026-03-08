@@ -44,6 +44,9 @@ export default function Profile() {
   const [stats, setStats] = useState<ProfileStats>({ appCount: 0, orgCount: 0, totalViews: 0, friendCount: 0 });
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const isOwnProfile = session?.user?.id === profile?.id;
 
