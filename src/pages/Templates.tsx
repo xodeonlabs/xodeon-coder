@@ -228,6 +228,7 @@ export default function Templates() {
                       </span>
                     )}
                   </div>
+                </div>
 
                 <div className="flex items-center justify-between mt-4">
                   <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
