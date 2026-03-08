@@ -75,7 +75,7 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
 
   return (
     <div
-      className="flex items-center justify-between px-2 sm:px-4 border-b border-border/50 h-11 sm:h-12 shrink-0 backdrop-blur-sm"
+      className="relative flex items-center justify-between px-2 sm:px-4 border-b border-border/50 h-11 sm:h-12 shrink-0 backdrop-blur-sm overflow-visible"
       style={{ background: 'hsl(var(--ide-toolbar) / 0.85)' }}
     >
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
