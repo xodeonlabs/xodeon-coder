@@ -494,11 +494,11 @@ export default function OrganizationPage() {
             </div>
 
             {/* Balance display */}
-            <div className="rounded-xl p-6 mb-4 text-center" style={{ background: 'hsl(var(--background))' }}>
+            <div className="rounded-xl p-4 sm:p-6 mb-4 text-center" style={{ background: 'hsl(var(--background))' }}>
               <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Totaal saldo</p>
               <div className="flex items-center justify-center gap-2">
-                <Coins className="h-8 w-8 text-yellow-400" />
-                <span className="text-4xl font-bold text-foreground font-mono">
+                <Coins className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400" />
+                <span className="text-3xl sm:text-4xl font-bold text-foreground font-mono">
                   {orgCoins.reduce((sum, c) => sum + c.balance, 0).toLocaleString('nl-NL')}
                 </span>
               </div>
