@@ -509,6 +509,7 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
     window.location.reload();
   }, []);
 
+  if (!ast) {
     return (
       <div className="flex h-full items-center justify-center">
         <p className="text-xs text-muted-foreground">No preview available</p>
