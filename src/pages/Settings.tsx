@@ -58,6 +58,9 @@ export default function Settings() {
     if (!session?.user?.id) return;
     setSaving(true);
     const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
+    // Filter out empty social links
+    const filteredSocials: Record<string, string> = {};
+    Object.entries(socialLinks).forEach(([k, v]) => { if (v.trim()) filteredSocials[k] = v.trim(); });
     const { error } = await supabase
       .from('profiles')
       .upsert({
@@ -65,6 +68,8 @@ export default function Settings() {
         display_name: displayName.trim() || null,
         bio: bio.trim(),
         username: cleanUsername || null,
+        social_links: filteredSocials,
+        show_email: showEmail,
         updated_at: new Date().toISOString(),
       } as any);
     if (error) {
