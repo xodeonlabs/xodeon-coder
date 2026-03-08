@@ -289,6 +289,7 @@ export default function AdminPanel() {
         await logAction('Advertentie aangemaakt', 'ad', undefined, adForm.title);
         toast({ title: 'Advertentie toegevoegd!' });
       }
+    }
     setShowAdForm(false);
     setSavingAd(false);
     fetchAll();
