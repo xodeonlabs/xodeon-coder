@@ -1106,7 +1106,7 @@ export default function OrganizationPage() {
                     </button>
                   </div>
                 </div>
-              ) : orgAds.length < ([1,2,3,5,10][(((selectedOrg as any).level ?? 1) - 1)] ?? 1) ? (
+              ) : orgAds.length < ([1,2,3,5,10,15,20,30,50,999][(((selectedOrg as any).level ?? 1) - 1)] ?? 1) ? (
                 <button
                   onClick={() => { setEditingAdId(null); setAdEmoji('🚀'); setAdTitle(''); setAdDescription(''); setAdUrl(''); setShowAdForm(true); }}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors w-full justify-center"
