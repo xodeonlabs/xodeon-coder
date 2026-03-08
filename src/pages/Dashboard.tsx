@@ -176,7 +176,7 @@ export default function Dashboard() {
     return () => window.removeEventListener('keydown', handler);
   }, [session?.user?.id]);
 
-  useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); fetchOrgMemberships(); fetchContracts(); }, []);
+  useEffect(() => { if (session?.user?.id) { fetchApps(); fetchOrgs(); fetchUnreadCount(); fetchOrgMemberships(); fetchContracts(); } }, [session?.user?.id]);
   useEffect(() => { checkAdminRole(); }, [session?.user?.id]);
 
   // Realtime contract notifications
