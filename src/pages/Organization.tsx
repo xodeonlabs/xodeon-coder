@@ -688,6 +688,13 @@ export default function OrganizationPage() {
           </>
         )}
       </div>
+      {iconPickerOrgId && (
+        <IconPicker
+          currentIcon={orgs.find(o => o.id === iconPickerOrgId)?.icon || 'building-2'}
+          onSelect={(icon) => changeOrgIcon(iconPickerOrgId, icon)}
+          onClose={() => setIconPickerOrgId(null)}
+        />
+      )}
     </div>
   );
 }
