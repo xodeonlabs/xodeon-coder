@@ -352,6 +352,7 @@ const Index = () => {
     return items;
   }, [ast, sections, zenMode, isFullscreen, toggleZenMode, toggleFullscreen, handleCopyCode, handleUndo, saveNow, handleAddPage]);
 
+  const selectedNode = useMemo(() => {
     if (!ast || !selectedId) return null;
     return findNodeById(ast, selectedId);
   }, [ast, selectedId]);
