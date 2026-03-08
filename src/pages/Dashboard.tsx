@@ -173,6 +173,41 @@ export default function Dashboard() {
   useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); fetchOrgMemberships(); fetchContracts(); }, []);
   useEffect(() => { checkAdminRole(); }, [session?.user?.id]);
 
+  // Realtime contract notifications
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    const channel = supabase
+      .channel('contract-notifications')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'collaborator_contracts' },
+        (payload) => {
+          const updated = payload.new as any;
+          const old = payload.old as any;
+          if (!updated || updated.status === old?.status) return;
+          
+          const isOwner = apps.some(a => a.id === updated.app_id && a.owner_id === session.user.id);
+          const isCollaborator = updated.collaborator_id === session.user.id;
+          
+          if (isOwner && updated.status === 'counter') {
+            toast({ title: '🔄 Tegenvoorstel ontvangen', description: `Een samenwerker stelt ${updated.counter_percentage}% voor.` });
+            fetchContracts();
+          } else if (isOwner && updated.status === 'accepted') {
+            toast({ title: '✅ Contract geaccepteerd', description: `Een samenwerker heeft het contract geaccepteerd!` });
+            fetchContracts();
+          } else if (isOwner && updated.status === 'rejected') {
+            toast({ title: '❌ Contract afgewezen', description: `Een samenwerker heeft het contract afgewezen.`, variant: 'destructive' });
+            fetchContracts();
+          } else if (isCollaborator && updated.status === 'pending' && old?.status === 'counter') {
+            toast({ title: '📋 Nieuw voorstel', description: `De eigenaar heeft een nieuw percentage voorgesteld: ${updated.percentage}%.` });
+            fetchContracts();
+          }
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [session?.user?.id, apps]);
+
   async function checkAdminRole() {
     if (!session?.user?.id) return;
     const { data } = await supabase.from('user_roles').select('role').eq('user_id', session.user.id).eq('role', 'admin' as any);
