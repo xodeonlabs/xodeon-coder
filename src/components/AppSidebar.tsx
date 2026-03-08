@@ -117,7 +117,7 @@ export function AppSidebar() {
         const msg = payload.new as any;
         if (msg?.receiver_id === session.user.id) {
           playNotification();
-          if (getNotificationToastEnabled()) {
+          if (!getDoNotDisturbEnabled() && getNotificationToastEnabled()) {
             supabase.from('profiles').select('display_name, username').eq('id', msg.sender_id).maybeSingle().then(({ data }) => {
               const name = data?.display_name || 'Iemand';
               const username = (data as any)?.username;
