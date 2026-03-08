@@ -252,6 +252,7 @@ export default function OrganizationPage() {
     if (action === 'accepted') viewMembers(selectedOrg);
   }
 
+  async function viewMembers(org: Organization) {
     setSelectedOrg(org);
     setLoadingMembers(true);
     setShowDeposit(false);
