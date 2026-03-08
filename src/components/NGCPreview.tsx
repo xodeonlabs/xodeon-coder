@@ -100,6 +100,31 @@ function executeActions(eventNode: NGCNode, runtime: NGCRuntime): string | null 
     }
 
     if (child.type === 'Var') {
+      // Handle coins commands
+      const coinsCmd = parseCoinsCommand(child.name);
+      if (coinsCmd) {
+        switch (coinsCmd.operation) {
+          case 'Add':
+            runtime.coinsAdd(coinsCmd.name, coinsCmd.amount!);
+            break;
+          case 'Remove':
+            runtime.coinsRemove(coinsCmd.name, coinsCmd.amount!);
+            break;
+          case 'Code':
+            if (coinsCmd.varName) {
+              const codeValue = runtime.getVar(coinsCmd.varName);
+              const result = runtime.coinsRedeemCode(coinsCmd.name, codeValue);
+              runtime.setVar('_coins_result', result.success ? 'success' : 'invalid');
+              runtime.setVar('_coins_amount', String(result.amount));
+            }
+            break;
+          case 'RegisterCode':
+            runtime.coinsRegisterCode(coinsCmd.name, coinsCmd.code!, coinsCmd.amount!);
+            break;
+        }
+        continue;
+      }
+
       const def = parseVarDefinition(child.name);
       if (def) {
         const opMatch = child.name.match(/^(\w+)([+\-*/])(.+)$/);
