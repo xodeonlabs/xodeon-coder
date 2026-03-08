@@ -295,8 +295,8 @@ export default function Templates() {
         {/* Category tabs */}
         <div className="flex items-center gap-1.5 mb-6 overflow-x-auto pb-1">
           {CATEGORIES.map(cat => (
+            <div key={cat.value} className="flex items-center gap-0.5 shrink-0">
               <button
-                key={cat.value}
                 onClick={() => setCategory(cat.value)}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
                   category === cat.value
@@ -307,6 +307,16 @@ export default function Templates() {
                 <LucideIcon name={cat.icon} className="h-3.5 w-3.5" />
                 {cat.label}
               </button>
+              {session?.user?.id && (
+                <button
+                  onClick={() => openCreateForCategory(cat.value)}
+                  className="p-1 rounded-md text-muted-foreground/50 hover:text-primary hover:bg-primary/10 transition-all"
+                  title={`Nieuwe ${cat.label} template`}
+                >
+                  <Plus className="h-3 w-3" />
+                </button>
+              )}
+            </div>
           ))}
         </div>
 
