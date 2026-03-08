@@ -344,12 +344,16 @@ export default function AdminPanel() {
   }
 
   async function removeRole(roleId: string) {
+    const role = roles.find(r => r.id === roleId);
+    if (role?.role === 'owner') {
+      toast({ title: 'Niet toegestaan', description: 'De owner rol kan niet worden verwijderd.', variant: 'destructive' });
+      return;
+    }
     const { error } = await supabase.from('user_roles').delete().eq('id', roleId);
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
-      const roleName = roles.find(r => r.id === roleId);
-      await logAction('Rol verwijderd', 'user', roleName?.user_id, `Rol: ${roleName?.role}`);
+      await logAction('Rol verwijderd', 'user', role?.user_id, `Rol: ${role?.role}`);
       setRoles(roles.filter(r => r.id !== roleId));
       toast({ title: 'Rol verwijderd' });
     }
