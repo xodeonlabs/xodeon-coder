@@ -84,6 +84,7 @@ export default function Dashboard() {
   const [slugValue, setSlugValue] = useState('');
   const [savingSlug, setSavingSlug] = useState(false);
   const [totalCoins, setTotalCoins] = useState(0);
+  const [displayName, setDisplayName] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -210,6 +211,11 @@ export default function Dashboard() {
     toast({ title: 'Link gekopieerd!' });
   }
 
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    supabase.from('profiles').select('display_name').eq('id', session.user.id).single()
+      .then(({ data }) => { if (data?.display_name) setDisplayName(data.display_name); });
+  }, [session?.user?.id]);
 
   async function deleteApp(id: string, name: string) {
     if (!confirm(`Weet je zeker dat je "${name}" wilt verwijderen?`)) return;
@@ -298,7 +304,7 @@ export default function Dashboard() {
           <button onClick={() => navigate('/settings')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all" title="Instellingen">
             <Settings className="h-4 w-4" /> <span className="hidden sm:inline">Account</span>
           </button>
-          <span className="hidden md:inline text-sm text-muted-foreground truncate max-w-[180px]">{session?.user?.email}</span>
+          <span className="hidden md:inline text-sm text-muted-foreground truncate max-w-[180px]">{displayName || session?.user?.email}</span>
           <ProfileAvatar size="sm" editable />
           <button onClick={signOut} className="p-1.5 sm:p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all" title="Uitloggen">
             <LogOut className="h-4 w-4" />
