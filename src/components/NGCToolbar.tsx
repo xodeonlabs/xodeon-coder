@@ -25,6 +25,7 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
   const [templateDescription, setTemplateDescription] = useState('');
   const [sharing, setSharing] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showIconPicker, setShowIconPicker] = useState(false);
 
   const handleNavigate = async (path: string) => {
     if (onSave) await onSave();
