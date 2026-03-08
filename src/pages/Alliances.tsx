@@ -389,13 +389,27 @@ export default function Alliances() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Jouw bedrijf in deze alliantie</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Jouw bedrijf</label>
                   <select
                     value={selectedOrgForCreate}
                     onChange={e => setSelectedOrgForCreate(e.target.value)}
                     className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
                   >
                     {myOwnedOrgs.map(o => (
+                      <option key={o.id} value={o.id}>{o.icon || '🏢'} {o.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Partner bedrijf (optioneel)</label>
+                  <select
+                    value={inviteOrgId}
+                    onChange={e => setInviteOrgId(e.target.value)}
+                    onFocus={() => { if (allOrgs.length === 0) loadAllOrgs(); }}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  >
+                    <option value="">Geen partner bedrijf</option>
+                    {allOrgs.filter(o => o.id !== selectedOrgForCreate).map(o => (
                       <option key={o.id} value={o.id}>{o.icon || '🏢'} {o.name}</option>
                     ))}
                   </select>
