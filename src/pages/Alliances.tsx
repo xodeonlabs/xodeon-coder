@@ -561,7 +561,7 @@ export default function Alliances() {
                     )}
                   </div>
 
-                  {isOrgOwner && showAddOrg && (
+                  {isAllianceOwner && showAddOrg && (
                     <div className="mb-4 p-3 rounded-lg border border-border/30 bg-secondary/20 space-y-2">
                       <select
                         value={addOrgId}
