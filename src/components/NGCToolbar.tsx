@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { ExternalLink, LogOut, AlertCircle, CheckCircle, ArrowLeft, Pencil, Share2, X, Menu } from 'lucide-react';
 import { ParseError } from '@/lib/ngc-ast';
+import { AppIcon } from '@/components/IconPicker';
 import { useNavigate } from 'react-router-dom';
 
 interface ToolbarProps {
   errors: ParseError[];
   appName?: string;
+  appIcon?: string;
   appCode?: string;
   onSignOut?: () => void;
   onSave?: () => Promise<void> | void;
@@ -13,7 +15,7 @@ interface ToolbarProps {
   onShareTemplate?: (name: string, description: string, code: string) => Promise<void>;
 }
 
-export function NGCToolbar({ errors, appName, appCode, onSignOut, onSave, onRename, onShareTemplate }: ToolbarProps) {
+export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSave, onRename, onShareTemplate }: ToolbarProps) {
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [nameValue, setNameValue] = useState('');
@@ -63,7 +65,9 @@ export function NGCToolbar({ errors, appName, appCode, onSignOut, onSave, onRena
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="hidden sm:flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-bold text-xs">N</div>
+          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white">
+            <AppIcon iconName={appIcon || 'file-code'} size={14} />
+          </div>
           <span className="text-sm font-bold text-foreground font-mono">NGC</span>
         </div>
         <div className="hidden sm:block h-4 w-px bg-border/30"></div>

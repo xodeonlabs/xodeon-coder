@@ -94,6 +94,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [code, setCode] = useState(FALLBACK_CODE);
   const [appName, setAppName] = useState('');
+  const [appIcon, setAppIcon] = useState('file-code');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -144,7 +145,7 @@ const Index = () => {
       return;
     }
 
-    supabase.from('apps').select('ngc_code, name').eq('id', appId).single().then(({ data, error }) => {
+    supabase.from('apps').select('ngc_code, name, icon').eq('id', appId).single().then(({ data, error }) => {
       if (error || !data) {
         const msg = error ? error.message : 'App niet gevonden';
         setLoadError(msg);
@@ -152,6 +153,7 @@ const Index = () => {
       } else {
         setCode(data.ngc_code || FALLBACK_CODE);
         setAppName(data.name);
+        setAppIcon((data as any).icon || 'file-code');
         setLoading(false);
       }
     });
@@ -548,6 +550,7 @@ const Index = () => {
       <NGCToolbar
         errors={errors}
         appName={appName}
+        appIcon={appIcon}
         appCode={code}
         onSignOut={signOut}
         onSave={saveNow}
