@@ -1,0 +1,154 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { Send } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+
+interface OrgChatMessage {
+  id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+}
+
+interface OrgChatProps {
+  organizationId: string;
+}
+
+export function OrgChat({ organizationId }: OrgChatProps) {
+  const { session } = useAuth();
+  const [messages, setMessages] = useState<OrgChatMessage[]>([]);
+  const [profiles, setProfiles] = useState<Record<string, { display_name: string | null; avatar_url: string | null }>>({});
+  const [input, setInput] = useState('');
+  const [sending, setSending] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Load messages + profiles
+  useEffect(() => {
+    supabase
+      .from('org_chat_messages')
+      .select('*')
+      .eq('organization_id', organizationId)
+      .order('created_at', { ascending: true })
+      .limit(200)
+      .then(async ({ data }) => {
+        if (!data) return;
+        setMessages(data as OrgChatMessage[]);
+        await loadProfiles(data.map(m => m.user_id));
+      });
+  }, [organizationId]);
+
+  async function loadProfiles(userIds: string[]) {
+    const unique = [...new Set(userIds)];
+    if (unique.length === 0) return;
+    const { data } = await supabase.from('profiles').select('id, display_name, avatar_url').in('id', unique);
+    if (data) {
+      setProfiles(prev => {
+        const map = { ...prev };
+        for (const p of data) {
+          map[p.id] = { display_name: p.display_name, avatar_url: p.avatar_url };
+        }
+        return map;
+      });
+    }
+  }
+
+  // Realtime
+  useEffect(() => {
+    const channel = supabase
+      .channel(`org-chat-${organizationId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'org_chat_messages', filter: `organization_id=eq.${organizationId}` },
+        async (payload) => {
+          const msg = payload.new as OrgChatMessage;
+          setMessages(prev => [...prev, msg]);
+          if (!profiles[msg.user_id]) {
+            await loadProfiles([msg.user_id]);
+          }
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [organizationId, profiles]);
+
+  // Auto-scroll
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const sendMessage = useCallback(async () => {
+    if (!input.trim() || !session?.user) return;
+    setSending(true);
+    await supabase.from('org_chat_messages').insert({
+      organization_id: organizationId,
+      user_id: session.user.id,
+      content: input.trim(),
+    } as any);
+    setInput('');
+    setSending(false);
+  }, [input, organizationId, session]);
+
+  const currentUserId = session?.user?.id;
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto p-3 space-y-2.5 min-h-0">
+        {messages.length === 0 && (
+          <p className="text-xs text-muted-foreground text-center py-6">Nog geen berichten in deze groepschat</p>
+        )}
+        {messages.map(msg => {
+          const isMe = msg.user_id === currentUserId;
+          const profile = profiles[msg.user_id];
+          const name = profile?.display_name || msg.user_id.slice(0, 8);
+          return (
+            <div key={msg.id} className={`flex gap-2 ${isMe ? 'flex-row-reverse' : ''}`}>
+              {!isMe && (
+                <Avatar className="h-6 w-6 shrink-0 mt-0.5">
+                  {profile?.avatar_url ? <AvatarImage src={profile.avatar_url} alt="" /> : null}
+                  <AvatarFallback className="text-[8px] font-bold bg-primary/20 text-primary">
+                    {name.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+              <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]`}>
+                {!isMe && <span className="text-[10px] text-muted-foreground mb-0.5 px-1">{name}</span>}
+                <div
+                  className={`rounded-lg px-2.5 py-1.5 text-xs break-words ${
+                    isMe
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-secondary text-secondary-foreground'
+                  }`}
+                >
+                  {msg.content}
+                </div>
+                <span className="text-[9px] text-muted-foreground mt-0.5 px-1">
+                  {new Date(msg.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+        <div ref={bottomRef} />
+      </div>
+
+      <div className="border-t border-border p-2 flex gap-1.5">
+        <input
+          className="flex-1 rounded-lg bg-background border border-border px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+          placeholder="Typ een bericht..."
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+          disabled={sending}
+        />
+        <button
+          onClick={sendMessage}
+          disabled={sending || !input.trim()}
+          className="rounded-lg p-2 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors"
+        >
+          <Send className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}

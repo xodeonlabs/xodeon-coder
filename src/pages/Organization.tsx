@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle, MessageCircle } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { OrgChat } from '@/components/OrgChat';
 
 interface Organization {
   id: string;
@@ -550,6 +551,20 @@ export default function OrganizationPage() {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Bedrijfschat */}
+          <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
+            <div className="px-4 sm:px-6 py-3 border-b border-border/50">
+              <h3 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
+                <MessageCircle className="h-5 w-5 text-primary" />
+                Groepschat
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Chat met alle leden van {selectedOrg.name}</p>
+            </div>
+            <div style={{ height: 350 }}>
+              <OrgChat organizationId={selectedOrg.id} />
+            </div>
           </div>
 
           {/* Bedrijfskluis */}
