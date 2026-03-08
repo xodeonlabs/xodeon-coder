@@ -230,18 +230,20 @@ export default function FriendChatPage() {
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-bold text-foreground font-display">Berichten</h2>
-            </div>
-            <ChatRetentionSelector
-              currentHours={myRetentionHours}
-              onUpdate={async (hours) => {
-                const { error } = await supabase.from('profiles').update({ friend_chat_retention_hours: hours } as any).eq('id', myId!);
-                if (!error) setMyRetentionHours(hours);
-              }}
-              label="Bewaring"
-            />
+            <>
+              <div className="flex items-center gap-2 flex-1">
+                <MessageCircle className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-bold text-foreground font-display">Berichten</h2>
+              </div>
+              <ChatRetentionSelector
+                currentHours={myRetentionHours}
+                onUpdate={async (hours) => {
+                  const { error } = await supabase.from('profiles').update({ friend_chat_retention_hours: hours } as any).eq('id', myId!);
+                  if (!error) setMyRetentionHours(hours);
+                }}
+                label="Bewaring"
+              />
+            </>
           )}
         </div>
       </header>
