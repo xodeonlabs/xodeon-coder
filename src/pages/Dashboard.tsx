@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, Link, ExternalLink, BarChart3 } from 'lucide-react';
+import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, Link, ExternalLink, BarChart3, Coins } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface App {
@@ -81,6 +81,20 @@ export default function Dashboard() {
   const [publishAppId, setPublishAppId] = useState<string | null>(null);
   const [slugValue, setSlugValue] = useState('');
   const [savingSlug, setSavingSlug] = useState(false);
+  const [totalCoins, setTotalCoins] = useState(0);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('ngc_runtime_state');
+      if (raw) {
+        const state = JSON.parse(raw);
+        if (state?.coins) {
+          const sum = Object.values(state.coins as Record<string, number>).reduce((a: number, b: number) => a + b, 0);
+          setTotalCoins(sum);
+        }
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   useEffect(() => { fetchApps(); fetchOrgs(); }, []);
 
@@ -259,6 +273,10 @@ export default function Dashboard() {
           <h1 className="text-base sm:text-xl font-bold text-foreground tracking-tight truncate">NGC Studio</h1>
         </div>
         <div className="flex items-center gap-1 sm:gap-4">
+          <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-accent/10 text-accent">
+            <Coins className="h-4 w-4" />
+            <span className="text-xs sm:text-sm font-semibold">{totalCoins}</span>
+          </div>
           <button onClick={() => navigate('/analytics')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
             <BarChart3 className="h-4 w-4" /> <span className="hidden sm:inline">Analytics</span>
           </button>
