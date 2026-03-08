@@ -470,7 +470,7 @@ const Index = () => {
         {/* Collapse toggle for left panel (hidden on mobile) */}
         <button
           onClick={() => setLeftOpen(p => !p)}
-          className="shrink-0 items-center justify-center w-5 hover:bg-secondary/60 transition-colors border-r border-border hidden sm:flex"
+          className="shrink-0 items-center justify-center w-5 hover:bg-secondary/60 transition-colors border-r border-border flex"
           title={leftOpen ? 'Paneel inklappen' : 'Paneel uitklappen'}
         >
           {leftOpen ? <PanelLeftClose className="h-3.5 w-3.5 text-muted-foreground" /> : <PanelLeftOpen className="h-3.5 w-3.5 text-muted-foreground" />}
