@@ -221,6 +221,91 @@ const LIBRARY: Folder[] = [
     ],
   },
   {
+    name: 'Coins',
+    icon: '🪙',
+    snippets: [
+      {
+        label: 'Coins instellen',
+        description: 'Stel een coins-saldo in met startwaarde',
+        code: '    Coins(munten)=100\n',
+      },
+      {
+        label: 'Coins toevoegen',
+        description: 'Voeg coins toe bij een event',
+        code: '                Coins.Add(munten, 10)\n',
+      },
+      {
+        label: 'Coins verwijderen',
+        description: 'Trek coins af bij een event',
+        code: '                Coins.Remove(munten, 5)\n',
+      },
+      {
+        label: 'Betaalcode registreren',
+        description: 'Registreer een inwisselbare code (bv. BUY100)',
+        code: '    Coins.Code(munten, "BUY100", 100)\n',
+      },
+      {
+        label: 'Code inwisselen',
+        description: 'Wissel code in uit een variabele',
+        code: '                Coins.Redeem(munten, codeInvoer)\n',
+      },
+      {
+        label: 'Coins weergeven',
+        description: 'Toon het huidige saldo',
+        code:
+          '        Text Saldo:\n' +
+          '            Tekst="Saldo: Coins(munten)"\n' +
+          '            Positie="10,10"\n' +
+          '            Grootte="200,30"\n' +
+          '            Kleur="#fbbf24"\n',
+      },
+      {
+        label: 'Coins winkel (compleet)',
+        description: 'Compleet voorbeeld met saldo, kopen en code inwisselen',
+        code:
+          '    Coins(munten)=50\n' +
+          '    Coins.Code(munten, "GRATIS100", 100)\n' +
+          '    Coins.Code(munten, "BONUS50", 50)\n' +
+          '    Var(betaalcode)=""\n' +
+          '    Page Winkel:\n' +
+          '        Text SaldoLabel:\n' +
+          '            Tekst="🪙 Saldo: Coins(munten)"\n' +
+          '            Positie="20,20"\n' +
+          '            Grootte="250,30"\n' +
+          '            Kleur="#fbbf24"\n' +
+          '        Button Koop:\n' +
+          '            Tekst="Koop item (-10 🪙)"\n' +
+          '            Positie="20,70"\n' +
+          '            Grootte="200,40"\n' +
+          '            Kleur="#3b82f6"\n' +
+          '            Hoekradius="8"\n' +
+          '            Event Click:\n' +
+          '                Coins.Remove(munten, 10)\n' +
+          '        Button Verdien:\n' +
+          '            Tekst="Verdien +5 🪙"\n' +
+          '            Positie="20,125"\n' +
+          '            Grootte="200,40"\n' +
+          '            Kleur="#22c55e"\n' +
+          '            Hoekradius="8"\n' +
+          '            Event Click:\n' +
+          '                Coins.Add(munten, 5)\n' +
+          '        TextBox CodeInput:\n' +
+          '            Positie="20,185"\n' +
+          '            Grootte="200,35"\n' +
+          '            Placeholder="Voer code in..."\n' +
+          '            Variabele="betaalcode"\n' +
+          '        Button WisselIn:\n' +
+          '            Tekst="Code inwisselen"\n' +
+          '            Positie="20,235"\n' +
+          '            Grootte="200,40"\n' +
+          '            Kleur="#f59e0b"\n' +
+          '            Hoekradius="8"\n' +
+          '            Event Click:\n' +
+          '                Coins.Redeem(munten, betaalcode)\n',
+      },
+    ],
+  },
+  {
     name: 'Besturing',
     icon: '🔀',
     snippets: [
