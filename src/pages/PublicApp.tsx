@@ -72,6 +72,11 @@ const PublicApp = () => {
           <span className="text-[10px] text-muted-foreground">NGC Studio</span>
         </div>
       </div>
+      {orgId && (
+        <div className="px-4 py-2 shrink-0">
+          <AdBanner page="public" organizationId={orgId} />
+        </div>
+      )}
       <div className="flex-1 overflow-auto">
         <NGCPreview ast={ast} organizationId={orgId} />
       </div>
