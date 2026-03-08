@@ -267,6 +267,9 @@ export default function Profile() {
         {/* Friends list */}
         <FriendsList userId={profile!.id} />
 
+        {/* Activity timeline */}
+        <ActivityTimeline userId={profile!.id} />
+
         {/* Apps gallery */}
         <PublicApps userId={profile!.id} />
 
