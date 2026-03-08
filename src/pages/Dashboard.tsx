@@ -165,7 +165,37 @@ export default function Dashboard() {
     setCreatingTemplate(false);
   }
 
-  async function deleteApp(id: string, name: string) {
+  function openPublishDialog(app: App) {
+    setPublishAppId(app.id);
+    setSlugValue(app.slug || app.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''));
+  }
+
+  async function saveSlug() {
+    if (!publishAppId || !slugValue.trim()) return;
+    const cleanSlug = slugValue.trim().toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/^-|-$/g, '');
+    if (!cleanSlug) { toast({ title: 'Ongeldige slug', variant: 'destructive' }); return; }
+    setSavingSlug(true);
+    // Make sure app is public too
+    const { error } = await supabase.from('apps').update({ slug: cleanSlug, is_public: true } as any).eq('id', publishAppId);
+    if (error) {
+      toast({ title: 'Fout', description: error.message?.includes('unique') ? 'Deze URL is al in gebruik. Kies een andere.' : error.message, variant: 'destructive' });
+    } else {
+      setApps(apps.map(a => a.id === publishAppId ? { ...a, slug: cleanSlug, is_public: true } : a));
+      toast({ title: 'Gepubliceerd!', description: `Je app is nu beschikbaar op /app/${cleanSlug}` });
+    }
+    setSavingSlug(false);
+  }
+
+  function getAppUrl(slug: string) {
+    return `${window.location.origin}/app/${slug}`;
+  }
+
+  async function copyAppLink(slug: string) {
+    await navigator.clipboard.writeText(getAppUrl(slug));
+    toast({ title: 'Link gekopieerd!' });
+  }
+
+
     if (!confirm(`Weet je zeker dat je "${name}" wilt verwijderen?`)) return;
     const { error } = await supabase.from('apps').delete().eq('id', id);
     if (error) {
