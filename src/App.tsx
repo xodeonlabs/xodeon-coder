@@ -13,6 +13,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Preview from "./pages/Preview";
 import Guest from "./pages/Guest";
 import PublicApp from "./pages/PublicApp";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/organization" element={<ProtectedRoute><Organization /></ProtectedRoute>} />
           <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/editor/:appId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/preview/:appId" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
           <Route path="/app/:slug" element={<PublicApp />} />
