@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import {
   LayoutDashboard, BarChart3, Building2, Handshake, Users,
-  MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins,
+  MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins, PanelLeftClose, PanelLeftOpen,
 } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
