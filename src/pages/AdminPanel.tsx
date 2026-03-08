@@ -127,9 +127,16 @@ export default function AdminPanel() {
     setAddingRole(false);
   }
 
+  function getUserEmail(userId: string) {
+    return authUsers.find(u => u.id === userId)?.email || null;
+  }
+
   function getUserName(userId: string) {
     const p = profiles.find(p => p.id === userId);
-    return p?.display_name || `${userId.slice(0, 8)}...`;
+    if (p?.display_name) return p.display_name;
+    const email = getUserEmail(userId);
+    if (email) return email;
+    return `${userId.slice(0, 8)}...`;
   }
 
   function getUserAvatar(userId: string) {
