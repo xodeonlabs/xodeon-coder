@@ -398,40 +398,71 @@ const Index = () => {
         >
           {leftOpen && (
             <>
-              {/* Explorer */}
-              <div className="flex flex-col min-h-0" style={{ flex: '1 1 33%' }}>
-                <div className="ide-panel-header">
-                  <span>📂 Explorer</span>
-                </div>
-                <div className="flex-1 overflow-y-auto min-h-0">
-                  <NGCExplorer
-                    ast={ast}
-                    selectedId={selectedId}
-                    onSelect={setSelectedId}
-                    onContextMenu={handleContextMenu}
-                    onRename={handleRename}
-                    onDelete={handleDelete}
-                  />
-                </div>
+              {/* Left panel tab switcher */}
+              <div className="flex border-b border-border shrink-0">
+                <button
+                  onClick={() => setLeftTab('explorer')}
+                  className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors ${
+                    leftTab === 'explorer' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  📂 Explorer
+                </button>
+                <button
+                  onClick={() => setLeftTab('versions')}
+                  className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
+                    leftTab === 'versions' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <History className="h-3 w-3" /> Versies
+                </button>
               </div>
-              {/* Data Panel */}
-              <div className="flex flex-col min-h-0 border-t border-border" style={{ flex: '1 1 33%' }}>
-                <div className="ide-panel-header">
-                  <span>💾 Data</span>
-                </div>
-                <div className="flex-1 overflow-y-auto min-h-0">
-                  <NGCDataPanel ast={ast} />
-                </div>
-              </div>
-              {/* Chat Panel */}
-              <div className="flex flex-col min-h-0 border-t border-border" style={{ flex: '1 1 34%' }}>
-                <div className="ide-panel-header">
-                  <span>🗣️ Chat</span>
-                </div>
+
+              {leftTab === 'explorer' ? (
+                <>
+                  {/* Explorer */}
+                  <div className="flex flex-col min-h-0" style={{ flex: '1 1 33%' }}>
+                    <div className="flex-1 overflow-y-auto min-h-0">
+                      <NGCExplorer
+                        ast={ast}
+                        selectedId={selectedId}
+                        onSelect={setSelectedId}
+                        onContextMenu={handleContextMenu}
+                        onRename={handleRename}
+                        onDelete={handleDelete}
+                      />
+                    </div>
+                  </div>
+                  {/* Data Panel */}
+                  <div className="flex flex-col min-h-0 border-t border-border" style={{ flex: '1 1 33%' }}>
+                    <div className="ide-panel-header">
+                      <span>💾 Data</span>
+                    </div>
+                    <div className="flex-1 overflow-y-auto min-h-0">
+                      <NGCDataPanel ast={ast} />
+                    </div>
+                  </div>
+                  {/* Chat Panel */}
+                  <div className="flex flex-col min-h-0 border-t border-border" style={{ flex: '1 1 34%' }}>
+                    <div className="ide-panel-header">
+                      <span>🗣️ Chat</span>
+                    </div>
+                    <div className="flex-1 overflow-hidden min-h-0">
+                      {appId && <NGCChat appId={appId} />}
+                    </div>
+                  </div>
+                </>
+              ) : (
                 <div className="flex-1 overflow-hidden min-h-0">
-                  {appId && <NGCChat appId={appId} />}
+                  {appId && (
+                    <NGCVersionPanel
+                      appId={appId}
+                      currentCode={code}
+                      onRestore={(restoredCode) => setCode(restoredCode)}
+                    />
+                  )}
                 </div>
-              </div>
+              )}
             </>
           )}
         </div>
