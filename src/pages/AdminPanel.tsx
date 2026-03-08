@@ -105,8 +105,8 @@ export default function AdminPanel() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [emojiSearch, setEmojiSearch] = useState('');
 
-  // User management
-  const [confirmAction, setConfirmAction] = useState<{ userId: string; action: 'ban' | 'unban' | 'delete'; name: string } | null>(null);
+  // Management confirmations
+  const [confirmAction, setConfirmAction] = useState<{ id: string; action: string; type: 'user' | 'app' | 'org'; name: string } | null>(null);
   const [managingUser, setManagingUser] = useState(false);
 
   useEffect(() => {
