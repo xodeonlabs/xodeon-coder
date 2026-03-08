@@ -52,6 +52,12 @@ export function setDoNotDisturbEnabled(enabled: boolean) {
   try {
     localStorage.setItem(DND_STORAGE_KEY, String(enabled));
     window.dispatchEvent(new CustomEvent('dnd-changed', { detail: enabled }));
+    // Sync to database
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user?.id) {
+        supabase.from('profiles').update({ is_dnd: enabled } as any).eq('id', data.user.id).then(() => {});
+      }
+    });
   } catch {
     // ignore
   }
