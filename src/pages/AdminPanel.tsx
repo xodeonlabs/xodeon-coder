@@ -1135,7 +1135,7 @@ export default function AdminPanel() {
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
                           <button
-                            onClick={() => { setEditingTemplate(t.id); setTemplateEditName(t.name); setTemplateEditCategory(t.category); }}
+                            onClick={() => { setEditingTemplate(t.id); setTemplateEditName(t.name); setTemplateEditCategory(t.category); setTemplateEditDescription(t.description || ''); setTemplateEditVisibility(t.visibility || 'public'); }}
                             className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
                             title="Bewerken"
                           >
