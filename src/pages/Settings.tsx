@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
-import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff, Clock, Coins, Pencil } from 'lucide-react';
+import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff, Clock, Coins, Pencil, Bell } from 'lucide-react';
+import { getNotificationSoundEnabled, setNotificationSoundEnabled } from '@/hooks/useNotificationSound';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { getCached, setCache, clearCache, CACHE_TTL } from '@/lib/cache';
 
@@ -34,6 +35,7 @@ const SECTIONS = [
   { id: 'social', label: 'Sociale media', icon: Share2 },
   { id: 'email', label: 'E-mailadres', icon: Mail },
   { id: 'password', label: 'Wachtwoord', icon: Lock },
+  { id: 'notifications', label: 'Notificaties', icon: Bell },
   { id: 'retention', label: 'Bewaartermijnen', icon: Clock },
   { id: 'danger', label: 'Gevarenzone', icon: Trash2 },
 ] as const;
@@ -59,6 +61,7 @@ export default function Settings() {
   const [savingPassword, setSavingPassword] = useState(false);
   const [retentionItems, setRetentionItems] = useState<RetentionItem[]>([]);
   const [retentionLoading, setRetentionLoading] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(() => getNotificationSoundEnabled());
 
   const isScrollingRef = useRef(false);
 
@@ -434,7 +437,31 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Bewaartermijnen overzicht */}
+        {/* Notificaties */}
+        <div id="settings-notifications" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+          <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
+            <Bell className="h-5 w-5 text-primary" />
+            Notificaties
+          </h2>
+          <p className="text-xs text-muted-foreground mb-4">Beheer je notificatie-instellingen.</p>
+          <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-secondary/30 border border-border/30">
+            <div>
+              <p className="text-sm font-medium text-foreground">Notificatiegeluid</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Speel een geluid af bij nieuwe berichten</p>
+            </div>
+            <button
+              onClick={() => {
+                const next = !soundEnabled;
+                setSoundEnabled(next);
+                setNotificationSoundEnabled(next);
+              }}
+              className={`relative w-11 h-6 rounded-full transition-colors ${soundEnabled ? 'bg-primary' : 'bg-muted'}`}
+            >
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${soundEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+            </button>
+          </div>
+        </div>
+
         <div id="settings-retention" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
           <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />

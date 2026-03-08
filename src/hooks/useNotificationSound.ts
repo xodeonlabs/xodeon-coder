@@ -1,20 +1,37 @@
 import { useCallback, useRef } from 'react';
 
 const NOTIFICATION_SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
+const STORAGE_KEY = 'ngc-notification-sound';
+
+export function getNotificationSoundEnabled(): boolean {
+  try {
+    const val = localStorage.getItem(STORAGE_KEY);
+    return val === null ? true : val === 'true';
+  } catch {
+    return true;
+  }
+}
+
+export function setNotificationSoundEnabled(enabled: boolean) {
+  try {
+    localStorage.setItem(STORAGE_KEY, String(enabled));
+  } catch {
+    // ignore
+  }
+}
 
 export function useNotificationSound() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const play = useCallback(() => {
+    if (!getNotificationSoundEnabled()) return;
     try {
       if (!audioRef.current) {
         audioRef.current = new Audio(NOTIFICATION_SOUND_URL);
         audioRef.current.volume = 0.5;
       }
       audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(() => {
-        // Browser may block autoplay until user interaction — silently ignore
-      });
+      audioRef.current.play().catch(() => {});
     } catch {
       // Ignore audio errors
     }
