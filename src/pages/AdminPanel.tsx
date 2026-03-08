@@ -198,7 +198,79 @@ export default function AdminPanel() {
     if (data?.coins) setUserCoins(data.coins);
   }
 
-  async function adminUpdateCoins() {
+  async function loadAdminAlliances() {
+    if (alliancesLoaded) return;
+    setAlliancesLoaded(true);
+    // Load alliances
+    const { data: allianceData } = await supabase.from('alliances' as any).select('*').order('created_at', { ascending: false });
+    const allList = (allianceData as any[]) || [];
+    setAdminAlliances(allList);
+
+    if (allList.length === 0) return;
+
+    const allianceIds = allList.map((a: any) => a.id);
+
+    // Load members
+    const { data: memberData } = await supabase.from('alliance_members' as any).select('*').in('alliance_id', allianceIds);
+    const memberMap: Record<string, any[]> = {};
+    (memberData as any[] || []).forEach(m => {
+      if (!memberMap[m.alliance_id]) memberMap[m.alliance_id] = [];
+      memberMap[m.alliance_id].push(m);
+    });
+    setAdminAllianceMembers(memberMap);
+
+    // Load coins
+    const { data: coinData } = await supabase.from('alliance_coins' as any).select('*').in('alliance_id', allianceIds);
+    const coinMap: Record<string, number> = {};
+    (coinData as any[] || []).forEach(c => { coinMap[c.alliance_id] = c.balance; });
+    setAdminAllianceCoins(coinMap);
+
+    // Load chats
+    const { data: chatData } = await supabase.from('alliance_chat_messages' as any).select('*').in('alliance_id', allianceIds).order('created_at', { ascending: true }).limit(500);
+    const chatMap: Record<string, any[]> = {};
+    (chatData as any[] || []).forEach(c => {
+      if (!chatMap[c.alliance_id]) chatMap[c.alliance_id] = [];
+      chatMap[c.alliance_id].push(c);
+    });
+    setAdminAllianceChats(chatMap);
+
+    // Load stats - get org IDs from members, then apps and views
+    const allOrgIds = [...new Set((memberData as any[] || []).map(m => m.organization_id))];
+    if (allOrgIds.length > 0) {
+      const { data: appsData } = await supabase.from('apps').select('id, organization_id').in('organization_id', allOrgIds);
+      const appsList = (appsData || []);
+      const appIds = appsList.map(a => a.id);
+      let viewCounts: Record<string, number> = {};
+      if (appIds.length > 0) {
+        const { data: viewData } = await supabase.from('app_views').select('app_id').in('app_id', appIds);
+        (viewData || []).forEach(v => { viewCounts[v.app_id] = (viewCounts[v.app_id] || 0) + 1; });
+      }
+
+      const statsMap: Record<string, { apps: number; views: number }> = {};
+      allianceIds.forEach(aid => {
+        const orgIds = (memberMap[aid] || []).map(m => m.organization_id);
+        const allianceApps = appsList.filter(a => orgIds.includes(a.organization_id));
+        const totalViews = allianceApps.reduce((s, a) => s + (viewCounts[a.id] || 0), 0);
+        statsMap[aid] = { apps: allianceApps.length, views: totalViews };
+      });
+      setAdminAllianceStats(statsMap);
+    }
+  }
+
+  async function adminDeleteAlliance(id: string) {
+    const alliance = adminAlliances.find(a => a.id === id);
+    const { data, error } = await supabase.functions.invoke('admin-delete-resource', {
+      body: { type: 'alliance', target_id: id },
+    });
+    if (error || data?.error) {
+      toast({ title: 'Fout', description: error?.message || data?.error, variant: 'destructive' });
+    } else {
+      await logAction('Alliantie verwijderd', 'alliance', id, alliance?.name || '');
+      setAdminAlliances(adminAlliances.filter(a => a.id !== id));
+      toast({ title: 'Alliantie verwijderd' });
+    }
+  }
+
     if (!coinUserId || !coinAmount) return;
     setCoinSaving(true);
     const { error } = await supabase.functions.invoke('admin-manage-coins', {
