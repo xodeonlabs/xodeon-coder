@@ -230,7 +230,7 @@ export default function FriendChatPage() {
                     {selectedFriend.display_name?.slice(0, 2).toUpperCase() || '??'}
                   </AvatarFallback>
                 </Avatar>
-                <StatusDot isDnd={(selectedFriend as any).is_dnd ?? false} className="absolute -bottom-0.5 -right-0.5" />
+                <StatusDot status={getOnlineStatus((selectedFriend as any).is_dnd ?? false, (selectedFriend as any).last_seen_at)} className="absolute -bottom-0.5 -right-0.5" />
               </div>
               <div className="min-w-0">
                 <h2 className="text-sm font-bold text-foreground truncate">{selectedFriend.display_name || 'Anoniem'}</h2>
