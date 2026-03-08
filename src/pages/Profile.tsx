@@ -256,11 +256,15 @@ export default function Profile() {
         </div>
 
         {/* Stats cards */}
-        <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-8 sm:mb-10">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8 sm:mb-10">
           <StatCard icon={<Code2 className="h-5 w-5 sm:h-6 sm:w-6" />} value={stats.appCount} label="Publieke apps" color="primary" />
           <StatCard icon={<Users className="h-5 w-5 sm:h-6 sm:w-6" />} value={stats.orgCount} label="Bedrijven" color="accent" />
+          <StatCard icon={<Heart className="h-5 w-5 sm:h-6 sm:w-6" />} value={stats.friendCount} label="Vrienden" color="accent" />
           <StatCard icon={<Eye className="h-5 w-5 sm:h-6 sm:w-6" />} value={stats.totalViews} label="App views" color="primary" />
         </div>
+
+        {/* Friends list */}
+        <FriendsList userId={profile!.id} />
 
         {/* Apps gallery */}
         <PublicApps userId={profile!.id} />
