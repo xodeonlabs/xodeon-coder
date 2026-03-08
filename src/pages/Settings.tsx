@@ -62,6 +62,7 @@ export default function Settings() {
   const [retentionItems, setRetentionItems] = useState<RetentionItem[]>([]);
   const [retentionLoading, setRetentionLoading] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(() => getNotificationSoundEnabled());
+  const [toastEnabled, setToastEnabled] = useState(() => getNotificationToastEnabled());
 
   const isScrollingRef = useRef(false);
 
