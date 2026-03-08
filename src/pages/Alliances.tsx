@@ -75,6 +75,8 @@ export default function Alliances() {
   const [newIcon, setNewIcon] = useState('🤝');
   const [creating, setCreating] = useState(false);
   const [allOrgs, setAllOrgs] = useState<OrgInfo[]>([]);
+  const [myOwnedOrgs, setMyOwnedOrgs] = useState<OrgInfo[]>([]);
+  const [selectedOrgForCreate, setSelectedOrgForCreate] = useState('');
   const [showAddOrg, setShowAddOrg] = useState(false);
   const [addOrgId, setAddOrgId] = useState('');
 
