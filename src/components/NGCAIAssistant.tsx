@@ -481,6 +481,13 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
           <Send className="h-3.5 w-3.5" />
         </button>
       </div>
+      <CoinConfirmDialog
+        open={coinConfirm.open}
+        onOpenChange={(open) => setCoinConfirm(prev => ({ ...prev, open }))}
+        amount={coinConfirm.amount}
+        description={coinConfirm.description}
+        onConfirm={coinConfirm.onConfirm}
+      />
     </div>
   );
 }
