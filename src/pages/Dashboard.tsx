@@ -398,6 +398,21 @@ export default function Dashboard() {
     setCreating(false);
   }
 
+  async function duplicateApp(app: App) {
+    if (!session?.user?.id) return;
+    clearCache(CACHE_KEYS.apps(session.user.id));
+    const { data, error } = await supabase.from('apps').insert({
+      owner_id: session.user.id,
+      name: `${app.name} (kopie)`,
+      ngc_code: app.ngc_code,
+    }).select().single();
+    if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
+    else if (data) {
+      setApps(prev => [data as App, ...prev]);
+      toast({ title: '📋 App gedupliceerd!', description: `"${app.name}" is gekopieerd.` });
+    }
+  }
+
   async function createTemplate() {
     if (!session?.user?.id || !templateName.trim()) return;
     setCreatingTemplate(true);
