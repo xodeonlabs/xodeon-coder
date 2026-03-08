@@ -63,6 +63,7 @@ export default function Settings() {
   const [retentionLoading, setRetentionLoading] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(() => getNotificationSoundEnabled());
   const [toastEnabled, setToastEnabled] = useState(() => getNotificationToastEnabled());
+  const [dndEnabled, setDndEnabled] = useState(() => getDoNotDisturbEnabled());
 
   const isScrollingRef = useRef(false);
 
