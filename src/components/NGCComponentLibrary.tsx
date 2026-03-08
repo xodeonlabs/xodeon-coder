@@ -600,7 +600,7 @@ const LIBRARY: Folder[] = [
   },
 ];
 
-export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: (code: string) => void; onCreateTemplate?: (code: string, name: string) => void }) {
+export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => void }) {
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
   const [communityTemplates, setCommunityTemplates] = useState<Template[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
