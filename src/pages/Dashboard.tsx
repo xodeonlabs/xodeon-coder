@@ -709,8 +709,8 @@ export default function Dashboard() {
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground font-display tracking-tight">
               {getGreeting()}{displayName ? `, ${displayName}` : ''} 👋
             </h2>
-            <p className="text-sm text-muted-foreground mt-1.5 italic">
-              {quote.emoji} {quote.text}
+            <p className="text-sm text-muted-foreground mt-1.5 italic min-h-[1.5em]">
+              {typedText}<span className="animate-pulse">|</span>
             </p>
           </div>
           <div className="flex items-center gap-2.5 shrink-0">
