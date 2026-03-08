@@ -17,6 +17,7 @@ import Templates from "./pages/Templates";
 import Settings from "./pages/Settings";
 import AdminPanel from "./pages/AdminPanel";
 import Alliances from "./pages/Alliances";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
