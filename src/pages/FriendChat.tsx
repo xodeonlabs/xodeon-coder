@@ -35,6 +35,7 @@ export default function FriendChatPage() {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const myId = session?.user?.id;
+  const [myRetentionHours, setMyRetentionHours] = useState(24);
 
   // Load friends list
   useEffect(() => {
