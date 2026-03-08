@@ -207,9 +207,7 @@ export default function Templates() {
 
         {/* Category tabs */}
         <div className="flex items-center gap-1.5 mb-6 overflow-x-auto pb-1">
-          {CATEGORIES.map(cat => {
-            const Icon = cat.icon;
-            return (
+          {CATEGORIES.map(cat => (
               <button
                 key={cat.value}
                 onClick={() => setCategory(cat.value)}
@@ -219,11 +217,10 @@ export default function Templates() {
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                 }`}
               >
-                <Icon className="h-3.5 w-3.5" />
+                <LucideIcon name={cat.icon} className="h-3.5 w-3.5" />
                 {cat.label}
               </button>
-            );
-          })}
+          ))}
         </div>
 
         {/* Templates grid */}
