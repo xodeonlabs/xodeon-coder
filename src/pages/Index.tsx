@@ -216,33 +216,6 @@ const Index = () => {
     }
   }, [activeTab, sections]);
 
-  const handleCreateTemplate = useCallback(async (templateCode: string, templateName: string) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({ title: 'Fout', description: 'Je moet ingelogd zijn', variant: 'destructive' });
-        return;
-      }
-      const { data, error } = await supabase
-        .from('apps')
-        .insert({
-          name: templateName,
-          ngc_code: `App:\n${templateCode}`,
-          owner_id: user.id,
-        })
-        .select()
-        .single();
-
-      if (error) {
-        toast({ title: 'Fout', description: error.message, variant: 'destructive' });
-      } else if (data) {
-        navigate(`/editor/${data.id}`);
-      }
-    } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : 'Onbekende fout';
-      toast({ title: 'Fout bij aanmaken template', description: errorMessage, variant: 'destructive' });
-    }
-  }, [navigate, toast]);
 
   const handleShareTemplate = useCallback(async (templateName: string, templateDescription: string, templateCode: string) => {
     try {
