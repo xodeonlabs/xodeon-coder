@@ -20,6 +20,7 @@ import Settings from "./pages/Settings";
 import AdminPanel from "./pages/AdminPanel";
 import Alliances from "./pages/Alliances";
 import Profile from "./pages/Profile";
+import OrgProfile from "./pages/OrgProfile";
 import NotFound from "./pages/NotFound";
 import FriendChat from "./pages/FriendChat";
 import GroupChats from "./pages/GroupChats";
