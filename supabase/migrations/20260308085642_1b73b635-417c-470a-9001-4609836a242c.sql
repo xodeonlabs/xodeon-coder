@@ -1,0 +1,1 @@
+ALTER TABLE public.apps ADD COLUMN chat_retention_hours integer NOT NULL DEFAULT 12;
