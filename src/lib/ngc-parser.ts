@@ -114,7 +114,9 @@ export function parseNGC(code: string): ParseResult {
     return { ast: null, errors };
   }
 
-  function parseNode(startIdx: number, parentIndent: number): { node: NGCNode; endIdx: number } | null {
+  let nodeCounter = 0;
+
+  function parseNode(startIdx: number, parentIndent: number, parentPath: string = ''): { node: NGCNode; endIdx: number } | null {
     if (startIdx >= lineInfos.length) return null;
 
     const headerLine = lineInfos[startIdx];
@@ -123,8 +125,12 @@ export function parseNGC(code: string): ParseResult {
     const header = parseNodeHeader(headerLine.content);
     if (!header) return null;
 
+    // Generate a stable ID based on type, name, and position in the tree
+    const nodePath = `${parentPath}/${header.type}_${header.name}_${nodeCounter++}`;
+    const stableId = `ngc_${nodePath.replace(/[^a-zA-Z0-9_]/g, '_')}`;
+
     const node: NGCNode = {
-      id: generateId(),
+      id: stableId,
       type: header.type as NGCNode['type'],
       name: header.name,
       properties: {},
@@ -160,7 +166,7 @@ export function parseNGC(code: string): ParseResult {
       }
 
       // Try to parse as child node
-      const childResult = parseNode(idx, headerLine.indent);
+      const childResult = parseNode(idx, headerLine.indent, nodePath);
       if (childResult) {
         node.children.push(childResult.node);
         node.endLine = childResult.node.endLine;
@@ -176,7 +182,7 @@ export function parseNGC(code: string): ParseResult {
     return { node, endIdx: idx };
   }
 
-  const result = parseNode(rootLineIdx, -1);
+  const result = parseNode(rootLineIdx, -1, 'root');
   if (!result) {
     errors.push({ line: lineInfos[rootLineIdx].lineNumber, message: 'Failed to parse App node' });
     return { ast: null, errors };
