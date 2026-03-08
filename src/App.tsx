@@ -14,6 +14,7 @@ import Preview from "./pages/Preview";
 import Guest from "./pages/Guest";
 import PublicApp from "./pages/PublicApp";
 import Settings from "./pages/Settings";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
