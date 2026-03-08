@@ -13,6 +13,7 @@ export default function Settings() {
   const { toast } = useToast();
 
   const [displayName, setDisplayName] = useState('');
+  const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
