@@ -20,6 +20,7 @@ import Alliances from "./pages/Alliances";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import FriendChat from "./pages/FriendChat";
+import GroupChats from "./pages/GroupChats";
 
 const queryClient = new QueryClient();
 
