@@ -111,7 +111,10 @@ export function AdBanner({ className = '' }: AdBannerProps) {
           <span className="text-lg">{ad.emoji}</span>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-foreground truncate">{ad.title}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-semibold text-foreground truncate">{ad.title}</p>
+            <span className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground bg-secondary/60 px-1.5 py-0.5 rounded shrink-0">Ad</span>
+          </div>
           <p className="text-[11px] text-muted-foreground truncate">{ad.description}</p>
         </div>
         <ExternalLink className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
