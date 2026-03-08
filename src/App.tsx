@@ -58,6 +58,7 @@ const App = () => (
           <Route path="/groepen" element={<ProtectedRoute><GroupChats /></ProtectedRoute>} />
           <Route path="/app/:slug" element={<PublicApp />} />
           <Route path="/profiel/:username" element={<Profile />} />
+          <Route path="/bedrijf/:orgId" element={<OrgProfile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
