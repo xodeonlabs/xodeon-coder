@@ -165,6 +165,7 @@ export default function Upgrades() {
                   orgBalance={orgBalance}
                   isOwner={selectedOrg.owner_id === session?.user?.id}
                   levelPaidUntil={selectedOrg.level_paid_until}
+                  autoPay={selectedOrg.auto_pay}
                   onUpgrade={(newLevel) => {
                     setSelectedOrg({ ...selectedOrg, level: newLevel });
                     loadOrgs();
