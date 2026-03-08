@@ -788,12 +788,35 @@ const Index = () => {
         >
           {rightOpen && (
             <>
-              <div className="ide-panel-header">
-                <span>Componenten</span>
+              {/* Right panel tab switcher */}
+              <div className="flex border-b border-border shrink-0">
+                <button
+                  onClick={() => setRightTab('components')}
+                  className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
+                    rightTab === 'components' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Blocks className="h-3 w-3" /> Componenten
+                </button>
+                <button
+                  onClick={() => setRightTab('ai')}
+                  className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
+                    rightTab === 'ai' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Sparkles className="h-3 w-3" /> AI
+                </button>
               </div>
-              <div className="flex-1 overflow-auto">
-                <NGCComponentLibrary onInsert={handleInsertCode} />
-              </div>
+
+              {rightTab === 'components' ? (
+                <div className="flex-1 overflow-auto">
+                  <NGCComponentLibrary onInsert={handleInsertCode} />
+                </div>
+              ) : (
+                <div className="flex-1 overflow-hidden min-h-0">
+                  <NGCAIAssistant currentCode={code} onApplyCode={(newCode) => setCode(newCode)} />
+                </div>
+              )}
             </>
           )}
         </div>
