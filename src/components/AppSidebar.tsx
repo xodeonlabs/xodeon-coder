@@ -21,6 +21,7 @@ const NAV_ITEMS = [
   { title: 'Berichten', url: '/berichten', icon: MessageCircle },
   { title: 'Groepen', url: '/groepen', icon: Users },
   { title: 'Bedrijven', url: '/organization', icon: Building2 },
+  { title: 'Upgrades', url: '/upgrades', icon: ArrowUp },
   { title: 'Allianties', url: '/alliances', icon: Handshake },
   { title: 'Analytics', url: '/analytics', icon: BarChart3 },
   { title: 'Templates', url: '/templates', icon: LayoutGrid },
