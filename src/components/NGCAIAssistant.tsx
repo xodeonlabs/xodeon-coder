@@ -340,10 +340,28 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
         >
           <ArrowLeft className="h-3.5 w-3.5" />
         </button>
-        <Sparkles className="h-3.5 w-3.5 text-primary" />
-        <span className="text-[11px] font-semibold text-foreground truncate flex-1">
-          {conversations.find(c => c.id === activeConvoId)?.title || 'AI Assistent'}
-        </span>
+        <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
+        {editingConvoId === activeConvoId ? (
+          <input
+            ref={editInputRef}
+            value={editingTitle}
+            onChange={(e) => setEditingTitle(e.target.value)}
+            onBlur={confirmRename}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') confirmRename();
+              if (e.key === 'Escape') setEditingConvoId(null);
+            }}
+            className="text-[11px] font-semibold text-foreground bg-secondary border border-border rounded px-1.5 py-0.5 flex-1 min-w-0 outline-none focus:ring-1 focus:ring-primary"
+          />
+        ) : (
+          <span
+            onClick={() => activeConvoId && startRename(activeConvoId, conversations.find(c => c.id === activeConvoId)?.title || '')}
+            className="text-[11px] font-semibold text-foreground truncate flex-1 cursor-pointer hover:text-primary transition-colors"
+            title="Klik om te hernoemen"
+          >
+            {conversations.find(c => c.id === activeConvoId)?.title || 'AI Assistent'}
+          </span>
+        )}
       </div>
 
       {/* Messages */}
