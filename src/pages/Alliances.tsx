@@ -499,6 +499,41 @@ export default function Alliances() {
                   <StatCard label="Alliantie Kluis" value={coins?.balance ?? 0} icon="🪙" />
                 </div>
 
+                {/* Vault */}
+                {userOrgId && (
+                  <div className="rounded-xl border border-border/40 p-5" style={{ background: 'hsl(var(--card))' }}>
+                    <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                      <Coins className="h-4 w-4 text-primary" /> Alliantie Kluis
+                    </h2>
+                    <p className="text-2xl font-bold text-foreground mb-4">{coins?.balance ?? 0} <span className="text-sm font-normal text-muted-foreground">coins</span></p>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="1"
+                        placeholder="Aantal"
+                        value={vaultAmount}
+                        onChange={e => setVaultAmount(e.target.value)}
+                        className="w-24 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      />
+                      <button
+                        onClick={() => vaultTransaction('deposit')}
+                        disabled={vaultLoading || !vaultAmount}
+                        className="px-3 py-2 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors"
+                      >
+                        Storten
+                      </button>
+                      <button
+                        onClick={() => vaultTransaction('withdraw')}
+                        disabled={vaultLoading || !vaultAmount}
+                        className="px-3 py-2 rounded-lg text-xs font-medium border border-border text-foreground hover:bg-secondary/50 disabled:opacity-40 transition-colors"
+                      >
+                        Opnemen
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-2">Storten/opnemen vanuit je bedrijfskluis</p>
+                  </div>
+                )}
+
                 {/* Member orgs */}
                 <div className="rounded-xl border border-border/40 p-5" style={{ background: 'hsl(var(--card))' }}>
                   <div className="flex items-center justify-between mb-4">
