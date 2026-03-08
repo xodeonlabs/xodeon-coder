@@ -853,9 +853,20 @@ export default function Dashboard() {
               {sharedApps.map(app => {
                 const appContract = contracts.find(c => c.app_id === app.id && c.collaborator_id === session?.user?.id && c.status === 'accepted');
                 return (
-                  <div key={app.id} className="glass-card rounded-2xl p-5 transition-all hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 cursor-pointer hover:-translate-y-1" onClick={() => navigate(`/editor/${app.id}`)}>
-                    <h3 className="font-semibold text-sm text-foreground truncate mb-1.5">{app.name}</h3>
-                    <p className="text-[11px] text-muted-foreground/60">{new Date(app.updated_at).toLocaleDateString('nl-NL', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                  <div key={app.id} className="glass-card rounded-2xl p-5 transition-all hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 cursor-pointer hover:-translate-y-1 group relative" onClick={() => navigate(`/editor/${app.id}`)}>
+                    <div className="flex items-start gap-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm text-foreground truncate mb-1.5">{app.name}</h3>
+                        <p className="text-[11px] text-muted-foreground/60">{new Date(app.updated_at).toLocaleDateString('nl-NL', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                      </div>
+                      <button
+                        onClick={e => { e.stopPropagation(); togglePin(app.id); }}
+                        className={`p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all ${pinnedAppIds.includes(app.id) ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-primary hover:bg-secondary/50'}`}
+                        title={pinnedAppIds.includes(app.id) ? 'Losmaken' : 'Vastpinnen'}
+                      >
+                        {pinnedAppIds.includes(app.id) ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+                      </button>
+                    </div>
                     {appContract && (
                       <div className="mt-2 flex items-center gap-1.5 text-[10px] text-accent/80">
                         <Handshake className="h-3 w-3" />
