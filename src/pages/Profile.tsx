@@ -259,6 +259,72 @@ export default function Profile() {
   );
 }
 
+const SOCIAL_CONFIG: Record<string, { icon: string; urlPrefix: string; label: string }> = {
+  instagram: { icon: '📸', urlPrefix: 'https://instagram.com/', label: 'Instagram' },
+  twitter: { icon: '𝕏', urlPrefix: 'https://x.com/', label: 'X' },
+  github: { icon: '💻', urlPrefix: 'https://github.com/', label: 'GitHub' },
+  linkedin: { icon: '💼', urlPrefix: '', label: 'LinkedIn' },
+  youtube: { icon: '🎬', urlPrefix: '', label: 'YouTube' },
+  website: { icon: '🌐', urlPrefix: '', label: 'Website' },
+};
+
+function SocialBar({ profile }: { profile: ProfileData }) {
+  const socials = profile.social_links || {};
+  const entries = Object.entries(socials).filter(([, v]) => v && v.trim());
+  const showEmailOnProfile = profile.show_email && profile.email;
+
+  if (entries.length === 0 && !showEmailOnProfile) return null;
+
+  function getSocialUrl(key: string, value: string): string {
+    const config = SOCIAL_CONFIG[key];
+    if (!config) return value;
+    if (value.startsWith('http')) return value;
+    if (config.urlPrefix) return `${config.urlPrefix}${value.replace('@', '')}`;
+    return value;
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 mt-3 justify-center sm:justify-start">
+      {showEmailOnProfile && (
+        <a
+          href={`mailto:${profile.email}`}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/30 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all"
+        >
+          <Mail className="h-3 w-3" />
+          {profile.email}
+        </a>
+      )}
+      {entries.map(([key, value]) => {
+        const config = SOCIAL_CONFIG[key] || { icon: '🔗', urlPrefix: '', label: key };
+        const url = getSocialUrl(key, value);
+        const isLink = url.startsWith('http');
+        const display = value.startsWith('http') ? config.label : `@${value.replace('@', '')}`;
+
+        return isLink ? (
+          <a
+            key={key}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/30 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all"
+          >
+            <span className="text-sm">{config.icon}</span>
+            {display}
+          </a>
+        ) : (
+          <span
+            key={key}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/30 text-xs text-muted-foreground"
+          >
+            <span className="text-sm">{config.icon}</span>
+            {display}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 function StatCard({ icon, value, label, color }: { icon: React.ReactNode; value: number; label: string; color: 'primary' | 'accent' }) {
   const gradientClass = color === 'primary'
     ? 'from-primary/15 to-primary/5'
