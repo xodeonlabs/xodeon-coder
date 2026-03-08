@@ -39,7 +39,7 @@ export default function Templates() {
   const [friends, setFriends] = useState<string[]>([]);
   const [userOrgs, setUserOrgs] = useState<string[]>([]);
 
-  useEffect(() => { loadTemplates(); }, []);
+  useEffect(() => { loadTemplates(); loadRelations(); }, [session?.user?.id]);
 
   async function loadTemplates() {
     setLoading(true);
