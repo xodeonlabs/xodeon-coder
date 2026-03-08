@@ -1,0 +1,1 @@
+ALTER TABLE public.organizations ADD COLUMN IF NOT EXISTS level_paid_until timestamp with time zone DEFAULT now();

@@ -925,6 +925,7 @@ export type Database = {
           id: string
           join_code: string
           level: number
+          level_paid_until: string | null
           name: string
           owner_id: string
           updated_at: string
@@ -937,6 +938,7 @@ export type Database = {
           id?: string
           join_code?: string
           level?: number
+          level_paid_until?: string | null
           name: string
           owner_id: string
           updated_at?: string
@@ -949,6 +951,7 @@ export type Database = {
           id?: string
           join_code?: string
           level?: number
+          level_paid_until?: string | null
           name?: string
           owner_id?: string
           updated_at?: string
