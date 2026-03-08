@@ -174,7 +174,8 @@ export function OrgChat({ organizationId }: OrgChatProps) {
         {messages.map((msg, idx) => {
           const isMe = msg.user_id === currentUserId;
           const profile = profiles[msg.user_id];
-          const name = profile?.display_name || msg.user_id.slice(0, 8);
+          const isAdminUser = adminIds.has(msg.user_id);
+          const name = isAdminUser ? 'Admin' : (profile?.display_name || msg.user_id.slice(0, 8));
           const isFirstUnread = idx === firstUnreadIdx;
 
           return (
@@ -192,13 +193,13 @@ export function OrgChat({ organizationId }: OrgChatProps) {
                 {!isMe && (
                   <Avatar className="h-6 w-6 shrink-0 mt-0.5">
                     {profile?.avatar_url ? <AvatarImage src={profile.avatar_url} alt="" /> : null}
-                    <AvatarFallback className="text-[8px] font-bold bg-primary/20 text-primary">
+                    <AvatarFallback className={`text-[8px] font-bold ${isAdminUser ? 'bg-destructive/20 text-destructive' : 'bg-primary/20 text-primary'}`}>
                       {name.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 )}
                 <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]`}>
-                  {!isMe && <span className="text-[10px] text-muted-foreground mb-0.5 px-1">{name}</span>}
+                  {!isMe && <span className={`text-[10px] mb-0.5 px-1 font-semibold ${isAdminUser ? 'text-destructive' : 'text-muted-foreground'}`}>{name}</span>}
                   <div
                     className={`rounded-lg px-2.5 py-1.5 text-xs break-words ${
                       isMe
