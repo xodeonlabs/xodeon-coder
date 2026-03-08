@@ -437,7 +437,31 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Bewaartermijnen overzicht */}
+        {/* Notificaties */}
+        <div id="settings-notifications" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+          <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
+            <Bell className="h-5 w-5 text-primary" />
+            Notificaties
+          </h2>
+          <p className="text-xs text-muted-foreground mb-4">Beheer je notificatie-instellingen.</p>
+          <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-secondary/30 border border-border/30">
+            <div>
+              <p className="text-sm font-medium text-foreground">Notificatiegeluid</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Speel een geluid af bij nieuwe berichten</p>
+            </div>
+            <button
+              onClick={() => {
+                const next = !soundEnabled;
+                setSoundEnabled(next);
+                setNotificationSoundEnabled(next);
+              }}
+              className={`relative w-11 h-6 rounded-full transition-colors ${soundEnabled ? 'bg-primary' : 'bg-muted'}`}
+            >
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${soundEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+            </button>
+          </div>
+        </div>
+
         <div id="settings-retention" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
           <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
