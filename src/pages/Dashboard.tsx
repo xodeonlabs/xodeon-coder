@@ -1421,5 +1421,6 @@ function ContractList({ contracts: items, currentUserId, onRespond, appNames, sh
         </div>
       </DialogContent>
     </Dialog>
+    </>
   );
 }
