@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Calendar, Code2, Users, Eye, ExternalLink, Settings, Sparkles, Mail, Globe, Heart } from 'lucide-react';
+import { ArrowLeft, Calendar, Code2, Users, Eye, ExternalLink, Settings, Sparkles, Mail, Globe, Heart, Camera, Pencil } from 'lucide-react';
 import { FriendButton } from '@/components/FriendButton';
 import { FriendsList } from '@/components/FriendsList';
 import { ActivityTimeline } from '@/components/ActivityTimeline';
 import { StatusDot } from '@/components/StatusDot';
+import { AppIcon, IconPicker } from '@/components/IconPicker';
+import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
@@ -49,7 +51,6 @@ export default function Profile() {
     async function load() {
       setLoading(true);
 
-      // Try lookup by username first, then fallback to UUID
       let prof: ProfileData | null = null;
       let error: any = null;
 
@@ -134,7 +135,6 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        {/* Skeleton hero */}
         <div className="relative h-48 sm:h-64">
           <Skeleton className="absolute inset-0 rounded-none" />
         </div>
@@ -183,20 +183,16 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero banner with gradient + glow */}
       <div className="relative h-48 sm:h-64 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5" />
         <div className="absolute inset-0">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full bg-primary/10 blur-[100px]" />
           <div className="absolute top-0 right-0 w-[400px] h-[200px] rounded-full bg-accent/8 blur-[80px]" />
         </div>
-        {/* Mesh pattern overlay */}
         <div className="absolute inset-0 opacity-[0.03]" style={{
           backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)',
           backgroundSize: '24px 24px',
         }} />
-
-        {/* Nav */}
         <div className="absolute top-0 left-0 right-0 px-4 sm:px-6 py-3 flex items-center justify-between z-20">
           <button
             onClick={() => navigate(-1)}
@@ -216,12 +212,9 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Profile content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        {/* Avatar + Name section - overlapping hero */}
         <div className="relative -mt-16 sm:-mt-20 z-10 mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6">
-            {/* Avatar */}
             <div className="relative">
               <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary/40 to-accent/40 blur-sm" />
               <Avatar className="relative h-28 w-28 sm:h-32 sm:w-32 border-4 border-background ring-2 ring-primary/20">
@@ -235,7 +228,6 @@ export default function Profile() {
               <StatusDot isDnd={profile?.is_dnd ?? false} size="md" className="absolute bottom-1 right-1" />
             </div>
 
-            {/* Name & Bio */}
             <div className="flex-1 text-center sm:text-left pb-2">
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground font-display tracking-tight">
                 {profile?.display_name || 'Anonieme gebruiker'}
@@ -249,9 +241,7 @@ export default function Profile() {
                   {profile.bio}
                 </p>
               )}
-              {/* Social links & email */}
               <SocialBar profile={profile!} />
-              {/* Friend button */}
               <div className="mt-3 flex justify-center sm:justify-start">
                 <FriendButton targetUserId={profile!.id} />
               </div>
@@ -259,7 +249,6 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Stats cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8 sm:mb-10">
           <StatCard icon={<Code2 className="h-5 w-5 sm:h-6 sm:w-6" />} value={stats.appCount} label="Publieke apps" color="primary" />
           <StatCard icon={<Users className="h-5 w-5 sm:h-6 sm:w-6" />} value={stats.orgCount} label="Bedrijven" color="accent" />
@@ -267,16 +256,9 @@ export default function Profile() {
           <StatCard icon={<Eye className="h-5 w-5 sm:h-6 sm:w-6" />} value={stats.totalViews} label="App views" color="primary" />
         </div>
 
-        {/* Friends list */}
         <FriendsList userId={profile!.id} />
-
-        {/* Activity timeline */}
         <ActivityTimeline userId={profile!.id} />
-
-        {/* Apps gallery */}
-        <PublicApps userId={profile!.id} />
-
-        {/* Footer spacer */}
+        <PublicApps userId={profile!.id} isOwner={isOwnProfile} />
         <div className="h-12" />
       </div>
     </div>
@@ -368,7 +350,7 @@ function StatCard({ icon, value, label, color }: { icon: React.ReactNode; value:
   );
 }
 
-function PublicApps({ userId }: { userId: string }) {
+function PublicApps({ userId, isOwner = false }: { userId: string; isOwner?: boolean }) {
   const [apps, setApps] = useState<Array<{
     id: string;
     name: string;
@@ -376,17 +358,23 @@ function PublicApps({ userId }: { userId: string }) {
     slug: string | null;
     created_at: string;
     ngc_code: string;
+    banner_url: string | null;
   }>>([]);
   const [appImages, setAppImages] = useState<Record<string, string[]>>({});
   const [appViews, setAppViews] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [iconPickerApp, setIconPickerApp] = useState<string | null>(null);
+  const [uploadingBanner, setUploadingBanner] = useState<string | null>(null);
+  const bannerRef = useRef<HTMLInputElement>(null);
+  const [bannerAppId, setBannerAppId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     async function load() {
       const { data } = await supabase
         .from('apps')
-        .select('id, name, icon, slug, created_at, ngc_code')
+        .select('id, name, icon, slug, created_at, ngc_code, banner_url')
         .eq('owner_id', userId)
         .eq('is_public', true)
         .order('created_at', { ascending: false })
@@ -396,7 +384,7 @@ function PublicApps({ userId }: { userId: string }) {
         setLoading(false);
         return;
       }
-      setApps(data);
+      setApps(data as any);
 
       const imageMap: Record<string, string[]> = {};
       await Promise.all(
@@ -435,6 +423,54 @@ function PublicApps({ userId }: { userId: string }) {
     return match ? match[1] : null;
   }
 
+  async function handleIconChange(appId: string, icon: string) {
+    const { error } = await supabase.from('apps').update({ icon }).eq('id', appId);
+    if (error) {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+      return;
+    }
+    setApps(prev => prev.map(a => a.id === appId ? { ...a, icon } : a));
+    toast({ title: '✅ Icoon bijgewerkt!' });
+  }
+
+  async function handleBannerUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !bannerAppId) return;
+
+    if (file.size > 4 * 1024 * 1024) {
+      toast({ title: 'Te groot', description: 'Maximaal 4MB', variant: 'destructive' });
+      return;
+    }
+
+    setUploadingBanner(bannerAppId);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${bannerAppId}/banner.${ext}`;
+
+      const { error: uploadErr } = await supabase.storage
+        .from('app-images')
+        .upload(path, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
+
+      const { data: urlData } = supabase.storage.from('app-images').getPublicUrl(path);
+      const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+
+      const { error: updateErr } = await supabase
+        .from('apps')
+        .update({ banner_url: publicUrl } as any)
+        .eq('id', bannerAppId);
+      if (updateErr) throw updateErr;
+
+      setApps(prev => prev.map(a => a.id === bannerAppId ? { ...a, banner_url: publicUrl } : a));
+      toast({ title: '✅ Banner bijgewerkt!' });
+    } catch (err: any) {
+      toast({ title: 'Fout', description: err.message, variant: 'destructive' });
+    }
+    setUploadingBanner(null);
+    setBannerAppId(null);
+    if (bannerRef.current) bannerRef.current.value = '';
+  }
+
   if (loading) {
     return (
       <div>
@@ -468,46 +504,56 @@ function PublicApps({ userId }: { userId: string }) {
         <span className="ml-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold tabular-nums">{apps.length}</span>
       </div>
 
+      <input
+        ref={bannerRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleBannerUpload}
+      />
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {apps.map((app, idx) => {
           const images = appImages[app.id] || [];
           const views = appViews[app.id] ?? 0;
           const desc = extractDescription(app.ngc_code);
           const date = new Date(app.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+          const bannerSrc = app.banner_url || (images.length > 0 ? images[0] : null);
 
           return (
             <div
               key={app.id}
-              onClick={() => app.slug ? navigate(`/app/${app.slug}`) : null}
-              className={`group relative rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1 ${app.slug ? 'cursor-pointer' : ''} animate-slide-up`}
+              onClick={() => !iconPickerApp && app.slug ? navigate(`/app/${app.slug}`) : null}
+              className={`group relative rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1 ${app.slug && !iconPickerApp ? 'cursor-pointer' : ''} animate-slide-up`}
               style={{ animationDelay: `${Math.min(idx * 80, 400)}ms` }}
             >
-              {/* Screenshot / Placeholder */}
-              {images.length > 0 ? (
+              {/* Banner area */}
+              {bannerSrc ? (
                 <div className="aspect-[16/10] bg-muted/20 overflow-hidden relative">
                   <img
-                    src={images[0]}
-                    alt={`Screenshot van ${app.name}`}
+                    src={bannerSrc}
+                    alt={`Banner van ${app.name}`}
                     className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
                     loading="lazy"
                   />
-                  {/* Gradient overlay at bottom */}
                   <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-card to-transparent" />
-                  {/* Extra thumbnails */}
-                  {images.length > 1 && (
-                    <div className="absolute top-3 right-3 flex gap-1.5">
-                      {images.slice(1, 3).map((img, i) => (
-                        <div key={i} className="w-9 h-9 rounded-lg border-2 border-background/90 overflow-hidden shadow-lg backdrop-blur-sm">
-                          <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {/* External link indicator */}
                   {app.slug && (
                     <div className="absolute top-3 left-3 p-1.5 rounded-lg bg-background/60 backdrop-blur-md text-foreground/70 opacity-0 group-hover:opacity-100 transition-opacity">
                       <ExternalLink className="h-3.5 w-3.5" />
                     </div>
+                  )}
+                  {isOwner && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setBannerAppId(app.id); bannerRef.current?.click(); }}
+                      className="absolute top-3 right-3 p-2 rounded-lg bg-background/60 backdrop-blur-md text-foreground/70 hover:bg-background/80 hover:text-foreground transition-all opacity-0 group-hover:opacity-100"
+                      title="Banner wijzigen"
+                    >
+                      {uploadingBanner === app.id ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-muted-foreground/30 border-t-foreground" />
+                      ) : (
+                        <Camera className="h-4 w-4" />
+                      )}
+                    </button>
                   )}
                 </div>
               ) : (
@@ -516,16 +562,38 @@ function PublicApps({ userId }: { userId: string }) {
                     backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)',
                     backgroundSize: '20px 20px',
                   }} />
-                  <span className="text-5xl opacity-40 group-hover:scale-110 transition-transform duration-500">{app.icon || '📱'}</span>
+                  <AppIcon iconName={app.icon || 'file-code'} size={48} className="opacity-30 group-hover:scale-110 transition-transform duration-500 text-muted-foreground" />
                   <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-card to-transparent" />
+                  {isOwner && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setBannerAppId(app.id); bannerRef.current?.click(); }}
+                      className="absolute top-3 right-3 p-2 rounded-lg bg-background/60 backdrop-blur-md text-foreground/70 hover:bg-background/80 hover:text-foreground transition-all opacity-0 group-hover:opacity-100"
+                      title="Banner toevoegen"
+                    >
+                      {uploadingBanner === app.id ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-muted-foreground/30 border-t-foreground" />
+                      ) : (
+                        <Camera className="h-4 w-4" />
+                      )}
+                    </button>
+                  )}
                 </div>
               )}
 
               {/* Content */}
               <div className="p-4 sm:p-5">
                 <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/15 to-accent/10 border border-primary/10 flex items-center justify-center shrink-0 text-sm">
-                    {app.icon || '📱'}
+                  <div
+                    className={`relative w-8 h-8 rounded-xl bg-gradient-to-br from-primary/15 to-accent/10 border border-primary/10 flex items-center justify-center shrink-0 ${isOwner ? 'cursor-pointer hover:border-primary/40 transition-colors' : ''}`}
+                    onClick={(e) => { if (isOwner) { e.stopPropagation(); setIconPickerApp(app.id); } }}
+                    title={isOwner ? 'Icoon wijzigen' : undefined}
+                  >
+                    <AppIcon iconName={app.icon || 'file-code'} size={16} className="text-primary/70" />
+                    {isOwner && (
+                      <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-primary/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Pencil className="h-2 w-2 text-primary-foreground" />
+                      </div>
+                    )}
                   </div>
                   <h4 className="text-sm font-bold text-foreground font-display truncate flex-1">{app.name}</h4>
                 </div>
@@ -554,6 +622,14 @@ function PublicApps({ userId }: { userId: string }) {
           );
         })}
       </div>
+
+      {iconPickerApp && (
+        <IconPicker
+          value={apps.find(a => a.id === iconPickerApp)?.icon || 'file-code'}
+          onChange={(icon) => handleIconChange(iconPickerApp, icon)}
+          onClose={() => setIconPickerApp(null)}
+        />
+      )}
     </div>
   );
 }

@@ -367,6 +367,7 @@ export type Database = {
       }
       apps: {
         Row: {
+          banner_url: string | null
           chat_retention_hours: number
           created_at: string
           icon: string | null
@@ -381,6 +382,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          banner_url?: string | null
           chat_retention_hours?: number
           created_at?: string
           icon?: string | null
@@ -395,6 +397,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          banner_url?: string | null
           chat_retention_hours?: number
           created_at?: string
           icon?: string | null
