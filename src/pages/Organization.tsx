@@ -561,35 +561,6 @@ export default function OrganizationPage() {
               </div>
             )}
 
-            {/* Transaction history */}
-            {transactions.length > 0 && (
-              <div>
-                <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
-                  <History className="h-3.5 w-3.5" /> Recente transacties
-                </h4>
-                <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                  {transactions.map(tx => (
-                    <div key={tx.id} className="flex items-center justify-between rounded-lg px-3 py-2 text-xs" style={{ background: 'hsl(var(--background))' }}>
-                      <div className="flex items-center gap-2">
-                        {tx.type === 'deposit' ? (
-                          <ArrowDownCircle className="h-3.5 w-3.5 text-[hsl(var(--ide-success))]" />
-                        ) : (
-                          <ArrowUpCircle className="h-3.5 w-3.5 text-destructive" />
-                        )}
-                        <span className={`font-mono font-semibold ${tx.type === 'deposit' ? 'text-[hsl(var(--ide-success))]' : 'text-destructive'}`}>
-                          {tx.type === 'deposit' ? '+' : '-'}{tx.amount}
-                        </span>
-                        <span className="text-muted-foreground truncate max-w-[150px]">{tx.note}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground shrink-0">
-                        <span className="font-mono">{tx.user_id.slice(0, 6)}...</span>
-                        <span>{new Date(tx.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
           </>
         )}
