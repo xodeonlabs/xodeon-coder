@@ -1,5 +1,6 @@
-import { ExternalLink, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ExternalLink, X, ChevronLeft, ChevronRight, Building2 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { getCached, setCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache';
 
@@ -11,6 +12,8 @@ interface Ad {
   url: string;
   gradient: string;
   pages: string[];
+  organization_id?: string | null;
+  org_name?: string;
 }
 
 const ROTATE_INTERVAL = 6000;
@@ -26,6 +29,7 @@ export function AdBanner({ className = '', page, organizationId }: AdBannerProps
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [ads, setAds] = useState<Ad[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const cacheKey = CACHE_KEYS.ads(page || 'all');
@@ -42,13 +46,27 @@ export function AdBanner({ className = '', page, organizationId }: AdBannerProps
       query = query.eq('organization_id', organizationId);
     }
 
-    query.then(({ data }) => {
+    query.then(async ({ data }) => {
       if (data && data.length > 0) {
         const filtered = page
           ? (data as any[]).filter((ad: any) => ad.pages && ad.pages.includes(page))
           : (data as any[]);
-        setAds(filtered as Ad[]);
-        setCache(cacheKey, filtered as Ad[]);
+
+        // Fetch org names for ads with organization_id
+        const orgIds = [...new Set(filtered.filter((a: any) => a.organization_id).map((a: any) => a.organization_id))];
+        let orgMap = new Map<string, string>();
+        if (orgIds.length > 0) {
+          const { data: orgs } = await supabase.from('organizations').select('id, name').in('id', orgIds);
+          if (orgs) orgMap = new Map(orgs.map(o => [o.id, o.name]));
+        }
+
+        const enriched = filtered.map((ad: any) => ({
+          ...ad,
+          org_name: ad.organization_id ? orgMap.get(ad.organization_id) : undefined,
+        }));
+
+        setAds(enriched as Ad[]);
+        setCache(cacheKey, enriched as Ad[]);
       }
     });
   }, [page, organizationId]);
@@ -81,6 +99,16 @@ export function AdBanner({ className = '', page, organizationId }: AdBannerProps
   if (dismissed || ads.length === 0) return null;
 
   const ad = ads[currentIndex % ads.length];
+  const hasExternalUrl = ad.url && ad.url.trim().length > 0;
+  const adHref = hasExternalUrl ? ad.url : (ad.organization_id ? `/bedrijf/${ad.organization_id}` : '#');
+  const isExternal = hasExternalUrl;
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (!isExternal) {
+      e.preventDefault();
+      if (ad.organization_id) navigate(`/bedrijf/${ad.organization_id}`);
+    }
+  };
 
   return (
     <div
@@ -109,9 +137,10 @@ export function AdBanner({ className = '', page, organizationId }: AdBannerProps
       </button>
 
       <a
-        href={ad.url}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={adHref}
+        target={isExternal ? '_blank' : undefined}
+        rel={isExternal ? 'noopener noreferrer' : undefined}
+        onClick={handleClick}
         className={`flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-all duration-300 ${isAnimating ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'}`}
       >
         <div className="w-9 h-9 rounded-lg bg-foreground/10 flex items-center justify-center shrink-0">
@@ -122,9 +151,21 @@ export function AdBanner({ className = '', page, organizationId }: AdBannerProps
             <p className="text-sm font-semibold text-foreground truncate">{ad.title}</p>
             <span className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground bg-secondary/60 px-1.5 py-0.5 rounded shrink-0">Ad</span>
           </div>
-          <p className="text-[11px] text-muted-foreground truncate">{ad.description}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-[11px] text-muted-foreground truncate">{ad.description}</p>
+            {ad.org_name && (
+              <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground/70 shrink-0">
+                <Building2 className="h-2.5 w-2.5" />
+                {ad.org_name}
+              </span>
+            )}
+          </div>
         </div>
-        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+        {isExternal ? (
+          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+        ) : (
+          <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+        )}
       </a>
 
       <div className="flex items-center justify-center gap-1.5 pb-2">
