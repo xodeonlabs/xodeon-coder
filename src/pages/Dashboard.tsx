@@ -369,6 +369,9 @@ export default function Dashboard() {
                   <button onClick={() => { setInviteAppId(app.id); setInviteEmail(''); }} className="rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Samenwerker uitnodigen">
                     <UserPlus className="h-4 w-4" />
                   </button>
+                  <button onClick={() => openPublishDialog(app)} className="rounded-lg p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors" title="Publiceren / Deel-link">
+                    <ExternalLink className="h-4 w-4" />
+                  </button>
                   <button onClick={() => deleteApp(app.id, app.name)} className="rounded-lg p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors ml-auto" title="Verwijderen">
                     <Trash2 className="h-4 w-4" />
                   </button>
