@@ -453,7 +453,7 @@ const Index = () => {
                 <span>Componenten</span>
               </div>
               <div className="flex-1 overflow-auto">
-                <NGCComponentLibrary onInsert={handleInsertCode} onCreateTemplate={handleCreateTemplate} />
+                <NGCComponentLibrary onInsert={handleInsertCode} />
               </div>
             </>
           )}

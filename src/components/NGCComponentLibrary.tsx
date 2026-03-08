@@ -799,7 +799,7 @@ export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => 
               communityTemplates.map(template => (
                 <button
                   key={(template as any).id}
-                  onClick={() => handleCreateFromCommunity(template)}
+                  onClick={() => handleUseTemplate(template)}
                   className="flex items-center gap-2 w-full px-2.5 py-2 text-xs rounded-sm hover:bg-accent/10 transition-colors text-left group bg-secondary/30"
                 >
                   <div className="flex-1 min-w-0">
