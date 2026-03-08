@@ -536,6 +536,9 @@ export default function AdminPanel() {
       } else if (confirmAction.type === 'ad') {
         await deleteAd(confirmAction.id);
         setConfirmAction(null);
+      } else if (confirmAction.type === 'alliance') {
+        await adminDeleteAlliance(confirmAction.id);
+        setConfirmAction(null);
       }
     } catch (e: any) {
       toast({ title: 'Fout', description: e.message, variant: 'destructive' });
