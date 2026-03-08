@@ -1019,7 +1019,7 @@ export default function OrganizationPage() {
                 <div>
                   <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                     <Megaphone className="h-5 w-5 text-accent" />
-                    Advertenties ({orgAds.length}/{[1,2,3,5,10][(((selectedOrg as any).level ?? 1) - 1)] ?? 1})
+                    Advertenties ({orgAds.length}/{[1,2,3,5,10,15,20,30,50,999][(((selectedOrg as any).level ?? 1) - 1)] ?? 1})
                   </h3>
                   <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
                     <Coins className="h-3 w-3" /> 10 coins per maand per actieve advertentie
