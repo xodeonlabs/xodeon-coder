@@ -479,6 +479,35 @@ export type Database = {
           },
         ]
       }
+      chat_group_read_status: {
+        Row: {
+          group_id: string
+          id: string
+          last_read_at: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          last_read_at?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          last_read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_group_read_status_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "chat_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_groups: {
         Row: {
           chat_retention_hours: number

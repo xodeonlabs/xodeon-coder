@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { ArrowLeft, Send, Plus, Users, Hash, UserPlus, Trash2, X, Search, Gamepad2 } from 'lucide-react';
+import { ArrowLeft, Send, Plus, Users, Hash, UserPlus, Trash2, X, Search, Gamepad2, Check, CheckCheck } from 'lucide-react';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { SnakeGame } from '@/components/SnakeGame';
 
@@ -50,8 +50,8 @@ export default function GroupChats() {
   const [showCreate, setShowCreate] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
   const [showGame, setShowGame] = useState(false);
-
-  // Create form
+  const [readStatuses, setReadStatuses] = useState<Record<string, string>>({});
+  // Maps group_id -> { user_id -> last_read_at } for all members
   const [newName, setNewName] = useState('');
   const [newIcon, setNewIcon] = useState('💬');
   const [newType, setNewType] = useState<'friend_group' | 'private' | 'org_channel'>('friend_group');
@@ -106,6 +106,23 @@ export default function GroupChats() {
       (profs || []).forEach(p => { map[p.id] = p; });
       setProfiles(map);
     }
+
+    // Load read statuses for all members of this group
+    const { data: readData } = await supabase
+      .from('chat_group_read_status' as any)
+      .select('user_id, last_read_at')
+      .eq('group_id', group.id);
+    const statusMap: Record<string, string> = {};
+    (readData as any[] || []).forEach((r: any) => { statusMap[r.user_id] = r.last_read_at; });
+    setReadStatuses(statusMap);
+
+    // Mark as read for current user
+    if (myId) {
+      await supabase.from('chat_group_read_status' as any).upsert(
+        { group_id: group.id, user_id: myId, last_read_at: new Date().toISOString() } as any,
+        { onConflict: 'group_id,user_id' }
+      );
+    }
   }
 
   // Realtime messages
@@ -124,6 +141,22 @@ export default function GroupChats() {
           supabase.from('profiles').select('id, display_name, avatar_url, username').eq('id', msg.user_id).maybeSingle().then(({ data }) => {
             if (data) setProfiles(prev => ({ ...prev, [data.id]: data }));
           });
+        }
+        // Update own read status when receiving messages
+        if (myId && msg.user_id !== myId) {
+          supabase.from('chat_group_read_status' as any).upsert(
+            { group_id: selectedGroup.id, user_id: myId, last_read_at: new Date().toISOString() } as any,
+            { onConflict: 'group_id,user_id' }
+          );
+        }
+      })
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'chat_group_read_status',
+        filter: `group_id=eq.${selectedGroup.id}`,
+      }, (payload) => {
+        const row = payload.new as any;
+        if (row?.user_id && row?.last_read_at) {
+          setReadStatuses(prev => ({ ...prev, [row.user_id]: row.last_read_at }));
         }
       })
       .subscribe();
@@ -448,6 +481,19 @@ export default function GroupChats() {
                 const name = profile?.display_name || 'Onbekend';
                 const showTime = i === 0 || (new Date(msg.created_at).getTime() - new Date(messages[i - 1].created_at).getTime() > 300000);
                 const showName = !isMine && (i === 0 || messages[i - 1].user_id !== msg.user_id);
+                
+                // Calculate read status for own messages
+                let readByOthers = 0;
+                let totalOthers = 0;
+                if (isMine) {
+                  const otherMemberIds = memberIds.filter(id => id !== myId);
+                  totalOthers = otherMemberIds.length;
+                  readByOthers = otherMemberIds.filter(id => {
+                    const lastRead = readStatuses[id];
+                    return lastRead && new Date(lastRead) >= new Date(msg.created_at);
+                  }).length;
+                }
+
                 return (
                   <div key={msg.id}>
                     {showTime && (
@@ -474,6 +520,26 @@ export default function GroupChats() {
                         }`}>
                           {msg.content}
                         </div>
+                        {isMine && totalOthers > 0 && (
+                          <div className="flex items-center gap-1 mt-0.5 px-1">
+                            {readByOthers === totalOthers ? (
+                              <>
+                                <CheckCheck className="h-3 w-3 text-accent" />
+                                <span className="text-[9px] text-accent font-medium">Gelezen</span>
+                              </>
+                            ) : readByOthers > 0 ? (
+                              <>
+                                <CheckCheck className="h-3 w-3 text-muted-foreground/60" />
+                                <span className="text-[9px] text-muted-foreground/60 font-medium">Gelezen door {readByOthers}/{totalOthers}</span>
+                              </>
+                            ) : (
+                              <>
+                                <Check className="h-3 w-3 text-muted-foreground/40" />
+                                <span className="text-[9px] text-muted-foreground/40 font-medium">Bezorgd</span>
+                              </>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
