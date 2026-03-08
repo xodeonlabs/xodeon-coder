@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useNotificationSound } from '@/hooks/useNotificationSound';
 import {
   LayoutDashboard, BarChart3, Building2, Handshake, Users,
   MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins, PanelLeftClose, PanelLeftOpen,
