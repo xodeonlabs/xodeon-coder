@@ -197,6 +197,226 @@ const DEFAULT_NGC_CODE = `App:
                     Data.Clear(gebruikers)
 `;
 
+const TEST_NGC_CODE = `App:
+    Var(teller)=0
+    Var(naam)=""
+    Var(invoer)=""
+    Var(resultaat)=""
+    List(boodschappen)="Melk,Brood,Kaas"
+    Page Home:
+        Frame Header:
+            Positie="0,0"
+            Grootte="500,50"
+            Kleur="rgb(30,41,59)"
+            Text Titel:
+                Tekst="🧪 NGC Test App"
+                Positie="15,10"
+                Grootte="300,30"
+                Kleur="rgb(255,255,255)"
+            Text CoinDisplay:
+                Tekst="🪙 Coins(wallet)"
+                Positie="350,10"
+                Grootte="140,30"
+                Kleur="rgb(250,204,21)"
+        Text SubTitel:
+            Tekst="Test alle NGC features"
+            Positie="15,60"
+            Grootte="300,25"
+            Kleur="rgb(148,163,184)"
+
+        # --- Variabelen test ---
+        Frame VarFrame:
+            Positie="15,95"
+            Grootte="220,180"
+            Kleur="rgb(30,41,59)"
+            Hoekradius="12"
+            Text VarTitle:
+                Tekst="📊 Variabelen"
+                Positie="10,8"
+                Grootte="200,25"
+                Kleur="rgb(255,255,255)"
+            Text TellerLabel:
+                Tekst="Teller: {teller}"
+                Positie="10,38"
+                Grootte="200,20"
+                Kleur="rgb(148,163,184)"
+            Button PlusBtn:
+                Tekst="+1"
+                Positie="10,65"
+                Grootte="95,36"
+                Kleur="rgb(34,197,94)"
+                Hoekradius="8"
+                Click:
+                    Var(teller)+1
+            Button MinBtn:
+                Tekst="-1"
+                Positie="115,65"
+                Grootte="95,36"
+                Kleur="rgb(239,68,68)"
+                Hoekradius="8"
+                Click:
+                    Var(teller)-1
+            TextBox NaamInput:
+                Positie="10,110"
+                Grootte="200,36"
+                Placeholder="Typ je naam..."
+                Variabele="naam"
+                Hoekradius="8"
+            Text NaamOutput:
+                Tekst="Hallo, {naam}!"
+                Positie="10,150"
+                Grootte="200,20"
+                Kleur="rgb(96,165,250)"
+
+        # --- Coins test ---
+        Frame CoinFrame:
+            Positie="250,95"
+            Grootte="220,180"
+            Kleur="rgb(30,41,59)"
+            Hoekradius="12"
+            Text CoinTitle:
+                Tekst="🪙 Coins Test"
+                Positie="10,8"
+                Grootte="200,25"
+                Kleur="rgb(255,255,255)"
+            Text CoinSaldo:
+                Tekst="Saldo: Coins(wallet)"
+                Positie="10,38"
+                Grootte="200,20"
+                Kleur="rgb(250,204,21)"
+            Button CoinAddBtn:
+                Tekst="+10 coins"
+                Positie="10,65"
+                Grootte="95,36"
+                Kleur="rgb(34,197,94)"
+                Hoekradius="8"
+                Click:
+                    Coins.Add(wallet, 10)
+            Button CoinRemoveBtn:
+                Tekst="-5 coins"
+                Positie="115,65"
+                Grootte="95,36"
+                Kleur="rgb(239,68,68)"
+                Hoekradius="8"
+                Click:
+                    Coins.Remove(wallet, 5)
+            Text CoinInfo:
+                Tekst="Remove toont bevestiging"
+                Positie="10,110"
+                Grootte="200,20"
+                Kleur="rgb(100,116,139)"
+
+        # --- Lijst test ---
+        Frame ListFrame:
+            Positie="15,290"
+            Grootte="220,200"
+            Kleur="rgb(30,41,59)"
+            Hoekradius="12"
+            Text ListTitle:
+                Tekst="📋 Lijst Test"
+                Positie="10,8"
+                Grootte="200,25"
+                Kleur="rgb(255,255,255)"
+            List(boodschappen):
+                Positie="10,38"
+                Grootte="200,100"
+            TextBox ListInput:
+                Positie="10,145"
+                Grootte="130,36"
+                Placeholder="Nieuw item..."
+                Variabele="invoer"
+                Hoekradius="8"
+            Button ListAddBtn:
+                Tekst="+"
+                Positie="150,145"
+                Grootte="60,36"
+                Kleur="rgb(59,130,246)"
+                Hoekradius="8"
+                Click:
+                    List.Add(boodschappen, Var(invoer))
+                    Var(invoer)=""
+
+        # --- Data test ---
+        Frame DataFrame:
+            Positie="250,290"
+            Grootte="220,200"
+            Kleur="rgb(30,41,59)"
+            Hoekradius="12"
+            Text DataTitle:
+                Tekst="💾 Data Test"
+                Positie="10,8"
+                Grootte="200,25"
+                Kleur="rgb(255,255,255)"
+            Button DataAddBtn:
+                Tekst="+ Record toevoegen"
+                Positie="10,40"
+                Grootte="200,36"
+                Kleur="rgb(59,130,246)"
+                Hoekradius="8"
+                Click:
+                    Data.Add(test, naam=Var(naam), score=Var(teller))
+            Button DataClearBtn:
+                Tekst="🗑 Alles wissen"
+                Positie="10,85"
+                Grootte="200,36"
+                Kleur="rgb(51,65,85)"
+                Hoekradius="8"
+                Click:
+                    Data.Clear(test)
+            Text DataInfo:
+                Tekst="Data: naam + score opslaan"
+                Positie="10,130"
+                Grootte="200,20"
+                Kleur="rgb(100,116,139)"
+
+        # --- Navigatie test ---
+        Button NavBtn:
+            Tekst="→ Ga naar Pagina 2"
+            Positie="15,505"
+            Grootte="455,42"
+            Kleur="rgb(139,92,246)"
+            Hoekradius="10"
+            Icoon="arrow-right"
+            Click:
+                GaNaar Pagina2
+
+    Page Pagina2:
+        Frame Header2:
+            Positie="0,0"
+            Grootte="500,50"
+            Kleur="rgb(30,41,59)"
+            Text Titel2:
+                Tekst="📄 Pagina 2 - Navigatie Test"
+                Positie="15,10"
+                Grootte="400,30"
+                Kleur="rgb(255,255,255)"
+        Text P2Info:
+            Tekst="Je bent naar pagina 2 genavigeerd! ✅"
+            Positie="15,70"
+            Grootte="400,25"
+            Kleur="rgb(34,197,94)"
+        Text P2Var:
+            Tekst="Teller staat op: {teller}"
+            Positie="15,100"
+            Grootte="400,25"
+            Kleur="rgb(148,163,184)"
+        Text P2Naam:
+            Tekst="Naam: {naam}"
+            Positie="15,130"
+            Grootte="400,25"
+            Kleur="rgb(148,163,184)"
+        Button TerugBtn:
+            Tekst="← Terug naar Home"
+            Positie="15,175"
+            Grootte="455,42"
+            Kleur="rgb(59,130,246)"
+            Hoekradius="10"
+            Icoon="arrow-left"
+            Click:
+                GaNaar Home
+`;
+
+
 interface OrgMembership {
   organization_id: string;
   role: string;
