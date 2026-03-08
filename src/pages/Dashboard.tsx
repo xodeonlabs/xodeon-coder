@@ -25,6 +25,7 @@ interface App {
 interface Org {
   id: string;
   name: string;
+  icon?: string;
 }
 
 const DEFAULT_NGC_CODE = `App:
