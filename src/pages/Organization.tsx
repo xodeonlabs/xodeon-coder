@@ -140,16 +140,14 @@ export default function OrganizationPage() {
     setLoadingMembers(true);
     setShowDeposit(false);
     setShowWithdraw(false);
-    const [membersRes, appsRes, coinsRes, txRes] = await Promise.all([
+    const [membersRes, appsRes, coinsRes] = await Promise.all([
       supabase.from('organization_members').select('*').eq('organization_id', org.id).order('created_at', { ascending: true }),
       supabase.from('apps').select('id, name, updated_at').eq('organization_id', org.id as any).order('updated_at', { ascending: false }),
       supabase.from('org_coins').select('*').eq('organization_id', org.id),
-      supabase.from('org_coin_transactions').select('*').eq('organization_id', org.id).order('created_at', { ascending: false }).limit(20),
     ]);
     if (!membersRes.error) setMembers((membersRes.data as unknown as OrgMember[]) || []);
     if (!appsRes.error) setOrgApps((appsRes.data as unknown as OrgApp[]) || []);
     if (!coinsRes.error) setOrgCoins((coinsRes.data as unknown as OrgCoin[]) || []);
-    if (!txRes.error) setTransactions((txRes.data as unknown as CoinTransaction[]) || []);
     setLoadingMembers(false);
   }
 
