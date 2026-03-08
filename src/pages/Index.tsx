@@ -589,7 +589,7 @@ const Index = () => {
 
         {/* Right Panel: Component Library (hidden on mobile) */}
         <div
-          className={`shrink-0 flex-col transition-all duration-200 hidden sm:flex ${rightOpen ? 'w-72' : 'w-0 overflow-hidden'}`}
+          className={`shrink-0 flex-col transition-all duration-200 flex ${rightOpen ? 'w-72' : 'w-0 overflow-hidden'}`}
         >
           {rightOpen && (
             <>
