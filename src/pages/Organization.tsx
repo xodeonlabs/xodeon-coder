@@ -333,7 +333,52 @@ export default function OrganizationPage() {
     setIconPickerOrgId(null);
   }
 
-  async function deleteOrg(org: Organization) {
+  async function saveOrgAd() {
+    if (!selectedOrg || !adTitle.trim()) return;
+    setAdSaving(true);
+    const adData = {
+      organization_id: selectedOrg.id,
+      emoji: adEmoji || '🚀',
+      title: adTitle.trim(),
+      description: adDescription.trim(),
+      url: adUrl.trim(),
+      is_active: true,
+      pages: ['dashboard', 'organizations'],
+    };
+    if (orgAd) {
+      const { error } = await supabase.from('ads' as any).update(adData).eq('id', orgAd.id);
+      if (error) {
+        toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+      } else {
+        setOrgAd({ id: orgAd.id, ...adData });
+        setShowAdForm(false);
+        toast({ title: 'Advertentie bijgewerkt!' });
+      }
+    } else {
+      const { data, error } = await supabase.from('ads' as any).insert(adData).select().single();
+      if (error) {
+        toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+      } else if (data) {
+        setOrgAd({ id: (data as any).id, ...adData });
+        setShowAdForm(false);
+        toast({ title: 'Advertentie aangemaakt!' });
+      }
+    }
+    setAdSaving(false);
+  }
+
+  async function deleteOrgAd() {
+    if (!orgAd) return;
+    if (!confirm('Weet je zeker dat je de advertentie wilt verwijderen?')) return;
+    const { error } = await supabase.from('ads' as any).delete().eq('id', orgAd.id);
+    if (!error) {
+      setOrgAd(null);
+      setShowAdForm(false);
+      toast({ title: 'Advertentie verwijderd' });
+    }
+  }
+
+
     if (!confirm(`Weet je zeker dat je "${org.name}" wilt verwijderen?`)) return;
     const { error } = await supabase.from('organizations').delete().eq('id', org.id);
     if (error) {
