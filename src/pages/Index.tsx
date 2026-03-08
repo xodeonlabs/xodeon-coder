@@ -866,6 +866,7 @@ const Index = () => {
 
       {/* Command Palette */}
       <CommandPalette open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} items={commandItems} />
+      <KeyboardShortcuts open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
 
       {/* Context Menu */}
       {contextMenu && contextNode && (
