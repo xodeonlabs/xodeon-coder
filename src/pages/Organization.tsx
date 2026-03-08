@@ -93,6 +93,10 @@ export default function OrganizationPage() {
 
   async function createOrg() {
     if (!newOrgName.trim() || !session?.user?.id) return;
+    if (orgs.length >= 3) {
+      toast({ title: 'Limiet bereikt', description: 'Je kunt maximaal 3 bedrijven joinen of aanmaken.', variant: 'destructive' });
+      return;
+    }
     setCreating(true);
     try {
       const { data, error } = await supabase
@@ -137,6 +141,10 @@ export default function OrganizationPage() {
 
   async function joinOrg() {
     if (!joinCode.trim()) return;
+    if (orgs.length >= 3) {
+      toast({ title: 'Limiet bereikt', description: 'Je kunt maximaal 3 bedrijven joinen of aanmaken.', variant: 'destructive' });
+      return;
+    }
     setJoining(true);
     try {
       const { data, error } = await supabase.rpc('join_organization_by_code', { _code: joinCode.trim() });
