@@ -416,42 +416,54 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
     const fee = Math.floor(amount * PLATFORM_FEE_RATE);
     const netAmount = amount - fee;
 
+    // Split coins with collaborators based on accepted contracts
+    let collaboratorShare = 0;
+    try {
+      const { data: contractData } = await supabase.from('collaborator_contracts' as any).select('collaborator_id, percentage').eq('app_id', ast?.id || '').eq('status', 'accepted');
+      if (contractData && (contractData as any[]).length > 0) {
+        for (const contract of contractData as any[]) {
+          const share = Math.floor(netAmount * (contract.percentage / 100));
+          collaboratorShare += share;
+          // Credit collaborator's coins
+          const { data: collabCoin } = await supabase.from('user_coins').select('id, balance').eq('user_id', contract.collaborator_id).maybeSingle();
+          if (collabCoin) {
+            await supabase.from('user_coins').update({ balance: (collabCoin as any).balance + share, updated_at: new Date().toISOString() } as any).eq('id', (collabCoin as any).id);
+          }
+        }
+      }
+    } catch { /* no contracts table or no contracts */ }
+
+    const ownerAmount = netAmount - collaboratorShare;
+
     if (organizationId) {
-      // Org path: withdraw from org vault (full amount), user gets net
       const { data } = await supabase.from('org_coins').select('id, balance').eq('organization_id', organizationId).eq('name', 'coins').single();
       if (!data || (data as any).balance < amount) return false;
       const newOrgBalance = (data as any).balance - amount;
       await supabase.from('org_coins').update({ balance: newOrgBalance, updated_at: new Date().toISOString() } as any).eq('id', (data as any).id);
-      runtime.coins[name] = (runtime.coins[name] ?? 0) + netAmount;
+      runtime.coins[name] = (runtime.coins[name] ?? 0) + ownerAmount;
       const { data: authData } = await supabase.auth.getUser();
       if (authData?.user) {
         await supabase.from('org_coin_transactions').insert({
-          organization_id: organizationId, coin_name: 'coins', amount: netAmount, type: 'withdraw',
-          user_id: authData.user.id, note: `App: Coins.Add(${name}, ${amount}) → ${netAmount} na 10% fee`,
+          organization_id: organizationId, coin_name: 'coins', amount: ownerAmount, type: 'withdraw',
+          user_id: authData.user.id, note: `App: Coins.Add(${name}, ${amount}) → ${ownerAmount} na fee+contracts`,
         } as any);
-        if (fee > 0) {
-          await supabase.from('org_coin_transactions').insert({
-            organization_id: organizationId, coin_name: 'coins', amount: fee, type: 'platform_fee',
-            user_id: authData.user.id, note: `Platformkosten 10% van ${amount}`,
-          } as any);
-        }
       }
       setOrgBalance(newOrgBalance);
       return true;
     }
-    // Personal path: user gets net amount
-    runtime.coinsAdd(name, netAmount);
+    // Personal path
+    runtime.coinsAdd(name, ownerAmount);
     const { data: authData } = await supabase.auth.getUser();
     if (authData?.user) {
       const { data: coinRow } = await supabase.from('user_coins').select('id, balance').eq('user_id', authData.user.id).maybeSingle();
       if (coinRow) {
-        await supabase.from('user_coins').update({ balance: (coinRow as any).balance + netAmount, updated_at: new Date().toISOString() } as any).eq('id', (coinRow as any).id);
+        await supabase.from('user_coins').update({ balance: (coinRow as any).balance + ownerAmount, updated_at: new Date().toISOString() } as any).eq('id', (coinRow as any).id);
       } else {
-        await supabase.from('user_coins').insert({ user_id: authData.user.id, balance: 100 + netAmount } as any);
+        await supabase.from('user_coins').insert({ user_id: authData.user.id, balance: 100 + ownerAmount } as any);
       }
     }
     return true;
-  }, [organizationId, runtime]);
+  }, [organizationId, runtime, ast]);
 
   const dbCoinsRemoveInternal = useCallback(async (name: string, amount: number): Promise<boolean> => {
     const fee = Math.floor(amount * PLATFORM_FEE_RATE);

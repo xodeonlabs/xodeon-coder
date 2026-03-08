@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield, Sparkles, Zap } from 'lucide-react';
+import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, FileText, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield, Sparkles, Zap, Handshake, Percent } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { AdBanner } from '@/components/AdBanner';
@@ -91,6 +91,22 @@ const DEFAULT_NGC_CODE = `App:
                 Kleur="#94a3b8"
 `;
 
+interface OrgMembership {
+  organization_id: string;
+  role: string;
+}
+
+interface Contract {
+  id: string;
+  app_id: string;
+  collaborator_id: string;
+  proposed_by: string;
+  percentage: number;
+  counter_percentage: number | null;
+  status: string;
+  created_at: string;
+}
+
 export default function Dashboard() {
   const { session, signOut } = useAuth();
   const navigate = useNavigate();
@@ -100,10 +116,12 @@ export default function Dashboard() {
   const [creating, setCreating] = useState(false);
   const [inviteAppId, setInviteAppId] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
+  const [invitePercentage, setInvitePercentage] = useState(10);
   const [inviting, setInviting] = useState(false);
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [editingNameValue, setEditingNameValue] = useState('');
   const [orgs, setOrgs] = useState<Org[]>([]);
+  const [orgMemberships, setOrgMemberships] = useState<OrgMembership[]>([]);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [templateDesc, setTemplateDesc] = useState('');
@@ -116,6 +134,8 @@ export default function Dashboard() {
   const [unreadOrgMessages, setUnreadOrgMessages] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [iconPickerAppId, setIconPickerAppId] = useState<string | null>(null);
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [contractAppId, setContractAppId] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadCoins() {
@@ -150,7 +170,7 @@ export default function Dashboard() {
     return () => window.removeEventListener('keydown', handler);
   }, [session?.user?.id]);
 
-  useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); }, []);
+  useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); fetchOrgMemberships(); fetchContracts(); }, []);
   useEffect(() => { checkAdminRole(); }, [session?.user?.id]);
 
   async function checkAdminRole() {
@@ -163,6 +183,27 @@ export default function Dashboard() {
     const { data } = await supabase.from('organizations').select('id, name, icon' as any).order('name');
     if (data) setOrgs(data as unknown as Org[]);
   }
+
+  async function fetchOrgMemberships() {
+    if (!session?.user?.id) return;
+    const { data } = await supabase.from('organization_members').select('organization_id, role').eq('user_id', session.user.id);
+    if (data) setOrgMemberships(data as unknown as OrgMembership[]);
+  }
+
+  async function fetchContracts() {
+    if (!session?.user?.id) return;
+    // Fetch contracts where user is owner or collaborator
+    const { data } = await supabase.from('collaborator_contracts' as any).select('*');
+    if (data) setContracts(data as unknown as Contract[]);
+  }
+
+  function isOrgAdmin(orgId: string): boolean {
+    const membership = orgMemberships.find(m => m.organization_id === orgId);
+    return membership?.role === 'owner' || membership?.role === 'admin';
+  }
+
+  // Only orgs where user is admin/owner
+  const adminOrgs = orgs.filter(o => isOrgAdmin(o.id));
 
   async function fetchUnreadCount() {
     if (!session?.user?.id) return;
@@ -184,6 +225,11 @@ export default function Dashboard() {
   }
 
   async function linkAppToOrg(appId: string, orgId: string | null) {
+    // Check if user is admin/owner of the org
+    if (orgId && !isOrgAdmin(orgId)) {
+      toast({ title: 'Geen toegang', description: 'Je moet admin of eigenaar zijn van het bedrijf om apps te koppelen.', variant: 'destructive' });
+      return;
+    }
     const { error } = await supabase.from('apps').update({ organization_id: orgId } as any).eq('id', appId);
     if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
     else { setApps(apps.map(a => a.id === appId ? { ...a, organization_id: orgId } : a)); toast({ title: orgId ? 'Gekoppeld aan bedrijf' : 'Ontkoppeld van bedrijf' }); }
@@ -332,11 +378,58 @@ export default function Dashboard() {
       const { data, error } = await supabase.functions.invoke('invite-collaborator', { body: { email: inviteEmail.trim(), app_id: inviteAppId } });
       if (error) throw error;
       if (data?.error) { toast({ title: 'Fout', description: data.error, variant: 'destructive' }); }
-      else { toast({ title: 'Verstuurd' }); setInviteEmail(''); setInviteAppId(null); }
+      else {
+        // Create contract for the collaborator
+        if (data?.collaborator_id && invitePercentage > 0) {
+          await supabase.from('collaborator_contracts' as any).insert({
+            app_id: inviteAppId,
+            collaborator_id: data.collaborator_id,
+            proposed_by: session?.user?.id,
+            percentage: invitePercentage,
+            status: 'pending',
+          } as any);
+          toast({ title: 'Uitgenodigd met contract', description: `${invitePercentage}% voorstel verstuurd.` });
+        } else {
+          toast({ title: 'Verstuurd' });
+        }
+        setInviteEmail('');
+        setInvitePercentage(10);
+        setInviteAppId(null);
+        fetchContracts();
+      }
     } catch (e) {
       toast({ title: 'Fout', description: e instanceof Error ? e.message : 'Onbekende fout', variant: 'destructive' });
     }
     setInviting(false);
+  }
+
+  async function respondToContract(contractId: string, action: 'accepted' | 'rejected' | 'counter', counterPct?: number) {
+    if (action === 'counter' && counterPct) {
+      await supabase.from('collaborator_contracts' as any).update({
+        status: 'counter',
+        counter_percentage: counterPct,
+        updated_at: new Date().toISOString(),
+      } as any).eq('id', contractId);
+      toast({ title: 'Tegenvoorstel verstuurd', description: `${counterPct}% voorgesteld.` });
+    } else if (action === 'accepted') {
+      const contract = contracts.find(c => c.id === contractId);
+      // If there's a counter, accept the counter percentage
+      const finalPct = contract?.counter_percentage || contract?.percentage || 10;
+      await supabase.from('collaborator_contracts' as any).update({
+        status: 'accepted',
+        percentage: finalPct,
+        counter_percentage: null,
+        updated_at: new Date().toISOString(),
+      } as any).eq('id', contractId);
+      toast({ title: 'Contract geaccepteerd', description: `${finalPct}% per transactie.` });
+    } else {
+      await supabase.from('collaborator_contracts' as any).update({
+        status: 'rejected',
+        updated_at: new Date().toISOString(),
+      } as any).eq('id', contractId);
+      toast({ title: 'Contract afgewezen' });
+    }
+    fetchContracts();
   }
 
   const myApps = apps.filter(a => a.owner_id === session?.user?.id);
@@ -499,12 +592,12 @@ export default function Dashboard() {
 
                 {/* Actions (on hover) */}
                 <div className="relative flex items-center gap-1 flex-wrap opacity-0 group-hover:opacity-100 transition-opacity duration-200" onClick={e => e.stopPropagation()}>
-                  {orgs.length > 0 && (
+                  {adminOrgs.length > 0 && (
                     <select value={app.organization_id || ''} onChange={e => linkAppToOrg(app.id, e.target.value || null)}
                       className="text-[11px] rounded-lg border border-border/40 bg-background/80 px-1.5 py-1 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 max-w-[100px]"
                     >
                       <option value="">Geen bedrijf</option>
-                      {orgs.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
+                      {adminOrgs.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
                     </select>
                   )}
                   <select value={app.chat_retention_hours ?? 12} onChange={e => updateRetention(app.id, parseInt(e.target.value))}
@@ -521,12 +614,30 @@ export default function Dashboard() {
                   <ActionBtn onClick={() => { setEditingNameId(app.id); setEditingNameValue(app.name); }} icon={<Pencil className="h-3.5 w-3.5" />} title="Hernoemen" />
                   <ActionBtn onClick={() => togglePublic(app)} icon={app.is_public ? <Lock className="h-3.5 w-3.5" /> : <Globe className="h-3.5 w-3.5" />} title={app.is_public ? 'Maak privé' : 'Maak publiek'} />
                   <ActionBtn onClick={() => toggleRemixable(app)} icon={<Copy className="h-3.5 w-3.5" />} title={app.is_remixable ? 'Remix uit' : 'Remix aan'} />
-                  <ActionBtn onClick={() => { setInviteAppId(app.id); setInviteEmail(''); }} icon={<UserPlus className="h-3.5 w-3.5" />} title="Uitnodigen" />
+                  <ActionBtn onClick={() => { setInviteAppId(app.id); setInviteEmail(''); setInvitePercentage(10); }} icon={<UserPlus className="h-3.5 w-3.5" />} title="Uitnodigen + Contract" />
+                  <ActionBtn onClick={() => setContractAppId(app.id)} icon={<FileText className="h-3.5 w-3.5" />} title="Contracten bekijken" className="hover:text-accent" />
                   <ActionBtn onClick={() => openPublishDialog(app)} icon={<ExternalLink className="h-3.5 w-3.5" />} title="Publiceren" className="hover:text-primary" />
                   <ActionBtn onClick={() => deleteApp(app.id, app.name)} icon={<Trash2 className="h-3.5 w-3.5" />} title="Verwijderen" className="ml-auto hover:text-destructive hover:bg-destructive/10" />
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Pending contracts for me */}
+        {contracts.filter(c => c.collaborator_id === session?.user?.id && (c.status === 'pending' || c.status === 'counter')).length > 0 && (
+          <div className="mt-10 pt-8 border-t border-border/20">
+            <h2 className="text-xl font-bold text-foreground font-display mb-5 flex items-center gap-2.5">
+              <div className="p-1.5 rounded-lg bg-accent/10 border border-accent/10"><Handshake className="h-4 w-4 text-accent" /></div>
+              Openstaande contracten
+            </h2>
+            <ContractList
+              contracts={contracts.filter(c => c.collaborator_id === session?.user?.id && (c.status === 'pending' || c.status === 'counter'))}
+              currentUserId={session?.user?.id || ''}
+              onRespond={respondToContract}
+              appNames={Object.fromEntries(apps.map(a => [a.id, a.name]))}
+              showAppName
+            />
           </div>
         )}
 
@@ -538,12 +649,21 @@ export default function Dashboard() {
               Gedeeld met mij
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {sharedApps.map(app => (
-                <div key={app.id} className="glass-card rounded-2xl p-5 transition-all hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 cursor-pointer hover:-translate-y-1" onClick={() => navigate(`/editor/${app.id}`)}>
-                  <h3 className="font-semibold text-sm text-foreground truncate mb-1.5">{app.name}</h3>
-                  <p className="text-[11px] text-muted-foreground/60">{new Date(app.updated_at).toLocaleDateString('nl-NL', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
-                </div>
-              ))}
+              {sharedApps.map(app => {
+                const appContract = contracts.find(c => c.app_id === app.id && c.collaborator_id === session?.user?.id && c.status === 'accepted');
+                return (
+                  <div key={app.id} className="glass-card rounded-2xl p-5 transition-all hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 cursor-pointer hover:-translate-y-1" onClick={() => navigate(`/editor/${app.id}`)}>
+                    <h3 className="font-semibold text-sm text-foreground truncate mb-1.5">{app.name}</h3>
+                    <p className="text-[11px] text-muted-foreground/60">{new Date(app.updated_at).toLocaleDateString('nl-NL', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                    {appContract && (
+                      <div className="mt-2 flex items-center gap-1.5 text-[10px] text-accent/80">
+                        <Handshake className="h-3 w-3" />
+                        <span>Contract: {appContract.percentage}% per transactie</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -571,24 +691,57 @@ export default function Dashboard() {
         )}
       </main>
 
-      {/* Modal Overlay helper */}
-      {/* Invite Dialog */}
+      {/* Invite Dialog with Contract */}
       {inviteAppId && (
         <ModalOverlay onClose={() => setInviteAppId(null)}>
           <ModalCard>
-            <ModalHeader icon={<UserPlus className="h-5 w-5 text-primary" />} title="Samenwerker uitnodigen" onClose={() => setInviteAppId(null)} />
-            <p className="text-sm text-muted-foreground mb-5">Voer het e-mailadres in van de gebruiker die je wilt uitnodigen.</p>
-            <input
-              type="email" placeholder="email@voorbeeld.nl" value={inviteEmail}
-              onChange={e => setInviteEmail(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && inviteCollaborator()}
-              className="w-full rounded-xl border border-border/40 bg-background/80 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40 mb-5"
-              autoFocus
-            />
+            <ModalHeader icon={<UserPlus className="h-5 w-5 text-primary" />} title="Samenwerker + Contract" onClose={() => setInviteAppId(null)} />
+            <p className="text-sm text-muted-foreground mb-4">Nodig een samenwerker uit met een coin-contract.</p>
+            <div className="space-y-4 mb-5">
+              <div>
+                <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase tracking-wider">E-mail</label>
+                <input
+                  type="email" placeholder="email@voorbeeld.nl" value={inviteEmail}
+                  onChange={e => setInviteEmail(e.target.value)}
+                  className="w-full rounded-xl border border-border/40 bg-background/80 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase tracking-wider flex items-center gap-1">
+                  <Percent className="h-3 w-3" /> Contract percentage (per transactie)
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range" min={0} max={50} value={invitePercentage}
+                    onChange={e => setInvitePercentage(parseInt(e.target.value))}
+                    className="flex-1 accent-primary"
+                  />
+                  <span className="text-sm font-bold text-foreground tabular-nums w-12 text-right">{invitePercentage}%</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground/50 mt-1">
+                  {invitePercentage === 0 ? 'Geen contract — gratis samenwerking' : `De samenwerker ontvangt ${invitePercentage}% van elke coin-transactie. Kan onderhandeld worden.`}
+                </p>
+              </div>
+            </div>
             <ModalFooter>
               <ModalCancelBtn onClick={() => setInviteAppId(null)} />
               <ModalActionBtn onClick={inviteCollaborator} disabled={inviting || !inviteEmail.trim()} loading={inviting} label="Uitnodigen" />
             </ModalFooter>
+          </ModalCard>
+        </ModalOverlay>
+      )}
+
+      {/* Contracts Dialog */}
+      {contractAppId && (
+        <ModalOverlay onClose={() => setContractAppId(null)}>
+          <ModalCard>
+            <ModalHeader icon={<Handshake className="h-5 w-5 text-accent" />} title="Contracten" onClose={() => setContractAppId(null)} />
+            <ContractList
+              contracts={contracts.filter(c => c.app_id === contractAppId)}
+              currentUserId={session?.user?.id || ''}
+              onRespond={respondToContract}
+            />
           </ModalCard>
         </ModalOverlay>
       )}
@@ -749,5 +902,93 @@ function ModalActionBtn({ onClick, disabled, loading, label }: { onClick: () => 
     <button onClick={onClick} disabled={disabled} className="px-5 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 disabled:opacity-50 transition-all active:scale-[0.98]">
       {loading ? 'Bezig...' : label}
     </button>
+  );
+}
+
+interface ContractListProps {
+  contracts: Contract[];
+  currentUserId: string;
+  onRespond: (id: string, action: 'accepted' | 'rejected' | 'counter', counterPct?: number) => void;
+  appNames?: Record<string, string>;
+  showAppName?: boolean;
+}
+
+function ContractList({ contracts: items, currentUserId, onRespond, appNames, showAppName }: ContractListProps) {
+  const [counterValues, setCounterValues] = useState<Record<string, number>>({});
+
+  if (items.length === 0) {
+    return <p className="text-sm text-muted-foreground/50 py-4 text-center">Geen contracten gevonden.</p>;
+  }
+
+  const statusLabels: Record<string, { label: string; color: string }> = {
+    pending: { label: 'Wachtend', color: 'text-yellow-400' },
+    counter: { label: 'Tegenvoorstel', color: 'text-orange-400' },
+    accepted: { label: 'Geaccepteerd', color: 'text-emerald-400' },
+    rejected: { label: 'Afgewezen', color: 'text-destructive' },
+  };
+
+  return (
+    <div className="space-y-3 max-h-[400px] overflow-y-auto">
+      {items.map(c => {
+        const isCollaborator = c.collaborator_id === currentUserId;
+        const isOwner = c.proposed_by === currentUserId || !isCollaborator;
+        const statusInfo = statusLabels[c.status] || { label: c.status, color: 'text-muted-foreground' };
+        const canRespond = (c.status === 'pending' && isCollaborator) || (c.status === 'counter' && isOwner);
+        const displayPct = c.status === 'counter' && c.counter_percentage ? c.counter_percentage : c.percentage;
+
+        return (
+          <div key={c.id} className="glass-card rounded-xl p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Handshake className="h-4 w-4 text-accent/70" />
+                <span className="text-sm font-medium text-foreground">
+                  {showAppName && appNames?.[c.app_id] ? appNames[c.app_id] : 'Contract'}
+                </span>
+              </div>
+              <span className={`text-[10px] font-semibold uppercase tracking-wider ${statusInfo.color}`}>
+                {statusInfo.label}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="flex-1 bg-secondary/30 rounded-full h-2 overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-accent to-primary rounded-full transition-all" style={{ width: `${displayPct * 2}%` }} />
+              </div>
+              <span className="text-sm font-bold text-foreground tabular-nums">{displayPct}%</span>
+            </div>
+
+            {c.status === 'counter' && c.counter_percentage && (
+              <p className="text-[10px] text-muted-foreground">
+                Tegenvoorstel: {c.counter_percentage}% (origineel: {c.percentage}%)
+              </p>
+            )}
+
+            {canRespond && (
+              <div className="flex items-center gap-2 pt-1">
+                <button onClick={() => onRespond(c.id, 'accepted')} className="px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors">
+                  Accepteren
+                </button>
+                <button onClick={() => onRespond(c.id, 'rejected')} className="px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 transition-colors">
+                  Afwijzen
+                </button>
+                {isCollaborator && c.status === 'pending' && (
+                  <div className="flex items-center gap-1.5 ml-auto">
+                    <input
+                      type="number" min={1} max={50}
+                      value={counterValues[c.id] ?? c.percentage}
+                      onChange={e => setCounterValues(prev => ({ ...prev, [c.id]: parseInt(e.target.value) || 1 }))}
+                      className="w-14 px-2 py-1 text-[11px] rounded-lg border border-border/40 bg-background/80 text-foreground text-center focus:outline-none focus:ring-1 focus:ring-accent/40"
+                    />
+                    <button onClick={() => onRespond(c.id, 'counter', counterValues[c.id] ?? c.percentage)} className="px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-colors">
+                      Tegenvoorstel
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
   );
 }
