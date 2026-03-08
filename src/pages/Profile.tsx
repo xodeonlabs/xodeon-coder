@@ -316,8 +316,8 @@ export default function Profile() {
                 {profile?.display_name || 'Anonieme gebruiker'}
               </h1>
               <p className="text-xs text-muted-foreground flex items-center gap-1.5 justify-center sm:justify-start mt-1">
-                <span className={`inline-block h-2 w-2 rounded-full ${getOnlineStatus(profile?.is_dnd ?? false, (profile as any)?.last_seen_at) === 'online' ? 'bg-emerald-500' : getOnlineStatus(profile?.is_dnd ?? false, (profile as any)?.last_seen_at) === 'dnd' ? 'bg-destructive' : 'bg-muted-foreground/50'}`} />
-                {getLastSeenText(getOnlineStatus(profile?.is_dnd ?? false, (profile as any)?.last_seen_at), (profile as any)?.last_seen_at)}
+                <span className={`inline-block h-2 w-2 rounded-full ${liveStatus === 'online' ? 'bg-emerald-500' : liveStatus === 'dnd' ? 'bg-destructive' : 'bg-muted-foreground/50'}`} />
+                {liveStatusText}
               </p>
               <p className="text-sm text-muted-foreground flex items-center gap-1.5 justify-center sm:justify-start mt-1.5">
                 <Calendar className="h-3.5 w-3.5" />
