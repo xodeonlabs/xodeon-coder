@@ -140,17 +140,21 @@ function ImageUploadSection({ appId }: { appId: string }) {
 
     setUploading(true);
     try {
-      const ext = file.name.split('.').pop() || 'png';
-      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-      const path = `${appId}/${safeName}`;
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+      const uniqueName = `img_${Date.now()}.${ext}`;
+      const path = `${appId}/${uniqueName}`;
 
-      const { error } = await supabase.storage.from('app-images').upload(path, file, { upsert: true });
+      const { error, data } = await supabase.storage.from('app-images').upload(path, file, { 
+        upsert: true,
+        contentType: file.type,
+      });
       if (error) throw error;
 
       toast({ title: '✅ Afbeelding geüpload!' });
       await loadImages();
     } catch (err: any) {
-      toast({ title: 'Upload mislukt', description: err.message, variant: 'destructive' });
+      console.error('Upload error:', err);
+      toast({ title: 'Upload mislukt', description: err?.message || 'Onbekende fout', variant: 'destructive' });
     }
     setUploading(false);
     if (fileRef.current) fileRef.current.value = '';
