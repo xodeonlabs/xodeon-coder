@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff, Clock, Coins, Pencil, Bell, BellOff } from 'lucide-react';
-import { getNotificationSoundEnabled, setNotificationSoundEnabled, getNotificationToastEnabled, setNotificationToastEnabled, getDoNotDisturbEnabled, setDoNotDisturbEnabled } from '@/hooks/useNotificationSound';
+import { getNotificationSoundEnabled, setNotificationSoundEnabled, getNotificationToastEnabled, setNotificationToastEnabled, useDoNotDisturb } from '@/hooks/useNotificationSound';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { getCached, setCache, clearCache, CACHE_TTL } from '@/lib/cache';
 
@@ -63,7 +63,7 @@ export default function Settings() {
   const [retentionLoading, setRetentionLoading] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(() => getNotificationSoundEnabled());
   const [toastEnabled, setToastEnabled] = useState(() => getNotificationToastEnabled());
-  const [dndEnabled, setDndEnabled] = useState(() => getDoNotDisturbEnabled());
+  const { dndEnabled, toggleDnd } = useDoNotDisturb();
 
   const isScrollingRef = useRef(false);
 
@@ -455,11 +455,7 @@ export default function Settings() {
               </div>
             </div>
             <button
-              onClick={() => {
-                const next = !dndEnabled;
-                setDndEnabled(next);
-                setDoNotDisturbEnabled(next);
-              }}
+              onClick={toggleDnd}
               className={`relative w-11 h-6 rounded-full transition-colors ${dndEnabled ? 'bg-destructive' : 'bg-muted'}`}
             >
               <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${dndEnabled ? 'translate-x-5' : 'translate-x-0'}`} />

@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useNotificationSound, getNotificationToastEnabled, getDoNotDisturbEnabled, setDoNotDisturbEnabled } from '@/hooks/useNotificationSound';
+import { useNotificationSound, getNotificationToastEnabled, getDoNotDisturbEnabled, useDoNotDisturb } from '@/hooks/useNotificationSound';
 import { toast } from 'sonner';
 import {
   LayoutDashboard, BarChart3, Building2, Handshake, Users,
@@ -32,7 +32,7 @@ export function AppSidebar() {
   const collapsed = state === 'collapsed';
   const { play: playNotification } = useNotificationSound();
 
-  const [dndEnabled, setDndEnabled] = useState(() => getDoNotDisturbEnabled());
+  const { dndEnabled, toggleDnd } = useDoNotDisturb();
   const [isAdmin, setIsAdmin] = useState(false);
   const [coins, setCoins] = useState(0);
   const [displayName, setDisplayName] = useState<string | null>(null);
@@ -238,10 +238,8 @@ export function AppSidebar() {
           <div className={`flex ${collapsed ? 'flex-col' : ''} gap-1`}>
             <button
               onClick={() => {
-                const next = !dndEnabled;
-                setDndEnabled(next);
-                setDoNotDisturbEnabled(next);
-                toast(next ? 'Niet storen ingeschakeld' : 'Niet storen uitgeschakeld', { position: 'bottom-right', duration: 2000 });
+                toggleDnd();
+                toast(!dndEnabled ? 'Niet storen ingeschakeld' : 'Niet storen uitgeschakeld', { position: 'bottom-right', duration: 2000 });
               }}
               className={`p-1.5 rounded-lg transition-all ${dndEnabled ? 'text-destructive bg-destructive/10' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
               title={dndEnabled ? 'Niet storen uit' : 'Niet storen aan'}
