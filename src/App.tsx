@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Preview from "./pages/Preview";
 import Guest from "./pages/Guest";
+import PublicApp from "./pages/PublicApp";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
