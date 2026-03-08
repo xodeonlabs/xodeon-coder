@@ -137,8 +137,8 @@ const Auth = () => {
       <div className="w-full max-w-[420px] relative z-10 animate-scale-in">
         {/* Logo & Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/10 border border-primary/20 mb-5 shadow-lg shadow-primary/10">
-            <img src="/ngc-logo.png" alt="NGC" className="h-9 object-contain" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl border border-primary/20 mb-5 shadow-lg shadow-primary/10 overflow-hidden">
+            <img src="/ngc-logo.png" alt="NGC" className="h-full w-full object-cover rounded-2xl" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground font-display tracking-tight">
             {modeTitle[mode]}
