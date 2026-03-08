@@ -131,7 +131,7 @@ export default function Analytics() {
   return (
     <div className="min-h-screen" style={{ background: 'hsl(var(--background))' }}>
       {/* Header */}
-      <header className="border-b border-border/50 px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4" style={{ background: 'hsl(var(--ide-toolbar) / 0.8)' }}>
+      <header className="lg:hidden border-b border-border/50 px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4" style={{ background: 'hsl(var(--ide-toolbar) / 0.8)' }}>
         <button onClick={() => navigate('/')} className="p-1.5 sm:p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all shrink-0">
           <ArrowLeft className="h-4 w-4" />
         </button>
