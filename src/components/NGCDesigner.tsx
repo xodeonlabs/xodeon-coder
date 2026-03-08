@@ -249,7 +249,7 @@ function DesignerNodeContent({ node, runtime }: { node: NGCNode; runtime: NGCRun
       return (
         <div style={{
           width: '100%', height: '100%',
-          background: color || '#3b82f6', color: '#fff',
+          background: color || 'rgb(59,130,246)', color: '#fff',
           borderRadius: `${radius}px`,
           fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
           pointerEvents: 'none',
