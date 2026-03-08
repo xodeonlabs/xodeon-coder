@@ -15,7 +15,7 @@ interface ToolbarProps {
   onShareTemplate?: (name: string, description: string, code: string) => Promise<void>;
 }
 
-export function NGCToolbar({ errors, appName, appCode, onSignOut, onSave, onRename, onShareTemplate }: ToolbarProps) {
+export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSave, onRename, onShareTemplate }: ToolbarProps) {
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [nameValue, setNameValue] = useState('');
