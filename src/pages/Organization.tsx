@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow } from 'lucide-react';
+import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle, History } from 'lucide-react';
 
 interface Organization {
   id: string;
@@ -26,6 +26,24 @@ interface OrgApp {
   updated_at: string;
 }
 
+interface OrgCoin {
+  id: string;
+  organization_id: string;
+  name: string;
+  balance: number;
+  updated_at: string;
+}
+
+interface CoinTransaction {
+  id: string;
+  coin_name: string;
+  amount: number;
+  type: 'deposit' | 'withdraw';
+  user_id: string;
+  note: string;
+  created_at: string;
+}
+
 export default function OrganizationPage() {
   const { session } = useAuth();
   const navigate = useNavigate();
@@ -43,6 +61,13 @@ export default function OrganizationPage() {
   const [members, setMembers] = useState<OrgMember[]>([]);
   const [orgApps, setOrgApps] = useState<OrgApp[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
+  const [orgCoins, setOrgCoins] = useState<OrgCoin[]>([]);
+  const [transactions, setTransactions] = useState<CoinTransaction[]>([]);
+  const [showDeposit, setShowDeposit] = useState(false);
+  const [showWithdraw, setShowWithdraw] = useState(false);
+  const [txAmount, setTxAmount] = useState('');
+  const [txNote, setTxNote] = useState('');
+  const [txProcessing, setTxProcessing] = useState(false);
 
   useEffect(() => { fetchOrgs(); }, []);
 
@@ -105,13 +130,78 @@ export default function OrganizationPage() {
   async function viewMembers(org: Organization) {
     setSelectedOrg(org);
     setLoadingMembers(true);
-    const [membersRes, appsRes] = await Promise.all([
+    setShowDeposit(false);
+    setShowWithdraw(false);
+    const [membersRes, appsRes, coinsRes, txRes] = await Promise.all([
       supabase.from('organization_members').select('*').eq('organization_id', org.id).order('created_at', { ascending: true }),
       supabase.from('apps').select('id, name, updated_at').eq('organization_id', org.id as any).order('updated_at', { ascending: false }),
+      supabase.from('org_coins').select('*').eq('organization_id', org.id),
+      supabase.from('org_coin_transactions').select('*').eq('organization_id', org.id).order('created_at', { ascending: false }).limit(20),
     ]);
     if (!membersRes.error) setMembers((membersRes.data as unknown as OrgMember[]) || []);
     if (!appsRes.error) setOrgApps((appsRes.data as unknown as OrgApp[]) || []);
+    if (!coinsRes.error) setOrgCoins((coinsRes.data as unknown as OrgCoin[]) || []);
+    if (!txRes.error) setTransactions((txRes.data as unknown as CoinTransaction[]) || []);
     setLoadingMembers(false);
+  }
+
+  async function handleCoinTransaction(type: 'deposit' | 'withdraw') {
+    if (!selectedOrg || !session?.user?.id || !txAmount.trim()) return;
+    const amount = parseInt(txAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast({ title: 'Fout', description: 'Voer een geldig bedrag in', variant: 'destructive' });
+      return;
+    }
+
+    setTxProcessing(true);
+    try {
+      // Get or create coin record
+      let coin = orgCoins.find(c => c.name === 'coins');
+      if (!coin) {
+        const { data, error } = await supabase.from('org_coins')
+          .insert({ organization_id: selectedOrg.id, name: 'coins', balance: 0 } as any)
+          .select()
+          .single();
+        if (error) throw error;
+        coin = data as unknown as OrgCoin;
+      }
+
+      const currentBalance = coin.balance;
+      if (type === 'withdraw' && currentBalance < amount) {
+        toast({ title: 'Onvoldoende saldo', description: `Kluis heeft maar ${currentBalance} coins`, variant: 'destructive' });
+        setTxProcessing(false);
+        return;
+      }
+
+      const newBalance = type === 'deposit' ? currentBalance + amount : currentBalance - amount;
+
+      // Update balance
+      const { error: updateErr } = await supabase.from('org_coins')
+        .update({ balance: newBalance, updated_at: new Date().toISOString() } as any)
+        .eq('id', coin.id);
+      if (updateErr) throw updateErr;
+
+      // Log transaction
+      await supabase.from('org_coin_transactions').insert({
+        organization_id: selectedOrg.id,
+        coin_name: 'coins',
+        amount,
+        type,
+        user_id: session.user.id,
+        note: txNote || (type === 'deposit' ? 'Storting' : 'Opname'),
+      } as any);
+
+      toast({ title: type === 'deposit' ? '💰 Gestort!' : '💸 Opgenomen!', description: `${amount} coins ${type === 'deposit' ? 'gestort in' : 'opgenomen uit'} de kluis` });
+      setTxAmount('');
+      setTxNote('');
+      setShowDeposit(false);
+      setShowWithdraw(false);
+      // Refresh
+      viewMembers(selectedOrg);
+    } catch (err: any) {
+      toast({ title: 'Fout', description: err.message, variant: 'destructive' });
+    }
+    setTxProcessing(false);
   }
 
   async function removeMember(memberId: string) {
@@ -364,6 +454,125 @@ export default function OrganizationPage() {
                     </p>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+
+          {/* Bedrijfskluis */}
+          <div className="mt-6 rounded-xl border border-border/50 p-6" style={{ background: 'hsl(var(--card))' }}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <Coins className="h-5 w-5 text-yellow-400" />
+                Bedrijfskluis
+              </h3>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => { setShowDeposit(!showDeposit); setShowWithdraw(false); }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[hsl(var(--ide-success))]/10 text-[hsl(var(--ide-success))] hover:bg-[hsl(var(--ide-success))]/20 transition-colors"
+                >
+                  <ArrowDownCircle className="h-3.5 w-3.5" /> Storten
+                </button>
+                <button
+                  onClick={() => { setShowWithdraw(!showWithdraw); setShowDeposit(false); }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                >
+                  <ArrowUpCircle className="h-3.5 w-3.5" /> Opnemen
+                </button>
+              </div>
+            </div>
+
+            {/* Balance display */}
+            <div className="rounded-xl p-6 mb-4 text-center" style={{ background: 'hsl(var(--background))' }}>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Totaal saldo</p>
+              <div className="flex items-center justify-center gap-2">
+                <Coins className="h-8 w-8 text-yellow-400" />
+                <span className="text-4xl font-bold text-foreground font-mono">
+                  {orgCoins.reduce((sum, c) => sum + c.balance, 0).toLocaleString('nl-NL')}
+                </span>
+              </div>
+              {orgCoins.length > 1 && (
+                <div className="flex items-center justify-center gap-4 mt-3">
+                  {orgCoins.map(c => (
+                    <span key={c.id} className="text-xs text-muted-foreground">
+                      {c.name}: <span className="font-mono font-semibold text-foreground">{c.balance.toLocaleString('nl-NL')}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Deposit/Withdraw form */}
+            {(showDeposit || showWithdraw) && (
+              <div className="rounded-lg border border-border p-4 mb-4" style={{ background: 'hsl(var(--background))' }}>
+                <h4 className="text-sm font-semibold text-foreground mb-3">
+                  {showDeposit ? '💰 Coins storten' : '💸 Coins opnemen'}
+                </h4>
+                <div className="flex gap-3 mb-3">
+                  <input
+                    type="number"
+                    placeholder="Bedrag"
+                    value={txAmount}
+                    onChange={e => setTxAmount(e.target.value)}
+                    min="1"
+                    className="flex-1 rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground font-mono placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Notitie (optioneel)"
+                    value={txNote}
+                    onChange={e => setTxNote(e.target.value)}
+                    className="flex-1 rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleCoinTransaction(showDeposit ? 'deposit' : 'withdraw')}
+                    disabled={txProcessing || !txAmount.trim()}
+                    className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all active:scale-95 disabled:opacity-50 ${
+                      showDeposit
+                        ? 'bg-[hsl(var(--ide-success))] text-white hover:bg-[hsl(var(--ide-success))]/90'
+                        : 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                    }`}
+                  >
+                    {txProcessing ? 'Bezig...' : showDeposit ? 'Storten' : 'Opnemen'}
+                  </button>
+                  <button
+                    onClick={() => { setShowDeposit(false); setShowWithdraw(false); }}
+                    className="px-4 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                  >
+                    Annuleren
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Transaction history */}
+            {transactions.length > 0 && (
+              <div>
+                <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
+                  <History className="h-3.5 w-3.5" /> Recente transacties
+                </h4>
+                <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                  {transactions.map(tx => (
+                    <div key={tx.id} className="flex items-center justify-between rounded-lg px-3 py-2 text-xs" style={{ background: 'hsl(var(--background))' }}>
+                      <div className="flex items-center gap-2">
+                        {tx.type === 'deposit' ? (
+                          <ArrowDownCircle className="h-3.5 w-3.5 text-[hsl(var(--ide-success))]" />
+                        ) : (
+                          <ArrowUpCircle className="h-3.5 w-3.5 text-destructive" />
+                        )}
+                        <span className={`font-mono font-semibold ${tx.type === 'deposit' ? 'text-[hsl(var(--ide-success))]' : 'text-destructive'}`}>
+                          {tx.type === 'deposit' ? '+' : '-'}{tx.amount}
+                        </span>
+                        <span className="text-muted-foreground truncate max-w-[150px]">{tx.note}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground shrink-0">
+                        <span className="font-mono">{tx.user_id.slice(0, 6)}...</span>
+                        <span>{new Date(tx.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

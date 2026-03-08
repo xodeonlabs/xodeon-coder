@@ -166,6 +166,79 @@ export type Database = {
           },
         ]
       }
+      org_coin_transactions: {
+        Row: {
+          amount: number
+          coin_name: string
+          created_at: string
+          id: string
+          note: string | null
+          organization_id: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          coin_name?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          organization_id: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          coin_name?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          organization_id?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_coin_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_coins: {
+        Row: {
+          balance: number
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          balance?: number
+          id?: string
+          name?: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_coins_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string
