@@ -1219,6 +1219,132 @@ export default function AdminPanel() {
           </div>
         )}
 
+        {/* Categories tab */}
+        {tab === 'categories' && (
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+              <Tags className="h-4 w-4 text-primary" /> Categorieën ({adminCategories.length})
+            </h3>
+            
+            {/* Add new category */}
+            <div className="rounded-xl border border-border/50 p-4" style={{ background: 'hsl(var(--card))' }}>
+              <h4 className="text-xs font-semibold text-muted-foreground mb-3">Nieuwe categorie</h4>
+              <div className="flex flex-wrap gap-2 items-end">
+                <div className="flex-1 min-w-[140px]">
+                  <label className="text-[10px] text-muted-foreground block mb-1">Value (uniek)</label>
+                  <input
+                    value={newCatValue}
+                    onChange={e => setNewCatValue(e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''))}
+                    placeholder="bijv. sport"
+                    className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <div className="flex-1 min-w-[140px]">
+                  <label className="text-[10px] text-muted-foreground block mb-1">Label</label>
+                  <input
+                    value={newCatLabel}
+                    onChange={e => setNewCatLabel(e.target.value)}
+                    placeholder="bijv. Sport"
+                    className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <div className="w-[140px]">
+                  <label className="text-[10px] text-muted-foreground block mb-1">Icoon (lucide)</label>
+                  <input
+                    value={newCatIcon}
+                    onChange={e => setNewCatIcon(e.target.value.toLowerCase())}
+                    placeholder="sparkles"
+                    className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <button
+                  onClick={addCategory}
+                  disabled={catSaving || !newCatValue.trim() || !newCatLabel.trim()}
+                  className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
+                >
+                  {catSaving ? 'Toevoegen...' : <><Plus className="h-4 w-4 inline mr-1" /> Toevoegen</>}
+                </button>
+              </div>
+            </div>
+
+            {/* Category list */}
+            {adminCategories.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Geen categorieën gevonden.</p>
+            ) : (
+              <div className="space-y-2">
+                {adminCategories.map(cat => (
+                  <div key={cat.id} className="rounded-xl border border-border/50 p-4" style={{ background: 'hsl(var(--card))' }}>
+                    {editingCat === cat.id ? (
+                      <div className="flex flex-wrap gap-2 items-end">
+                        <div className="flex-1 min-w-[140px]">
+                          <label className="text-[10px] text-muted-foreground block mb-1">Value (niet wijzigbaar)</label>
+                          <input
+                            value={cat.value}
+                            disabled
+                            className="w-full px-3 py-2 rounded-lg border border-border/40 bg-muted text-sm text-muted-foreground"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-[140px]">
+                          <label className="text-[10px] text-muted-foreground block mb-1">Label</label>
+                          <input
+                            value={editCatLabel}
+                            onChange={e => setEditCatLabel(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          />
+                        </div>
+                        <div className="w-[140px]">
+                          <label className="text-[10px] text-muted-foreground block mb-1">Icoon</label>
+                          <input
+                            value={editCatIcon}
+                            onChange={e => setEditCatIcon(e.target.value.toLowerCase())}
+                            className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          />
+                        </div>
+                        <button
+                          onClick={() => updateCategory(cat.id)}
+                          className="px-3 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                        >
+                          <Save className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => setEditingCat(null)}
+                          className="px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                        >
+                          Annuleren
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-mono px-2 py-1 rounded bg-secondary text-muted-foreground">{cat.value}</span>
+                          <span className="text-sm font-semibold text-foreground">{cat.label}</span>
+                          <span className="text-xs text-muted-foreground">icoon: {cat.icon}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => { setEditingCat(cat.id); setEditCatLabel(cat.label); setEditCatIcon(cat.icon); }}
+                            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                            title="Bewerken"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            onClick={() => deleteCategory(cat.id, cat.label)}
+                            className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                            title="Verwijderen"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Activity tab */}
         {tab === 'activity' && (
           <div className="rounded-xl border border-border/50 p-5" style={{ background: 'hsl(var(--card))' }}>
