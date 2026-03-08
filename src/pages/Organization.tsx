@@ -898,6 +898,14 @@ export default function OrganizationPage() {
           onClose={() => setIconPickerOrgId(null)}
         />
       )}
+
+      <CoinConfirmDialog
+        open={coinConfirm.open}
+        onOpenChange={(open) => { if (!open) setCoinConfirm(prev => ({ ...prev, open: false })); }}
+        amount={coinConfirm.amount}
+        description={coinConfirm.description}
+        onConfirm={() => { coinConfirm.onConfirm(); setCoinConfirm(prev => ({ ...prev, open: false })); }}
+      />
     </div>
   );
 }
