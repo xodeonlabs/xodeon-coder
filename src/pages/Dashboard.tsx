@@ -589,6 +589,7 @@ export default function Dashboard() {
 
             <NavBtn onClick={() => navigate('/templates')} icon={<LayoutGrid className="h-4 w-4" />} label="Templates" />
             <NavBtn onClick={() => navigate('/berichten')} icon={<MessageCircle className="h-4 w-4" />} label="Berichten" />
+            <NavBtn onClick={() => navigate('/groepen')} icon={<Users className="h-4 w-4" />} label="Groepen" />
             <NavBtn onClick={() => navigate('/analytics')} icon={<BarChart3 className="h-4 w-4" />} label="Analytics" />
             <NavBtn onClick={() => navigate('/organization')} icon={<Building2 className="h-4 w-4" />} label="Bedrijven" badge={unreadOrgMessages} />
             <NavBtn onClick={() => navigate('/alliances')} icon={<Handshake className="h-4 w-4" />} label="Allianties" />
