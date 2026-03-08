@@ -632,7 +632,106 @@ export default function OrganizationPage() {
             )}
           </div>
 
-          {/* Bedrijfschat */}
+          {/* Advertentie */}
+          {(selectedOrg.owner_id === session?.user?.id || members.find(m => m.user_id === session?.user?.id && m.role === 'admin')) && (
+            <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                  <Megaphone className="h-5 w-5 text-accent" />
+                  Advertentie
+                </h3>
+                {orgAd && !showAdForm && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => { setAdEmoji(orgAd.emoji); setAdTitle(orgAd.title); setAdDescription(orgAd.description); setAdUrl(orgAd.url); setShowAdForm(true); }}
+                      className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                      title="Bewerken"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button onClick={deleteOrgAd} className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Verwijderen">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {orgAd && !showAdForm ? (
+                <div className="flex items-center gap-3 rounded-lg border border-border/40 p-3" style={{ background: 'hsl(var(--background))' }}>
+                  <span className="text-2xl">{orgAd.emoji}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-sm text-foreground">{orgAd.title}</p>
+                    <p className="text-xs text-muted-foreground truncate">{orgAd.description}</p>
+                    {orgAd.url && <p className="text-xs text-primary truncate mt-0.5">{orgAd.url}</p>}
+                  </div>
+                </div>
+              ) : showAdForm ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">Emoji</label>
+                      <input
+                        value={adEmoji}
+                        onChange={e => setAdEmoji(e.target.value)}
+                        className="w-14 text-center text-lg rounded-lg border border-border bg-background px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">Titel *</label>
+                      <input
+                        value={adTitle}
+                        onChange={e => setAdTitle(e.target.value)}
+                        placeholder="Jouw advertentietitel"
+                        className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1">Beschrijving</label>
+                    <input
+                      value={adDescription}
+                      onChange={e => setAdDescription(e.target.value)}
+                      placeholder="Korte beschrijving"
+                      className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1">URL (optioneel)</label>
+                    <input
+                      value={adUrl}
+                      onChange={e => setAdUrl(e.target.value)}
+                      placeholder="https://..."
+                      className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={saveOrgAd}
+                      disabled={adSaving || !adTitle.trim()}
+                      className="px-4 py-2 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                    >
+                      {adSaving ? 'Opslaan...' : orgAd ? 'Bijwerken' : 'Aanmaken'}
+                    </button>
+                    <button
+                      onClick={() => setShowAdForm(false)}
+                      className="px-4 py-2 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                    >
+                      Annuleren
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setAdEmoji('🚀'); setAdTitle(''); setAdDescription(''); setAdUrl(''); setShowAdForm(true); }}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors w-full justify-center"
+                >
+                  <Plus className="h-4 w-4" />
+                  Advertentie maken (max. 1)
+                </button>
+              )}
+            </div>
+          )}
+
           <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
             <div className="px-4 sm:px-6 py-3 border-b border-border/50">
               <h3 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
