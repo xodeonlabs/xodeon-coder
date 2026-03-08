@@ -461,6 +461,22 @@ export default function Settings() {
               <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${soundEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
             </button>
           </div>
+          <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-secondary/30 border border-border/30 mt-3">
+            <div>
+              <p className="text-sm font-medium text-foreground">Pop-up notificaties</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Toon een toast-melding bij nieuwe berichten</p>
+            </div>
+            <button
+              onClick={() => {
+                const next = !toastEnabled;
+                setToastEnabled(next);
+                setNotificationToastEnabled(next);
+              }}
+              className={`relative w-11 h-6 rounded-full transition-colors ${toastEnabled ? 'bg-primary' : 'bg-muted'}`}
+            >
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${toastEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+            </button>
+          </div>
         </div>
 
         <div id="settings-retention" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
