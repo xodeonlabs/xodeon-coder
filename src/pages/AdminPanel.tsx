@@ -222,9 +222,9 @@ export default function AdminPanel() {
   }
 
   async function saveTemplateEdit(id: string) {
-    const { error } = await supabase.from('templates').update({ name: templateEditName, category: templateEditCategory }).eq('id', id);
+    const { error } = await supabase.from('templates').update({ name: templateEditName, category: templateEditCategory, description: templateEditDescription, visibility: templateEditVisibility } as any).eq('id', id);
     if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); return; }
-    setAdminTemplates(ts => ts.map(t => t.id === id ? { ...t, name: templateEditName, category: templateEditCategory } : t));
+    setAdminTemplates(ts => ts.map(t => t.id === id ? { ...t, name: templateEditName, category: templateEditCategory, description: templateEditDescription, visibility: templateEditVisibility } : t));
     setEditingTemplate(null);
     toast({ title: 'Template bijgewerkt' });
   }
