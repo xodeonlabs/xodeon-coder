@@ -155,6 +155,7 @@ export type Database = {
         Row: {
           chat_retention_hours: number
           created_at: string
+          icon: string | null
           id: string
           is_public: boolean
           is_remixable: boolean
@@ -168,6 +169,7 @@ export type Database = {
         Insert: {
           chat_retention_hours?: number
           created_at?: string
+          icon?: string | null
           id?: string
           is_public?: boolean
           is_remixable?: boolean
@@ -181,6 +183,7 @@ export type Database = {
         Update: {
           chat_retention_hours?: number
           created_at?: string
+          icon?: string | null
           id?: string
           is_public?: boolean
           is_remixable?: boolean
