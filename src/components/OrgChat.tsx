@@ -240,7 +240,25 @@ export function OrgChat({ organizationId }: OrgChatProps) {
         <div ref={bottomRef} />
       </div>
 
+      {showGame && session?.user && (
+        <div className="border-t border-border p-2">
+          <SnakeGame
+            channelName={`org-${organizationId}`}
+            userId={session.user.id}
+            userName={profiles[session.user.id]?.display_name || session.user.email?.split('@')[0] || 'Speler'}
+            onClose={() => setShowGame(false)}
+          />
+        </div>
+      )}
+
       <div className="border-t border-border p-2 flex gap-1.5">
+        <button
+          onClick={() => setShowGame(!showGame)}
+          className={`rounded-lg p-2 transition-colors ${showGame ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'}`}
+          title="Snake spelen"
+        >
+          <Gamepad2 className="h-3.5 w-3.5" />
+        </button>
         <input
           className="flex-1 rounded-lg bg-background border border-border px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
           placeholder="Typ een bericht..."
