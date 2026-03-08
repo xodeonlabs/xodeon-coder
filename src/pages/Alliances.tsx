@@ -426,7 +426,7 @@ export default function Alliances() {
                 <div className="rounded-xl border border-border/40 p-5" style={{ background: 'hsl(var(--card))' }}>
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-sm font-semibold text-foreground">Leden</h2>
-                    {isAdmin && (
+                    {isOrgOwner && (
                       <button
                         onClick={() => { setShowAddOrg(true); loadAllOrgs(); }}
                         className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
