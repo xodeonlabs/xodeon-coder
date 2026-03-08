@@ -111,7 +111,18 @@ export default function AdminPanel() {
   const [templateEditDescription, setTemplateEditDescription] = useState('');
   const [templateEditVisibility, setTemplateEditVisibility] = useState('public');
   
-  // Alliances management
+  // Categories management
+  const [adminCategories, setAdminCategories] = useState<{ id: string; value: string; label: string; icon: string; sort_order: number }[]>([]);
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
+  const [newCatValue, setNewCatValue] = useState('');
+  const [newCatLabel, setNewCatLabel] = useState('');
+  const [newCatIcon, setNewCatIcon] = useState('sparkles');
+  const [catSaving, setCatSaving] = useState(false);
+  const [editingCat, setEditingCat] = useState<string | null>(null);
+  const [editCatLabel, setEditCatLabel] = useState('');
+  const [editCatIcon, setEditCatIcon] = useState('');
+
+
   const [adminAlliances, setAdminAlliances] = useState<any[]>([]);
   const [adminAllianceMembers, setAdminAllianceMembers] = useState<Record<string, any[]>>({});
   const [adminAllianceCoins, setAdminAllianceCoins] = useState<Record<string, number>>({});
