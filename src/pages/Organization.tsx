@@ -606,7 +606,58 @@ export default function OrganizationPage() {
           </div>
         )}
 
-        {/* Organization list */}
+        {/* Solliciteren form */}
+        {showApply && (
+          <div className="rounded-xl border border-border/50 p-6 mb-8" style={{ background: 'hsl(var(--card))' }}>
+            <h3 className="text-lg font-bold text-foreground mb-4">Solliciteren bij een bedrijf</h3>
+            <input
+              autoFocus
+              placeholder="Zoek bedrijf op naam..."
+              value={applySearch}
+              onChange={e => setApplySearch(e.target.value)}
+              className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mb-4"
+            />
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {allPublicOrgs
+                .filter(o => !applySearch || o.name.toLowerCase().includes(applySearch.toLowerCase()))
+                .map(o => {
+                  const existing = myRequests.find(r => r.organization_id === o.id);
+                  return (
+                    <div key={o.id} className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-background/50">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">
+                        {o.icon || '🏢'}
+                      </div>
+                      <span className="text-sm font-medium text-foreground flex-1 truncate">{o.name}</span>
+                      {existing ? (
+                        <span className={`text-[11px] px-2 py-1 rounded-full font-medium ${
+                          existing.status === 'pending' ? 'bg-yellow-500/15 text-yellow-600' :
+                          existing.status === 'accepted' ? 'bg-green-500/15 text-green-600' :
+                          'bg-destructive/15 text-destructive'
+                        }`}>
+                          {existing.status === 'pending' ? '⏳ Wachtend' : existing.status === 'accepted' ? '✅ Geaccepteerd' : '❌ Geweigerd'}
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => sendJoinRequest(o.id)}
+                          disabled={applying === o.id}
+                          className="px-3 py-1.5 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors"
+                        >
+                          {applying === o.id ? 'Bezig...' : 'Solliciteren'}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              {allPublicOrgs.filter(o => !applySearch || o.name.toLowerCase().includes(applySearch.toLowerCase())).length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">Geen bedrijven gevonden.</p>
+              )}
+            </div>
+            <button onClick={() => setShowApply(false)} className="mt-4 px-5 py-2.5 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
+              Sluiten
+            </button>
+          </div>
+        )}
+
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary/20 border-t-primary" />
