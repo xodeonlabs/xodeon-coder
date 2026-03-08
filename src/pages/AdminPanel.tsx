@@ -6,6 +6,30 @@ import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, Megaphone, Plus, Eye, EyeOff, GripVertical } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
+const EMOJI_LIST = [
+  { emoji: '🚀', label: 'rocket' }, { emoji: '🎮', label: 'game' }, { emoji: '🐍', label: 'snake' },
+  { emoji: '💡', label: 'lightbulb idea' }, { emoji: '🎯', label: 'target' }, { emoji: '🔥', label: 'fire' },
+  { emoji: '⭐', label: 'star' }, { emoji: '❤️', label: 'heart' }, { emoji: '🎵', label: 'music' },
+  { emoji: '📱', label: 'phone mobile' }, { emoji: '💻', label: 'laptop computer' }, { emoji: '🖥️', label: 'desktop monitor' },
+  { emoji: '🎨', label: 'art palette' }, { emoji: '📷', label: 'camera photo' }, { emoji: '🎬', label: 'film movie' },
+  { emoji: '📚', label: 'books' }, { emoji: '✏️', label: 'pencil write' }, { emoji: '🔧', label: 'wrench tool' },
+  { emoji: '⚡', label: 'lightning energy' }, { emoji: '🌍', label: 'globe world earth' }, { emoji: '🏠', label: 'home house' },
+  { emoji: '🛒', label: 'shopping cart' }, { emoji: '💰', label: 'money bag' }, { emoji: '🎁', label: 'gift present' },
+  { emoji: '🏆', label: 'trophy winner' }, { emoji: '👑', label: 'crown king' }, { emoji: '💎', label: 'gem diamond' },
+  { emoji: '🔒', label: 'lock security' }, { emoji: '🔑', label: 'key' }, { emoji: '🛡️', label: 'shield protect' },
+  { emoji: '📊', label: 'chart stats' }, { emoji: '📈', label: 'graph trending up' }, { emoji: '🗓️', label: 'calendar date' },
+  { emoji: '⏰', label: 'clock time alarm' }, { emoji: '🌟', label: 'glowing star' }, { emoji: '✨', label: 'sparkles' },
+  { emoji: '🎉', label: 'party celebration' }, { emoji: '🎪', label: 'circus tent' }, { emoji: '🎲', label: 'dice game' },
+  { emoji: '🧩', label: 'puzzle' }, { emoji: '🤖', label: 'robot ai' }, { emoji: '👾', label: 'alien space invader' },
+  { emoji: '🦊', label: 'fox' }, { emoji: '🐱', label: 'cat' }, { emoji: '🐶', label: 'dog' },
+  { emoji: '☕', label: 'coffee' }, { emoji: '🍕', label: 'pizza food' }, { emoji: '🍎', label: 'apple fruit' },
+  { emoji: '🌈', label: 'rainbow' }, { emoji: '☀️', label: 'sun' }, { emoji: '🌙', label: 'moon night' },
+  { emoji: '🎸', label: 'guitar' }, { emoji: '🎧', label: 'headphones' }, { emoji: '📡', label: 'satellite signal' },
+  { emoji: '🧪', label: 'test tube science' }, { emoji: '🔬', label: 'microscope' }, { emoji: '💊', label: 'pill medicine' },
+  { emoji: '🚗', label: 'car' }, { emoji: '✈️', label: 'airplane travel' }, { emoji: '🚂', label: 'train' },
+  { emoji: '📝', label: 'memo note' }, { emoji: '📌', label: 'pin' }, { emoji: '🏷️', label: 'tag label' },
+];
+
 interface UserProfile {
   id: string;
   display_name: string | null;
@@ -77,6 +101,8 @@ export default function AdminPanel() {
   const [editingAd, setEditingAd] = useState<AdRow | null>(null);
   const [adForm, setAdForm] = useState({ emoji: '🚀', title: '', description: '', url: '', gradient: 'linear-gradient(135deg, hsl(200 40% 14%), hsl(var(--secondary)))' });
   const [savingAd, setSavingAd] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [emojiSearch, setEmojiSearch] = useState('');
 
   useEffect(() => {
     checkAdmin();
@@ -564,15 +590,43 @@ export default function AdminPanel() {
 
             <div className="space-y-3">
               <div className="flex gap-2">
-                <div className="w-20">
+                <div className="w-20 relative">
                   <label className="text-xs font-medium text-foreground uppercase tracking-wide">Emoji</label>
-                  <input
-                    type="text"
-                    value={adForm.emoji}
-                    onChange={e => setAdForm({ ...adForm, emoji: e.target.value })}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground text-center focus:outline-none focus:ring-2 focus:ring-primary/50 mt-1"
-                    maxLength={4}
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-lg text-center focus:outline-none focus:ring-2 focus:ring-primary/50 mt-1 hover:bg-secondary/30 transition-colors"
+                  >
+                    {adForm.emoji}
+                  </button>
+                  {showEmojiPicker && (
+                    <div className="absolute top-full left-0 mt-1 z-[60] rounded-xl border border-border/50 shadow-2xl w-72" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
+                      <div className="p-2 border-b border-border/50">
+                        <input
+                          type="text"
+                          placeholder="Zoek emoji..."
+                          value={emojiSearch}
+                          onChange={e => setEmojiSearch(e.target.value)}
+                          autoFocus
+                          className="w-full rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        />
+                      </div>
+                      <div className="p-2 grid grid-cols-8 gap-1 max-h-[200px] overflow-y-auto">
+                        {EMOJI_LIST
+                          .filter(e => e.label.toLowerCase().includes(emojiSearch.toLowerCase()))
+                          .map(e => (
+                            <button
+                              key={e.emoji}
+                              onClick={() => { setAdForm({ ...adForm, emoji: e.emoji }); setShowEmojiPicker(false); setEmojiSearch(''); }}
+                              className={`p-1.5 rounded-lg text-lg hover:bg-secondary/60 transition-colors ${adForm.emoji === e.emoji ? 'bg-primary/20 ring-1 ring-primary' : ''}`}
+                              title={e.label}
+                            >
+                              {e.emoji}
+                            </button>
+                          ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1">
                   <label className="text-xs font-medium text-foreground uppercase tracking-wide">Titel</label>
