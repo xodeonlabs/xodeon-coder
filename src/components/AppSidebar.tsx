@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useNotificationSound, getNotificationToastEnabled } from '@/hooks/useNotificationSound';
+import { useNotificationSound, getNotificationToastEnabled, getDoNotDisturbEnabled } from '@/hooks/useNotificationSound';
 import { toast } from 'sonner';
 import {
   LayoutDashboard, BarChart3, Building2, Handshake, Users,
@@ -96,7 +96,7 @@ export function AppSidebar() {
         const msg = payload.new as any;
         if (msg?.user_id !== session.user.id) {
           playNotification();
-          if (getNotificationToastEnabled()) {
+          if (!getDoNotDisturbEnabled() && getNotificationToastEnabled()) {
             supabase.from('profiles').select('display_name').eq('id', msg.user_id).maybeSingle().then(({ data }) => {
               const name = data?.display_name || 'Iemand';
               toast(name, {
@@ -117,7 +117,7 @@ export function AppSidebar() {
         const msg = payload.new as any;
         if (msg?.receiver_id === session.user.id) {
           playNotification();
-          if (getNotificationToastEnabled()) {
+          if (!getDoNotDisturbEnabled() && getNotificationToastEnabled()) {
             supabase.from('profiles').select('display_name, username').eq('id', msg.sender_id).maybeSingle().then(({ data }) => {
               const name = data?.display_name || 'Iemand';
               const username = (data as any)?.username;
