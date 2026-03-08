@@ -505,6 +505,7 @@ export default function Settings() {
             Account verwijderen
           </button>
         </div>
+        </div>
       </div>
     </div>
   );
