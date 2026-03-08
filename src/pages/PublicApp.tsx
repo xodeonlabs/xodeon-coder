@@ -32,7 +32,14 @@ const PublicApp = () => {
         } else {
           setCode(data.ngc_code || '');
           setAppName(data.name);
+          setAppId(data.id);
           setOrgId((data as any).organization_id || null);
+          // Check if pinned
+          if (session?.user?.id) {
+            supabase.from('pinned_apps' as any).select('id').eq('user_id', session.user.id).eq('app_id', data.id).maybeSingle().then(({ data: pin }) => {
+              setIsPinned(!!pin);
+            });
+          }
           // Record page view
           supabase.from('app_views').insert({
             app_id: data.id,
