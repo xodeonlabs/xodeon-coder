@@ -550,6 +550,7 @@ const Index = () => {
       <NGCToolbar
         errors={errors}
         appName={appName}
+        appIcon={appIcon}
         appCode={code}
         onSignOut={signOut}
         onSave={saveNow}
