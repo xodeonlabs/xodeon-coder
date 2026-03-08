@@ -128,6 +128,12 @@ export function AppSidebar() {
                       }`}
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span className="flex-1">{item.title}</span>}
+                      {item.url === '/groepen' && unreadGroups > 0 && (
+                        <span className="ml-auto min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1">
+                          {unreadGroups > 9 ? '9+' : unreadGroups}
+                        </span>
+                      )}
                       {!collapsed && <span>{item.title}</span>}
                     </button>
                   </SidebarMenuButton>
