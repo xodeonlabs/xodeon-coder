@@ -11,6 +11,7 @@ interface DesignerProps {
   onSizeChange: (nodeId: string, w: number, h: number) => void;
   onDropNew: (parentId: string, type: NGCNodeType, x: number, y: number) => void;
   onDelete?: (nodeId: string) => void;
+  onPropertyChange?: (nodeId: string, key: string, value: string) => void;
 }
 
 function cleanStr(val: string): string {
@@ -54,6 +55,7 @@ function DraggableNode({
   onPositionChange,
   onSizeChange,
   onDelete,
+  onPropertyChange,
   children,
 }: {
   node: NGCNode;
@@ -63,6 +65,7 @@ function DraggableNode({
   onPositionChange: (nodeId: string, x: number, y: number) => void;
   onSizeChange: (nodeId: string, w: number, h: number) => void;
   onDelete?: (nodeId: string) => void;
+  onPropertyChange?: (nodeId: string, key: string, value: string) => void;
   children: React.ReactNode;
 }) {
   const pos = node.properties.Positie ? parsePosition(node.properties.Positie) : { x: 0, y: 0 };
@@ -121,6 +124,26 @@ function DraggableNode({
     document.addEventListener('mouseup', handleMouseUp);
   }, [node.id, size, onSizeChange]);
 
+  const isImageNode = node.type === 'Image';
+
+  const handleImageDragOver = useCallback((e: React.DragEvent) => {
+    if (!isImageNode) return;
+    if (e.dataTransfer.types.includes('ngc/image-url')) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = 'copy';
+    }
+  }, [isImageNode]);
+
+  const handleImageDrop = useCallback((e: React.DragEvent) => {
+    if (!isImageNode) return;
+    const url = e.dataTransfer.getData('ngc/image-url');
+    if (!url) return;
+    e.preventDefault();
+    e.stopPropagation();
+    onPropertyChange?.(node.id, 'Bron', `"${url}"`);
+  }, [isImageNode, node.id, onPropertyChange]);
+
   return (
     <div
       style={{
@@ -135,6 +158,8 @@ function DraggableNode({
       }}
       onMouseDown={handleMouseDown}
       onClick={e => { e.stopPropagation(); onSelect(node.id); }}
+      onDragOver={handleImageDragOver}
+      onDrop={handleImageDrop}
     >
       {children}
 
@@ -273,7 +298,7 @@ const PALETTE_ITEMS: { type: NGCNodeType; label: string; icon: string }[] = [
   { type: 'Frame', label: 'Frame', icon: '📦' },
 ];
 
-export function NGCDesigner({ ast, selectedId, onSelect, onPositionChange, onSizeChange, onDropNew, onDelete }: DesignerProps) {
+export function NGCDesigner({ ast, selectedId, onSelect, onPositionChange, onSizeChange, onDropNew, onDelete, onPropertyChange }: DesignerProps) {
   const [updateCount, forceUpdate] = useState(0);
   const [currentPage, setCurrentPage] = useState<string | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -435,6 +460,7 @@ export function NGCDesigner({ ast, selectedId, onSelect, onPositionChange, onSiz
             onPositionChange={onPositionChange}
             onSizeChange={onSizeChange}
             onDelete={onDelete}
+            onPropertyChange={onPropertyChange}
           >
             <DesignerNodeContent node={child} runtime={runtime} />
           </DraggableNode>

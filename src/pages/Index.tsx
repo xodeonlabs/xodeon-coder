@@ -491,6 +491,17 @@ const Index = () => {
     setCode(astToNGC(updateSize(ast)));
   }, [ast]);
 
+  const handlePropertyChange = useCallback((nodeId: string, key: string, value: string) => {
+    if (!ast) return;
+    function updateProp(node: NGCNode): NGCNode {
+      if (node.id === nodeId) {
+        return { ...node, properties: { ...node.properties, [key]: value } };
+      }
+      return { ...node, children: node.children.map(updateProp) };
+    }
+    setCode(astToNGC(updateProp(ast)));
+  }, [ast]);
+
   const handleDropNew = useCallback((parentId: string, type: NGCNodeType, x: number, y: number) => {
     if (!ast) return;
     const newNode: NGCNode = {
@@ -785,6 +796,7 @@ const Index = () => {
                   onSizeChange={handleSizeChange}
                   onDropNew={handleDropNew}
                   onDelete={handleDelete}
+                  onPropertyChange={handlePropertyChange}
                 />
               </div>
             )}
