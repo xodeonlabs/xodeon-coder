@@ -574,6 +574,13 @@ export default function AdminPanel() {
                     <p className="text-sm font-semibold text-foreground truncate">{org.name}</p>
                     <p className="text-[11px] text-muted-foreground">Eigenaar: {getUserName(org.owner_id)}</p>
                   </div>
+                  <button
+                    onClick={() => setConfirmAction({ id: org.id, action: 'delete', type: 'org', name: org.name })}
+                    className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0"
+                    title="Verwijderen"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               ))}
               {orgs.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">Geen bedrijven gevonden.</p>}
