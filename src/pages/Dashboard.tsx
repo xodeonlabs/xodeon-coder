@@ -258,6 +258,8 @@ export default function Dashboard() {
 
   async function fetchUnreadCount() {
     if (!session?.user?.id) return;
+    const cached = getCached<number>(CACHE_KEYS.unreadCount(session.user.id), CACHE_TTL.short);
+    if (cached !== null) { setUnreadOrgMessages(cached); return; }
     const { data: memberships } = await supabase.from('organization_members').select('organization_id').eq('user_id', session.user.id);
     if (!memberships || memberships.length === 0) return;
     const orgIds = memberships.map(m => m.organization_id);
@@ -273,6 +275,7 @@ export default function Dashboard() {
       if (count) total += count;
     }
     setUnreadOrgMessages(total);
+    setCache(CACHE_KEYS.unreadCount(session.user.id), total);
   }
 
   async function linkAppToOrg(appId: string, orgId: string | null) {
