@@ -49,6 +49,7 @@ const App = () => (
           <Route path="/editor/:appId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/preview/:appId" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
           <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
+          <Route path="/berichten" element={<ProtectedRoute><FriendChat /></ProtectedRoute>} />
           <Route path="/app/:slug" element={<PublicApp />} />
           <Route path="/profiel/:username" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
