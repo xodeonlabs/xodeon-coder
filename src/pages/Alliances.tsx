@@ -314,32 +314,75 @@ export default function Alliances() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {!selectedAlliance ? (
           /* Alliance list */
-          alliances.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-5xl mb-4">🤝</p>
-              <h2 className="text-lg font-bold text-foreground mb-2">Geen allianties</h2>
-              <p className="text-sm text-muted-foreground">Een platform-admin kan allianties aanmaken tussen bedrijven.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {alliances.map(alliance => (
-                <button
-                  key={alliance.id}
-                  onClick={() => selectAlliance(alliance)}
-                  className="text-left rounded-2xl border border-border/40 p-5 transition-all hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5"
-                  style={{ background: 'hsl(var(--card))' }}
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="text-2xl">{alliance.icon}</span>
-                    <h3 className="text-sm font-semibold text-foreground">{alliance.name}</h3>
+          <>
+            {isAdmin && !showCreate && (
+              <button
+                onClick={() => setShowCreate(true)}
+                className="mb-6 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                <Plus className="h-4 w-4" /> Alliantie aanmaken
+              </button>
+            )}
+
+            {isAdmin && showCreate && (
+              <div className="mb-6 rounded-xl border border-border/40 p-5 space-y-3" style={{ background: 'hsl(var(--card))' }}>
+                <h3 className="text-sm font-semibold text-foreground">Nieuwe alliantie</h3>
+                <div className="flex items-center gap-3">
+                  <EmojiPickerBtn value={newIcon} onChange={setNewIcon} />
+                  <input
+                    value={newName}
+                    onChange={e => setNewName(e.target.value)}
+                    placeholder="Naam van de alliantie"
+                    className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={createAlliance} disabled={creating || !newName.trim()} className="px-4 py-2 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors">
+                    {creating ? 'Bezig...' : 'Aanmaken'}
+                  </button>
+                  <button onClick={() => setShowCreate(false)} className="px-4 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
+                    Annuleren
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {alliances.length === 0 ? (
+              <div className="text-center py-20">
+                <p className="text-5xl mb-4">🤝</p>
+                <h2 className="text-lg font-bold text-foreground mb-2">Geen allianties</h2>
+                <p className="text-sm text-muted-foreground">{isAdmin ? 'Maak een alliantie aan met de knop hierboven.' : 'Een platform-admin kan allianties aanmaken tussen bedrijven.'}</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {alliances.map(alliance => (
+                  <div
+                    key={alliance.id}
+                    className="relative text-left rounded-2xl border border-border/40 p-5 transition-all hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
+                    style={{ background: 'hsl(var(--card))' }}
+                    onClick={() => selectAlliance(alliance)}
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-2xl">{alliance.icon}</span>
+                      <h3 className="text-sm font-semibold text-foreground flex-1">{alliance.name}</h3>
+                      {isAdmin && (
+                        <button
+                          onClick={e => { e.stopPropagation(); deleteAlliance(alliance.id); }}
+                          className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          title="Verwijderen"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Aangemaakt op {new Date(alliance.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </p>
                   </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Aangemaakt op {new Date(alliance.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </p>
-                </button>
-              ))}
-            </div>
-          )
+                ))}
+              </div>
+            )}
+          </>
         ) : (
           /* Alliance detail */
           <>
