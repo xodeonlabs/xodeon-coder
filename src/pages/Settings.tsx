@@ -337,7 +337,7 @@ export default function Settings() {
         </div>
 
         {/* Email section */}
-        <div className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+        <div id="settings-email" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
           <h2 className="text-lg font-bold text-foreground mb-5 flex items-center gap-2">
             <Mail className="h-5 w-5 text-primary" />
             E-mailadres
