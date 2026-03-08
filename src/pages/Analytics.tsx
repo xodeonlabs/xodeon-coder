@@ -27,8 +27,8 @@ export default function Analytics() {
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
 
   useEffect(() => {
-    loadAnalytics();
-  }, []);
+    if (session?.user?.id) loadAnalytics();
+  }, [session?.user?.id]);
 
   async function loadAnalytics() {
     setLoading(true);
