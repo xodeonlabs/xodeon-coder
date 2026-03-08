@@ -42,9 +42,9 @@ function initRuntime(ast: NGCNode, runtime: NGCRuntime) {
     // Check for coins definition
     const coinsDef = parseCoinsCommand(ast.name);
     if (coinsDef && coinsDef.operation === 'Set') {
-      // Gebruiker start altijd met 100 coins
+      // Initialize coins with the defined amount if not already set
       if (!(coinsDef.name in runtime.coins)) {
-        runtime.coinsSet(coinsDef.name, 100);
+        runtime.coinsSet(coinsDef.name, coinsDef.amount ?? 0);
       }
     }
     // Check for coins code registration
@@ -387,11 +387,12 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
   const [currentPage, setCurrentPage] = useState<string | null>(null);
   const [orgBalance, setOrgBalance] = useState<number | null>(null);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const runtime = useMemo(() => {
     const rt = createRuntime();
     if (ast) initRuntime(ast, rt);
     return rt;
-  }, [ast]);
+  }, [ast, updateCount]);
 
   // Load org coin balance if app belongs to an org
   useEffect(() => {
