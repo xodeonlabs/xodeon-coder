@@ -1,17 +1,22 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { NGCPreview } from '@/components/NGCPreview';
 import { parseNGC } from '@/lib/ngc-parser';
 import { AdBanner } from '@/components/AdBanner';
+import { Pin, PinOff } from 'lucide-react';
 
 const PublicApp = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { session } = useAuth();
   const [code, setCode] = useState('');
+  const [appId, setAppId] = useState<string | null>(null);
   const [appName, setAppName] = useState('');
   const [orgId, setOrgId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [isPinned, setIsPinned] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -27,7 +32,14 @@ const PublicApp = () => {
         } else {
           setCode(data.ngc_code || '');
           setAppName(data.name);
+          setAppId(data.id);
           setOrgId((data as any).organization_id || null);
+          // Check if pinned
+          if (session?.user?.id) {
+            supabase.from('pinned_apps' as any).select('id').eq('user_id', session.user.id).eq('app_id', data.id).maybeSingle().then(({ data: pin }) => {
+              setIsPinned(!!pin);
+            });
+          }
           // Record page view
           supabase.from('app_views').insert({
             app_id: data.id,
@@ -36,7 +48,22 @@ const PublicApp = () => {
         }
         setLoading(false);
       });
-  }, [slug]);
+  }, [slug, session?.user?.id]);
+
+  const togglePin = async () => {
+    if (!session?.user?.id || !appId) return;
+    if (isPinned) {
+      await supabase.from('pinned_apps' as any).delete().eq('user_id', session.user.id).eq('app_id', appId);
+      setIsPinned(false);
+      window.dispatchEvent(new Event('pinned-apps-changed'));
+    } else {
+      const { data: existing } = await supabase.from('pinned_apps' as any).select('id').eq('user_id', session.user.id);
+      if (existing && (existing as any[]).length >= 3) return;
+      await supabase.from('pinned_apps' as any).insert({ user_id: session.user.id, app_id: appId, sort_order: (existing as any[])?.length || 0 } as any);
+      setIsPinned(true);
+      window.dispatchEvent(new Event('pinned-apps-changed'));
+    }
+  };
 
   const { ast } = useMemo(() => parseNGC(code), [code]);
 
@@ -67,9 +94,20 @@ const PublicApp = () => {
         style={{ background: 'hsl(var(--ide-toolbar))', borderBottom: '1px solid hsl(var(--border))' }}
       >
         <span className="text-xs font-medium text-foreground">{appName}</span>
-        <div className="flex items-center gap-1.5">
-          <div className="h-4 w-4 rounded-sm overflow-hidden shrink-0"><img src="/ngc-logo.png" alt="NGC" className="h-full w-full object-cover" /></div>
-          <span className="text-[10px] text-muted-foreground">NGC Studio</span>
+        <div className="flex items-center gap-2">
+          {session?.user?.id && (
+            <button
+              onClick={togglePin}
+              className={`p-1 rounded-md transition-colors ${isPinned ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+              title={isPinned ? 'Losmaken' : 'Vastpinnen'}
+            >
+              {isPinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+            </button>
+          )}
+          <div className="flex items-center gap-1.5">
+            <div className="h-4 w-4 rounded-sm overflow-hidden shrink-0"><img src="/ngc-logo.png" alt="NGC" className="h-full w-full object-cover" /></div>
+            <span className="text-[10px] text-muted-foreground">NGC Studio</span>
+          </div>
         </div>
       </div>
       {orgId && (
