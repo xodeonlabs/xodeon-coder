@@ -477,6 +477,7 @@ export type Database = {
       organizations: {
         Row: {
           created_at: string
+          icon: string | null
           id: string
           join_code: string
           name: string
@@ -485,6 +486,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          icon?: string | null
           id?: string
           join_code?: string
           name: string
@@ -493,6 +495,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          icon?: string | null
           id?: string
           join_code?: string
           name?: string

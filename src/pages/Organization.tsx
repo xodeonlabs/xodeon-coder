@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle, MessageCircle } from 'lucide-react';
+import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { OrgChat } from '@/components/OrgChat';
 import { AdBanner } from '@/components/AdBanner';
@@ -14,6 +15,7 @@ interface Organization {
   join_code: string;
   owner_id: string;
   created_at: string;
+  icon?: string;
 }
 
 interface OrgMember {
@@ -63,6 +65,7 @@ export default function OrganizationPage() {
   const [txAmount, setTxAmount] = useState('');
   const [txNote, setTxNote] = useState('');
   const [txProcessing, setTxProcessing] = useState(false);
+  const [iconPickerOrgId, setIconPickerOrgId] = useState<string | null>(null);
 
   useEffect(() => { fetchOrgs(); }, []);
 
@@ -305,6 +308,15 @@ export default function OrganizationPage() {
     }
   }
 
+  async function changeOrgIcon(orgId: string, icon: string) {
+    const { error } = await supabase.from('organizations').update({ icon } as any).eq('id', orgId);
+    if (!error) {
+      setOrgs(orgs.map(o => o.id === orgId ? { ...o, icon } : o));
+      if (selectedOrg?.id === orgId) setSelectedOrg({ ...selectedOrg, icon });
+    }
+    setIconPickerOrgId(null);
+  }
+
   async function deleteOrg(org: Organization) {
     if (!confirm(`Weet je zeker dat je "${org.name}" wilt verwijderen?`)) return;
     const { error } = await supabase.from('organizations').delete().eq('id', org.id);
@@ -435,9 +447,13 @@ export default function OrganizationPage() {
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center shrink-0">
-                      <Building2 className="h-5 w-5 text-accent" />
-                    </div>
+                    <button
+                      onClick={e => { e.stopPropagation(); setIconPickerOrgId(org.id); }}
+                      className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center shrink-0 text-accent hover:from-accent/30 hover:to-accent/10 transition-colors"
+                      title="Icoon wijzigen"
+                    >
+                      <AppIcon iconName={org.icon || 'building-2'} size={20} />
+                    </button>
                     <div>
                       <h3 className="font-semibold text-foreground">{org.name}</h3>
                       <p className="text-xs text-muted-foreground mt-0.5">
@@ -672,6 +688,13 @@ export default function OrganizationPage() {
           </>
         )}
       </div>
+      {iconPickerOrgId && (
+        <IconPicker
+          value={orgs.find(o => o.id === iconPickerOrgId)?.icon || 'building-2'}
+          onChange={(icon) => changeOrgIcon(iconPickerOrgId, icon)}
+          onClose={() => setIconPickerOrgId(null)}
+        />
+      )}
     </div>
   );
 }
