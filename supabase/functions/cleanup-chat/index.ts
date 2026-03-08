@@ -165,6 +165,37 @@ Deno.serve(async (req) => {
       }
     }
 
+    // 5. Group chat messages (per-group retention)
+    {
+      const { data: groups, error: groupsError } = await supabase
+        .from("chat_groups")
+        .select("id, chat_retention_hours");
+
+      if (groupsError) {
+        console.error("Error fetching chat groups:", groupsError);
+      } else {
+        for (const group of groups ?? []) {
+          const hours = group.chat_retention_hours ?? 48;
+          const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+
+          const { data, error } = await supabase
+            .from("chat_group_messages")
+            .delete()
+            .eq("group_id", group.id)
+            .lt("created_at", cutoff)
+            .select("id");
+
+          if (error) {
+            console.error(`Error deleting group chat for ${group.id}:`, error);
+            continue;
+          }
+          const count = data?.length ?? 0;
+          if (count > 0) console.log(`Group ${group.id}: deleted ${count} msgs (${hours}h)`);
+          totalDeleted += count;
+        }
+      }
+    }
+
     console.log(`Cleanup complete: ${totalDeleted} total messages deleted`);
 
     return new Response(JSON.stringify({ success: true, deleted: totalDeleted }), {
