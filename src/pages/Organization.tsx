@@ -264,30 +264,30 @@ export default function OrganizationPage() {
   return (
     <div className="min-h-screen" style={{ background: 'hsl(var(--background))' }}>
       {/* Header */}
-      <header className="border-b border-border/50 px-6 py-4 flex items-center justify-between backdrop-blur-sm" style={{ background: 'hsl(var(--ide-toolbar) / 0.8)' }}>
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/')} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
+      <header className="border-b border-border/50 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between backdrop-blur-sm" style={{ background: 'hsl(var(--ide-toolbar) / 0.8)' }}>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button onClick={() => navigate('/')} className="p-1.5 sm:p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
             <ArrowLeft className="h-4 w-4" />
           </button>
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center">
-            <Building2 className="h-4 w-4 text-white" />
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center">
+            <Building2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
           </div>
-          <h1 className="text-xl font-bold text-foreground tracking-tight">Bedrijven</h1>
+          <h1 className="text-base sm:text-xl font-bold text-foreground tracking-tight">Bedrijven</h1>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
         {/* Actions */}
-        <div className="flex items-center gap-3 mb-10">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mb-6 sm:mb-10">
           <button
             onClick={() => { setShowCreate(true); setShowJoin(false); }}
-            className="flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 active:scale-95"
+            className="flex items-center justify-center gap-2 rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 active:scale-95"
           >
             <Plus className="h-4 w-4" /> Bedrijf starten
           </button>
           <button
             onClick={() => { setShowJoin(true); setShowCreate(false); }}
-            className="flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all border border-border text-foreground hover:bg-secondary active:scale-95"
+            className="flex items-center justify-center gap-2 rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 text-sm font-semibold transition-all border border-border text-foreground hover:bg-secondary active:scale-95"
           >
             <LogIn className="h-4 w-4" /> Bedrijf joinen
           </button>
