@@ -436,16 +436,29 @@ export default function OrganizationPage() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mb-6 sm:mb-10">
           <button
             onClick={() => { setShowCreate(true); setShowJoin(false); }}
-            className="flex items-center justify-center gap-2 rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 active:scale-95"
+            disabled={orgs.length >= 3}
+            className="flex items-center justify-center gap-2 rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus className="h-4 w-4" /> Bedrijf starten
           </button>
           <button
             onClick={() => { setShowJoin(true); setShowCreate(false); }}
-            className="flex items-center justify-center gap-2 rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 text-sm font-semibold transition-all border border-border text-foreground hover:bg-secondary active:scale-95"
+            disabled={orgs.length >= 3}
+            className="flex items-center justify-center gap-2 rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 text-sm font-semibold transition-all border border-border text-foreground hover:bg-secondary active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <LogIn className="h-4 w-4" /> Bedrijf joinen
           </button>
+          <div className="flex items-center gap-2 ml-auto">
+            <div className="flex gap-1">
+              {[0, 1, 2].map(i => (
+                <div
+                  key={i}
+                  className={`h-2.5 w-2.5 rounded-full transition-colors ${i < orgs.length ? 'bg-primary' : 'bg-muted'}`}
+                />
+              ))}
+            </div>
+            <span className="text-xs text-muted-foreground font-medium">{orgs.length}/3</span>
+          </div>
         </div>
 
         {/* Create form */}
