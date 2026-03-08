@@ -284,9 +284,12 @@ export function AppSidebar() {
         <div className={`flex items-center gap-2.5 ${collapsed ? 'flex-col' : ''}`}>
           <div
             onClick={() => navigate(`/profiel/${profileUsername || session?.user?.id}`)}
-            className="cursor-pointer shrink-0"
+            className="cursor-pointer shrink-0 relative"
           >
             <ProfileAvatar size="sm" />
+            {dndEnabled && (
+              <span className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full bg-destructive border-2 border-background" title="Niet storen" />
+            )}
           </div>
           {!collapsed && (
             <div className="flex-1 min-w-0">
