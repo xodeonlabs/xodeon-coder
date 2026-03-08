@@ -17,6 +17,7 @@ import Templates from "./pages/Templates";
 import Settings from "./pages/Settings";
 import AdminPanel from "./pages/AdminPanel";
 import Alliances from "./pages/Alliances";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/preview/:appId" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
           <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
           <Route path="/app/:slug" element={<PublicApp />} />
+          <Route path="/profiel/:userId" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
