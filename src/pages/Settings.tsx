@@ -130,6 +130,20 @@ export default function Settings() {
             </div>
             <div className="flex-1 w-full space-y-3">
               <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Gebruikersnaam</label>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm text-muted-foreground">@</span>
+                  <input
+                    value={username}
+                    onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, ''))}
+                    placeholder="jouw.username"
+                    maxLength={30}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+                <span className="text-[10px] text-muted-foreground">Dit wordt je profiel-URL: /profiel/{username || '...'}</span>
+              </div>
+              <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1 block">Weergavenaam</label>
                 <input
                   value={displayName}
