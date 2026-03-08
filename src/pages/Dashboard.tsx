@@ -817,6 +817,7 @@ export default function Dashboard() {
                   <ActionBtn onClick={() => { setInviteAppId(app.id); setInviteEmail(''); setInvitePercentage(10); }} icon={<UserPlus className="h-3.5 w-3.5" />} title="Uitnodigen + Contract" />
                   <ActionBtn onClick={() => setContractAppId(app.id)} icon={<FileText className="h-3.5 w-3.5" />} title="Contracten bekijken" className="hover:text-accent" />
                   <ActionBtn onClick={() => openPublishDialog(app)} icon={<ExternalLink className="h-3.5 w-3.5" />} title="Publiceren" className="hover:text-primary" />
+                  <ActionBtn onClick={() => togglePin(app.id)} icon={pinnedAppIds.includes(app.id) ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />} title={pinnedAppIds.includes(app.id) ? 'Losmaken' : 'Vastpinnen'} className={pinnedAppIds.includes(app.id) ? 'text-primary hover:text-destructive' : 'hover:text-primary'} />
                   <ActionBtn onClick={() => deleteApp(app.id, app.name)} icon={<Trash2 className="h-3.5 w-3.5" />} title="Verwijderen" className="ml-auto hover:text-destructive hover:bg-destructive/10" />
                 </div>
               </div>
