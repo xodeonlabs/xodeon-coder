@@ -673,12 +673,20 @@ export default function AdminPanel() {
                       {new Date(app.updated_at).toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' })}
                     </span>
                     <button
+                      onClick={() => { setCollabAppId(app.id); setCollabEmail(''); }}
+                      className="p-1 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                      title="Persoon toevoegen"
+                    >
+                      <UserPlus className="h-3.5 w-3.5" />
+                    </button>
+                    <button
                       onClick={() => setConfirmAction({ id: app.id, action: 'delete', type: 'app', name: app.name })}
                       className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                       title="Verwijderen"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
+                  </div>
                   </div>
                 </div>
               ))}
