@@ -25,11 +25,12 @@ export default function Settings() {
     setEmail(session.user.email || '');
     supabase
       .from('profiles')
-      .select('display_name')
+      .select('display_name, bio')
       .eq('id', session.user.id)
       .single()
       .then(({ data }) => {
         if (data?.display_name) setDisplayName(data.display_name);
+        if ((data as any)?.bio) setBio((data as any).bio);
       });
   }, [session?.user]);
 
