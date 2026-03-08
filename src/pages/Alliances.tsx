@@ -352,7 +352,7 @@ export default function Alliances() {
               <div className="text-center py-20">
                 <p className="text-5xl mb-4">🤝</p>
                 <h2 className="text-lg font-bold text-foreground mb-2">Geen allianties</h2>
-                <p className="text-sm text-muted-foreground">{isAdmin ? 'Maak een alliantie aan met de knop hierboven.' : 'Een platform-admin kan allianties aanmaken tussen bedrijven.'}</p>
+                <p className="text-sm text-muted-foreground">{isOrgOwner ? 'Maak een alliantie aan met de knop hierboven.' : 'Eigenaren van een bedrijf kunnen allianties aanmaken.'}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
