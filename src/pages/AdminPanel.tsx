@@ -100,7 +100,16 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [chatReplyInputs, setChatReplyInputs] = useState<Record<string, string>>({});
   const [chatSending, setChatSending] = useState<string | null>(null);
-  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'chats' | 'activity' | 'coins'>('users');
+  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'chats' | 'activity' | 'coins' | 'alliances'>('users');
+  
+  // Alliances management
+  const [adminAlliances, setAdminAlliances] = useState<any[]>([]);
+  const [adminAllianceMembers, setAdminAllianceMembers] = useState<Record<string, any[]>>({});
+  const [adminAllianceCoins, setAdminAllianceCoins] = useState<Record<string, number>>({});
+  const [adminAllianceChats, setAdminAllianceChats] = useState<Record<string, any[]>>({});
+  const [adminAllianceStats, setAdminAllianceStats] = useState<Record<string, { apps: number; views: number }>>({});
+  const [selectedAdminAlliance, setSelectedAdminAlliance] = useState<string | null>(null);
+  const [alliancesLoaded, setAlliancesLoaded] = useState(false);
 
   // Coins management
   const [userCoins, setUserCoins] = useState<{ user_id: string; balance: number }[]>([]);
