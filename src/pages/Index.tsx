@@ -496,6 +496,7 @@ const Index = () => {
         <div
           ref={editorContainerRef}
           className="flex-1 flex flex-col min-w-0 relative"
+          {...editorSwipe}
           onMouseMove={(e) => {
             const rect = editorContainerRef.current?.getBoundingClientRect();
             if (rect) {
