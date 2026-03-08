@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle, History } from 'lucide-react';
+import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 
 interface Organization {
   id: string;
@@ -34,15 +34,6 @@ interface OrgCoin {
   updated_at: string;
 }
 
-interface CoinTransaction {
-  id: string;
-  coin_name: string;
-  amount: number;
-  type: 'deposit' | 'withdraw';
-  user_id: string;
-  note: string;
-  created_at: string;
-}
 
 export default function OrganizationPage() {
   const { session } = useAuth();
@@ -62,7 +53,7 @@ export default function OrganizationPage() {
   const [orgApps, setOrgApps] = useState<OrgApp[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [orgCoins, setOrgCoins] = useState<OrgCoin[]>([]);
-  const [transactions, setTransactions] = useState<CoinTransaction[]>([]);
+  
   const [showDeposit, setShowDeposit] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [txAmount, setTxAmount] = useState('');
@@ -149,16 +140,14 @@ export default function OrganizationPage() {
     setLoadingMembers(true);
     setShowDeposit(false);
     setShowWithdraw(false);
-    const [membersRes, appsRes, coinsRes, txRes] = await Promise.all([
+    const [membersRes, appsRes, coinsRes] = await Promise.all([
       supabase.from('organization_members').select('*').eq('organization_id', org.id).order('created_at', { ascending: true }),
       supabase.from('apps').select('id, name, updated_at').eq('organization_id', org.id as any).order('updated_at', { ascending: false }),
       supabase.from('org_coins').select('*').eq('organization_id', org.id),
-      supabase.from('org_coin_transactions').select('*').eq('organization_id', org.id).order('created_at', { ascending: false }).limit(20),
     ]);
     if (!membersRes.error) setMembers((membersRes.data as unknown as OrgMember[]) || []);
     if (!appsRes.error) setOrgApps((appsRes.data as unknown as OrgApp[]) || []);
     if (!coinsRes.error) setOrgCoins((coinsRes.data as unknown as OrgCoin[]) || []);
-    if (!txRes.error) setTransactions((txRes.data as unknown as CoinTransaction[]) || []);
     setLoadingMembers(false);
   }
 
@@ -570,35 +559,6 @@ export default function OrganizationPage() {
               </div>
             )}
 
-            {/* Transaction history */}
-            {transactions.length > 0 && (
-              <div>
-                <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
-                  <History className="h-3.5 w-3.5" /> Recente transacties
-                </h4>
-                <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                  {transactions.map(tx => (
-                    <div key={tx.id} className="flex items-center justify-between rounded-lg px-3 py-2 text-xs" style={{ background: 'hsl(var(--background))' }}>
-                      <div className="flex items-center gap-2">
-                        {tx.type === 'deposit' ? (
-                          <ArrowDownCircle className="h-3.5 w-3.5 text-[hsl(var(--ide-success))]" />
-                        ) : (
-                          <ArrowUpCircle className="h-3.5 w-3.5 text-destructive" />
-                        )}
-                        <span className={`font-mono font-semibold ${tx.type === 'deposit' ? 'text-[hsl(var(--ide-success))]' : 'text-destructive'}`}>
-                          {tx.type === 'deposit' ? '+' : '-'}{tx.amount}
-                        </span>
-                        <span className="text-muted-foreground truncate max-w-[150px]">{tx.note}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground shrink-0">
-                        <span className="font-mono">{tx.user_id.slice(0, 6)}...</span>
-                        <span>{new Date(tx.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
           </>
         )}
