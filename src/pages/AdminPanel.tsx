@@ -47,6 +47,7 @@ export default function AdminPanel() {
 
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
+  const [authUsers, setAuthUsers] = useState<AuthUser[]>([]);
   const [roles, setRoles] = useState<UserRoleRow[]>([]);
   const [apps, setApps] = useState<AppRow[]>([]);
   const [orgs, setOrgs] = useState<OrgRow[]>([]);
