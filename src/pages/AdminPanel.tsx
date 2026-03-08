@@ -151,6 +151,17 @@ export default function AdminPanel() {
     if (adsRes.data) setAds(adsRes.data as unknown as AdRow[]);
     if (logsRes.data) setActivityLogs(logsRes.data as any[]);
 
+    // Fetch chats via edge function
+    try {
+      const { data: chatData } = await supabase.functions.invoke('admin-list-chats');
+      if (chatData) {
+        setAppChats(chatData.app_chats || []);
+        setOrgChats(chatData.org_chats || []);
+      }
+    } catch (e) {
+      console.error('Failed to fetch chats:', e);
+    }
+
     try {
       const { data: fnData, error: fnError } = await supabase.functions.invoke('admin-list-users');
       if (!fnError && fnData) {
