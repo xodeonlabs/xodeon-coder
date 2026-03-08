@@ -58,24 +58,66 @@ export default function Settings() {
       if (cached.display_name) setDisplayName(cached.display_name);
       if (cached.bio) setBio(cached.bio);
       if (cached.username) setUsername(cached.username);
-      return;
+    } else {
+      supabase
+        .from('profiles')
+        .select('display_name, bio, username, social_links, show_email, friend_chat_retention_hours')
+        .eq('id', session.user.id)
+        .single()
+        .then(({ data }) => {
+          if (data?.display_name) setDisplayName(data.display_name);
+          if ((data as any)?.bio) setBio((data as any).bio);
+          if ((data as any)?.username) setUsername((data as any).username);
+          if ((data as any)?.show_email) setShowEmail((data as any).show_email);
+          if ((data as any)?.social_links && typeof (data as any).social_links === 'object') {
+            setSocialLinks(prev => ({ ...prev, ...(data as any).social_links }));
+          }
+          if (data) setCache(cacheKey, { display_name: data.display_name, bio: (data as any)?.bio, username: (data as any)?.username });
+        });
     }
-    supabase
-      .from('profiles')
-      .select('display_name, bio, username, social_links, show_email')
-      .eq('id', session.user.id)
-      .single()
-      .then(({ data }) => {
-        if (data?.display_name) setDisplayName(data.display_name);
-        if ((data as any)?.bio) setBio((data as any).bio);
-        if ((data as any)?.username) setUsername((data as any).username);
-        if ((data as any)?.show_email) setShowEmail((data as any).show_email);
-        if ((data as any)?.social_links && typeof (data as any).social_links === 'object') {
-          setSocialLinks(prev => ({ ...prev, ...(data as any).social_links }));
-        }
-        if (data) setCache(cacheKey, { display_name: data.display_name, bio: (data as any)?.bio, username: (data as any)?.username });
-      });
+    loadRetentionOverview();
   }, [session?.user]);
+
+  async function loadRetentionOverview() {
+    if (!session?.user?.id) return;
+    setRetentionLoading(true);
+    const items: RetentionItem[] = [];
+
+    // Friend chat retention
+    const { data: profile } = await supabase.from('profiles').select('friend_chat_retention_hours').eq('id', session.user.id).maybeSingle();
+    items.push({ label: 'Vriendenberichten', icon: '💬', hours: (profile as any)?.friend_chat_retention_hours ?? 24, type: 'friend' });
+
+    // Apps
+    const { data: apps } = await supabase.from('apps').select('id, name, chat_retention_hours, icon').eq('owner_id', session.user.id);
+    for (const app of apps || []) {
+      items.push({ label: app.name, icon: app.icon || '📱', hours: app.chat_retention_hours ?? 12, type: 'app', id: app.id });
+    }
+
+    // Organizations owned/admin
+    const { data: memberships } = await supabase.from('organization_members').select('organization_id, role').eq('user_id', session.user.id);
+    const orgIds = (memberships || []).filter(m => m.role === 'owner' || m.role === 'admin').map(m => m.organization_id);
+    if (orgIds.length > 0) {
+      const { data: orgs } = await supabase.from('organizations').select('id, name, icon, chat_retention_hours').in('id', orgIds);
+      for (const org of orgs || []) {
+        items.push({ label: org.name, icon: org.icon || '🏢', hours: (org as any).chat_retention_hours ?? 48, type: 'org', id: org.id });
+      }
+    }
+
+    // Alliances created by user
+    const { data: alliances } = await supabase.from('alliances').select('id, name, icon, chat_retention_hours').eq('created_by', session.user.id);
+    for (const a of alliances || []) {
+      items.push({ label: a.name, icon: a.icon || '🤝', hours: (a as any).chat_retention_hours ?? 48, type: 'alliance', id: a.id });
+    }
+
+    // Groups created by user
+    const { data: groups } = await supabase.from('chat_groups' as any).select('id, name, icon, chat_retention_hours').eq('created_by', session.user.id);
+    for (const g of (groups as any[]) || []) {
+      items.push({ label: g.name, icon: g.icon || '👥', hours: g.chat_retention_hours ?? 48, type: 'group', id: g.id });
+    }
+
+    setRetentionItems(items);
+    setRetentionLoading(false);
+  }
 
   async function saveProfile() {
     if (!session?.user?.id) return;
