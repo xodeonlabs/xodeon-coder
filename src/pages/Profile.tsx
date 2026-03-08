@@ -34,7 +34,7 @@ export default function Profile() {
   const navigate = useNavigate();
   const { session } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [stats, setStats] = useState<ProfileStats>({ appCount: 0, orgCount: 0, totalViews: 0 });
+  const [stats, setStats] = useState<ProfileStats>({ appCount: 0, orgCount: 0, totalViews: 0, friendCount: 0 });
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
