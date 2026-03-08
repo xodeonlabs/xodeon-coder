@@ -721,6 +721,28 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Stats widget */}
+        {!loading && myApps.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 animate-slide-up" style={{ animationDelay: '100ms' }}>
+            {[
+              { icon: <FileCode className="h-4 w-4" />, label: 'Apps', value: stats.totalApps, color: 'primary' },
+              { icon: <Code className="h-4 w-4" />, label: 'Regels code', value: stats.totalLines.toLocaleString(), color: 'accent' },
+              { icon: <Globe className="h-4 w-4" />, label: 'Publiek', value: stats.publicApps, color: 'primary' },
+              { icon: <TrendingUp className="h-4 w-4" />, label: 'Actief (7d)', value: stats.activeThisWeek, color: 'accent' },
+            ].map(stat => (
+              <div key={stat.label} className="glass-card rounded-xl p-3 sm:p-4 flex items-center gap-3">
+                <div className={`p-2 rounded-lg bg-${stat.color}/10 text-${stat.color}`}>
+                  {stat.icon}
+                </div>
+                <div>
+                  <p className="text-lg sm:text-xl font-bold text-foreground tabular-nums">{stat.value}</p>
+                  <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Content */}
         {loading ? (
           <div className="flex items-center justify-center py-24">
