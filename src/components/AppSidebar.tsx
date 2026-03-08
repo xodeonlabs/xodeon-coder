@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useNotificationSound } from '@/hooks/useNotificationSound';
 import {
   LayoutDashboard, BarChart3, Building2, Handshake, Users,
   MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins, PanelLeftClose, PanelLeftOpen,
@@ -28,6 +29,7 @@ export function AppSidebar() {
   const { session, signOut } = useAuth();
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
+  const { play: playNotification } = useNotificationSound();
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [coins, setCoins] = useState(0);
@@ -89,10 +91,14 @@ export function AppSidebar() {
     if (!session?.user?.id) return;
     const channel = supabase
       .channel('sidebar-unread-badges')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_group_messages' }, () => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_group_messages' }, (payload) => {
+        const msg = payload.new as any;
+        if (msg?.user_id !== session.user.id) playNotification();
         fetchUnreadGroups();
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'friend_messages' }, () => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'friend_messages' }, (payload) => {
+        const msg = payload.new as any;
+        if (msg?.receiver_id === session.user.id) playNotification();
         fetchUnreadMessages();
       })
       .subscribe();
