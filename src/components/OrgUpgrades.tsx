@@ -527,10 +527,11 @@ export function OrgUpgrades({ orgId, orgName, currentLevel, orgBalance, isOwner,
                 <button
                   onClick={() => handleLevelChange(lvl.level)}
                   disabled={upgrading}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all active:scale-95 disabled:opacity-50 border border-border/40 text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] sm:text-xs font-bold transition-all active:scale-95 disabled:opacity-50 border border-border/40 text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                 >
-                  <ArrowDown className="h-3.5 w-3.5" />
-                  Downgrade (gratis, {TAX_RATES[lvl.level]}% tax, {MONTHLY_COSTS[lvl.level]}c/mo)
+                  <ArrowDown className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  <span className="sm:hidden">Downgrade · {TAX_RATES[lvl.level]}% · {MONTHLY_COSTS[lvl.level]}c</span>
+                  <span className="hidden sm:inline">Downgrade (gratis, {TAX_RATES[lvl.level]}% tax, {MONTHLY_COSTS[lvl.level]}c/mo)</span>
                 </button>
               )}
             </div>
