@@ -493,10 +493,17 @@ export default function OrganizationPage() {
                         </AvatarFallback>
                       </Avatar>
                       {roleIcon(member.role)}
-                      <span className="text-sm text-foreground truncate">
-                        {memberProfiles[member.user_id]?.display_name || `${member.user_id.slice(0, 8)}...`}
-                      </span>
-                      <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-secondary shrink-0">{roleLabel(member.role)}</span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-foreground truncate">
+                            {memberProfiles[member.user_id]?.display_name || `${member.user_id.slice(0, 8)}...`}
+                          </span>
+                          <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-secondary shrink-0">{roleLabel(member.role)}</span>
+                        </div>
+                        {memberProfiles[member.user_id]?.bio && (
+                          <p className="text-[11px] text-muted-foreground truncate mt-0.5">{memberProfiles[member.user_id].bio}</p>
+                        )}
+                      </div>
                     </div>
                     {selectedOrg.owner_id === session?.user?.id && member.role !== 'owner' && (
                       <div className="flex items-center gap-2">
