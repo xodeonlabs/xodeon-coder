@@ -84,6 +84,7 @@ export default function Dashboard() {
   const [slugValue, setSlugValue] = useState('');
   const [savingSlug, setSavingSlug] = useState(false);
   const [totalCoins, setTotalCoins] = useState(0);
+  const [displayName, setDisplayName] = useState<string | null>(null);
 
   useEffect(() => {
     try {
