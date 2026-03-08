@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Send } from 'lucide-react';
+import { getCached, setCache, CACHE_TTL } from '@/lib/cache';
 
 interface ChatMessage {
   id: string;

@@ -58,6 +58,7 @@ export default function Settings() {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
       toast({ title: '✅ Profiel opgeslagen!' });
+      clearCache(`profile:${session.user.id}`);
     }
     setSaving(false);
   }
