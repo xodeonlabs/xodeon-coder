@@ -101,11 +101,54 @@ export default function Dashboard() {
     } catch { /* ignore */ }
   }, []);
 
-  useEffect(() => { fetchApps(); fetchOrgs(); }, []);
+  useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); }, []);
 
   async function fetchOrgs() {
     const { data } = await supabase.from('organizations').select('id, name').order('name');
     if (data) setOrgs(data as unknown as Org[]);
+  }
+
+  async function fetchUnreadCount() {
+    if (!session?.user?.id) return;
+    // Get all orgs the user is a member of
+    const { data: memberships } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .eq('user_id', session.user.id);
+    if (!memberships || memberships.length === 0) return;
+
+    const orgIds = memberships.map(m => m.organization_id);
+
+    // Get read statuses
+    const { data: readStatuses } = await supabase
+      .from('org_chat_read_status')
+      .select('organization_id, last_read_at')
+      .eq('user_id', session.user.id)
+      .in('organization_id', orgIds);
+
+    const readMap: Record<string, string> = {};
+    if (readStatuses) {
+      for (const rs of readStatuses) {
+        readMap[rs.organization_id] = rs.last_read_at;
+      }
+    }
+
+    // Count unread messages across all orgs
+    let total = 0;
+    for (const orgId of orgIds) {
+      const lastRead = readMap[orgId];
+      let query = supabase
+        .from('org_chat_messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('organization_id', orgId)
+        .neq('user_id', session.user.id);
+      if (lastRead) {
+        query = query.gt('created_at', lastRead);
+      }
+      const { count } = await query;
+      if (count) total += count;
+    }
+    setUnreadOrgMessages(total);
   }
 
   async function linkAppToOrg(appId: string, orgId: string | null) {
