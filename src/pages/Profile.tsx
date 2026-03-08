@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Calendar, Code2, Users, Eye, ExternalLink, Settings, Sparkles, Mail, Globe, Heart } from 'lucide-react';
 import { FriendButton } from '@/components/FriendButton';
 import { FriendsList } from '@/components/FriendsList';
+import { ActivityTimeline } from '@/components/ActivityTimeline';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
@@ -265,6 +266,9 @@ export default function Profile() {
 
         {/* Friends list */}
         <FriendsList userId={profile!.id} />
+
+        {/* Activity timeline */}
+        <ActivityTimeline userId={profile!.id} />
 
         {/* Apps gallery */}
         <PublicApps userId={profile!.id} />
