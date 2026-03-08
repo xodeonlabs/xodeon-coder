@@ -59,6 +59,13 @@ export default function Templates() {
   const [friends, setFriends] = useState<string[]>([]);
   const [userOrgs, setUserOrgs] = useState<string[]>([]);
   const [dbCategories, setDbCategories] = useState<CategoryRow[]>([]);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [createCategory, setCreateCategory] = useState('algemeen');
+  const [createName, setCreateName] = useState('');
+  const [createDescription, setCreateDescription] = useState('');
+  const [createCode, setCreateCode] = useState('');
+  const [createVisibility, setCreateVisibility] = useState('public');
+  const [creating, setCreating] = useState(false);
 
   const CATEGORIES = useMemo(() => {
     if (dbCategories.length === 0) return FALLBACK_CATEGORIES;
