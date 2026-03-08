@@ -12,6 +12,7 @@ export default function Settings() {
   const { toast } = useToast();
 
   const [displayName, setDisplayName] = useState('');
+  const [bio, setBio] = useState('');
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -24,11 +25,12 @@ export default function Settings() {
     setEmail(session.user.email || '');
     supabase
       .from('profiles')
-      .select('display_name')
+      .select('display_name, bio')
       .eq('id', session.user.id)
       .single()
       .then(({ data }) => {
         if (data?.display_name) setDisplayName(data.display_name);
+        if ((data as any)?.bio) setBio((data as any).bio);
       });
   }, [session?.user]);
 
@@ -40,8 +42,9 @@ export default function Settings() {
       .upsert({
         id: session.user.id,
         display_name: displayName.trim() || null,
+        bio: bio.trim(),
         updated_at: new Date().toISOString(),
-      });
+      } as any);
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
@@ -119,6 +122,18 @@ export default function Settings() {
                   placeholder="Jouw naam..."
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Bio</label>
+                <textarea
+                  value={bio}
+                  onChange={e => setBio(e.target.value)}
+                  placeholder="Vertel iets over jezelf..."
+                  rows={3}
+                  maxLength={300}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                />
+                <span className="text-[10px] text-muted-foreground">{bio.length}/300</span>
               </div>
               <button
                 onClick={saveProfile}
