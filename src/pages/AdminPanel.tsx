@@ -210,7 +210,7 @@ export default function AdminPanel() {
   async function loadAdminTemplates(force = false) {
     if (templatesLoaded && !force) return;
     setTemplatesLoaded(true);
-    const { data } = await supabase.from('templates').select('id, name, category, author_id, downloads, is_published, created_at').order('created_at', { ascending: false });
+    const { data } = await supabase.from('templates').select('id, name, description, category, author_id, downloads, is_published, created_at, visibility' as any).order('created_at', { ascending: false });
     setAdminTemplates((data as any[]) || []);
   }
 
