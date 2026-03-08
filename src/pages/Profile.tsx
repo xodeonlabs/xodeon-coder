@@ -26,6 +26,7 @@ interface ProfileData {
   email?: string;
   is_dnd?: boolean;
   last_seen_at?: string | null;
+  banner_url?: string | null;
 }
 
 interface ProfileStats {
