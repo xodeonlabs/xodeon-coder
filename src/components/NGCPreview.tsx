@@ -104,7 +104,47 @@ function executeDataCommand(cmd: ReturnType<typeof parseDataCommand>, runtime: N
   }
 }
 
-interface CoinHandlers {
+/** Evaluate a Zichtbaar expression like Var(pagina)=="login" or "true"/"false" */
+function evaluateVisibility(expr: string, runtime: NGCRuntime): boolean {
+  if (expr === 'false' || expr === '0') return false;
+  if (expr === 'true' || expr === '1') return true;
+
+  // Resolve variable references first
+  const resolved = resolveVarRefs(expr, runtime);
+
+  // Handle == comparison
+  const eqMatch = resolved.match(/^(.+)==(.+)$/);
+  if (eqMatch) {
+    const left = eqMatch[1].replace(/^"|"$/g, '').trim();
+    const right = eqMatch[2].replace(/^"|"$/g, '').trim();
+    return left === right;
+  }
+
+  // Handle != comparison
+  const neqMatch = resolved.match(/^(.+)!=(.+)$/);
+  if (neqMatch) {
+    const left = neqMatch[1].replace(/^"|"$/g, '').trim();
+    const right = neqMatch[2].replace(/^"|"$/g, '').trim();
+    return left !== right;
+  }
+
+  // Handle > < >= <=
+  const cmpMatch = resolved.match(/^(.+?)(>=|<=|>|<)(.+)$/);
+  if (cmpMatch) {
+    const left = parseFloat(cmpMatch[1].trim());
+    const right = parseFloat(cmpMatch[3].trim());
+    switch (cmpMatch[2]) {
+      case '>': return left > right;
+      case '<': return left < right;
+      case '>=': return left >= right;
+      case '<=': return left <= right;
+    }
+  }
+
+  return resolved !== '' && resolved !== '0' && resolved !== 'false';
+}
+
+
   add: (name: string, amount: number) => Promise<boolean> | boolean;
   remove: (name: string, amount: number) => Promise<boolean> | boolean;
 }
