@@ -26,6 +26,7 @@ interface ProfileStats {
   appCount: number;
   orgCount: number;
   totalViews: number;
+  friendCount: number;
 }
 
 export default function Profile() {
