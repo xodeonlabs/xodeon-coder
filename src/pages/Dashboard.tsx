@@ -455,6 +455,7 @@ export default function Dashboard() {
         setInviteEmail('');
         setInvitePercentage(10);
         setInviteAppId(null);
+        clearCache(CACHE_KEYS.contracts(session?.user?.id || ''));
         fetchContracts();
       }
     } catch (e) {
