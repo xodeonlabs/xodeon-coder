@@ -2,6 +2,19 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { NGCNode } from '@/lib/ngc-ast';
 import { createRuntime, NGCRuntime, resolveVarRefs, parseVarDefinition, parseListDefinition, parseDataCommand, parseCoinsCommand, clearPersistedState } from '@/lib/ngc-runtime';
 import { supabase } from '@/integrations/supabase/client';
+import { icons } from 'lucide-react';
+
+function LucideIcon({ name, size = 16, color = 'currentColor' }: { name: string; size?: number; color?: string }) {
+  // Convert common names: "heart" -> "Heart", "arrow-left" -> "ArrowLeft"
+  const pascalName = name
+    .split('-')
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('') as keyof typeof icons;
+  
+  const IconComponent = icons[pascalName];
+  if (!IconComponent) return null;
+  return <IconComponent size={size} color={color} />;
+}
 
 interface PreviewProps {
   ast: NGCNode | null;
@@ -197,6 +210,8 @@ function NGCNodeRenderer({
   const text = resolveVarRefs(rawText, runtime);
   const radius = node.properties.Hoekradius ? cleanStr(node.properties.Hoekradius) : '0';
 
+  const iconName = node.properties.Icoon ? cleanStr(node.properties.Icoon) : '';
+
   const baseStyle: React.CSSProperties = {
     position: 'absolute',
     left: pos.x,
@@ -219,6 +234,7 @@ function NGCNodeRenderer({
     case 'Frame':
       return (
         <div style={{ ...baseStyle, background: color || '#1e293b', borderRadius: `${radius}px`, overflow: 'hidden' }}>
+          {iconName && <div style={{ padding: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LucideIcon name={iconName} size={24} color={color || '#fff'} /></div>}
           {node.children.map(child => (
             <NGCNodeRenderer key={child.id} node={child} runtime={runtime} onRuntimeChange={onRuntimeChange} onNavigate={onNavigate} coinHandlers={coinHandlers} />
           ))}
@@ -243,13 +259,15 @@ function NGCNodeRenderer({
           }}
           onClick={() => handleEvent('Click')}
         >
-          {text}
+          {iconName && <LucideIcon name={iconName} size={16} color="#fff" />}
+          {text && <span style={{ marginLeft: iconName ? 6 : 0 }}>{text}</span>}
         </button>
       );
 
     case 'Text':
       return (
-        <div style={{ ...baseStyle, color: color || '#fff', fontSize: 16, fontFamily: 'inherit' }}>
+        <div style={{ ...baseStyle, color: color || '#fff', fontSize: 16, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }}>
+          {iconName && <LucideIcon name={iconName} size={18} color={color || '#fff'} />}
           {text}
         </div>
       );

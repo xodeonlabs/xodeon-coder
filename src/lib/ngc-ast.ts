@@ -59,11 +59,11 @@ export const VALID_CHILDREN: Record<string, NGCNodeType[]> = {
 };
 
 export const DEFAULT_PROPERTIES: Record<string, Record<string, string>> = {
-  Button: { Tekst: '"Button"', Positie: '"0,0"', Grootte: '"100,40"', Kleur: '"#3b82f6"', Hoekradius: '"6"' },
-  Text: { Tekst: '"Text"', Positie: '"0,0"', Grootte: '"200,30"', Kleur: '"#ffffff"' },
+  Button: { Tekst: '"Button"', Positie: '"0,0"', Grootte: '"100,40"', Kleur: '"#3b82f6"', Hoekradius: '"6"', Icoon: '""' },
+  Text: { Tekst: '"Text"', Positie: '"0,0"', Grootte: '"200,30"', Kleur: '"#ffffff"', Icoon: '""' },
   TextBox: { Tekst: '""', Positie: '"0,0"', Grootte: '"200,30"', Placeholder: '"Type here..."', Variabele: '""' },
   Image: { Bron: '""', Positie: '"0,0"', Grootte: '"100,100"' },
-  Frame: { Positie: '"0,0"', Grootte: '"300,200"', Kleur: '"#1e293b"' },
+  Frame: { Positie: '"0,0"', Grootte: '"300,200"', Kleur: '"#1e293b"', Icoon: '""' },
   Page: {},
   Var: {},
   Function: {},
