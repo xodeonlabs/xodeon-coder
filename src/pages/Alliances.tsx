@@ -341,8 +341,20 @@ export default function Alliances() {
                     className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
                   />
                 </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Jouw bedrijf in deze alliantie</label>
+                  <select
+                    value={selectedOrgForCreate}
+                    onChange={e => setSelectedOrgForCreate(e.target.value)}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  >
+                    {myOwnedOrgs.map(o => (
+                      <option key={o.id} value={o.id}>{o.icon || '🏢'} {o.name}</option>
+                    ))}
+                  </select>
+                </div>
                 <div className="flex gap-2">
-                  <button onClick={createAlliance} disabled={creating || !newName.trim()} className="px-4 py-2 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors">
+                  <button onClick={createAlliance} disabled={creating || !newName.trim() || !selectedOrgForCreate} className="px-4 py-2 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors">
                     {creating ? 'Bezig...' : 'Aanmaken'}
                   </button>
                   <button onClick={() => setShowCreate(false)} className="px-4 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
