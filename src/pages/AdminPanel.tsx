@@ -522,7 +522,7 @@ export default function AdminPanel() {
                         className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
                         title="Bewerken"
                       >
-                        <GripVertical className="h-4 w-4" />
+                        <Pencil className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => deleteAd(ad.id)}
