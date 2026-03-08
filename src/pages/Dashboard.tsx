@@ -81,6 +81,20 @@ export default function Dashboard() {
   const [publishAppId, setPublishAppId] = useState<string | null>(null);
   const [slugValue, setSlugValue] = useState('');
   const [savingSlug, setSavingSlug] = useState(false);
+  const [totalCoins, setTotalCoins] = useState(0);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('ngc_runtime_state');
+      if (raw) {
+        const state = JSON.parse(raw);
+        if (state?.coins) {
+          const sum = Object.values(state.coins as Record<string, number>).reduce((a: number, b: number) => a + b, 0);
+          setTotalCoins(sum);
+        }
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   useEffect(() => { fetchApps(); fetchOrgs(); }, []);
 
