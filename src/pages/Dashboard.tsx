@@ -298,10 +298,38 @@ export default function Dashboard() {
   }
 
   async function updateRetention(id: string, hours: number) {
+    const app = apps.find(a => a.id === id);
+    if (!app) return;
+    const currentHours = app.chat_retention_hours ?? 12;
+
+    // Only charge if increasing beyond 12 hours
+    if (hours > 12 && hours > currentHours) {
+      const extraBlocks = Math.ceil((hours - Math.max(currentHours, 12)) / 12);
+      const cost = extraBlocks * 5;
+
+      if (cost > 0) {
+        const { data: authData } = await supabase.auth.getUser();
+        if (!authData?.user) return;
+
+        const { data: coinRow } = await supabase.from('user_coins').select('id, balance').eq('user_id', authData.user.id).maybeSingle();
+        const balance = (coinRow as any)?.balance ?? 0;
+
+        if (balance < cost) {
+          toast({ title: 'Niet genoeg coins', description: `Je hebt ${cost} coins nodig maar je hebt er ${balance}.`, variant: 'destructive' });
+          return;
+        }
+
+        await supabase.from('user_coins').update({ balance: balance - cost, updated_at: new Date().toISOString() } as any).eq('id', (coinRow as any).id);
+        toast({ title: `${cost} coins afgeschreven`, description: `Bewaartijd verlengd naar ${hours >= 24 ? Math.round(hours / 24) + ' dag(en)' : hours + ' uur'}` });
+      }
+    }
+
     const { error } = await supabase.from('apps').update({ chat_retention_hours: hours } as any).eq('id', id);
     if (!error) {
       setApps(apps.map(a => a.id === id ? { ...a, chat_retention_hours: hours } : a));
-      toast({ title: 'Bewaartermijn bijgewerkt', description: `Chat wordt nu ${hours} uur bewaard` });
+      if (hours <= 12) {
+        toast({ title: 'Bewaartermijn bijgewerkt', description: `Chat wordt nu ${hours} uur bewaard` });
+      }
     }
   }
 
@@ -493,16 +521,16 @@ export default function Dashboard() {
                   <select
                     value={app.chat_retention_hours ?? 12}
                     onChange={e => updateRetention(app.id, parseInt(e.target.value))}
-                    className="text-xs rounded-lg border border-border bg-background px-2 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 max-w-[100px]"
+                    className="text-xs rounded-lg border border-border bg-background px-2 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 max-w-[120px]"
                     title="Chat bewaartermijn"
                   >
                     <option value={1}>1 uur</option>
                     <option value={6}>6 uur</option>
-                    <option value={12}>12 uur</option>
-                    <option value={24}>24 uur</option>
-                    <option value={48}>2 dagen</option>
-                    <option value={168}>1 week</option>
-                    <option value={720}>30 dagen</option>
+                    <option value={12}>12 uur (gratis)</option>
+                    <option value={24}>24 uur (5🪙)</option>
+                    <option value={48}>2 dagen (15🪙)</option>
+                    <option value={168}>1 week (65🪙)</option>
+                    <option value={720}>30 dagen (295🪙)</option>
                   </select>
                   <button onClick={() => { setEditingNameId(app.id); setEditingNameValue(app.name); }} className="rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Naam wijzigen">
                     <Pencil className="h-4 w-4" />
