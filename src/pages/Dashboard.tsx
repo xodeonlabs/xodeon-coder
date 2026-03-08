@@ -572,7 +572,7 @@ export default function Dashboard() {
           </div>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1 sm:gap-2">
+          <nav className="hidden md:flex lg:hidden items-center gap-1 sm:gap-2">
             {/* Coins */}
             <div className="relative group/coins flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-accent/5 border border-accent/10 text-accent cursor-default transition-colors hover:bg-accent/10">
               <Coins className="h-3.5 w-3.5" />
