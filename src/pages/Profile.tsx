@@ -15,6 +15,9 @@ interface ProfileData {
   bio: string | null;
   created_at: string;
   username: string | null;
+  social_links: Record<string, string> | null;
+  show_email: boolean;
+  email?: string;
 }
 
 interface ProfileStats {
