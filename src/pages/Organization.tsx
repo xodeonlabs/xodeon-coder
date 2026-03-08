@@ -457,6 +457,125 @@ export default function OrganizationPage() {
               </div>
             )}
           </div>
+
+          {/* Bedrijfskluis */}
+          <div className="mt-6 rounded-xl border border-border/50 p-6" style={{ background: 'hsl(var(--card))' }}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <Coins className="h-5 w-5 text-yellow-400" />
+                Bedrijfskluis
+              </h3>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => { setShowDeposit(!showDeposit); setShowWithdraw(false); }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[hsl(var(--ide-success))]/10 text-[hsl(var(--ide-success))] hover:bg-[hsl(var(--ide-success))]/20 transition-colors"
+                >
+                  <ArrowDownCircle className="h-3.5 w-3.5" /> Storten
+                </button>
+                <button
+                  onClick={() => { setShowWithdraw(!showWithdraw); setShowDeposit(false); }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                >
+                  <ArrowUpCircle className="h-3.5 w-3.5" /> Opnemen
+                </button>
+              </div>
+            </div>
+
+            {/* Balance display */}
+            <div className="rounded-xl p-6 mb-4 text-center" style={{ background: 'hsl(var(--background))' }}>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Totaal saldo</p>
+              <div className="flex items-center justify-center gap-2">
+                <Coins className="h-8 w-8 text-yellow-400" />
+                <span className="text-4xl font-bold text-foreground font-mono">
+                  {orgCoins.reduce((sum, c) => sum + c.balance, 0).toLocaleString('nl-NL')}
+                </span>
+              </div>
+              {orgCoins.length > 1 && (
+                <div className="flex items-center justify-center gap-4 mt-3">
+                  {orgCoins.map(c => (
+                    <span key={c.id} className="text-xs text-muted-foreground">
+                      {c.name}: <span className="font-mono font-semibold text-foreground">{c.balance.toLocaleString('nl-NL')}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Deposit/Withdraw form */}
+            {(showDeposit || showWithdraw) && (
+              <div className="rounded-lg border border-border p-4 mb-4" style={{ background: 'hsl(var(--background))' }}>
+                <h4 className="text-sm font-semibold text-foreground mb-3">
+                  {showDeposit ? '💰 Coins storten' : '💸 Coins opnemen'}
+                </h4>
+                <div className="flex gap-3 mb-3">
+                  <input
+                    type="number"
+                    placeholder="Bedrag"
+                    value={txAmount}
+                    onChange={e => setTxAmount(e.target.value)}
+                    min="1"
+                    className="flex-1 rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground font-mono placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Notitie (optioneel)"
+                    value={txNote}
+                    onChange={e => setTxNote(e.target.value)}
+                    className="flex-1 rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleCoinTransaction(showDeposit ? 'deposit' : 'withdraw')}
+                    disabled={txProcessing || !txAmount.trim()}
+                    className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all active:scale-95 disabled:opacity-50 ${
+                      showDeposit
+                        ? 'bg-[hsl(var(--ide-success))] text-white hover:bg-[hsl(var(--ide-success))]/90'
+                        : 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                    }`}
+                  >
+                    {txProcessing ? 'Bezig...' : showDeposit ? 'Storten' : 'Opnemen'}
+                  </button>
+                  <button
+                    onClick={() => { setShowDeposit(false); setShowWithdraw(false); }}
+                    className="px-4 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                  >
+                    Annuleren
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Transaction history */}
+            {transactions.length > 0 && (
+              <div>
+                <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
+                  <History className="h-3.5 w-3.5" /> Recente transacties
+                </h4>
+                <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                  {transactions.map(tx => (
+                    <div key={tx.id} className="flex items-center justify-between rounded-lg px-3 py-2 text-xs" style={{ background: 'hsl(var(--background))' }}>
+                      <div className="flex items-center gap-2">
+                        {tx.type === 'deposit' ? (
+                          <ArrowDownCircle className="h-3.5 w-3.5 text-[hsl(var(--ide-success))]" />
+                        ) : (
+                          <ArrowUpCircle className="h-3.5 w-3.5 text-destructive" />
+                        )}
+                        <span className={`font-mono font-semibold ${tx.type === 'deposit' ? 'text-[hsl(var(--ide-success))]' : 'text-destructive'}`}>
+                          {tx.type === 'deposit' ? '+' : '-'}{tx.amount}
+                        </span>
+                        <span className="text-muted-foreground truncate max-w-[150px]">{tx.note}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground shrink-0">
+                        <span className="font-mono">{tx.user_id.slice(0, 6)}...</span>
+                        <span>{new Date(tx.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           </>
         )}
       </div>
