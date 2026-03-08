@@ -355,6 +355,8 @@ const Index = () => {
       });
     });
     items.push(
+      { id: 'search', label: 'Zoeken in code', category: 'Zoeken', icon: <Search className="h-4 w-4" />, action: () => { setSearchShowReplace(false); setSearchOpen(true); } },
+      { id: 'replace', label: 'Zoeken en vervangen', category: 'Zoeken', icon: <Replace className="h-4 w-4" />, action: () => { setSearchShowReplace(true); setSearchOpen(true); } },
       { id: 'zen', label: zenMode ? 'Zen mode uit' : 'Zen mode aan', category: 'Weergave', icon: <Eye className="h-4 w-4" />, action: toggleZenMode },
       { id: 'fullscreen', label: isFullscreen ? 'Volledig scherm uit' : 'Volledig scherm', category: 'Weergave', icon: <Maximize className="h-4 w-4" />, action: toggleFullscreen },
       { id: 'copy', label: 'Kopieer alle code', category: 'Bewerken', icon: <Copy className="h-4 w-4" />, action: handleCopyCode },
@@ -363,9 +365,11 @@ const Index = () => {
       { id: 'code-mode', label: 'Code modus', category: 'Modus', icon: <Code className="h-4 w-4" />, action: () => setEditorMode('code') },
       { id: 'design-mode', label: 'Ontwerp modus', category: 'Modus', icon: <MousePointer className="h-4 w-4" />, action: () => setEditorMode('design') },
       { id: 'new-page', label: 'Nieuwe pagina toevoegen', category: 'Bewerken', icon: <Plus className="h-4 w-4" />, action: handleAddPage },
+      { id: 'left-panel', label: leftOpen ? 'Linkerpaneel inklappen' : 'Linkerpaneel uitklappen', category: 'Weergave', icon: <PanelLeftClose className="h-4 w-4" />, action: () => setLeftOpen(o => !o) },
+      { id: 'right-panel', label: rightOpen ? 'Rechterpaneel inklappen' : 'Rechterpaneel uitklappen', category: 'Weergave', icon: <PanelRightClose className="h-4 w-4" />, action: () => setRightOpen(o => !o) },
     );
     return items;
-  }, [ast, sections, zenMode, isFullscreen, toggleZenMode, toggleFullscreen, handleCopyCode, handleUndo, saveNow, handleAddPage]);
+  }, [ast, sections, zenMode, isFullscreen, leftOpen, rightOpen, toggleZenMode, toggleFullscreen, handleCopyCode, handleUndo, saveNow, handleAddPage]);
 
   const selectedNode = useMemo(() => {
     if (!ast || !selectedId) return null;
