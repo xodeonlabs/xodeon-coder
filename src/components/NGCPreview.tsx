@@ -258,7 +258,8 @@ function NGCNodeRenderer({
           }}
           onClick={() => handleEvent('Click')}
         >
-          {text}
+          {iconName && <LucideIcon name={iconName} size={16} color="#fff" />}
+          {text && <span style={{ marginLeft: iconName ? 6 : 0 }}>{text}</span>}
         </button>
       );
 
