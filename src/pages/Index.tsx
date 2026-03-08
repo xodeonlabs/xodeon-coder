@@ -95,6 +95,8 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<string>('global');
   const [editorMode, setEditorMode] = useState<'code' | 'design'>('code');
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const editorContainerRef = useRef<HTMLDivElement>(null);
+  const { cursors, updateCursor } = useLiveCursors(appId);
 
   const isRemoteUpdate = useRef(false);
 
