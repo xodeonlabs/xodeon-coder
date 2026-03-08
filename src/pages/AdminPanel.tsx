@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, Megaphone, Plus, Eye, EyeOff, Pencil, Ban, ShieldOff } from 'lucide-react';
+import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, Megaphone, Plus, Eye, EyeOff, Pencil, Ban, ShieldOff, Activity } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const EMOJI_LIST = [
@@ -88,8 +88,9 @@ export default function AdminPanel() {
   const [apps, setApps] = useState<AppRow[]>([]);
   const [orgs, setOrgs] = useState<OrgRow[]>([]);
   const [ads, setAds] = useState<AdRow[]>([]);
+  const [activityLogs, setActivityLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads'>('users');
+  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'activity'>('users');
 
   // Add role
   const [addRoleUserId, setAddRoleUserId] = useState('');
@@ -127,18 +128,20 @@ export default function AdminPanel() {
 
   async function fetchAll() {
     setLoading(true);
-    const [profilesRes, rolesRes, appsRes, orgsRes, adsRes] = await Promise.all([
+    const [profilesRes, rolesRes, appsRes, orgsRes, adsRes, logsRes] = await Promise.all([
       supabase.from('profiles').select('*'),
       supabase.from('user_roles').select('*'),
       supabase.from('apps').select('id, name, owner_id, is_public, updated_at').order('updated_at', { ascending: false }),
       supabase.from('organizations').select('id, name, owner_id'),
       supabase.from('ads' as any).select('*').order('sort_order', { ascending: true }),
+      supabase.from('admin_activity_log' as any).select('*').order('created_at', { ascending: false }).limit(100),
     ]);
     if (profilesRes.data) setProfiles(profilesRes.data as UserProfile[]);
     if (rolesRes.data) setRoles(rolesRes.data as unknown as UserRoleRow[]);
     if (appsRes.data) setApps(appsRes.data as unknown as AppRow[]);
     if (orgsRes.data) setOrgs(orgsRes.data as unknown as OrgRow[]);
     if (adsRes.data) setAds(adsRes.data as unknown as AdRow[]);
+    if (logsRes.data) setActivityLogs(logsRes.data as any[]);
 
     try {
       const { data: fnData, error: fnError } = await supabase.functions.invoke('admin-list-users');
@@ -150,11 +153,24 @@ export default function AdminPanel() {
     setLoading(false);
   }
 
+  async function logAction(action: string, targetType: string, targetId?: string, details?: string) {
+    if (!session?.user?.id) return;
+    await (supabase.from('admin_activity_log' as any) as any).insert({
+      admin_id: session.user.id,
+      action,
+      target_type: targetType,
+      target_id: targetId || null,
+      details: details || '',
+    });
+  }
+
   async function removeRole(roleId: string) {
     const { error } = await supabase.from('user_roles').delete().eq('id', roleId);
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
+      const roleName = roles.find(r => r.id === roleId);
+      await logAction('Rol verwijderd', 'user', roleName?.user_id, `Rol: ${roleName?.role}`);
       setRoles(roles.filter(r => r.id !== roleId));
       toast({ title: 'Rol verwijderd' });
     }
@@ -170,6 +186,7 @@ export default function AdminPanel() {
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
+      await logAction('Rol toegevoegd', 'user', addRoleUserId.trim(), `Rol: ${addRoleValue}`);
       toast({ title: 'Rol toegevoegd!' });
       setAddRoleUserId('');
       fetchAll();
@@ -187,6 +204,7 @@ export default function AdminPanel() {
       if (data?.error) throw new Error(data.error);
 
       const messages = { ban: 'Gebruiker geblokkeerd', unban: 'Gebruiker gedeblokkeerd', delete: 'Gebruiker verwijderd' };
+      await logAction(messages[action], 'user', userId);
       toast({ title: messages[action] });
       setConfirmAction(null);
       fetchAll();
@@ -253,7 +271,10 @@ export default function AdminPanel() {
         gradient: adForm.gradient,
       }).eq('id', editingAd.id);
       if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
-      else toast({ title: 'Advertentie bijgewerkt!' });
+      else {
+        await logAction('Advertentie bijgewerkt', 'ad', editingAd.id, adForm.title);
+        toast({ title: 'Advertentie bijgewerkt!' });
+      }
     } else {
       const { error } = await (supabase.from('ads' as any) as any).insert({
         emoji: adForm.emoji,
@@ -264,7 +285,10 @@ export default function AdminPanel() {
         sort_order: ads.length,
       });
       if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
-      else toast({ title: 'Advertentie toegevoegd!' });
+      else {
+        await logAction('Advertentie aangemaakt', 'ad', undefined, adForm.title);
+        toast({ title: 'Advertentie toegevoegd!' });
+      }
     }
     setShowAdForm(false);
     setSavingAd(false);
@@ -273,13 +297,16 @@ export default function AdminPanel() {
 
   async function toggleAdActive(ad: AdRow) {
     await (supabase.from('ads' as any) as any).update({ is_active: !ad.is_active }).eq('id', ad.id);
+    await logAction(ad.is_active ? 'Advertentie gedeactiveerd' : 'Advertentie geactiveerd', 'ad', ad.id, ad.title);
     setAds(ads.map(a => a.id === ad.id ? { ...a, is_active: !a.is_active } : a));
   }
 
   async function deleteAd(id: string) {
+    const ad = ads.find(a => a.id === id);
     const { error } = await (supabase.from('ads' as any) as any).delete().eq('id', id);
     if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     else {
+      await logAction('Advertentie verwijderd', 'ad', id, ad?.title || '');
       setAds(ads.filter(a => a.id !== id));
       toast({ title: 'Advertentie verwijderd' });
     }
@@ -366,6 +393,12 @@ export default function AdminPanel() {
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'ads' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
             <Megaphone className="h-4 w-4" /> Advertenties
+          </button>
+          <button
+            onClick={() => setTab('activity')}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'activity' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
+          >
+            <Activity className="h-4 w-4" /> Activiteit
           </button>
         </div>
 
@@ -612,6 +645,64 @@ export default function AdminPanel() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* Activity tab */}
+        {tab === 'activity' && (
+          <div className="rounded-xl border border-border/50 p-5" style={{ background: 'hsl(var(--card))' }}>
+            <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
+              <Activity className="h-4 w-4 text-primary" /> Recente activiteiten ({activityLogs.length})
+            </h3>
+            {activityLogs.length === 0 ? (
+              <div className="text-center py-8">
+                <Activity className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">Nog geen activiteiten gelogd.</p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {activityLogs.map((log: any) => {
+                  const adminName = getUserName(log.admin_id);
+                  const targetName = log.target_id ? getUserName(log.target_id) : null;
+                  const time = new Date(log.created_at);
+                  const timeStr = time.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+                  
+                  const actionIcons: Record<string, JSX.Element> = {
+                    'Rol toegevoegd': <UserPlus className="h-3.5 w-3.5 text-primary" />,
+                    'Rol verwijderd': <Trash2 className="h-3.5 w-3.5 text-orange-500" />,
+                    'Gebruiker geblokkeerd': <Ban className="h-3.5 w-3.5 text-orange-500" />,
+                    'Gebruiker gedeblokkeerd': <ShieldOff className="h-3.5 w-3.5 text-primary" />,
+                    'Gebruiker verwijderd': <Trash2 className="h-3.5 w-3.5 text-destructive" />,
+                    'Advertentie aangemaakt': <Plus className="h-3.5 w-3.5 text-primary" />,
+                    'Advertentie bijgewerkt': <Pencil className="h-3.5 w-3.5 text-primary" />,
+                    'Advertentie verwijderd': <Trash2 className="h-3.5 w-3.5 text-destructive" />,
+                    'Advertentie geactiveerd': <Eye className="h-3.5 w-3.5 text-primary" />,
+                    'Advertentie gedeactiveerd': <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />,
+                  };
+
+                  return (
+                    <div key={log.id} className="flex items-start gap-3 rounded-lg px-3 py-2.5 bg-background/50 hover:bg-secondary/20 transition-colors">
+                      <div className="mt-0.5 p-1.5 rounded-lg bg-secondary/60 shrink-0">
+                        {actionIcons[log.action] || <Activity className="h-3.5 w-3.5 text-muted-foreground" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-foreground">
+                          <span className="font-semibold">{adminName}</span>
+                          {' '}<span className="text-muted-foreground">{log.action.toLowerCase()}</span>
+                          {targetName && log.target_type === 'user' && (
+                            <>{' '}<span className="font-medium">{targetName}</span></>
+                          )}
+                          {log.details && (
+                            <span className="text-muted-foreground"> · {log.details}</span>
+                          )}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{timeStr}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
