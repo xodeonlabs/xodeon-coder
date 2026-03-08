@@ -155,6 +155,33 @@ export default function OrganizationPage() {
 
   useEffect(() => { fetchOrgs(); fetchMyRequests(); }, []);
 
+  async function searchPublicApps(query: string) {
+    setLinkAppSearch(query);
+    if (query.length < 2) { setLinkAppResults([]); return; }
+    const { data } = await supabase.from('apps').select('id, name, owner_id').eq('is_public', true).ilike('name', `%${query}%`).limit(10);
+    setLinkAppResults((data || []).filter(a => !orgApps.some(oa => oa.id === a.id)));
+  }
+
+  async function linkPublicApp(appId: string) {
+    if (!selectedOrg) return;
+    setLinkingAppId(appId);
+    try {
+      const { data: { session: s } } = await supabase.auth.getSession();
+      const res = await supabase.functions.invoke('admin-link-app-org', {
+        body: { app_id: appId, organization_id: selectedOrg.id },
+      });
+      if (res.error) throw new Error(res.error.message);
+      toast({ title: 'App gekoppeld!' });
+      setShowLinkApp(false);
+      setLinkAppSearch('');
+      setLinkAppResults([]);
+      selectOrg(selectedOrg);
+    } catch (err: any) {
+      toast({ title: 'Fout', description: err.message, variant: 'destructive' });
+    }
+    setLinkingAppId(null);
+  }
+
   async function fetchOrgs() {
     const cacheKey = `orgs-list:${session?.user?.id}`;
     const cached = getCached<Organization[]>(cacheKey, CACHE_TTL.medium);
