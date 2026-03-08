@@ -29,11 +29,21 @@ function retentionCostPerMonth(hours: number): number {
   return blocks * 5;
 }
 
+const SECTIONS = [
+  { id: 'profile', label: 'Profiel', icon: User },
+  { id: 'social', label: 'Sociale media', icon: Share2 },
+  { id: 'email', label: 'E-mailadres', icon: Mail },
+  { id: 'password', label: 'Wachtwoord', icon: Lock },
+  { id: 'retention', label: 'Bewaartermijnen', icon: Clock },
+  { id: 'danger', label: 'Gevarenzone', icon: Trash2 },
+] as const;
+
 export default function Settings() {
   const { session } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const [activeSection, setActiveSection] = useState('profile');
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
@@ -49,6 +59,11 @@ export default function Settings() {
   const [savingPassword, setSavingPassword] = useState(false);
   const [retentionItems, setRetentionItems] = useState<RetentionItem[]>([]);
   const [retentionLoading, setRetentionLoading] = useState(true);
+
+  function scrollToSection(id: string) {
+    setActiveSection(id);
+    document.getElementById(`settings-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
   useEffect(() => {
     if (!session?.user) return;
