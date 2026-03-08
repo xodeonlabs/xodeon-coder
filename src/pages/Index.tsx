@@ -13,6 +13,7 @@ import { NGCAIAssistant } from '@/components/NGCAIAssistant';
 import { NGCContextMenu } from '@/components/NGCContextMenu';
 import { NGCToolbar } from '@/components/NGCToolbar';
 import { NGCDesigner } from '@/components/NGCDesigner';
+import { KeyboardShortcuts } from '@/components/KeyboardShortcuts';
 import { NGCVersionPanel } from '@/components/NGCVersionPanel';
 import { CommandPalette } from '@/components/CommandPalette';
 import { SearchReplace } from '@/components/SearchReplace';
