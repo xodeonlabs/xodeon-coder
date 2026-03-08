@@ -655,9 +655,6 @@ function PublicApps({ userId, isOwner = false }: { userId: string; isOwner?: boo
     </div>
   );
 }
-
-  useEffect(() => {
-    async function load() {
       const { data } = await supabase
         .from('apps')
         .select('id, name, icon, slug, created_at, ngc_code')
