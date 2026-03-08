@@ -44,7 +44,7 @@ function initRuntime(ast: NGCNode, runtime: NGCRuntime) {
     if (coinsDef && coinsDef.operation === 'Set') {
       // Initialize coins with the defined amount if not already set
       if (!(coinsDef.name in runtime.coins)) {
-        runtime.coinsSet(coinsDef.name, coinsDef.amount ?? 0);
+        runtime.coinsSet(coinsDef.name, coinsDef.amount ?? 100);
       }
     }
     // Check for coins code registration
