@@ -26,21 +26,23 @@ export default function Settings() {
     if (!session?.user) return;
     setEmail(session.user.email || '');
     const cacheKey = `profile:${session.user.id}`;
-    const cached = getCached<{ display_name: string | null; bio: string | null }>(cacheKey, CACHE_TTL.medium);
+    const cached = getCached<{ display_name: string | null; bio: string | null; username: string | null }>(cacheKey, CACHE_TTL.medium);
     if (cached) {
       if (cached.display_name) setDisplayName(cached.display_name);
       if (cached.bio) setBio(cached.bio);
+      if (cached.username) setUsername(cached.username);
       return;
     }
     supabase
       .from('profiles')
-      .select('display_name, bio')
+      .select('display_name, bio, username')
       .eq('id', session.user.id)
       .single()
       .then(({ data }) => {
         if (data?.display_name) setDisplayName(data.display_name);
         if ((data as any)?.bio) setBio((data as any).bio);
-        if (data) setCache(cacheKey, { display_name: data.display_name, bio: (data as any)?.bio });
+        if ((data as any)?.username) setUsername((data as any).username);
+        if (data) setCache(cacheKey, { display_name: data.display_name, bio: (data as any)?.bio, username: (data as any)?.username });
       });
   }, [session?.user]);
 
