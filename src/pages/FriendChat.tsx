@@ -348,9 +348,28 @@ export default function FriendChatPage() {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Snake Game */}
+            {showGame && myId && selectedFriend && (
+              <div className="border-t border-border/30 px-4 sm:px-6 py-2">
+                <SnakeGame
+                  channelName={`friend-${[myId, selectedFriend.id].sort().join('-')}`}
+                  userId={myId}
+                  userName={session?.user?.email?.split('@')[0] || 'Speler'}
+                  onClose={() => setShowGame(false)}
+                />
+              </div>
+            )}
+
             {/* Input */}
             <div className="border-t border-border/30 px-4 sm:px-6 py-3">
               <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowGame(!showGame)}
+                  className={`p-2.5 rounded-xl transition-all ${showGame ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'}`}
+                  title="Snake spelen"
+                >
+                  <Gamepad2 className="h-4 w-4" />
+                </button>
                 <input
                   type="text"
                   value={newMessage}
