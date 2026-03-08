@@ -284,10 +284,12 @@ export default function FriendChatPage() {
                           {initials}
                         </AvatarFallback>
                       </Avatar>
-                      {(friend.unread ?? 0) > 0 && (
+                      {(friend.unread ?? 0) > 0 ? (
                         <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1">
                           {friend.unread}
                         </span>
+                      ) : (
+                        <StatusDot isDnd={(friend as any).is_dnd ?? false} className="absolute -bottom-0.5 -right-0.5" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
