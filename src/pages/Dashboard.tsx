@@ -223,6 +223,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showNewAppDialog, setShowNewAppDialog] = useState(false);
+  const [templateDialog, setTemplateDialog] = useState<{ open: boolean; app: App | null; name: string; category: string }>({ open: false, app: null, name: '', category: 'algemeen' });
   const [inviteAppId, setInviteAppId] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
   const [invitePercentage, setInvitePercentage] = useState(10);
