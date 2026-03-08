@@ -325,7 +325,7 @@ export default function Alliances() {
               </button>
             )}
 
-            {isAdmin && showCreate && (
+            {isOrgOwner && showCreate && (
               <div className="mb-6 rounded-xl border border-border/40 p-5 space-y-3" style={{ background: 'hsl(var(--card))' }}>
                 <h3 className="text-sm font-semibold text-foreground">Nieuwe alliantie</h3>
                 <div className="flex items-center gap-3">
