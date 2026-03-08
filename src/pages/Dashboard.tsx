@@ -701,6 +701,15 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Icon Picker */}
+      {iconPickerAppId && (
+        <IconPicker
+          value={apps.find(a => a.id === iconPickerAppId)?.icon || 'file-code'}
+          onChange={icon => updateAppIcon(iconPickerAppId, icon)}
+          onClose={() => setIconPickerAppId(null)}
+        />
+      )}
     </div>
   );
 }
