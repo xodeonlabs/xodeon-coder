@@ -119,7 +119,7 @@ export function NGCChat({ appId }: NGCChatProps) {
                     : 'bg-secondary text-secondary-foreground'
                 }`}
               >
-                {msg.content}
+                {censorText(msg.content)}
               </div>
               <span className="text-[9px] text-muted-foreground mt-0.5 px-1">
                 {new Date(msg.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}

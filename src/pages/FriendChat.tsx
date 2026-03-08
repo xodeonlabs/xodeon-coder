@@ -358,7 +358,7 @@ export default function FriendChatPage() {
                             : 'bg-secondary/60 text-foreground rounded-bl-md'
                         }`}
                       >
-                        {msg.content}
+                        {censorText(msg.content)}
                       </div>
                     </div>
                   </div>

@@ -223,7 +223,7 @@ export function OrgChat({ organizationId }: OrgChatProps) {
                         : 'bg-secondary text-secondary-foreground'
                     }`}
                   >
-                    {msg.content}
+                    {censorText(msg.content)}
                   </div>
                   <div className="flex items-center gap-1 mt-0.5 px-1">
                     <span className="text-[9px] text-muted-foreground">
