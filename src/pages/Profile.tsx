@@ -236,6 +236,8 @@ export default function Profile() {
                   {profile.bio}
                 </p>
               )}
+              {/* Social links & email */}
+              <SocialBar profile={profile!} />
             </div>
           </div>
         </div>
