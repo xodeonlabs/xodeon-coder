@@ -319,6 +319,50 @@ export type Database = {
           },
         ]
       }
+      collaborator_contracts: {
+        Row: {
+          app_id: string
+          collaborator_id: string
+          counter_percentage: number | null
+          created_at: string
+          id: string
+          percentage: number
+          proposed_by: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          app_id: string
+          collaborator_id: string
+          counter_percentage?: number | null
+          created_at?: string
+          id?: string
+          percentage?: number
+          proposed_by: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          app_id?: string
+          collaborator_id?: string
+          counter_percentage?: number | null
+          created_at?: string
+          id?: string
+          percentage?: number
+          proposed_by?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collaborator_contracts_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_chat_messages: {
         Row: {
           content: string
