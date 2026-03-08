@@ -239,6 +239,7 @@ export default function Dashboard() {
     }
   }
 
+  async function renameApp(id: string, newName: string) {
     if (!newName.trim()) return;
     const { error } = await supabase.from('apps').update({ name: newName.trim() }).eq('id', id);
     if (!error) {
