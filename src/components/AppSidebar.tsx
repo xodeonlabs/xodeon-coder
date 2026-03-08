@@ -34,6 +34,7 @@ export function AppSidebar() {
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [profileUsername, setProfileUsername] = useState<string | null>(null);
   const [unreadGroups, setUnreadGroups] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   const fetchUnreadGroups = useCallback(async () => {
     if (!session?.user?.id) return;
