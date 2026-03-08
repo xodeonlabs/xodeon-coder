@@ -485,6 +485,62 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-    </div>
+
+      {/* Publish Dialog */}
+      {publishAppId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setPublishAppId(null)}>
+          <div className="rounded-2xl border border-border/50 p-8 w-full max-w-md shadow-2xl" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10"><ExternalLink className="h-5 w-5 text-primary" /></div>
+                App publiceren
+              </h3>
+              <button onClick={() => setPublishAppId(null)} className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg p-1.5 transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6">Kies een unieke URL voor je app. Iedereen met de link kan je app bekijken.</p>
+            <div className="mb-4">
+              <label className="block text-xs font-medium text-muted-foreground mb-1.5">Publieke URL</label>
+              <div className="flex items-center gap-0 rounded-lg border border-border overflow-hidden bg-background">
+                <span className="px-3 py-3 text-xs text-muted-foreground bg-secondary/50 shrink-0 border-r border-border">{window.location.origin}/app/</span>
+                <input
+                  type="text"
+                  value={slugValue}
+                  onChange={e => setSlugValue(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                  className="flex-1 px-3 py-3 text-sm text-foreground bg-transparent focus:outline-none"
+                  placeholder="mijn-app"
+                  autoFocus
+                />
+              </div>
+              <p className="text-[10px] text-muted-foreground/60 mt-1.5">Alleen kleine letters, cijfers en streepjes.</p>
+            </div>
+
+            {apps.find(a => a.id === publishAppId)?.slug && (
+              <div className="mb-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
+                <p className="text-xs text-muted-foreground mb-2">Huidige link:</p>
+                <div className="flex items-center gap-2">
+                  <code className="text-xs text-primary flex-1 truncate">{getAppUrl(apps.find(a => a.id === publishAppId)!.slug!)}</code>
+                  <button onClick={() => copyAppLink(apps.find(a => a.id === publishAppId)!.slug!)} className="text-xs px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0">
+                    Kopieer
+                  </button>
+                  <a href={getAppUrl(apps.find(a => a.id === publishAppId)!.slug!)} target="_blank" rel="noopener noreferrer" className="text-xs px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0">
+                    Open
+                  </a>
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setPublishAppId(null)} className="px-5 py-2.5 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
+                Annuleren
+              </button>
+              <button onClick={saveSlug} disabled={savingSlug || !slugValue.trim()} className="px-6 py-2.5 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all active:scale-95">
+                {savingSlug ? 'Opslaan...' : 'Publiceren'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
   );
 }
