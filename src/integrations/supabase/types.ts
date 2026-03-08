@@ -830,18 +830,21 @@ export type Database = {
         Row: {
           balance: number
           id: string
+          last_daily_bonus: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           balance?: number
           id?: string
+          last_daily_bonus?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           balance?: number
           id?: string
+          last_daily_bonus?: string | null
           updated_at?: string
           user_id?: string
         }
