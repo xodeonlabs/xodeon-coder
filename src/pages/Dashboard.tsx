@@ -170,7 +170,7 @@ export default function Dashboard() {
     return () => window.removeEventListener('keydown', handler);
   }, [session?.user?.id]);
 
-  useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); }, []);
+  useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); fetchOrgMemberships(); fetchContracts(); }, []);
   useEffect(() => { checkAdminRole(); }, [session?.user?.id]);
 
   async function checkAdminRole() {
@@ -183,6 +183,27 @@ export default function Dashboard() {
     const { data } = await supabase.from('organizations').select('id, name, icon' as any).order('name');
     if (data) setOrgs(data as unknown as Org[]);
   }
+
+  async function fetchOrgMemberships() {
+    if (!session?.user?.id) return;
+    const { data } = await supabase.from('organization_members').select('organization_id, role').eq('user_id', session.user.id);
+    if (data) setOrgMemberships(data as unknown as OrgMembership[]);
+  }
+
+  async function fetchContracts() {
+    if (!session?.user?.id) return;
+    // Fetch contracts where user is owner or collaborator
+    const { data } = await supabase.from('collaborator_contracts' as any).select('*');
+    if (data) setContracts(data as unknown as Contract[]);
+  }
+
+  function isOrgAdmin(orgId: string): boolean {
+    const membership = orgMemberships.find(m => m.organization_id === orgId);
+    return membership?.role === 'owner' || membership?.role === 'admin';
+  }
+
+  // Only orgs where user is admin/owner
+  const adminOrgs = orgs.filter(o => isOrgAdmin(o.id));
 
   async function fetchUnreadCount() {
     if (!session?.user?.id) return;
@@ -204,6 +225,11 @@ export default function Dashboard() {
   }
 
   async function linkAppToOrg(appId: string, orgId: string | null) {
+    // Check if user is admin/owner of the org
+    if (orgId && !isOrgAdmin(orgId)) {
+      toast({ title: 'Geen toegang', description: 'Je moet admin of eigenaar zijn van het bedrijf om apps te koppelen.', variant: 'destructive' });
+      return;
+    }
     const { error } = await supabase.from('apps').update({ organization_id: orgId } as any).eq('id', appId);
     if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
     else { setApps(apps.map(a => a.id === appId ? { ...a, organization_id: orgId } : a)); toast({ title: orgId ? 'Gekoppeld aan bedrijf' : 'Ontkoppeld van bedrijf' }); }
