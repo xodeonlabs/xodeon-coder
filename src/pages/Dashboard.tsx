@@ -139,6 +139,28 @@ export default function Dashboard() {
     setCreating(false);
   }
 
+  async function createTemplate() {
+    if (!session?.user?.id || !templateName.trim()) return;
+    setCreatingTemplate(true);
+    const { data, error } = await supabase.from('apps').insert({
+      owner_id: session.user.id,
+      name: templateName.trim(),
+      ngc_code: DEFAULT_NGC_CODE,
+      is_public: true,
+      is_remixable: true,
+    }).select().single();
+    if (error) {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    } else if (data) {
+      toast({ title: 'Template aangemaakt', description: `"${templateName.trim()}" is publiek beschikbaar.` });
+      setShowTemplateDialog(false);
+      setTemplateName('');
+      setTemplateDesc('');
+      navigate(`/editor/${data.id}`);
+    }
+    setCreatingTemplate(false);
+  }
+
   async function deleteApp(id: string, name: string) {
     if (!confirm(`Weet je zeker dat je "${name}" wilt verwijderen?`)) return;
     const { error } = await supabase.from('apps').delete().eq('id', id);
