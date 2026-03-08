@@ -54,7 +54,8 @@ export function FriendButton({ targetUserId, onStatusChange }: FriendButtonProps
       status: 'pending',
     });
     if (error) {
-      toast({ title: 'Fout', description: 'Kon verzoek niet verzenden', variant: 'destructive' });
+      console.error('Friend request error:', error);
+      toast({ title: 'Fout', description: error.message || 'Kon verzoek niet verzenden', variant: 'destructive' });
     } else {
       setStatus('pending_sent');
       toast({ title: 'Verzoek verzonden! 🤝' });
