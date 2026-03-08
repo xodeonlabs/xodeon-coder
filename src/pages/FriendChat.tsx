@@ -245,21 +245,7 @@ export default function FriendChatPage() {
 
           {selectedFriend ? (
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="relative shrink-0">
-                <Avatar className="h-8 w-8">
-                  {selectedFriend.avatar_url ? (
-                    <AvatarImage src={selectedFriend.avatar_url} alt="" className="object-cover" />
-                  ) : null}
-                  <AvatarFallback className="text-xs font-bold bg-gradient-to-br from-primary/30 to-accent/20 text-primary">
-                    {selectedFriend.display_name?.slice(0, 2).toUpperCase() || '??'}
-                  </AvatarFallback>
-                </Avatar>
-                <StatusDot status={getOnlineStatus((selectedFriend as any).is_dnd ?? false, (selectedFriend as any).last_seen_at)} className="absolute -bottom-0.5 -right-0.5" />
-              </div>
-              <div className="min-w-0">
-                <h2 className="text-sm font-bold text-foreground truncate">{selectedFriend.display_name || 'Anoniem'}</h2>
-                <p className="text-[10px] text-muted-foreground">{getLastSeenText(getOnlineStatus((selectedFriend as any).is_dnd ?? false, (selectedFriend as any).last_seen_at), (selectedFriend as any).last_seen_at)}</p>
-              </div>
+              <FriendChatHeader friend={selectedFriend} />
             </div>
           ) : (
             <>
