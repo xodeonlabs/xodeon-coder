@@ -415,6 +415,29 @@ export function OrgUpgrades({ orgId, orgName, currentLevel, orgBalance, isOwner,
                 </button>
               )}
             </div>
+
+            {/* Auto-pay toggle */}
+            {isOwner && (
+              <div className="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-border/20">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-foreground">Automatisch betalen</p>
+                  <p className="text-[10px] text-muted-foreground leading-relaxed">
+                    Coins worden automatisch elke maand afgeschreven uit de kluis.
+                  </p>
+                </div>
+                <button
+                  onClick={handleToggleAutoPay}
+                  disabled={togglingAutoPay}
+                  className={`relative shrink-0 w-10 h-[22px] rounded-full transition-colors duration-200 ${
+                    autoPayEnabled ? 'bg-primary' : 'bg-secondary'
+                  }`}
+                >
+                  <span className={`absolute top-[3px] left-[3px] w-4 h-4 rounded-full bg-primary-foreground shadow-sm transition-transform duration-200 ${
+                    autoPayEnabled ? 'translate-x-[18px]' : 'translate-x-0'
+                  }`} />
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

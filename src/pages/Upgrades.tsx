@@ -55,6 +55,7 @@ export default function Upgrades() {
       owner_id: o.owner_id,
       level: o.level ?? 1,
       level_paid_until: o.level_paid_until,
+      auto_pay: o.auto_pay ?? false,
       icon: o.icon,
     }));
     setOrgs(mapped);
