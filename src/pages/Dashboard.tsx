@@ -882,7 +882,7 @@ export default function Dashboard() {
               <div className="mb-5 text-6xl">🚀</div>
               <h3 className="text-xl font-bold text-foreground font-display mb-2">Begin je avontuur!</h3>
               <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">{quote.emoji} {quote.text}</p>
-              <button onClick={createApp} disabled={creating} className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 transition-all active:scale-[0.98]">
+              <button onClick={handleNewAppClick} disabled={creating} className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 transition-all active:scale-[0.98]">
                 <Plus className="h-5 w-5" /> Maak je eerste app
               </button>
               <p className="text-[10px] text-muted-foreground/40 mt-4">💡 Ctrl+N om snel een app aan te maken</p>
