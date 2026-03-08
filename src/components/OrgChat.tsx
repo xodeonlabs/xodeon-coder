@@ -5,6 +5,7 @@ import { Send, Check, CheckCheck, Gamepad2 } from 'lucide-react';
 import { SnakeGame } from '@/components/SnakeGame';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { getCached, setCache, CACHE_TTL } from '@/lib/cache';
+import { censorText } from '@/lib/profanity-filter';
 
 interface OrgChatMessage {
   id: string;
