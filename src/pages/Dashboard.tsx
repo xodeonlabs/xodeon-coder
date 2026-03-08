@@ -525,8 +525,10 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {myApps.map(app => (
-              <div key={app.id} className="group rounded-xl border border-border/40 p-5 transition-all hover:border-primary/60 hover:shadow-lg hover:shadow-primary/10 cursor-pointer hover:-translate-y-1" style={{ background: 'hsl(var(--card))' }} onClick={() => navigate(`/editor/${app.id}`)}>
+            {myApps.map((app, idx) => (
+              <div key={app.id} className={`group rounded-xl border border-border/40 p-5 transition-all hover:border-primary/60 hover:shadow-xl hover:shadow-primary/15 cursor-pointer hover:-translate-y-1.5 relative overflow-hidden`} style={{ background: 'hsl(var(--card))' }} onClick={() => navigate(`/editor/${app.id}`)}>
+                {/* 🌈 Surprise 5 & 10: Animated gradient overlay */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${APP_GRADIENTS[idx % APP_GRADIENTS.length]} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
                 <div className="flex items-start gap-3 mb-4">
                   {/* App icon */}
                   <button
