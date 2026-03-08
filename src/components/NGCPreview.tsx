@@ -479,7 +479,36 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
     remove: dbCoinsRemove,
   };
 
-  if (!ast) {
+  // Get all pages from AST
+  const pages = useMemo(() => {
+    if (!ast) return [];
+    return ast.children.filter(c => c.type === 'Page');
+  }, [ast]);
+
+  // Determine active page
+  const activePage = useMemo(() => {
+    if (pages.length === 0) return null;
+    if (currentPage) {
+      const found = pages.find(p => p.name === currentPage);
+      if (found) return found;
+    }
+    return pages[0];
+  }, [pages, currentPage]);
+
+  const handleRuntimeChange = useCallback(() => {
+    forceUpdate(n => n + 1);
+  }, []);
+
+  const handleNavigate = useCallback((pageName: string) => {
+    setCurrentPage(pageName);
+  }, []);
+
+  const handleReset = useCallback(() => {
+    clearPersistedState();
+    forceUpdate(n => n + 1);
+    window.location.reload();
+  }, []);
+
     return (
       <div className="flex h-full items-center justify-center">
         <p className="text-xs text-muted-foreground">No preview available</p>
