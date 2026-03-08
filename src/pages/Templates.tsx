@@ -72,7 +72,18 @@ export default function Templates() {
     if (showMine && session?.user?.id) {
       result = result.filter(t => t.author_id === session.user.id);
     } else {
-      result = result.filter(t => t.is_published || t.author_id === session?.user?.id);
+      result = result.filter(t => {
+        // Own templates always visible
+        if (t.author_id === session?.user?.id) return true;
+        // Must be published
+        if (!t.is_published) return false;
+        // Visibility check
+        const vis = (t as any).visibility || 'public';
+        if (vis === 'public') return true;
+        if (vis === 'friends' && friends.includes(t.author_id)) return true;
+        if (vis === 'org' && userOrgs.includes(t.author_id)) return true;
+        return false;
+      });
     }
     if (category !== 'alle') {
       result = result.filter(t => t.category === category);
@@ -82,7 +93,7 @@ export default function Templates() {
       result = result.filter(t => t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
     }
     return result;
-  }, [templates, search, category, showMine, session?.user?.id]);
+  }, [templates, search, category, showMine, session?.user?.id, friends, userOrgs]);
 
   async function useTemplate(template: Template) {
     if (!session?.user?.id) { navigate('/auth'); return; }
