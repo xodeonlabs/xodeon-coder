@@ -25,6 +25,7 @@ interface ProfileData {
   show_email: boolean;
   email?: string;
   is_dnd?: boolean;
+  last_seen_at?: string | null;
 }
 
 interface ProfileStats {
