@@ -213,7 +213,7 @@ function NGCNodeRenderer({
   const radius = node.properties.Hoekrond ? cleanStr(node.properties.Hoekrond) : (node.properties.Hoekradius ? cleanStr(node.properties.Hoekradius) : '0');
   const fontSize = node.properties.Lettergrootte ? parseInt(cleanStr(node.properties.Lettergrootte)) : null;
   const border = node.properties.Rand ? cleanStr(node.properties.Rand) : null;
-  const visible = node.properties.Zichtbaar ? cleanStr(node.properties.Zichtbaar) !== 'false' : true;
+  const visible = node.properties.Zichtbaar ? evaluateVisibility(cleanStr(node.properties.Zichtbaar), runtime) : true;
 
   const iconName = node.properties.Icoon ? cleanStr(node.properties.Icoon) : '';
 
