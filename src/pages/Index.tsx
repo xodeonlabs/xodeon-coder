@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useSwipe } from '@/hooks/useSwipe';
-import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Plus, Code, MousePointer, History, Maximize, Minimize, Eye, Copy, Undo2, FileCode } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Plus, Code, MousePointer, History, Maximize, Minimize, Eye, Copy, Undo2, FileCode, Search, Replace } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { NGCCodeEditor } from '@/components/NGCCodeEditor';
@@ -13,6 +13,7 @@ import { NGCToolbar } from '@/components/NGCToolbar';
 import { NGCDesigner } from '@/components/NGCDesigner';
 import { NGCVersionPanel } from '@/components/NGCVersionPanel';
 import { CommandPalette } from '@/components/CommandPalette';
+import { SearchReplace } from '@/components/SearchReplace';
 import { StatusBar } from '@/components/StatusBar';
 import { parseNGC, astToNGC } from '@/lib/ngc-parser';
 import { NGCNode, NGCNodeType, DEFAULT_PROPERTIES, generateId } from '@/lib/ngc-ast';
@@ -113,6 +114,8 @@ const Index = () => {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const undoRef = useRef<string[]>([]);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchShowReplace, setSearchShowReplace] = useState(false);
 
   // Swipe gestures for mobile panel toggling
   const leftPanelSwipe = useSwipe(
@@ -272,6 +275,18 @@ const Index = () => {
         e.preventDefault();
         setCommandPaletteOpen(o => !o);
       }
+      // Ctrl+F — search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        setSearchShowReplace(false);
+        setSearchOpen(true);
+      }
+      // Ctrl+H — search & replace
+      if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+        e.preventDefault();
+        setSearchShowReplace(true);
+        setSearchOpen(true);
+      }
       // Ctrl+Z — undo (only when not in textarea)
       if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !(e.target instanceof HTMLTextAreaElement)) {
         e.preventDefault();
@@ -340,6 +355,8 @@ const Index = () => {
       });
     });
     items.push(
+      { id: 'search', label: 'Zoeken in code', category: 'Zoeken', icon: <Search className="h-4 w-4" />, action: () => { setSearchShowReplace(false); setSearchOpen(true); } },
+      { id: 'replace', label: 'Zoeken en vervangen', category: 'Zoeken', icon: <Replace className="h-4 w-4" />, action: () => { setSearchShowReplace(true); setSearchOpen(true); } },
       { id: 'zen', label: zenMode ? 'Zen mode uit' : 'Zen mode aan', category: 'Weergave', icon: <Eye className="h-4 w-4" />, action: toggleZenMode },
       { id: 'fullscreen', label: isFullscreen ? 'Volledig scherm uit' : 'Volledig scherm', category: 'Weergave', icon: <Maximize className="h-4 w-4" />, action: toggleFullscreen },
       { id: 'copy', label: 'Kopieer alle code', category: 'Bewerken', icon: <Copy className="h-4 w-4" />, action: handleCopyCode },
@@ -348,9 +365,11 @@ const Index = () => {
       { id: 'code-mode', label: 'Code modus', category: 'Modus', icon: <Code className="h-4 w-4" />, action: () => setEditorMode('code') },
       { id: 'design-mode', label: 'Ontwerp modus', category: 'Modus', icon: <MousePointer className="h-4 w-4" />, action: () => setEditorMode('design') },
       { id: 'new-page', label: 'Nieuwe pagina toevoegen', category: 'Bewerken', icon: <Plus className="h-4 w-4" />, action: handleAddPage },
+      { id: 'left-panel', label: leftOpen ? 'Linkerpaneel inklappen' : 'Linkerpaneel uitklappen', category: 'Weergave', icon: <PanelLeftClose className="h-4 w-4" />, action: () => setLeftOpen(o => !o) },
+      { id: 'right-panel', label: rightOpen ? 'Rechterpaneel inklappen' : 'Rechterpaneel uitklappen', category: 'Weergave', icon: <PanelRightClose className="h-4 w-4" />, action: () => setRightOpen(o => !o) },
     );
     return items;
-  }, [ast, sections, zenMode, isFullscreen, toggleZenMode, toggleFullscreen, handleCopyCode, handleUndo, saveNow, handleAddPage]);
+  }, [ast, sections, zenMode, isFullscreen, leftOpen, rightOpen, toggleZenMode, toggleFullscreen, handleCopyCode, handleUndo, saveNow, handleAddPage]);
 
   const selectedNode = useMemo(() => {
     if (!ast || !selectedId) return null;
@@ -715,7 +734,14 @@ const Index = () => {
 
           {editorMode === 'code' ? (
             <>
-              <div className="flex-1 overflow-hidden">
+              <div className="flex-1 overflow-hidden relative">
+                <SearchReplace
+                  open={searchOpen}
+                  onClose={() => setSearchOpen(false)}
+                  code={code}
+                  onCodeChange={setCode}
+                  showReplace={searchShowReplace}
+                />
                 <NGCCodeEditor code={activeSection?.code || ''} onChange={handleSectionCodeChange} errors={errors} />
               </div>
               {/* Error bar */}
