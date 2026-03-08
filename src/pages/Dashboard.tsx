@@ -220,6 +220,48 @@ export default function Dashboard() {
     return () => { supabase.removeChannel(channel); };
   }, [session?.user?.id, apps]);
 
+  // Realtime friend request notifications
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    const channel = supabase
+      .channel('friend-notifications')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'friendships' },
+        async (payload) => {
+          const row = payload.new as any;
+          if (row.receiver_id === session.user.id && row.status === 'pending') {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('display_name')
+              .eq('id', row.sender_id)
+              .single();
+            const name = profile?.display_name || 'Iemand';
+            toast({ title: '🤝 Vriendschapsverzoek', description: `${name} wil je vriend worden!` });
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'friendships' },
+        async (payload) => {
+          const row = payload.new as any;
+          const old = payload.old as any;
+          if (row.status === 'accepted' && old?.status === 'pending' && row.sender_id === session.user.id) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('display_name')
+              .eq('id', row.receiver_id)
+              .single();
+            const name = profile?.display_name || 'Iemand';
+            toast({ title: '🎉 Verzoek geaccepteerd!', description: `${name} en jij zijn nu vrienden!` });
+          }
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [session?.user?.id]);
+
   async function checkAdminRole() {
     if (!session?.user?.id) return;
     const cached = getCached<boolean>(CACHE_KEYS.adminRole(session.user.id), CACHE_TTL.long);
