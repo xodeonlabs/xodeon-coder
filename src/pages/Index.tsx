@@ -814,7 +814,7 @@ const Index = () => {
                 </div>
               ) : (
                 <div className="flex-1 overflow-hidden min-h-0">
-                  <NGCAIAssistant currentCode={code} onApplyCode={(newCode) => setCode(newCode)} />
+                  <NGCAIAssistant appId={appId!} currentCode={code} onApplyCode={(newCode) => setCode(newCode)} />
                 </div>
               )}
             </>
