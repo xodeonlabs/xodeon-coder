@@ -11,6 +11,7 @@ import { CoinConfirmDialog } from '@/components/CoinConfirmDialog';
 import confetti from 'canvas-confetti';
 import { getCached, setCache, clearCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache';
 import { useDailyBonus } from '@/hooks/useDailyBonus';
+import { DailyBonusOverlay } from '@/components/DailyBonusOverlay';
 
 const APP_GRADIENTS = [
   'from-blue-500/15 to-cyan-500/5',
