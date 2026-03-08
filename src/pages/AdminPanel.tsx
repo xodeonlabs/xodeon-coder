@@ -240,6 +240,49 @@ export default function AdminPanel() {
     toast({ title: 'Template bijgewerkt' });
   }
 
+  async function loadAdminCategories(force = false) {
+    if (categoriesLoaded && !force) return;
+    setCategoriesLoaded(true);
+    const { data } = await supabase.from('categories' as any).select('*').order('sort_order', { ascending: true });
+    setAdminCategories((data as any[]) || []);
+  }
+
+  async function addCategory() {
+    if (!newCatValue.trim() || !newCatLabel.trim()) return;
+    setCatSaving(true);
+    const nextOrder = adminCategories.length > 0 ? Math.max(...adminCategories.map(c => c.sort_order)) + 1 : 1;
+    const { data, error } = await supabase.from('categories' as any).insert({
+      value: newCatValue.trim().toLowerCase().replace(/\s+/g, '-'),
+      label: newCatLabel.trim(),
+      icon: newCatIcon,
+      sort_order: nextOrder,
+    } as any).select().single();
+    if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
+    else if (data) {
+      setAdminCategories([...adminCategories, data as any]);
+      setNewCatValue('');
+      setNewCatLabel('');
+      setNewCatIcon('sparkles');
+      toast({ title: 'Categorie toegevoegd!' });
+    }
+    setCatSaving(false);
+  }
+
+  async function updateCategory(id: string) {
+    const { error } = await supabase.from('categories' as any).update({ label: editCatLabel, icon: editCatIcon } as any).eq('id', id);
+    if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); return; }
+    setAdminCategories(cats => cats.map(c => c.id === id ? { ...c, label: editCatLabel, icon: editCatIcon } : c));
+    setEditingCat(null);
+    toast({ title: 'Categorie bijgewerkt' });
+  }
+
+  async function deleteCategory(id: string, label: string) {
+    const { error } = await supabase.from('categories' as any).delete().eq('id', id);
+    if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); return; }
+    setAdminCategories(cats => cats.filter(c => c.id !== id));
+    toast({ title: 'Categorie verwijderd', description: `"${label}" is verwijderd.` });
+  }
+
   async function loadAdminAlliances(force = false) {
     if (alliancesLoaded && !force) return;
     setAlliancesLoaded(true);
