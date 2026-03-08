@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, forwardRef } from 'react';
 import { icons } from 'lucide-react';
 import { X } from 'lucide-react';
 
@@ -37,14 +37,14 @@ interface AppIconProps {
   className?: string;
 }
 
-export function AppIcon({ iconName, size = 20, className = '' }: AppIconProps) {
+export const AppIcon = forwardRef<HTMLSpanElement, AppIconProps>(({ iconName, size = 20, className = '' }, ref) => {
   const IconComp = getIconComponent(iconName || 'file-code');
   if (!IconComp) {
     const Fallback = getIconComponent('file-code');
-    return Fallback ? <Fallback size={size} className={className} /> : null;
+    return <span ref={ref}>{Fallback ? <Fallback size={size} className={className} /> : null}</span>;
   }
-  return <IconComp size={size} className={className} />;
-}
+  return <span ref={ref}><IconComp size={size} className={className} /></span>;
+});
 
 interface IconPickerProps {
   value: string;
