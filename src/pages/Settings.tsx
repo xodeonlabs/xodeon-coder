@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
-import { ArrowLeft, Save, Mail, User, Lock, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff } from 'lucide-react';
 import { getCached, setCache, clearCache, CACHE_TTL } from '@/lib/cache';
 
 export default function Settings() {
@@ -15,6 +15,10 @@ export default function Settings() {
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
+  const [showEmail, setShowEmail] = useState(false);
+  const [socialLinks, setSocialLinks] = useState<Record<string, string>>({
+    instagram: '', twitter: '', github: '', linkedin: '', youtube: '', website: '',
+  });
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -35,13 +39,17 @@ export default function Settings() {
     }
     supabase
       .from('profiles')
-      .select('display_name, bio, username')
+      .select('display_name, bio, username, social_links, show_email')
       .eq('id', session.user.id)
       .single()
       .then(({ data }) => {
         if (data?.display_name) setDisplayName(data.display_name);
         if ((data as any)?.bio) setBio((data as any).bio);
         if ((data as any)?.username) setUsername((data as any).username);
+        if ((data as any)?.show_email) setShowEmail((data as any).show_email);
+        if ((data as any)?.social_links && typeof (data as any).social_links === 'object') {
+          setSocialLinks(prev => ({ ...prev, ...(data as any).social_links }));
+        }
         if (data) setCache(cacheKey, { display_name: data.display_name, bio: (data as any)?.bio, username: (data as any)?.username });
       });
   }, [session?.user]);
@@ -50,6 +58,9 @@ export default function Settings() {
     if (!session?.user?.id) return;
     setSaving(true);
     const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
+    // Filter out empty social links
+    const filteredSocials: Record<string, string> = {};
+    Object.entries(socialLinks).forEach(([k, v]) => { if (v.trim()) filteredSocials[k] = v.trim(); });
     const { error } = await supabase
       .from('profiles')
       .upsert({
@@ -57,6 +68,9 @@ export default function Settings() {
         display_name: displayName.trim() || null,
         bio: bio.trim(),
         username: cleanUsername || null,
+        social_links: filteredSocials,
+        show_email: showEmail,
+        public_email: showEmail ? (session.user.email || null) : null,
         updated_at: new Date().toISOString(),
       } as any);
     if (error) {
@@ -164,6 +178,19 @@ export default function Settings() {
                 />
                 <span className="text-[10px] text-muted-foreground">{bio.length}/300</span>
               </div>
+              {/* Email visibility toggle */}
+              <div className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2.5">
+                <div className="flex items-center gap-2">
+                  {showEmail ? <Eye className="h-4 w-4 text-primary" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+                  <span className="text-sm text-foreground">E-mail tonen op profiel</span>
+                </div>
+                <button
+                  onClick={() => setShowEmail(!showEmail)}
+                  className={`relative w-10 h-5 rounded-full transition-colors ${showEmail ? 'bg-primary' : 'bg-muted'}`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-background shadow transition-transform ${showEmail ? 'translate-x-5' : ''}`} />
+                </button>
+              </div>
               <button
                 onClick={saveProfile}
                 disabled={saving}
@@ -173,6 +200,39 @@ export default function Settings() {
                 {saving ? 'Opslaan...' : 'Profiel opslaan'}
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Social media section */}
+        <div className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+          <h2 className="text-lg font-bold text-foreground mb-5 flex items-center gap-2">
+            <Share2 className="h-5 w-5 text-primary" />
+            Sociale media
+          </h2>
+          <div className="space-y-3">
+            {[
+              { key: 'instagram', label: 'Instagram', placeholder: 'jouw_username', prefix: '@' },
+              { key: 'twitter', label: 'X / Twitter', placeholder: 'jouw_username', prefix: '@' },
+              { key: 'github', label: 'GitHub', placeholder: 'jouw_username', prefix: '@' },
+              { key: 'linkedin', label: 'LinkedIn', placeholder: 'linkedin.com/in/...', prefix: '' },
+              { key: 'youtube', label: 'YouTube', placeholder: 'youtube.com/@...', prefix: '' },
+              { key: 'website', label: 'Website', placeholder: 'https://jouw-site.nl', prefix: '' },
+            ].map(({ key, label, placeholder, prefix }) => (
+              <div key={key}>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">{label}</label>
+                <div className="flex items-center gap-1">
+                  {prefix && <span className="text-sm text-muted-foreground">{prefix}</span>}
+                  <input
+                    value={socialLinks[key] || ''}
+                    onChange={e => setSocialLinks(prev => ({ ...prev, [key]: e.target.value }))}
+                    placeholder={placeholder}
+                    maxLength={100}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+              </div>
+            ))}
+            <p className="text-[10px] text-muted-foreground">Deze links worden getoond op je publieke profiel. Laat een veld leeg om het te verbergen.</p>
           </div>
         </div>
 

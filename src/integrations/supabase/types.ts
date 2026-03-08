@@ -735,6 +735,9 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          public_email: string | null
+          show_email: boolean | null
+          social_links: Json | null
           updated_at: string
           username: string | null
         }
@@ -744,6 +747,9 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id: string
+          public_email?: string | null
+          show_email?: boolean | null
+          social_links?: Json | null
           updated_at?: string
           username?: string | null
         }
@@ -753,6 +759,9 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          public_email?: string | null
+          show_email?: boolean | null
+          social_links?: Json | null
           updated_at?: string
           username?: string | null
         }

@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Calendar, Code2, Users, Eye, ExternalLink, Settings, Sparkles } from 'lucide-react';
+import { ArrowLeft, Calendar, Code2, Users, Eye, ExternalLink, Settings, Sparkles, Mail, Globe } from 'lucide-react';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
@@ -15,6 +15,9 @@ interface ProfileData {
   bio: string | null;
   created_at: string;
   username: string | null;
+  social_links: Record<string, string> | null;
+  show_email: boolean;
+  email?: string;
 }
 
 interface ProfileStats {
@@ -49,18 +52,18 @@ export default function Profile() {
       if (isUuid) {
         const res = await supabase
           .from('profiles')
-          .select('id, display_name, avatar_url, bio, created_at, username')
+          .select('id, display_name, avatar_url, bio, created_at, username, social_links, show_email, public_email')
           .eq('id', username)
           .single();
-        prof = res.data as ProfileData | null;
+        prof = res.data ? { ...res.data, email: (res.data as any).public_email } as ProfileData : null;
         error = res.error;
       } else {
         const res = await supabase
           .from('profiles')
-          .select('id, display_name, avatar_url, bio, created_at, username')
+          .select('id, display_name, avatar_url, bio, created_at, username, social_links, show_email, public_email')
           .eq('username', username)
           .single();
-        prof = res.data as ProfileData | null;
+        prof = res.data ? { ...res.data, email: (res.data as any).public_email } as ProfileData : null;
         error = res.error;
       }
 
@@ -233,6 +236,8 @@ export default function Profile() {
                   {profile.bio}
                 </p>
               )}
+              {/* Social links & email */}
+              <SocialBar profile={profile!} />
             </div>
           </div>
         </div>
@@ -250,6 +255,72 @@ export default function Profile() {
         {/* Footer spacer */}
         <div className="h-12" />
       </div>
+    </div>
+  );
+}
+
+const SOCIAL_CONFIG: Record<string, { icon: string; urlPrefix: string; label: string }> = {
+  instagram: { icon: '📸', urlPrefix: 'https://instagram.com/', label: 'Instagram' },
+  twitter: { icon: '𝕏', urlPrefix: 'https://x.com/', label: 'X' },
+  github: { icon: '💻', urlPrefix: 'https://github.com/', label: 'GitHub' },
+  linkedin: { icon: '💼', urlPrefix: '', label: 'LinkedIn' },
+  youtube: { icon: '🎬', urlPrefix: '', label: 'YouTube' },
+  website: { icon: '🌐', urlPrefix: '', label: 'Website' },
+};
+
+function SocialBar({ profile }: { profile: ProfileData }) {
+  const socials = profile.social_links || {};
+  const entries = Object.entries(socials).filter(([, v]) => v && v.trim());
+  const showEmailOnProfile = profile.show_email && profile.email;
+
+  if (entries.length === 0 && !showEmailOnProfile) return null;
+
+  function getSocialUrl(key: string, value: string): string {
+    const config = SOCIAL_CONFIG[key];
+    if (!config) return value;
+    if (value.startsWith('http')) return value;
+    if (config.urlPrefix) return `${config.urlPrefix}${value.replace('@', '')}`;
+    return value;
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 mt-3 justify-center sm:justify-start">
+      {showEmailOnProfile && (
+        <a
+          href={`mailto:${profile.email}`}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/30 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all"
+        >
+          <Mail className="h-3 w-3" />
+          {profile.email}
+        </a>
+      )}
+      {entries.map(([key, value]) => {
+        const config = SOCIAL_CONFIG[key] || { icon: '🔗', urlPrefix: '', label: key };
+        const url = getSocialUrl(key, value);
+        const isLink = url.startsWith('http');
+        const display = value.startsWith('http') ? config.label : `@${value.replace('@', '')}`;
+
+        return isLink ? (
+          <a
+            key={key}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/30 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all"
+          >
+            <span className="text-sm">{config.icon}</span>
+            {display}
+          </a>
+        ) : (
+          <span
+            key={key}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/30 text-xs text-muted-foreground"
+          >
+            <span className="text-sm">{config.icon}</span>
+            {display}
+          </span>
+        );
+      })}
     </div>
   );
 }
