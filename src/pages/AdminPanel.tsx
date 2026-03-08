@@ -1214,8 +1214,7 @@ export default function AdminPanel() {
                                           toast({ title: 'Fout', description: error?.message || data?.error, variant: 'destructive' });
                                         } else {
                                           toast({ title: 'Bedrijf verwijderd uit alliantie' });
-                                          setAlliancesLoaded(false);
-                                          loadAdminAlliances();
+                                          loadAdminAlliances(true);
                                         }
                                       }}
                                       className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
