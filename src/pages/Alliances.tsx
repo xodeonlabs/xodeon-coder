@@ -366,7 +366,7 @@ export default function Alliances() {
                     <div className="flex items-center gap-3 mb-3">
                       <span className="text-2xl">{alliance.icon}</span>
                       <h3 className="text-sm font-semibold text-foreground flex-1">{alliance.name}</h3>
-                      {isAdmin && (
+                      {isOrgOwner && (
                         <button
                           onClick={e => { e.stopPropagation(); deleteAlliance(alliance.id); }}
                           className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
