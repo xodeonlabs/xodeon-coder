@@ -316,7 +316,7 @@ export default function Alliances() {
         {!selectedAlliance ? (
           /* Alliance list */
           <>
-            {isAdmin && !showCreate && (
+            {isOrgOwner && !showCreate && (
               <button
                 onClick={() => setShowCreate(true)}
                 className="mb-6 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
