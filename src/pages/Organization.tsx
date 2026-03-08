@@ -777,7 +777,51 @@ export default function OrganizationPage() {
             )}
           </div>
 
-          <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+          {/* Join Requests */}
+          {joinRequests.length > 0 && (selectedOrg.owner_id === session?.user?.id || members.find(m => m.user_id === session?.user?.id && (m.role === 'owner' || m.role === 'admin'))) && (
+            <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+              <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                <Clock className="h-5 w-5 text-yellow-500" />
+                Sollicitaties ({joinRequests.length})
+              </h3>
+              <div className="space-y-2">
+                {joinRequests.map(req => {
+                  const profile = requestProfiles[req.user_id];
+                  return (
+                    <div key={req.id} className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-background/50">
+                      <Avatar className="h-7 w-7 border border-border/50 shrink-0">
+                        {profile?.avatar_url ? <AvatarImage src={profile.avatar_url} alt="" /> : null}
+                        <AvatarFallback className="text-[10px] font-bold bg-primary/20 text-primary">
+                          {(profile?.display_name || req.user_id).slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{profile?.display_name || `${req.user_id.slice(0, 8)}...`}</p>
+                        <p className="text-[10px] text-muted-foreground">{new Date(req.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleJoinRequest(req.id, 'accepted')}
+                          className="p-1.5 rounded-lg text-green-600 hover:bg-green-500/10 transition-colors"
+                          title="Accepteren"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleJoinRequest(req.id, 'rejected')}
+                          className="p-1.5 rounded-lg text-destructive hover:bg-destructive/10 transition-colors"
+                          title="Weigeren"
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
             <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
               <AppWindow className="h-5 w-5 text-accent" />
               Apps van {selectedOrg.name}
