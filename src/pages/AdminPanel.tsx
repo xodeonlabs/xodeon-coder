@@ -186,6 +186,7 @@ export default function AdminPanel() {
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
+      await logAction('Rol toegevoegd', 'user', addRoleUserId.trim(), `Rol: ${addRoleValue}`);
       toast({ title: 'Rol toegevoegd!' });
       setAddRoleUserId('');
       fetchAll();
