@@ -9,12 +9,14 @@ interface Ad {
   description: string;
   url: string;
   gradient: string;
+  pages: string[];
 }
 
 const ROTATE_INTERVAL = 6000;
 
 interface AdBannerProps {
   className?: string;
+  page?: string;
 }
 
 export function AdBanner({ className = '' }: AdBannerProps) {
