@@ -488,6 +488,24 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -500,6 +518,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_app_collaborator: { Args: { _app_id: string }; Returns: boolean }
       is_app_org_member: { Args: { _app_id: string }; Returns: boolean }
       is_app_owner: { Args: { _app_id: string }; Returns: boolean }
@@ -509,6 +534,7 @@ export type Database = {
       join_organization_by_code: { Args: { _code: string }; Returns: string }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       org_role: "owner" | "admin" | "member"
     }
     CompositeTypes: {
@@ -637,6 +663,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       org_role: ["owner", "admin", "member"],
     },
   },
