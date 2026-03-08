@@ -4,8 +4,29 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
-import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff, Clock, Coins } from 'lucide-react';
 import { getCached, setCache, clearCache, CACHE_TTL } from '@/lib/cache';
+
+interface RetentionItem {
+  label: string;
+  icon: string;
+  hours: number;
+  type: 'app' | 'org' | 'alliance' | 'group' | 'friend';
+  id?: string;
+}
+
+function formatRetention(hours: number): string {
+  if (hours < 24) return `${hours} uur`;
+  if (hours < 168) return `${Math.round(hours / 24)} dag(en)`;
+  if (hours < 720) return `${Math.round(hours / 168)} week`;
+  return `${Math.round(hours / 720)} maand(en)`;
+}
+
+function retentionCostPerMonth(hours: number): number {
+  if (hours <= 12) return 0;
+  const blocks = Math.ceil((hours - 12) / 12);
+  return blocks * 5;
+}
 
 export default function Settings() {
   const { session } = useAuth();
