@@ -34,6 +34,7 @@ export function AppSidebar() {
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [profileUsername, setProfileUsername] = useState<string | null>(null);
   const [unreadGroups, setUnreadGroups] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   const fetchUnreadGroups = useCallback(async () => {
     if (!session?.user?.id) return;
@@ -58,6 +59,16 @@ export function AppSidebar() {
     setUnreadGroups(unread);
   }, [session?.user?.id]);
 
+  const fetchUnreadMessages = useCallback(async () => {
+    if (!session?.user?.id) return;
+    const { count } = await supabase
+      .from('friend_messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('receiver_id', session.user.id)
+      .is('read_at', null);
+    setUnreadMessages(count ?? 0);
+  }, [session?.user?.id]);
+
   useEffect(() => {
     if (!session?.user?.id) return;
     supabase.from('user_roles').select('role').eq('user_id', session.user.id).eq('role', 'admin').maybeSingle()
@@ -70,23 +81,28 @@ export function AppSidebar() {
         if ((data as any)?.username) setProfileUsername((data as any).username);
       });
     fetchUnreadGroups();
-  }, [session?.user?.id, fetchUnreadGroups]);
+    fetchUnreadMessages();
+  }, [session?.user?.id, fetchUnreadGroups, fetchUnreadMessages]);
 
-  // Realtime: listen for new group messages
+  // Realtime: listen for new group messages and friend messages
   useEffect(() => {
     if (!session?.user?.id) return;
     const channel = supabase
-      .channel('sidebar-group-messages')
+      .channel('sidebar-unread-badges')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_group_messages' }, () => {
         fetchUnreadGroups();
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'friend_messages' }, () => {
+        fetchUnreadMessages();
+      })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [session?.user?.id, fetchUnreadGroups]);
+  }, [session?.user?.id, fetchUnreadGroups, fetchUnreadMessages]);
 
-  // Reset count when visiting /groepen
+  // Reset counts when visiting pages
   useEffect(() => {
     if (location.pathname === '/groepen') setUnreadGroups(0);
+    if (location.pathname === '/berichten') { setUnreadMessages(0); }
   }, [location.pathname]);
 
   const isActive = (path: string) => location.pathname === path;
@@ -137,7 +153,11 @@ export function AppSidebar() {
                           {unreadGroups > 9 ? '9+' : unreadGroups}
                         </span>
                       )}
-                      {!collapsed && <span>{item.title}</span>}
+                      {item.url === '/berichten' && unreadMessages > 0 && (
+                        <span className="ml-auto min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1">
+                          {unreadMessages > 9 ? '9+' : unreadMessages}
+                        </span>
+                      )}
                     </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
