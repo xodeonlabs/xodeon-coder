@@ -1,12 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield } from 'lucide-react';
+import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield, Sparkles, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { AdBanner } from '@/components/AdBanner';
 import { AppIcon, IconPicker } from '@/components/IconPicker';
+import confetti from 'canvas-confetti';
+
+// 🎨 Surprise 10: Unique gradient accents per app card
+const APP_GRADIENTS = [
+  'from-blue-500/20 to-cyan-500/10',
+  'from-purple-500/20 to-pink-500/10',
+  'from-emerald-500/20 to-teal-500/10',
+  'from-orange-500/20 to-amber-500/10',
+  'from-rose-500/20 to-red-500/10',
+  'from-indigo-500/20 to-violet-500/10',
+  'from-lime-500/20 to-green-500/10',
+  'from-fuchsia-500/20 to-purple-500/10',
+];
+
+// 💬 Surprise 6: Motivational quotes
+const QUOTES = [
+  { text: 'De beste apps beginnen met één regel code.', emoji: '✨' },
+  { text: 'Elke expert was ooit een beginner.', emoji: '🌱' },
+  { text: 'Code is poëzie die machines kunnen lezen.', emoji: '📜' },
+  { text: 'Fouten maken is het begin van iets moois.', emoji: '💎' },
+  { text: 'Bouw iets waar je trots op bent.', emoji: '🏆' },
+  { text: 'De enige limiet is je verbeelding.', emoji: '🚀' },
+  { text: 'Kleine stappen leiden tot grote apps.', emoji: '👣' },
+  { text: 'Vandaag is een mooie dag om te creëren.', emoji: '🎨' },
+];
 
 interface App {
   id: string;
