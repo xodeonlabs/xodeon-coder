@@ -62,39 +62,162 @@ const DEFAULT_NGC_CODE = `App:
     Var(gebruiker)=""
     Var(wachtwoord)=""
     Var(ingelogd)=0
+    Var(pagina)="login"
+    Var(regGebruiker)=""
+    Var(regWachtwoord)=""
+    Var(regBevestig)=""
+    Var(foutmelding)=""
+    Var(opgeslagenUser)=""
+    Var(opgeslagenPass)=""
     Page Login:
+        Zichtbaar=Var(pagina)=="login"
+        Frame LoginBg:
+            Positie="0,0"
+            Grootte="500,400"
+            Kleur="rgb(15,23,42)"
         Frame LoginBox:
-            Positie="100,80"
-            Grootte="300,280"
-            Kleur="#1e293b"
+            Positie="100,50"
+            Grootte="300,320"
+            Kleur="rgb(30,41,59)"
+            Hoekradius="16"
             Text Titel:
-                Tekst="Inloggen"
+                Tekst="🔐 Inloggen"
                 Positie="20,15"
                 Grootte="260,30"
-                Kleur="#ffffff"
+                Kleur="rgb(255,255,255)"
+            Text Fout:
+                Tekst=Var(foutmelding)
+                Positie="20,48"
+                Grootte="260,18"
+                Kleur="rgb(239,68,68)"
             TextBox UserInput:
-                Positie="20,60"
-                Grootte="260,35"
+                Positie="20,70"
+                Grootte="260,38"
                 Placeholder="Gebruikersnaam..."
                 Variabele="gebruiker"
+                Hoekradius="8"
             TextBox PassInput:
-                Positie="20,110"
-                Grootte="260,35"
+                Positie="20,120"
+                Grootte="260,38"
                 Placeholder="Wachtwoord..."
                 Variabele="wachtwoord"
+                Hoekradius="8"
             Button LoginBtn:
                 Tekst="Inloggen"
-                Positie="20,165"
-                Grootte="260,40"
-                Kleur="#3b82f6"
+                Positie="20,175"
+                Grootte="260,42"
+                Kleur="rgb(59,130,246)"
+                Hoekradius="10"
+                Click:
+                    Als Var(gebruiker)==Var(opgeslagenUser) En Var(wachtwoord)==Var(opgeslagenPass) En Var(opgeslagenUser)!="":
+                        Var(ingelogd)=1
+                        Var(pagina)="home"
+                        Var(foutmelding)=""
+                    Anders:
+                        Var(foutmelding)="Onjuiste gegevens"
+            Button NaarRegistreer:
+                Tekst="Account aanmaken →"
+                Positie="20,230"
+                Grootte="260,36"
+                Kleur="rgb(51,65,85)"
                 Hoekradius="8"
                 Click:
-                    Var(ingelogd)=1
-            Text Info:
-                Tekst="Nog geen account?"
-                Positie="20,220"
+                    Var(pagina)="registreer"
+                    Var(foutmelding)=""
+    Page Registreer:
+        Zichtbaar=Var(pagina)=="registreer"
+        Frame RegBg:
+            Positie="0,0"
+            Grootte="500,400"
+            Kleur="rgb(15,23,42)"
+        Frame RegBox:
+            Positie="100,30"
+            Grootte="300,350"
+            Kleur="rgb(30,41,59)"
+            Hoekradius="16"
+            Text RegTitel:
+                Tekst="📝 Registreren"
+                Positie="20,15"
+                Grootte="260,30"
+                Kleur="rgb(255,255,255)"
+            Text RegFout:
+                Tekst=Var(foutmelding)
+                Positie="20,48"
+                Grootte="260,18"
+                Kleur="rgb(239,68,68)"
+            TextBox RegUser:
+                Positie="20,70"
+                Grootte="260,38"
+                Placeholder="Kies een gebruikersnaam..."
+                Variabele="regGebruiker"
+                Hoekradius="8"
+            TextBox RegPass:
+                Positie="20,120"
+                Grootte="260,38"
+                Placeholder="Kies een wachtwoord..."
+                Variabele="regWachtwoord"
+                Hoekradius="8"
+            TextBox RegBevestig:
+                Positie="20,170"
+                Grootte="260,38"
+                Placeholder="Bevestig wachtwoord..."
+                Variabele="regBevestig"
+                Hoekradius="8"
+            Button RegBtn:
+                Tekst="Registreren"
+                Positie="20,225"
+                Grootte="260,42"
+                Kleur="rgb(34,197,94)"
+                Hoekradius="10"
+                Click:
+                    Als Var(regGebruiker)!="" En Var(regWachtwoord)!="" En Var(regWachtwoord)==Var(regBevestig):
+                        Var(opgeslagenUser)=Var(regGebruiker)
+                        Var(opgeslagenPass)=Var(regWachtwoord)
+                        Var(pagina)="login"
+                        Var(foutmelding)=""
+                    Anders:
+                        Var(foutmelding)="Vul alles in / wachtwoorden komen niet overeen"
+            Button NaarLogin:
+                Tekst="← Terug naar inloggen"
+                Positie="20,280"
+                Grootte="260,36"
+                Kleur="rgb(51,65,85)"
+                Hoekradius="8"
+                Click:
+                    Var(pagina)="login"
+                    Var(foutmelding)=""
+    Page Home:
+        Zichtbaar=Var(pagina)=="home"
+        Frame HomeBg:
+            Positie="0,0"
+            Grootte="500,400"
+            Kleur="rgb(15,23,42)"
+        Frame HomeBox:
+            Positie="100,80"
+            Grootte="300,200"
+            Kleur="rgb(30,41,59)"
+            Hoekradius="16"
+            Text Welkom:
+                Tekst="Welkom, " + Var(gebruiker) + "! 🎉"
+                Positie="20,20"
+                Grootte="260,30"
+                Kleur="rgb(255,255,255)"
+            Text HomeInfo:
+                Tekst="Je bent succesvol ingelogd."
+                Positie="20,55"
                 Grootte="260,20"
-                Kleur="#94a3b8"
+                Kleur="rgb(148,163,184)"
+            Button UitlogBtn:
+                Tekst="Uitloggen"
+                Positie="20,100"
+                Grootte="260,42"
+                Kleur="rgb(239,68,68)"
+                Hoekradius="10"
+                Click:
+                    Var(ingelogd)=0
+                    Var(pagina)="login"
+                    Var(gebruiker)=""
+                    Var(wachtwoord)=""
 `;
 
 interface OrgMembership {
