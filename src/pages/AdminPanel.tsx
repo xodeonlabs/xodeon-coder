@@ -491,7 +491,7 @@ export default function AdminPanel() {
                           <div className="flex items-center gap-1 ml-1">
                             {isUserBanned(profile.id) ? (
                               <button
-                                onClick={() => setConfirmAction({ userId: profile.id, action: 'unban', name: displayLabel })}
+                                onClick={() => setConfirmAction({ id: profile.id, action: 'unban', type: 'user', name: displayLabel })}
                                 className="p-1 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
                                 title="Deblokkeren"
                               >
@@ -499,7 +499,7 @@ export default function AdminPanel() {
                               </button>
                             ) : (
                               <button
-                                onClick={() => setConfirmAction({ userId: profile.id, action: 'ban', name: displayLabel })}
+                                onClick={() => setConfirmAction({ id: profile.id, action: 'ban', type: 'user', name: displayLabel })}
                                 className="p-1 rounded-lg text-muted-foreground hover:text-orange-500 hover:bg-orange-500/10 transition-colors"
                                 title="Blokkeren"
                               >
@@ -507,7 +507,7 @@ export default function AdminPanel() {
                               </button>
                             )}
                             <button
-                              onClick={() => setConfirmAction({ userId: profile.id, action: 'delete', name: displayLabel })}
+                              onClick={() => setConfirmAction({ id: profile.id, action: 'delete', type: 'user', name: displayLabel })}
                               className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                               title="Verwijderen"
                             >
