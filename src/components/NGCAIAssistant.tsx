@@ -122,7 +122,7 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
     setEditingConvoId(null);
   }, [editingConvoId, editingTitle]);
 
-
+  const openConversation = (convo: Conversation) => {
     setActiveConvoId(convo.id);
     setView('chat');
     setPendingCode(null);
