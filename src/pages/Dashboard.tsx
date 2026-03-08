@@ -334,6 +334,16 @@ export default function Dashboard() {
                       {orgs.find(o => o.id === app.organization_id)?.name || 'Bedrijf'}
                     </span>
                   )}
+                  {app.slug && (
+                    <button
+                      onClick={e => { e.stopPropagation(); copyAppLink(app.slug!); }}
+                      className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary flex items-center gap-1 hover:bg-primary/20 transition-colors"
+                      title={getAppUrl(app.slug)}
+                    >
+                      <Link className="h-3 w-3" />
+                      /app/{app.slug}
+                    </button>
+                  )}
                 </div>
                 <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
                   {orgs.length > 0 && (
