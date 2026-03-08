@@ -310,6 +310,14 @@ export default function Dashboard() {
     setEditingNameId(null);
   }
 
+  async function updateAppIcon(id: string, icon: string) {
+    const { error } = await supabase.from('apps').update({ icon } as any).eq('id', id);
+    if (!error) {
+      setApps(apps.map(a => a.id === id ? { ...a, icon } : a));
+    }
+    setIconPickerAppId(null);
+  }
+
   async function inviteCollaborator() {
     if (!inviteAppId || !inviteEmail.trim()) return;
     setInviting(true);
