@@ -231,7 +231,14 @@ export default function Dashboard() {
     if (!error) setApps(apps.map(a => a.id === app.id ? { ...a, is_remixable: !a.is_remixable } : a));
   }
 
-  async function renameApp(id: string, newName: string) {
+  async function updateRetention(id: string, hours: number) {
+    const { error } = await supabase.from('apps').update({ chat_retention_hours: hours } as any).eq('id', id);
+    if (!error) {
+      setApps(apps.map(a => a.id === id ? { ...a, chat_retention_hours: hours } : a));
+      toast({ title: 'Bewaartermijn bijgewerkt', description: `Chat wordt nu ${hours} uur bewaard` });
+    }
+  }
+
     if (!newName.trim()) return;
     const { error } = await supabase.from('apps').update({ name: newName.trim() }).eq('id', id);
     if (!error) {
