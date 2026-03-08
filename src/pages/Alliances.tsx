@@ -345,6 +345,7 @@ export default function Alliances() {
   }
 
   const totalViews = sharedApps.reduce((s, a) => s + a.views, 0);
+  const isAllianceOwner = selectedAlliance?.created_by === session?.user?.id;
 
   if (loading) {
     return (
@@ -512,7 +513,7 @@ export default function Alliances() {
                 </div>
 
                 {/* Vault */}
-                {userOrgId && (
+                {isAllianceOwner && userOrgId && (
                   <div className="rounded-xl border border-border/40 p-5" style={{ background: 'hsl(var(--card))' }}>
                     <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
                       <Coins className="h-4 w-4 text-primary" /> Alliantie Kluis
@@ -550,7 +551,7 @@ export default function Alliances() {
                 <div className="rounded-xl border border-border/40 p-5" style={{ background: 'hsl(var(--card))' }}>
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-sm font-semibold text-foreground">Leden</h2>
-                    {isOrgOwner && (
+                    {isAllianceOwner && (
                       <button
                         onClick={() => { setShowAddOrg(true); loadAllOrgs(); }}
                         className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
@@ -560,7 +561,7 @@ export default function Alliances() {
                     )}
                   </div>
 
-                  {isOrgOwner && showAddOrg && (
+                  {isAllianceOwner && showAddOrg && (
                     <div className="mb-4 p-3 rounded-lg border border-border/30 bg-secondary/20 space-y-2">
                       <select
                         value={addOrgId}
@@ -604,7 +605,7 @@ export default function Alliances() {
                             <p className="text-sm font-medium text-foreground truncate">{org?.name || 'Onbekend'}</p>
                             <p className="text-[10px] text-muted-foreground">Lid sinds {new Date(m.joined_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                           </div>
-                          {isOrgOwner && (
+                          {isAllianceOwner && (
                             <button
                               onClick={() => removeOrgFromAlliance(m.id)}
                               className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
