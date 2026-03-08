@@ -121,9 +121,15 @@ export default function Alliances() {
 
   async function deleteAlliance(id: string) {
     if (!confirm('Weet je zeker dat je deze alliantie wilt verwijderen?')) return;
-    const { error } = await supabase.from('alliances' as any).delete().eq('id', id);
-    if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
-    else { toast({ title: 'Alliantie verwijderd' }); loadAlliances(); }
+    const { error, status } = await supabase.from('alliances' as any).delete().eq('id', id);
+    console.log('Delete alliance result:', { error, status, id });
+    if (error) {
+      toast({ title: 'Fout bij verwijderen', description: error.message, variant: 'destructive' });
+    } else {
+      if (selectedAlliance?.id === id) setSelectedAlliance(null);
+      toast({ title: '🗑️ Alliantie verwijderd' });
+      loadAlliances();
+    }
   }
 
   async function loadAllOrgs() {
