@@ -52,7 +52,7 @@ export default function Profile() {
       if (isUuid) {
         const res = await supabase
           .from('profiles')
-          .select('id, display_name, avatar_url, bio, created_at, username')
+          .select('id, display_name, avatar_url, bio, created_at, username, social_links, show_email')
           .eq('id', username)
           .single();
         prof = res.data as ProfileData | null;
@@ -60,7 +60,7 @@ export default function Profile() {
       } else {
         const res = await supabase
           .from('profiles')
-          .select('id, display_name, avatar_url, bio, created_at, username')
+          .select('id, display_name, avatar_url, bio, created_at, username, social_links, show_email')
           .eq('username', username)
           .single();
         prof = res.data as ProfileData | null;
