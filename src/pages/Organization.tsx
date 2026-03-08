@@ -270,6 +270,7 @@ export default function OrganizationPage() {
   async function executeCoinTransaction(type: 'deposit' | 'withdraw', amount: number) {
     if (!selectedOrg || !session?.user?.id) return;
     setTxProcessing(true);
+    try {
       // Get or create coin record
       let coin = orgCoins.find(c => c.name === 'coins');
       if (!coin) {
