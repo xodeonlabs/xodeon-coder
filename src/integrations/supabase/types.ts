@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_versions: {
+        Row: {
+          app_id: string
+          created_at: string
+          created_by: string
+          id: string
+          label: string
+          ngc_code: string
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          label?: string
+          ngc_code: string
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          label?: string
+          ngc_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_versions_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_views: {
         Row: {
           app_id: string
