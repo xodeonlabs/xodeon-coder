@@ -12,6 +12,7 @@ interface Friend {
   avatar_url: string | null;
   username: string | null;
   is_dnd?: boolean;
+  last_seen_at?: string | null;
 }
 
 export function FriendsList({ userId }: { userId: string }) {
