@@ -60,10 +60,42 @@ export default function Settings() {
   const [retentionItems, setRetentionItems] = useState<RetentionItem[]>([]);
   const [retentionLoading, setRetentionLoading] = useState(true);
 
+  const isScrollingRef = useRef(false);
+
   function scrollToSection(id: string) {
+    isScrollingRef.current = true;
     setActiveSection(id);
     document.getElementById(`settings-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => { isScrollingRef.current = false; }, 800);
   }
+
+  // IntersectionObserver to highlight active section on scroll
+  useEffect(() => {
+    const sectionIds = SECTIONS.map(s => s.id);
+    const elements = sectionIds.map(id => document.getElementById(`settings-${id}`)).filter(Boolean) as HTMLElement[];
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (isScrollingRef.current) return;
+        // Find the most visible section
+        let best: { id: string; ratio: number } | null = null;
+        for (const entry of entries) {
+          const id = entry.target.id.replace('settings-', '');
+          if (!best || entry.intersectionRatio > best.ratio) {
+            best = { id, ratio: entry.intersectionRatio };
+          }
+        }
+        if (best && best.ratio > 0) {
+          setActiveSection(best.id);
+        }
+      },
+      { threshold: [0, 0.25, 0.5, 0.75, 1], rootMargin: '-80px 0px -40% 0px' }
+    );
+
+    elements.forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, [retentionLoading]); // re-attach after content loads
 
   useEffect(() => {
     if (!session?.user) return;
