@@ -105,7 +105,24 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
     }
   }, [activeConvoId]);
 
-  const openConversation = (convo: Conversation) => {
+  const startRename = useCallback((convoId: string, currentTitle: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setEditingConvoId(convoId);
+    setEditingTitle(currentTitle);
+    setTimeout(() => editInputRef.current?.focus(), 50);
+  }, []);
+
+  const confirmRename = useCallback(async () => {
+    if (!editingConvoId || !editingTitle.trim()) {
+      setEditingConvoId(null);
+      return;
+    }
+    await supabase.from('ai_conversations').update({ title: editingTitle.trim() }).eq('id', editingConvoId);
+    setConversations(prev => prev.map(c => c.id === editingConvoId ? { ...c, title: editingTitle.trim() } : c));
+    setEditingConvoId(null);
+  }, [editingConvoId, editingTitle]);
+
+
     setActiveConvoId(convo.id);
     setView('chat');
     setPendingCode(null);
