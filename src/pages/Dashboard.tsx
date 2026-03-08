@@ -94,21 +94,19 @@ export default function Dashboard() {
   const [iconPickerAppId, setIconPickerAppId] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('ngc_runtime_state');
-      if (raw) {
-        const state = JSON.parse(raw);
-        if (state?.coins) {
-          const sum = Object.values(state.coins as Record<string, number>).reduce((a: number, b: number) => a + b, 0);
-          setTotalCoins(sum);
-        } else {
-          setTotalCoins(100);
-        }
+    async function loadCoins() {
+      if (!session?.user?.id) return;
+      const { data } = await supabase.from('user_coins' as any).select('balance').eq('user_id', session.user.id).maybeSingle();
+      if (data) {
+        setTotalCoins((data as any).balance ?? 100);
       } else {
+        // Create coins row for existing user
+        await supabase.from('user_coins' as any).insert({ user_id: session.user.id, balance: 100 } as any);
         setTotalCoins(100);
       }
-    } catch { setTotalCoins(100); }
-  }, []);
+    }
+    loadCoins();
+  }, [session?.user?.id]);
 
   useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); }, []);
   useEffect(() => { checkAdminRole(); }, [session?.user?.id]);

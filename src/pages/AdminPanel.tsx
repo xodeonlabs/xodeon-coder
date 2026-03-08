@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, Megaphone, Plus, Eye, EyeOff, Pencil, Ban, ShieldOff, Activity, MessageCircle, Send } from 'lucide-react';
+import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, Megaphone, Plus, Eye, EyeOff, Pencil, Ban, ShieldOff, Activity, MessageCircle, Send, Coins } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const EMOJI_LIST = [
@@ -100,7 +100,14 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [chatReplyInputs, setChatReplyInputs] = useState<Record<string, string>>({});
   const [chatSending, setChatSending] = useState<string | null>(null);
-  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'chats' | 'activity'>('users');
+  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'chats' | 'activity' | 'coins'>('users');
+
+  // Coins management
+  const [userCoins, setUserCoins] = useState<{ user_id: string; balance: number }[]>([]);
+  const [coinUserId, setCoinUserId] = useState('');
+  const [coinAmount, setCoinAmount] = useState('');
+  const [coinAction, setCoinAction] = useState<'add' | 'set'>('add');
+  const [coinSaving, setCoinSaving] = useState(false);
   const [collabAppId, setCollabAppId] = useState<string | null>(null);
   const [collabEmail, setCollabEmail] = useState('');
   const [collabAdding, setCollabAdding] = useState(false);
@@ -175,6 +182,28 @@ export default function AdminPanel() {
     } catch { /* ignore */ }
 
     setLoading(false);
+  }
+
+  async function loadAllCoins() {
+    const { data } = await supabase.functions.invoke('admin-manage-coins', { body: { action: 'list', user_id: '_', amount: 0 } });
+    if (data?.coins) setUserCoins(data.coins);
+  }
+
+  async function adminUpdateCoins() {
+    if (!coinUserId || !coinAmount) return;
+    setCoinSaving(true);
+    const { error } = await supabase.functions.invoke('admin-manage-coins', {
+      body: { action: coinAction, user_id: coinUserId, amount: parseInt(coinAmount) },
+    });
+    if (error) {
+      toast({ title: 'Fout', description: String(error), variant: 'destructive' });
+    } else {
+      toast({ title: 'Coins bijgewerkt!' });
+      setCoinAmount('');
+      await loadAllCoins();
+      await logAction(`coins_${coinAction}`, 'user', coinUserId, `${coinAction === 'add' ? '+' : '='}${coinAmount}`);
+    }
+    setCoinSaving(false);
   }
 
   async function logAction(action: string, targetType: string, targetId?: string, details?: string) {
@@ -525,6 +554,12 @@ export default function AdminPanel() {
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'activity' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
             <Activity className="h-4 w-4" /> Activiteit
+          </button>
+          <button
+            onClick={() => { setTab('coins'); loadAllCoins(); }}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'coins' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
+          >
+            <Coins className="h-4 w-4" /> Coins
           </button>
         </div>
 
@@ -891,7 +926,86 @@ export default function AdminPanel() {
           </div>
         )}
 
-        {/* Chats tab */}
+        {/* Coins tab */}
+        {tab === 'coins' && (
+          <div className="rounded-xl border border-border/50 p-5" style={{ background: 'hsl(var(--card))' }}>
+            <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
+              <Coins className="h-4 w-4 text-primary" /> Coins beheren
+            </h3>
+
+            {/* Give coins form */}
+            <div className="flex flex-wrap items-end gap-3 mb-6 p-4 rounded-lg border border-border/40" style={{ background: 'hsl(var(--background))' }}>
+              <div className="flex-1 min-w-[180px]">
+                <label className="block text-xs font-medium text-muted-foreground mb-1">Gebruiker</label>
+                <select
+                  value={coinUserId}
+                  onChange={e => setCoinUserId(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                >
+                  <option value="">Selecteer gebruiker...</option>
+                  {profiles.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.display_name || authUsers.find(u => u.id === p.id)?.email || p.id.slice(0, 8)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="w-24">
+                <label className="block text-xs font-medium text-muted-foreground mb-1">Actie</label>
+                <select
+                  value={coinAction}
+                  onChange={e => setCoinAction(e.target.value as 'add' | 'set')}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                >
+                  <option value="add">Toevoegen</option>
+                  <option value="set">Instellen</option>
+                </select>
+              </div>
+              <div className="w-28">
+                <label className="block text-xs font-medium text-muted-foreground mb-1">Aantal</label>
+                <input
+                  type="number"
+                  value={coinAmount}
+                  onChange={e => setCoinAmount(e.target.value)}
+                  placeholder="100"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                />
+              </div>
+              <button
+                onClick={adminUpdateCoins}
+                disabled={coinSaving || !coinUserId || !coinAmount}
+                className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+              >
+                {coinSaving ? '...' : 'Opslaan'}
+              </button>
+            </div>
+
+            {/* Coins overview */}
+            {userCoins.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Geen coins data gevonden.</p>
+            ) : (
+              <div className="space-y-1.5 max-h-[400px] overflow-y-auto">
+                {userCoins.map(uc => {
+                  const profile = profiles.find(p => p.id === uc.user_id);
+                  const email = authUsers.find(u => u.id === uc.user_id)?.email;
+                  return (
+                    <div key={uc.user_id} className="flex items-center justify-between rounded-lg px-3 py-2.5 bg-background/50 hover:bg-secondary/20 transition-colors">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <span className="text-sm text-foreground truncate">{profile?.display_name || email || uc.user_id.slice(0, 8)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-primary">{uc.balance}</span>
+                        <Coins className="h-3.5 w-3.5 text-primary/60" />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
         {tab === 'chats' && (
           <div className="space-y-6">
             {/* App chats grouped by app */}
