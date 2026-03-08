@@ -1003,21 +1003,63 @@ export default function AdminPanel() {
               <Building2 className="h-4 w-4 text-accent" /> Alle bedrijven ({orgs.length})
             </h3>
             <div className="space-y-2">
-              {orgs.map(org => (
-                <div key={org.id} className="flex items-center justify-between rounded-lg px-4 py-3 bg-background/50">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{org.name}</p>
-                    <p className="text-[11px] text-muted-foreground">Eigenaar: <UserLink userId={org.owner_id} /></p>
+              {orgs.map(org => {
+                const levelNames: Record<number, string> = { 1:'Starter', 2:'Groeier', 3:'Professional', 4:'Enterprise', 5:'Legende', 6:'Titan', 7:'Mythisch', 8:'Onsterfelijk', 9:'Goddelijk', 10:'Oppermacht' };
+                const levelIcons: Record<number, string> = { 1:'🏠', 2:'🌱', 3:'⚡', 4:'💎', 5:'👑', 6:'🔱', 7:'🐉', 8:'⭐', 9:'🌟', 10:'🏆' };
+                const lvl = org.level ?? 1;
+                return (
+                  <div key={org.id} className="flex items-center justify-between rounded-lg px-4 py-3 bg-background/50 gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-foreground truncate">{org.name}</p>
+                      <p className="text-[11px] text-muted-foreground">Eigenaar: <UserLink userId={org.owner_id} /></p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        {levelIcons[lvl] || '🏠'} Level {lvl} — {levelNames[lvl] || 'Onbekend'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <select
+                        value={lvl}
+                        onChange={async (e) => {
+                          const newLevel = parseInt(e.target.value);
+                          const { error } = await supabase.from('organizations').update({ level: newLevel } as any).eq('id', org.id);
+                          if (error) {
+                            toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+                          } else {
+                            setOrgs(orgs.map(o => o.id === org.id ? { ...o, level: newLevel } : o));
+                            toast({ title: `${org.name} → Level ${newLevel} (${levelNames[newLevel]})` });
+                          }
+                        }}
+                        className="rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      >
+                        {Array.from({ length: 10 }, (_, i) => i + 1).map(l => (
+                          <option key={l} value={l}>{levelIcons[l]} Lvl {l} — {levelNames[l]}</option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={async () => {
+                          if (!confirm(`Level van "${org.name}" resetten naar 1?`)) return;
+                          const { error } = await supabase.from('organizations').update({ level: 1 } as any).eq('id', org.id);
+                          if (!error) {
+                            setOrgs(orgs.map(o => o.id === org.id ? { ...o, level: 1 } : o));
+                            toast({ title: `${org.name} gereset naar Level 1` });
+                          }
+                        }}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-amber-400 hover:bg-amber-500/10 transition-colors"
+                        title="Reset naar Level 1"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => setConfirmAction({ id: org.id, action: 'delete', type: 'org', name: org.name })}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                        title="Verwijderen"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    onClick={() => setConfirmAction({ id: org.id, action: 'delete', type: 'org', name: org.name })}
-                    className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0"
-                    title="Verwijderen"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              ))}
+                );
+              })}
               {orgs.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">Geen bedrijven gevonden.</p>}
             </div>
           </div>
