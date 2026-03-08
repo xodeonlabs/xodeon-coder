@@ -1247,6 +1247,68 @@ export default function Dashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Template Dialog */}
+      <Dialog open={templateDialog.open} onOpenChange={(open) => !open && setTemplateDialog(prev => ({ ...prev, open: false }))}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Template aanmaken</DialogTitle>
+            <DialogDescription>Geef je template een naam en kies een categorie.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Naam</label>
+              <input
+                type="text"
+                value={templateDialog.name}
+                onChange={e => setTemplateDialog(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Template naam..."
+                className="w-full px-3 py-2.5 rounded-xl border border-border/40 bg-card text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Categorie</label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { value: 'algemeen', label: 'Algemeen', icon: '✨' },
+                  { value: 'game', label: 'Games', icon: '🎮' },
+                  { value: 'tool', label: 'Tools', icon: '🛠️' },
+                  { value: 'shop', label: 'Shops', icon: '🛒' },
+                  { value: 'educatie', label: 'Educatie', icon: '📚' },
+                ].map(cat => (
+                  <button
+                    key={cat.value}
+                    onClick={() => setTemplateDialog(prev => ({ ...prev, category: cat.value }))}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border transition-all ${
+                      templateDialog.category === cat.value
+                        ? 'border-primary/40 bg-primary/10 text-primary'
+                        : 'border-border/40 text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                    }`}
+                  >
+                    <span>{cat.icon}</span>
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                onClick={() => setTemplateDialog({ open: false, app: null, name: '', category: 'algemeen' })}
+                className="px-4 py-2 text-sm font-medium rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/30 transition-colors"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={confirmConvertToTemplate}
+                disabled={!templateDialog.name.trim()}
+                className="px-5 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 disabled:opacity-50 transition-all active:scale-[0.98]"
+              >
+                Aanmaken
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
