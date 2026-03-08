@@ -690,7 +690,7 @@ export default function AdminPanel() {
                         <Pencil className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => deleteAd(ad.id)}
+                        onClick={() => setConfirmAction({ id: ad.id, action: 'delete', type: 'ad', name: ad.title })}
                         className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                         title="Verwijderen"
                       >
