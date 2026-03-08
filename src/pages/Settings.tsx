@@ -123,6 +123,18 @@ export default function Settings() {
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
               </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Bio</label>
+                <textarea
+                  value={bio}
+                  onChange={e => setBio(e.target.value)}
+                  placeholder="Vertel iets over jezelf..."
+                  rows={3}
+                  maxLength={300}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                />
+                <span className="text-[10px] text-muted-foreground">{bio.length}/300</span>
+              </div>
               <button
                 onClick={saveProfile}
                 disabled={saving}
