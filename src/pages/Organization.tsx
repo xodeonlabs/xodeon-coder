@@ -151,11 +151,49 @@ export default function OrganizationPage() {
     setLoadingMembers(false);
   }
 
+  function getPersonalCoins(): number {
+    try {
+      const raw = localStorage.getItem('ngc_runtime_state');
+      if (raw) {
+        const state = JSON.parse(raw);
+        if (state?.coins) {
+          return Object.values(state.coins as Record<string, number>).reduce((a: number, b: number) => a + b, 0);
+        }
+      }
+    } catch { /* ignore */ }
+    return 0;
+  }
+
+  function updatePersonalCoins(delta: number) {
+    try {
+      const raw = localStorage.getItem('ngc_runtime_state');
+      const state = raw ? JSON.parse(raw) : { variables: {}, lists: {}, data: {}, coins: {}, coinCodes: {} };
+      if (!state.coins) state.coins = {};
+      // Use a general 'wallet' key for personal coins
+      const currentWallet = state.coins['wallet'] ?? 0;
+      state.coins['wallet'] = Math.max(0, currentWallet + delta);
+      localStorage.setItem('ngc_runtime_state', JSON.stringify(state));
+    } catch { /* ignore */ }
+  }
+
+  const [personalCoins, setPersonalCoins] = useState(0);
+  useEffect(() => {
+    setPersonalCoins(getPersonalCoins());
+  }, [showDeposit, showWithdraw, txProcessing]);
+
   async function handleCoinTransaction(type: 'deposit' | 'withdraw') {
     if (!selectedOrg || !session?.user?.id || !txAmount.trim()) return;
     const amount = parseInt(txAmount);
     if (isNaN(amount) || amount <= 0) {
       toast({ title: 'Fout', description: 'Voer een geldig bedrag in', variant: 'destructive' });
+      return;
+    }
+
+    const currentPersonal = getPersonalCoins();
+
+    // Check personal balance for deposits
+    if (type === 'deposit' && currentPersonal < amount) {
+      toast({ title: 'Onvoldoende persoonlijk saldo', description: `Je hebt maar ${currentPersonal} coins`, variant: 'destructive' });
       return;
     }
 
@@ -181,11 +219,19 @@ export default function OrganizationPage() {
 
       const newBalance = type === 'deposit' ? currentBalance + amount : currentBalance - amount;
 
-      // Update balance
+      // Update org balance
       const { error: updateErr } = await supabase.from('org_coins')
         .update({ balance: newBalance, updated_at: new Date().toISOString() } as any)
         .eq('id', coin.id);
       if (updateErr) throw updateErr;
+
+      // Transfer personal coins
+      if (type === 'deposit') {
+        updatePersonalCoins(-amount); // Deduct from personal
+      } else {
+        updatePersonalCoins(amount); // Add to personal
+      }
+      setPersonalCoins(getPersonalCoins());
 
       // Log transaction
       await supabase.from('org_coin_transactions').insert({
@@ -194,15 +240,14 @@ export default function OrganizationPage() {
         amount,
         type,
         user_id: session.user.id,
-        note: txNote || (type === 'deposit' ? 'Storting' : 'Opname'),
+        note: txNote || (type === 'deposit' ? 'Storting vanuit persoonlijk saldo' : 'Opname naar persoonlijk saldo'),
       } as any);
 
-      toast({ title: type === 'deposit' ? '💰 Gestort!' : '💸 Opgenomen!', description: `${amount} coins ${type === 'deposit' ? 'gestort in' : 'opgenomen uit'} de kluis` });
+      toast({ title: type === 'deposit' ? '💰 Gestort!' : '💸 Opgenomen!', description: `${amount} coins ${type === 'deposit' ? 'overgedragen naar bedrijf' : 'overgedragen naar jou'}` });
       setTxAmount('');
       setTxNote('');
       setShowDeposit(false);
       setShowWithdraw(false);
-      // Refresh
       viewMembers(selectedOrg);
     } catch (err: any) {
       toast({ title: 'Fout', description: err.message, variant: 'destructive' });
