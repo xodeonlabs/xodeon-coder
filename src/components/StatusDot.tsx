@@ -28,8 +28,8 @@ export function getOnlineStatus(isDnd: boolean, lastSeenAt?: string | null): Onl
   if (isDnd) return 'dnd';
   if (!lastSeenAt) return 'offline';
   const diff = Date.now() - new Date(lastSeenAt).getTime();
-  // Consider offline after 2 minutes
-  if (diff > 2 * 60 * 1000) return 'offline';
+  // Consider offline after 3 minutes (presence updates every 60s)
+  if (diff > 3 * 60 * 1000) return 'offline';
   return 'online';
 }
 
