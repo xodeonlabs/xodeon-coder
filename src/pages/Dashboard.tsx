@@ -570,12 +570,12 @@ export default function Dashboard() {
             <h1 className="hidden sm:block text-lg font-bold text-foreground font-display tracking-tight">NGC Studio</h1>
           </div>
 
-          <nav className="flex items-center gap-1 sm:gap-2">
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-1 sm:gap-2">
             {/* Coins */}
             <div className="relative group/coins flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-accent/5 border border-accent/10 text-accent cursor-default transition-colors hover:bg-accent/10">
               <Coins className="h-3.5 w-3.5" />
               <span className="text-xs font-semibold tabular-nums">{totalCoins}</span>
-              {/* Tooltip */}
               <div className="absolute top-full mt-2 right-0 hidden group-hover/coins:block z-50 glass-card-highlight rounded-xl p-4 shadow-2xl min-w-[200px] animate-scale-in">
                 <div className="text-xs text-muted-foreground mb-1.5">💰 Coin Overzicht</div>
                 <div className="text-xl font-bold text-foreground font-display">{totalCoins}</div>
@@ -606,7 +606,42 @@ export default function Dashboard() {
               <LogOut className="h-4 w-4" />
             </button>
           </nav>
+
+          {/* Mobile: coins + avatar + hamburger */}
+          <div className="flex md:hidden items-center gap-2">
+            <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl bg-accent/5 border border-accent/10 text-accent">
+              <Coins className="h-3.5 w-3.5" />
+              <span className="text-xs font-semibold tabular-nums">{totalCoins}</span>
+            </div>
+            <div onClick={() => navigate(`/profiel/${profileUsername || session?.user?.id}`)} className="cursor-pointer">
+              <ProfileAvatar size="sm" />
+            </div>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-xl text-foreground/80 hover:bg-secondary/50 transition-all"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile dropdown menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden mt-3 pb-2 border-t border-border/20 pt-3 animate-slide-up">
+            <div className="flex flex-col gap-1">
+              <MobileNavItem onClick={() => { navigate('/templates'); setMobileMenuOpen(false); }} icon={<LayoutGrid className="h-4 w-4" />} label="Templates" />
+              <MobileNavItem onClick={() => { navigate('/analytics'); setMobileMenuOpen(false); }} icon={<BarChart3 className="h-4 w-4" />} label="Analytics" />
+              <MobileNavItem onClick={() => { navigate('/organization'); setMobileMenuOpen(false); }} icon={<Building2 className="h-4 w-4" />} label="Bedrijven" badge={unreadOrgMessages} />
+              <MobileNavItem onClick={() => { navigate('/alliances'); setMobileMenuOpen(false); }} icon={<Handshake className="h-4 w-4" />} label="Allianties" />
+              {isAdmin && <MobileNavItem onClick={() => { navigate('/admin'); setMobileMenuOpen(false); }} icon={<Shield className="h-4 w-4" />} label="Admin" variant="destructive" />}
+              <MobileNavItem onClick={() => { navigate('/settings'); setMobileMenuOpen(false); }} icon={<Settings className="h-4 w-4" />} label="Instellingen" />
+              <MobileNavItem onClick={() => { navigate(`/profiel/${profileUsername || session?.user?.id}`); setMobileMenuOpen(false); }} icon={<Users className="h-4 w-4" />} label="Mijn profiel" />
+              <div className="border-t border-border/20 mt-1 pt-1">
+                <MobileNavItem onClick={() => { signOut(); setMobileMenuOpen(false); }} icon={<LogOut className="h-4 w-4" />} label="Uitloggen" variant="destructive" />
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
