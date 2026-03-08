@@ -308,7 +308,15 @@ export default function OrganizationPage() {
     }
   }
 
-  async function deleteOrg(org: Organization) {
+  async function changeOrgIcon(orgId: string, icon: string) {
+    const { error } = await supabase.from('organizations').update({ icon } as any).eq('id', orgId);
+    if (!error) {
+      setOrgs(orgs.map(o => o.id === orgId ? { ...o, icon } : o));
+      if (selectedOrg?.id === orgId) setSelectedOrg({ ...selectedOrg, icon });
+    }
+    setIconPickerOrgId(null);
+  }
+
     if (!confirm(`Weet je zeker dat je "${org.name}" wilt verwijderen?`)) return;
     const { error } = await supabase.from('organizations').delete().eq('id', org.id);
     if (error) {
