@@ -87,9 +87,11 @@ export default function Alliances() {
 
   async function checkAdmin() {
     if (!session?.user?.id) return;
-    // Check if user owns any organization
-    const { data } = await supabase.from('organizations').select('id').eq('owner_id', session.user.id).limit(1);
-    setIsOrgOwner(!!(data && data.length > 0));
+    const { data } = await supabase.from('organizations').select('id, name, icon').eq('owner_id', session.user.id);
+    const owned = (data as unknown as OrgInfo[]) || [];
+    setMyOwnedOrgs(owned);
+    setIsOrgOwner(owned.length > 0);
+    if (owned.length > 0) setSelectedOrgForCreate(owned[0].id);
   }
 
   async function createAlliance() {
