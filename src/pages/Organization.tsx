@@ -811,10 +811,19 @@ export default function OrganizationPage() {
         {selectedOrg && (
           <>
           <div className="mt-6 sm:mt-8 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
-            <h3 className="text-lg font-bold text-foreground mb-1 flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" />
-              Leden van {selectedOrg.name}
-            </h3>
+             <div className="flex items-center justify-between mb-1">
+               <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                 <Users className="h-5 w-5 text-primary" />
+                 Leden van {selectedOrg.name}
+               </h3>
+               <button
+                 onClick={() => navigate(`/bedrijf/${selectedOrg.id}`)}
+                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-primary hover:bg-primary/10 transition-colors"
+               >
+                 <Globe className="h-3.5 w-3.5" />
+                 Bedrijfsprofiel
+               </button>
+             </div>
             {/* Bio */}
             {(selectedOrg.bio || selectedOrg.owner_id === session?.user?.id || members.find(m => m.user_id === session?.user?.id && (m.role === 'owner' || m.role === 'admin'))) && (
               <OrgBioSection
