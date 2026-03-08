@@ -58,8 +58,22 @@ export default function Templates() {
   const [showMine, setShowMine] = useState(false);
   const [friends, setFriends] = useState<string[]>([]);
   const [userOrgs, setUserOrgs] = useState<string[]>([]);
+  const [dbCategories, setDbCategories] = useState<CategoryRow[]>([]);
 
-  useEffect(() => { loadTemplates(); loadRelations(); }, [session?.user?.id]);
+  const CATEGORIES = useMemo(() => {
+    if (dbCategories.length === 0) return FALLBACK_CATEGORIES;
+    return [
+      { value: 'alle', label: 'Alle', icon: 'layout-grid' },
+      ...dbCategories.map(c => ({ value: c.value, label: c.label, icon: c.icon })),
+    ];
+  }, [dbCategories]);
+
+  useEffect(() => { loadTemplates(); loadRelations(); loadCategories(); }, [session?.user?.id]);
+
+  async function loadCategories() {
+    const { data } = await supabase.from('categories' as any).select('*').order('sort_order', { ascending: true });
+    if (data) setDbCategories(data as any);
+  }
 
   async function loadTemplates() {
     setLoading(true);
