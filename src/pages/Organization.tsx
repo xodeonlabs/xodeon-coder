@@ -317,6 +317,7 @@ export default function OrganizationPage() {
     setIconPickerOrgId(null);
   }
 
+  async function deleteOrg(org: Organization) {
     if (!confirm(`Weet je zeker dat je "${org.name}" wilt verwijderen?`)) return;
     const { error } = await supabase.from('organizations').delete().eq('id', org.id);
     if (error) {
