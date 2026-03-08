@@ -23,6 +23,7 @@ export function OrgChat({ organizationId }: OrgChatProps) {
   const [profiles, setProfiles] = useState<Record<string, { display_name: string | null; avatar_url: string | null }>>({});
   const [adminIds, setAdminIds] = useState<Set<string>>(new Set());
   const [input, setInput] = useState('');
+  const [showGame, setShowGame] = useState(false);
   const [sending, setSending] = useState(false);
   const [lastReadAt, setLastReadAt] = useState<string | null>(null);
   const [otherReadAt, setOtherReadAt] = useState<Record<string, string>>({});
