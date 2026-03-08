@@ -245,7 +245,7 @@ export default function Profile() {
         </div>
 
         {/* Apps gallery */}
-        <PublicApps userId={userId!} />
+        <PublicApps userId={profile!.id} />
 
         {/* Footer spacer */}
         <div className="h-12" />
