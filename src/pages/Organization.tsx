@@ -1112,6 +1112,27 @@ export default function OrganizationPage() {
             </div>
           )}
 
+          {/* Upgrades - alleen zichtbaar voor eigenaar */}
+          {selectedOrg.owner_id === session?.user?.id && (
+            <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+              <h3 className="text-lg font-bold text-foreground flex items-center gap-2 mb-4">
+                <ArrowUp className="h-5 w-5 text-primary" />
+                Upgrades
+              </h3>
+              <OrgUpgrades
+                orgId={selectedOrg.id}
+                orgName={selectedOrg.name}
+                currentLevel={(selectedOrg as any).level ?? 1}
+                orgBalance={orgCoins.reduce((sum, c) => sum + c.balance, 0)}
+                isOwner={selectedOrg.owner_id === session?.user?.id}
+                onUpgrade={(newLevel) => {
+                  setSelectedOrg({ ...selectedOrg, level: newLevel } as any);
+                  viewMembers({ ...selectedOrg, level: newLevel } as any);
+                }}
+              />
+            </div>
+          )}
+
           <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
             <div className="px-4 sm:px-6 py-3 border-b border-border/50 flex items-center justify-between">
               <div>
