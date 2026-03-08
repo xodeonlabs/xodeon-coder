@@ -50,9 +50,28 @@ export function getDoNotDisturbEnabled(): boolean {
 export function setDoNotDisturbEnabled(enabled: boolean) {
   try {
     localStorage.setItem(DND_STORAGE_KEY, String(enabled));
+    window.dispatchEvent(new CustomEvent('dnd-changed', { detail: enabled }));
   } catch {
     // ignore
   }
+}
+
+export function useDoNotDisturb() {
+  const [enabled, setEnabled] = useState(() => getDoNotDisturbEnabled());
+
+  useEffect(() => {
+    const handler = (e: Event) => setEnabled((e as CustomEvent).detail);
+    window.addEventListener('dnd-changed', handler);
+    return () => window.removeEventListener('dnd-changed', handler);
+  }, []);
+
+  const toggle = useCallback(() => {
+    const next = !getDoNotDisturbEnabled();
+    setDoNotDisturbEnabled(next);
+    setEnabled(next);
+  }, []);
+
+  return { dndEnabled: enabled, toggleDnd: toggle };
 }
 
 export function useNotificationSound() {
