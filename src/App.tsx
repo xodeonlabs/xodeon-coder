@@ -44,6 +44,7 @@ const App = () => (
           <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
           <Route path="/editor/:appId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/preview/:appId" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
+          <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
           <Route path="/app/:slug" element={<PublicApp />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
