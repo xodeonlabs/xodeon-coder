@@ -79,7 +79,7 @@ export default function Profile() {
       setProfile(prof);
       const userId = prof.id;
 
-      const [appsRes, orgsRes] = await Promise.all([
+      const [appsRes, orgsRes, friendsRes] = await Promise.all([
         supabase
           .from('apps')
           .select('id', { count: 'exact', head: true })
@@ -89,6 +89,11 @@ export default function Profile() {
           .from('organization_members')
           .select('id', { count: 'exact', head: true })
           .eq('user_id', userId),
+        supabase
+          .from('friendships')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'accepted')
+          .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`),
       ]);
 
       const appCount = appsRes.count ?? 0;
