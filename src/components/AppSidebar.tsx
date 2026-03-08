@@ -59,6 +59,16 @@ export function AppSidebar() {
     setUnreadGroups(unread);
   }, [session?.user?.id]);
 
+  const fetchUnreadMessages = useCallback(async () => {
+    if (!session?.user?.id) return;
+    const { count } = await supabase
+      .from('friend_messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('receiver_id', session.user.id)
+      .is('read_at', null);
+    setUnreadMessages(count ?? 0);
+  }, [session?.user?.id]);
+
   useEffect(() => {
     if (!session?.user?.id) return;
     supabase.from('user_roles').select('role').eq('user_id', session.user.id).eq('role', 'admin').maybeSingle()
