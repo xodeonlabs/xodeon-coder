@@ -29,6 +29,29 @@ interface Message {
   created_at: string;
 }
 
+function FriendChatHeader({ friend }: { friend: ChatFriend }) {
+  const { status, text } = useLastSeen(friend.id);
+  return (
+    <>
+      <div className="relative shrink-0">
+        <Avatar className="h-8 w-8">
+          {friend.avatar_url ? (
+            <AvatarImage src={friend.avatar_url} alt="" className="object-cover" />
+          ) : null}
+          <AvatarFallback className="text-xs font-bold bg-gradient-to-br from-primary/30 to-accent/20 text-primary">
+            {friend.display_name?.slice(0, 2).toUpperCase() || '??'}
+          </AvatarFallback>
+        </Avatar>
+        <StatusDot status={status} className="absolute -bottom-0.5 -right-0.5" />
+      </div>
+      <div className="min-w-0">
+        <h2 className="text-sm font-bold text-foreground truncate">{friend.display_name || 'Anoniem'}</h2>
+        <p className="text-[10px] text-muted-foreground">{text}</p>
+      </div>
+    </>
+  );
+}
+
 export default function FriendChatPage() {
   const { session } = useAuth();
   const navigate = useNavigate();
