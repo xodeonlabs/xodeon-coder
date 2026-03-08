@@ -553,6 +553,7 @@ export default function Dashboard() {
                 </div>
                 <button
                   onClick={async () => {
+                    if (!confirm('Weet je zeker dat je de publicatie wilt intrekken? Je app is daarna niet meer bereikbaar via de publieke link.')) return;
                     const { error } = await supabase.from('apps').update({ is_public: false, slug: null }).eq('id', publishAppId!);
                     if (!error) {
                       setApps(apps.map(a => a.id === publishAppId ? { ...a, is_public: false, slug: null } : a));
