@@ -1106,7 +1106,7 @@ export default function OrganizationPage() {
                   className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors w-full justify-center"
                 >
                   <Plus className="h-4 w-4" />
-                  Advertentie maken (max. 1)
+                  Advertentie maken (max. {[1,2,3,5,10][(((selectedOrg as any).level ?? 1) - 1)] ?? 1})
                 </button>
               )}
             </div>
