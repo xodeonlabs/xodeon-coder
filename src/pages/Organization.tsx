@@ -156,15 +156,15 @@ export default function OrganizationPage() {
     setLoadingMembers(true);
     setShowDeposit(false);
     setShowWithdraw(false);
-    const [membersRes, appsRes, coinsRes] = await Promise.all([
+    const [membersRes, appsRes, coinsRes, adsRes] = await Promise.all([
       supabase.from('organization_members').select('*').eq('organization_id', org.id).order('created_at', { ascending: true }),
       supabase.from('apps').select('id, name, updated_at').eq('organization_id', org.id as any).order('updated_at', { ascending: false }),
       supabase.from('org_coins').select('*').eq('organization_id', org.id),
+      supabase.from('ads').select('*').eq('organization_id' as any, org.id),
     ]);
     if (!membersRes.error) {
       const mems = (membersRes.data as unknown as OrgMember[]) || [];
       setMembers(mems);
-      // Fetch profiles for all members
       const userIds = mems.map(m => m.user_id);
       if (userIds.length > 0) {
         const { data: profiles } = await supabase.from('profiles').select('id, display_name, avatar_url, bio').in('id', userIds);
@@ -179,6 +179,13 @@ export default function OrganizationPage() {
     }
     if (!appsRes.error) setOrgApps((appsRes.data as unknown as OrgApp[]) || []);
     if (!coinsRes.error) setOrgCoins((coinsRes.data as unknown as OrgCoin[]) || []);
+    if (!adsRes.error && adsRes.data && adsRes.data.length > 0) {
+      const ad = adsRes.data[0] as any;
+      setOrgAd({ id: ad.id, emoji: ad.emoji, title: ad.title, description: ad.description, url: ad.url });
+    } else {
+      setOrgAd(null);
+    }
+    setShowAdForm(false);
     setLoadingMembers(false);
   }
 
