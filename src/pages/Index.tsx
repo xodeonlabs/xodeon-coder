@@ -558,7 +558,7 @@ const Index = () => {
         onShareTemplate={handleShareTemplate}
       />
 
-      <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden">
+      <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden" autoSaveId="ngc-main-panels">
         {/* Left Panel */}
         {leftOpen && (
           <>
