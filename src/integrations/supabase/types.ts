@@ -421,6 +421,33 @@ export type Database = {
           },
         ]
       }
+      categories: {
+        Row: {
+          created_at: string
+          icon: string
+          id: string
+          label: string
+          sort_order: number
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string
+          id?: string
+          label: string
+          sort_order?: number
+          value: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string
+          id?: string
+          label?: string
+          sort_order?: number
+          value?: string
+        }
+        Relationships: []
+      }
       chat_group_members: {
         Row: {
           group_id: string

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, Megaphone, Plus, Eye, EyeOff, Pencil, Ban, ShieldOff, Activity, MessageCircle, Send, Coins, Handshake, BarChart3, Globe, Lock, BookTemplate, Save } from 'lucide-react';
+import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, Megaphone, Plus, Eye, EyeOff, Pencil, Ban, ShieldOff, Activity, MessageCircle, Send, Coins, Handshake, BarChart3, Globe, Lock, BookTemplate, Save, Tags } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const EMOJI_LIST = [
@@ -100,7 +100,7 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [chatReplyInputs, setChatReplyInputs] = useState<Record<string, string>>({});
   const [chatSending, setChatSending] = useState<string | null>(null);
-  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'chats' | 'activity' | 'coins' | 'alliances' | 'templates'>('users');
+  const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'chats' | 'activity' | 'coins' | 'alliances' | 'templates' | 'categories'>('users');
   
   // Templates management
   const [adminTemplates, setAdminTemplates] = useState<{ id: string; name: string; description: string; category: string; visibility: string; author_id: string; downloads: number; is_published: boolean; created_at: string }[]>([]);
@@ -111,7 +111,18 @@ export default function AdminPanel() {
   const [templateEditDescription, setTemplateEditDescription] = useState('');
   const [templateEditVisibility, setTemplateEditVisibility] = useState('public');
   
-  // Alliances management
+  // Categories management
+  const [adminCategories, setAdminCategories] = useState<{ id: string; value: string; label: string; icon: string; sort_order: number }[]>([]);
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
+  const [newCatValue, setNewCatValue] = useState('');
+  const [newCatLabel, setNewCatLabel] = useState('');
+  const [newCatIcon, setNewCatIcon] = useState('sparkles');
+  const [catSaving, setCatSaving] = useState(false);
+  const [editingCat, setEditingCat] = useState<string | null>(null);
+  const [editCatLabel, setEditCatLabel] = useState('');
+  const [editCatIcon, setEditCatIcon] = useState('');
+
+
   const [adminAlliances, setAdminAlliances] = useState<any[]>([]);
   const [adminAllianceMembers, setAdminAllianceMembers] = useState<Record<string, any[]>>({});
   const [adminAllianceCoins, setAdminAllianceCoins] = useState<Record<string, number>>({});
@@ -227,6 +238,49 @@ export default function AdminPanel() {
     setAdminTemplates(ts => ts.map(t => t.id === id ? { ...t, name: templateEditName, category: templateEditCategory, description: templateEditDescription, visibility: templateEditVisibility } : t));
     setEditingTemplate(null);
     toast({ title: 'Template bijgewerkt' });
+  }
+
+  async function loadAdminCategories(force = false) {
+    if (categoriesLoaded && !force) return;
+    setCategoriesLoaded(true);
+    const { data } = await supabase.from('categories' as any).select('*').order('sort_order', { ascending: true });
+    setAdminCategories((data as any[]) || []);
+  }
+
+  async function addCategory() {
+    if (!newCatValue.trim() || !newCatLabel.trim()) return;
+    setCatSaving(true);
+    const nextOrder = adminCategories.length > 0 ? Math.max(...adminCategories.map(c => c.sort_order)) + 1 : 1;
+    const { data, error } = await supabase.from('categories' as any).insert({
+      value: newCatValue.trim().toLowerCase().replace(/\s+/g, '-'),
+      label: newCatLabel.trim(),
+      icon: newCatIcon,
+      sort_order: nextOrder,
+    } as any).select().single();
+    if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
+    else if (data) {
+      setAdminCategories([...adminCategories, data as any]);
+      setNewCatValue('');
+      setNewCatLabel('');
+      setNewCatIcon('sparkles');
+      toast({ title: 'Categorie toegevoegd!' });
+    }
+    setCatSaving(false);
+  }
+
+  async function updateCategory(id: string) {
+    const { error } = await supabase.from('categories' as any).update({ label: editCatLabel, icon: editCatIcon } as any).eq('id', id);
+    if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); return; }
+    setAdminCategories(cats => cats.map(c => c.id === id ? { ...c, label: editCatLabel, icon: editCatIcon } : c));
+    setEditingCat(null);
+    toast({ title: 'Categorie bijgewerkt' });
+  }
+
+  async function deleteCategory(id: string, label: string) {
+    const { error } = await supabase.from('categories' as any).delete().eq('id', id);
+    if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); return; }
+    setAdminCategories(cats => cats.filter(c => c.id !== id));
+    toast({ title: 'Categorie verwijderd', description: `"${label}" is verwijderd.` });
   }
 
   async function loadAdminAlliances(force = false) {
@@ -699,10 +753,16 @@ export default function AdminPanel() {
             <Handshake className="h-4 w-4" /> Allianties
           </button>
           <button
-            onClick={() => { setTab('templates'); loadAdminTemplates(); }}
+            onClick={() => { setTab('templates'); loadAdminTemplates(); loadAdminCategories(); }}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'templates' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
             <BookTemplate className="h-4 w-4" /> Templates
+          </button>
+          <button
+            onClick={() => { setTab('categories'); loadAdminCategories(); }}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'categories' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
+          >
+            <Tags className="h-4 w-4" /> Categorieën
           </button>
           <button
             onClick={() => setTab('activity')}
@@ -1068,7 +1128,7 @@ export default function AdminPanel() {
                         <div>
                           <label className="text-[11px] text-muted-foreground mb-1 block">Categorie</label>
                           <div className="flex flex-wrap gap-1.5">
-                            {['algemeen', 'game', 'tool', 'shop', 'educatie'].map(cat => (
+                            {(adminCategories.length > 0 ? adminCategories.map(c => c.value) : ['algemeen', 'game', 'tool', 'shop', 'educatie']).map(cat => (
                               <button
                                 key={cat}
                                 onClick={() => setTemplateEditCategory(cat)}
@@ -1144,6 +1204,132 @@ export default function AdminPanel() {
                           </button>
                           <button
                             onClick={() => setConfirmAction({ id: t.id, action: 'delete', type: 'template', name: t.name })}
+                            className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                            title="Verwijderen"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Categories tab */}
+        {tab === 'categories' && (
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+              <Tags className="h-4 w-4 text-primary" /> Categorieën ({adminCategories.length})
+            </h3>
+            
+            {/* Add new category */}
+            <div className="rounded-xl border border-border/50 p-4" style={{ background: 'hsl(var(--card))' }}>
+              <h4 className="text-xs font-semibold text-muted-foreground mb-3">Nieuwe categorie</h4>
+              <div className="flex flex-wrap gap-2 items-end">
+                <div className="flex-1 min-w-[140px]">
+                  <label className="text-[10px] text-muted-foreground block mb-1">Value (uniek)</label>
+                  <input
+                    value={newCatValue}
+                    onChange={e => setNewCatValue(e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''))}
+                    placeholder="bijv. sport"
+                    className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <div className="flex-1 min-w-[140px]">
+                  <label className="text-[10px] text-muted-foreground block mb-1">Label</label>
+                  <input
+                    value={newCatLabel}
+                    onChange={e => setNewCatLabel(e.target.value)}
+                    placeholder="bijv. Sport"
+                    className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <div className="w-[140px]">
+                  <label className="text-[10px] text-muted-foreground block mb-1">Icoon (lucide)</label>
+                  <input
+                    value={newCatIcon}
+                    onChange={e => setNewCatIcon(e.target.value.toLowerCase())}
+                    placeholder="sparkles"
+                    className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <button
+                  onClick={addCategory}
+                  disabled={catSaving || !newCatValue.trim() || !newCatLabel.trim()}
+                  className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
+                >
+                  {catSaving ? 'Toevoegen...' : <><Plus className="h-4 w-4 inline mr-1" /> Toevoegen</>}
+                </button>
+              </div>
+            </div>
+
+            {/* Category list */}
+            {adminCategories.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Geen categorieën gevonden.</p>
+            ) : (
+              <div className="space-y-2">
+                {adminCategories.map(cat => (
+                  <div key={cat.id} className="rounded-xl border border-border/50 p-4" style={{ background: 'hsl(var(--card))' }}>
+                    {editingCat === cat.id ? (
+                      <div className="flex flex-wrap gap-2 items-end">
+                        <div className="flex-1 min-w-[140px]">
+                          <label className="text-[10px] text-muted-foreground block mb-1">Value (niet wijzigbaar)</label>
+                          <input
+                            value={cat.value}
+                            disabled
+                            className="w-full px-3 py-2 rounded-lg border border-border/40 bg-muted text-sm text-muted-foreground"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-[140px]">
+                          <label className="text-[10px] text-muted-foreground block mb-1">Label</label>
+                          <input
+                            value={editCatLabel}
+                            onChange={e => setEditCatLabel(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          />
+                        </div>
+                        <div className="w-[140px]">
+                          <label className="text-[10px] text-muted-foreground block mb-1">Icoon</label>
+                          <input
+                            value={editCatIcon}
+                            onChange={e => setEditCatIcon(e.target.value.toLowerCase())}
+                            className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          />
+                        </div>
+                        <button
+                          onClick={() => updateCategory(cat.id)}
+                          className="px-3 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                        >
+                          <Save className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => setEditingCat(null)}
+                          className="px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                        >
+                          Annuleren
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-mono px-2 py-1 rounded bg-secondary text-muted-foreground">{cat.value}</span>
+                          <span className="text-sm font-semibold text-foreground">{cat.label}</span>
+                          <span className="text-xs text-muted-foreground">icoon: {cat.icon}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => { setEditingCat(cat.id); setEditCatLabel(cat.label); setEditCatIcon(cat.icon); }}
+                            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                            title="Bewerken"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            onClick={() => deleteCategory(cat.id, cat.label)}
                             className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                             title="Verwijderen"
                           >

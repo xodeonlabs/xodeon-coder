@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Search, Download, Plus, Trash2, Eye, EyeOff, Sparkles, LayoutGrid, Code, Gamepad2, ShoppingCart, BookOpen } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
 interface Template {
   id: string;
@@ -18,14 +19,33 @@ interface Template {
   created_at: string;
 }
 
-const CATEGORIES = [
-  { value: 'alle', label: 'Alle', icon: LayoutGrid },
-  { value: 'algemeen', label: 'Algemeen', icon: Sparkles },
-  { value: 'game', label: 'Games', icon: Gamepad2 },
-  { value: 'tool', label: 'Tools', icon: Code },
-  { value: 'shop', label: 'Shops', icon: ShoppingCart },
-  { value: 'educatie', label: 'Educatie', icon: BookOpen },
+interface CategoryRow {
+  id: string;
+  value: string;
+  label: string;
+  icon: string;
+  sort_order: number;
+}
+
+// Fallback if DB categories haven't loaded yet
+const FALLBACK_CATEGORIES = [
+  { value: 'alle', label: 'Alle', icon: 'layout-grid' },
+  { value: 'algemeen', label: 'Algemeen', icon: 'sparkles' },
+  { value: 'game', label: 'Games', icon: 'gamepad-2' },
+  { value: 'tool', label: 'Tools', icon: 'code' },
+  { value: 'shop', label: 'Shops', icon: 'shopping-cart' },
+  { value: 'educatie', label: 'Educatie', icon: 'book-open' },
 ];
+
+function LucideIcon({ name, className }: { name: string; className?: string }) {
+  const pascalName = name
+    .split('-')
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
+  const IconComponent = (LucideIcons as any)[pascalName];
+  if (!IconComponent || typeof IconComponent !== 'function') return <Sparkles className={className} />;
+  return <IconComponent className={className} />;
+}
 
 export default function Templates() {
   const { session } = useAuth();
@@ -38,8 +58,22 @@ export default function Templates() {
   const [showMine, setShowMine] = useState(false);
   const [friends, setFriends] = useState<string[]>([]);
   const [userOrgs, setUserOrgs] = useState<string[]>([]);
+  const [dbCategories, setDbCategories] = useState<CategoryRow[]>([]);
 
-  useEffect(() => { loadTemplates(); loadRelations(); }, [session?.user?.id]);
+  const CATEGORIES = useMemo(() => {
+    if (dbCategories.length === 0) return FALLBACK_CATEGORIES;
+    return [
+      { value: 'alle', label: 'Alle', icon: 'layout-grid' },
+      ...dbCategories.map(c => ({ value: c.value, label: c.label, icon: c.icon })),
+    ];
+  }, [dbCategories]);
+
+  useEffect(() => { loadTemplates(); loadRelations(); loadCategories(); }, [session?.user?.id]);
+
+  async function loadCategories() {
+    const { data } = await supabase.from('categories' as any).select('*').order('sort_order', { ascending: true });
+    if (data) setDbCategories(data as any);
+  }
 
   async function loadTemplates() {
     setLoading(true);
@@ -173,9 +207,7 @@ export default function Templates() {
 
         {/* Category tabs */}
         <div className="flex items-center gap-1.5 mb-6 overflow-x-auto pb-1">
-          {CATEGORIES.map(cat => {
-            const Icon = cat.icon;
-            return (
+          {CATEGORIES.map(cat => (
               <button
                 key={cat.value}
                 onClick={() => setCategory(cat.value)}
@@ -185,11 +217,10 @@ export default function Templates() {
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                 }`}
               >
-                <Icon className="h-3.5 w-3.5" />
+                <LucideIcon name={cat.icon} className="h-3.5 w-3.5" />
                 {cat.label}
               </button>
-            );
-          })}
+          ))}
         </div>
 
         {/* Templates grid */}
