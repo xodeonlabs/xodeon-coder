@@ -100,7 +100,7 @@ export function NGCChat({ appId }: NGCChatProps) {
           const isMe = msg.user_id === currentUserId;
           const isAdminUser = adminIds.has(msg.user_id);
           const shortName = isAdminUser ? 'Admin' : (profiles[msg.user_id] || msg.user_email.split('@')[0]);
-          const displayName = isMe ? (profiles[msg.user_id] || 'Jij') : shortName;
+          const displayName = isAdminUser ? 'Admin' : (profiles[msg.user_id] || msg.user_email.split('@')[0]);
           return (
             <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
               <span className={`text-[10px] mb-0.5 px-1 font-semibold ${isAdminUser ? 'text-destructive' : 'text-muted-foreground'}`}>{displayName}</span>
