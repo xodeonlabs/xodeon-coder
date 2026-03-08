@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/sidebar';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { AppIcon } from '@/components/IconPicker';
+import { StatusDot } from '@/components/StatusDot';
 
 const NAV_ITEMS = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard },
