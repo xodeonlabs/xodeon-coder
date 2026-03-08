@@ -441,9 +441,22 @@ export default function Dashboard() {
         </div>
         <div className="flex items-center gap-1 sm:gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-accent/10 text-accent" title="Jouw coins">
-              <Coins className="h-4 w-4" />
+            {/* ✨ Surprise 3 & 8: Sparkle coins with tooltip */}
+            <div className="relative group/coins flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-accent/10 text-accent cursor-default" title="Jouw coins">
+              <Coins className="h-4 w-4 animate-pulse" />
               <span className="text-xs sm:text-sm font-semibold">{totalCoins}</span>
+              <Sparkles className="h-3 w-3 opacity-0 group-hover/coins:opacity-100 transition-opacity text-yellow-400" />
+              {/* Tooltip */}
+              <div className="absolute top-full mt-2 right-0 hidden group-hover/coins:block z-50 rounded-xl border border-border/50 p-4 shadow-xl min-w-[200px]" style={{ background: 'hsl(var(--card))' }}>
+                <div className="text-xs text-muted-foreground mb-2">💰 Coin Overzicht</div>
+                <div className="text-2xl font-bold text-foreground mb-1">{totalCoins} coins</div>
+                <div className="text-[10px] text-muted-foreground">
+                  Gebruik coins voor chat-retentie, advertenties en meer.
+                </div>
+                <div className="mt-2 pt-2 border-t border-border/30 text-[10px] text-muted-foreground/60">
+                  ⌨️ Ctrl+N = Nieuwe App · Ctrl+K = Analytics
+                </div>
+              </div>
             </div>
           </div>
           <button onClick={() => navigate('/analytics')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
