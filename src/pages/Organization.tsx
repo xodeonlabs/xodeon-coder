@@ -205,36 +205,18 @@ export default function OrganizationPage() {
     setLoadingMembers(false);
   }
 
-  function getPersonalCoins(): number {
-    try {
-      const raw = localStorage.getItem('ngc_runtime_state');
-      if (raw) {
-        const state = JSON.parse(raw);
-        if (state?.coins) {
-          return Object.values(state.coins as Record<string, number>).reduce((a: number, b: number) => a + b, 0);
-        }
-      }
-    } catch { /* ignore */ }
-    return 0;
-  }
-
-  function updatePersonalCoins(delta: number) {
-    try {
-      const raw = localStorage.getItem('ngc_runtime_state');
-      const state = raw ? JSON.parse(raw) : { variables: {}, lists: {}, data: {}, coins: {}, coinCodes: {} };
-      if (!state.coins) state.coins = {};
-      // Use a general 'wallet' key for personal coins
-      const currentWallet = state.coins['wallet'] ?? 0;
-      state.coins['wallet'] = Math.max(0, currentWallet + delta);
-      localStorage.setItem('ngc_runtime_state', JSON.stringify(state));
-    } catch { /* ignore */ }
-  }
-
   const [personalCoins, setPersonalCoins] = useState(0);
   const [coinConfirm, setCoinConfirm] = useState<{ open: boolean; amount: number; description: string; onConfirm: () => void }>({ open: false, amount: 0, description: '', onConfirm: () => {} });
+
+  async function fetchPersonalCoins() {
+    if (!session?.user?.id) return;
+    const { data } = await supabase.from('user_coins').select('balance').eq('user_id', session.user.id).maybeSingle();
+    setPersonalCoins(data?.balance ?? 0);
+  }
+
   useEffect(() => {
-    setPersonalCoins(getPersonalCoins());
-  }, [showDeposit, showWithdraw, txProcessing]);
+    fetchPersonalCoins();
+  }, [session?.user?.id, showDeposit, showWithdraw, txProcessing]);
 
   async function handleCoinTransaction(type: 'deposit' | 'withdraw') {
     if (!selectedOrg || !session?.user?.id || !txAmount.trim()) return;
@@ -244,11 +226,9 @@ export default function OrganizationPage() {
       return;
     }
 
-    const currentPersonal = getPersonalCoins();
-
     // Check personal balance for deposits
-    if (type === 'deposit' && currentPersonal < amount) {
-      toast({ title: 'Onvoldoende persoonlijk saldo', description: `Je hebt maar ${currentPersonal} coins`, variant: 'destructive' });
+    if (type === 'deposit' && personalCoins < amount) {
+      toast({ title: 'Onvoldoende persoonlijk saldo', description: `Je hebt maar ${personalCoins} coins`, variant: 'destructive' });
       return;
     }
 
@@ -304,13 +284,14 @@ export default function OrganizationPage() {
         .eq('id', coin.id);
       if (updateErr) throw updateErr;
 
-      // Transfer personal coins
-      if (type === 'deposit') {
-        updatePersonalCoins(-amount); // Deduct from personal
-      } else {
-        updatePersonalCoins(amount); // Add to personal
+      // Transfer personal coins via user_coins table
+      const { data: userCoinRow } = await supabase.from('user_coins').select('id, balance').eq('user_id', session.user.id).maybeSingle();
+      const currentUserBalance = userCoinRow?.balance ?? 0;
+      const newUserBalance = type === 'deposit' ? currentUserBalance - amount : currentUserBalance + amount;
+      if (userCoinRow) {
+        await supabase.from('user_coins').update({ balance: Math.max(0, newUserBalance), updated_at: new Date().toISOString() }).eq('id', userCoinRow.id);
       }
-      setPersonalCoins(getPersonalCoins());
+      await fetchPersonalCoins();
 
       // Log transaction
       await supabase.from('org_coin_transactions').insert({
