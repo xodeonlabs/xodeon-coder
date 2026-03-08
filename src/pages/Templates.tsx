@@ -51,6 +51,22 @@ export default function Templates() {
     setLoading(false);
   }
 
+  async function loadRelations() {
+    if (!session?.user?.id) return;
+    // Load friends
+    const { data: friendData } = await supabase.from('friendships').select('sender_id, receiver_id').eq('status', 'accepted');
+    const friendIds = (friendData || []).map(f => f.sender_id === session.user.id ? f.receiver_id : f.sender_id);
+    setFriends(friendIds);
+    // Load user's org author IDs
+    const { data: orgMembers } = await supabase.from('organization_members').select('organization_id').eq('user_id', session.user.id);
+    if (orgMembers && orgMembers.length > 0) {
+      const orgIds = orgMembers.map(m => m.organization_id);
+      const { data: coMembers } = await supabase.from('organization_members').select('user_id, organization_id').in('organization_id', orgIds);
+      const orgUserIds = [...new Set((coMembers || []).map(m => m.user_id))];
+      setUserOrgs(orgUserIds);
+    }
+  }
+
   const filtered = useMemo(() => {
     let result = templates;
     if (showMine && session?.user?.id) {
