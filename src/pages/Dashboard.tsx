@@ -82,6 +82,7 @@ export default function Dashboard() {
   const [slugValue, setSlugValue] = useState('');
   const [savingSlug, setSavingSlug] = useState(false);
   const [totalCoins, setTotalCoins] = useState(0);
+  const [totalOwnerCoins, setTotalOwnerCoins] = useState(0);
 
   useEffect(() => {
     try {
@@ -91,6 +92,10 @@ export default function Dashboard() {
         if (state?.coins) {
           const sum = Object.values(state.coins as Record<string, number>).reduce((a: number, b: number) => a + b, 0);
           setTotalCoins(sum);
+        }
+        if (state?.ownerCoins) {
+          const sum = Object.values(state.ownerCoins as Record<string, number>).reduce((a: number, b: number) => a + b, 0);
+          setTotalOwnerCoins(sum);
         }
       }
     } catch { /* ignore */ }
