@@ -19,21 +19,20 @@ export function useDailyBonus(userId: string | undefined) {
           .from('user_coins')
           .select('id, balance, last_daily_bonus' as any)
           .eq('user_id', userId)
-          .maybeSingle();
+          .maybeSingle() as any;
 
         if (!coinData) return;
 
-        const lastBonus = (coinData as any).last_daily_bonus;
-        if (lastBonus === today) return; // Already claimed today
+        const lastBonus = coinData.last_daily_bonus;
+        if (lastBonus === today) return;
 
-        // Update balance and last_daily_bonus
-        await supabase
+        await (supabase
           .from('user_coins')
           .update({
             balance: (coinData.balance || 0) + DAILY_BONUS_AMOUNT,
             last_daily_bonus: today,
           } as any)
-          .eq('id', coinData.id);
+          .eq('id', coinData.id) as any);
 
         console.log(`🎁 Dagelijkse bonus: +${DAILY_BONUS_AMOUNT} coins`);
       } catch (err) {
