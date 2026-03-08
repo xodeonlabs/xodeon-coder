@@ -928,13 +928,60 @@ export default function OrganizationPage() {
           )}
 
           <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
-            <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-              <AppWindow className="h-5 w-5 text-accent" />
-              Apps van {selectedOrg.name}
-            </h3>
-            {orgApps.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nog geen apps gekoppeld. Koppel apps via het dashboard.</p>
-            ) : (
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <AppWindow className="h-5 w-5 text-accent" />
+                Apps van {selectedOrg.name}
+              </h3>
+              {(selectedOrg.owner_id === session?.user?.id || members.find(m => m.user_id === session?.user?.id && m.role === 'admin')) && (
+                <button
+                  onClick={() => setShowLinkApp(!showLinkApp)}
+                  className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                >
+                  <Link className="h-3.5 w-3.5" />
+                  Publieke app koppelen
+                </button>
+              )}
+            </div>
+
+            {showLinkApp && (
+              <div className="mb-4 p-3 rounded-xl border border-border/40 bg-secondary/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Zoek publieke apps..."
+                    value={linkAppSearch}
+                    onChange={e => searchPublicApps(e.target.value)}
+                    className="flex-1 text-sm bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground"
+                    autoFocus
+                  />
+                </div>
+                {linkAppResults.length > 0 && (
+                  <div className="space-y-1 max-h-40 overflow-y-auto">
+                    {linkAppResults.map(app => (
+                      <button
+                        key={app.id}
+                        onClick={() => linkPublicApp(app.id)}
+                        disabled={linkingAppId === app.id}
+                        className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors text-sm"
+                      >
+                        <Globe className="h-3.5 w-3.5 text-primary/60 shrink-0" />
+                        <span className="truncate text-foreground">{app.name}</span>
+                        {linkingAppId === app.id && <span className="text-xs text-muted-foreground ml-auto">Koppelen...</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {linkAppSearch.length >= 2 && linkAppResults.length === 0 && (
+                  <p className="text-xs text-muted-foreground px-1">Geen publieke apps gevonden.</p>
+                )}
+              </div>
+            )}
+
+            {orgApps.length === 0 && !showLinkApp ? (
+              <p className="text-sm text-muted-foreground">Nog geen apps gekoppeld.</p>
+            ) : orgApps.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {orgApps.map(app => (
                   <div
