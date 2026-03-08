@@ -177,6 +177,19 @@ export default function Settings() {
                 />
                 <span className="text-[10px] text-muted-foreground">{bio.length}/300</span>
               </div>
+              {/* Email visibility toggle */}
+              <div className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2.5">
+                <div className="flex items-center gap-2">
+                  {showEmail ? <Eye className="h-4 w-4 text-primary" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+                  <span className="text-sm text-foreground">E-mail tonen op profiel</span>
+                </div>
+                <button
+                  onClick={() => setShowEmail(!showEmail)}
+                  className={`relative w-10 h-5 rounded-full transition-colors ${showEmail ? 'bg-primary' : 'bg-muted'}`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-background shadow transition-transform ${showEmail ? 'translate-x-5' : ''}`} />
+                </button>
+              </div>
               <button
                 onClick={saveProfile}
                 disabled={saving}
