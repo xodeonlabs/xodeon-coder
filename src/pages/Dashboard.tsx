@@ -665,24 +665,57 @@ export default function Dashboard() {
         )}
       </main>
 
-      {/* Modal Overlay helper */}
-      {/* Invite Dialog */}
+      {/* Invite Dialog with Contract */}
       {inviteAppId && (
         <ModalOverlay onClose={() => setInviteAppId(null)}>
           <ModalCard>
-            <ModalHeader icon={<UserPlus className="h-5 w-5 text-primary" />} title="Samenwerker uitnodigen" onClose={() => setInviteAppId(null)} />
-            <p className="text-sm text-muted-foreground mb-5">Voer het e-mailadres in van de gebruiker die je wilt uitnodigen.</p>
-            <input
-              type="email" placeholder="email@voorbeeld.nl" value={inviteEmail}
-              onChange={e => setInviteEmail(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && inviteCollaborator()}
-              className="w-full rounded-xl border border-border/40 bg-background/80 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40 mb-5"
-              autoFocus
-            />
+            <ModalHeader icon={<UserPlus className="h-5 w-5 text-primary" />} title="Samenwerker + Contract" onClose={() => setInviteAppId(null)} />
+            <p className="text-sm text-muted-foreground mb-4">Nodig een samenwerker uit met een coin-contract.</p>
+            <div className="space-y-4 mb-5">
+              <div>
+                <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase tracking-wider">E-mail</label>
+                <input
+                  type="email" placeholder="email@voorbeeld.nl" value={inviteEmail}
+                  onChange={e => setInviteEmail(e.target.value)}
+                  className="w-full rounded-xl border border-border/40 bg-background/80 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase tracking-wider flex items-center gap-1">
+                  <Percent className="h-3 w-3" /> Contract percentage (per transactie)
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range" min={0} max={50} value={invitePercentage}
+                    onChange={e => setInvitePercentage(parseInt(e.target.value))}
+                    className="flex-1 accent-primary"
+                  />
+                  <span className="text-sm font-bold text-foreground tabular-nums w-12 text-right">{invitePercentage}%</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground/50 mt-1">
+                  {invitePercentage === 0 ? 'Geen contract — gratis samenwerking' : `De samenwerker ontvangt ${invitePercentage}% van elke coin-transactie. Kan onderhandeld worden.`}
+                </p>
+              </div>
+            </div>
             <ModalFooter>
               <ModalCancelBtn onClick={() => setInviteAppId(null)} />
               <ModalActionBtn onClick={inviteCollaborator} disabled={inviting || !inviteEmail.trim()} loading={inviting} label="Uitnodigen" />
             </ModalFooter>
+          </ModalCard>
+        </ModalOverlay>
+      )}
+
+      {/* Contracts Dialog */}
+      {contractAppId && (
+        <ModalOverlay onClose={() => setContractAppId(null)}>
+          <ModalCard>
+            <ModalHeader icon={<Handshake className="h-5 w-5 text-accent" />} title="Contracten" onClose={() => setContractAppId(null)} />
+            <ContractList
+              contracts={contracts.filter(c => c.app_id === contractAppId)}
+              currentUserId={session?.user?.id || ''}
+              onRespond={respondToContract}
+            />
           </ModalCard>
         </ModalOverlay>
       )}
