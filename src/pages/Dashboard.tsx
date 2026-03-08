@@ -216,26 +216,36 @@ export default function Dashboard() {
 
   async function checkAdminRole() {
     if (!session?.user?.id) return;
+    const cached = getCached<boolean>(CACHE_KEYS.adminRole(session.user.id), CACHE_TTL.long);
+    if (cached !== null) { setIsAdmin(cached); return; }
     const { data } = await supabase.from('user_roles').select('role').eq('user_id', session.user.id).eq('role', 'admin' as any);
-    setIsAdmin(!!(data && data.length > 0));
+    const result = !!(data && data.length > 0);
+    setIsAdmin(result);
+    setCache(CACHE_KEYS.adminRole(session.user.id), result);
   }
 
   async function fetchOrgs() {
+    if (!session?.user?.id) return;
+    const cached = getCached<Org[]>(CACHE_KEYS.orgs(session.user.id), CACHE_TTL.medium);
+    if (cached) { setOrgs(cached); return; }
     const { data } = await supabase.from('organizations').select('id, name, icon' as any).order('name');
-    if (data) setOrgs(data as unknown as Org[]);
+    if (data) { setOrgs(data as unknown as Org[]); setCache(CACHE_KEYS.orgs(session.user.id), data as unknown as Org[]); }
   }
 
   async function fetchOrgMemberships() {
     if (!session?.user?.id) return;
+    const cached = getCached<OrgMembership[]>(CACHE_KEYS.orgMemberships(session.user.id), CACHE_TTL.medium);
+    if (cached) { setOrgMemberships(cached); return; }
     const { data } = await supabase.from('organization_members').select('organization_id, role').eq('user_id', session.user.id);
-    if (data) setOrgMemberships(data as unknown as OrgMembership[]);
+    if (data) { setOrgMemberships(data as unknown as OrgMembership[]); setCache(CACHE_KEYS.orgMemberships(session.user.id), data as unknown as OrgMembership[]); }
   }
 
   async function fetchContracts() {
     if (!session?.user?.id) return;
-    // Fetch contracts where user is owner or collaborator
+    const cached = getCached<Contract[]>(CACHE_KEYS.contracts(session.user.id), CACHE_TTL.short);
+    if (cached) { setContracts(cached); return; }
     const { data } = await supabase.from('collaborator_contracts' as any).select('*');
-    if (data) setContracts(data as unknown as Contract[]);
+    if (data) { setContracts(data as unknown as Contract[]); setCache(CACHE_KEYS.contracts(session.user.id), data as unknown as Contract[]); }
   }
 
   function isOrgAdmin(orgId: string): boolean {
