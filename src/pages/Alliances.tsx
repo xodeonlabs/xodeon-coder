@@ -95,21 +95,21 @@ export default function Alliances() {
   }
 
   async function createAlliance() {
-    if (!newName.trim() || !session?.user?.id || creating) return;
+    if (!newName.trim() || !session?.user?.id || creating || !selectedOrgForCreate) return;
     setCreating(true);
-    const { error } = await supabase.from('alliances' as any).insert({
+    const { data: inserted, error } = await supabase.from('alliances' as any).insert({
       name: newName.trim(),
       icon: newIcon,
       created_by: session.user.id,
-    } as any);
+    } as any).select('id').single();
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
-    } else {
-      // Create coin pool
-      const { data: newAlliance } = await supabase.from('alliances' as any).select('id').eq('name', newName.trim()).order('created_at', { ascending: false }).limit(1).single();
-      if (newAlliance) {
-        await supabase.from('alliance_coins' as any).insert({ alliance_id: (newAlliance as any).id, balance: 0 } as any);
-      }
+    } else if (inserted) {
+      const allianceId = (inserted as any).id;
+      // Add coin pool
+      await supabase.from('alliance_coins' as any).insert({ alliance_id: allianceId, balance: 0 } as any);
+      // Auto-add selected org as member
+      await supabase.from('alliance_members' as any).insert({ alliance_id: allianceId, organization_id: selectedOrgForCreate } as any);
       toast({ title: '✅ Alliantie aangemaakt!' });
       setNewName('');
       setNewIcon('🤝');
