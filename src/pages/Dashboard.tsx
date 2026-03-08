@@ -113,6 +113,7 @@ export default function Dashboard() {
   const { session, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  useDailyBonus(session?.user?.id);
   const [apps, setApps] = useState<App[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
