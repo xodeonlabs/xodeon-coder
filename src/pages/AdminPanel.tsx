@@ -419,12 +419,14 @@ export default function AdminPanel() {
   }
 
   const roleIcon = (role: string) => {
+    if (role === 'owner') return <Crown className="h-4 w-4 text-amber-500" />;
     if (role === 'admin') return <Crown className="h-4 w-4 text-yellow-400" />;
     if (role === 'moderator') return <ShieldCheck className="h-4 w-4 text-primary" />;
     return <User className="h-4 w-4 text-muted-foreground" />;
   };
 
   const roleLabel = (role: string) => {
+    if (role === 'owner') return 'Owner';
     if (role === 'admin') return 'Admin';
     if (role === 'moderator') return 'Moderator';
     return 'Gebruiker';
