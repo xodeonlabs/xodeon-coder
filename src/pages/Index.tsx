@@ -292,6 +292,54 @@ const Index = () => {
     setCode(astToNGC(updated));
   }, [ast]);
 
+  // Designer handlers
+  const handlePositionChange = useCallback((nodeId: string, x: number, y: number) => {
+    if (!ast) return;
+    function updatePos(node: NGCNode): NGCNode {
+      if (node.id === nodeId) {
+        return { ...node, properties: { ...node.properties, Positie: `"${x},${y}"` } };
+      }
+      return { ...node, children: node.children.map(updatePos) };
+    }
+    setCode(astToNGC(updatePos(ast)));
+  }, [ast]);
+
+  const handleSizeChange = useCallback((nodeId: string, w: number, h: number) => {
+    if (!ast) return;
+    function updateSize(node: NGCNode): NGCNode {
+      if (node.id === nodeId) {
+        return { ...node, properties: { ...node.properties, Grootte: `"${w},${h}"` } };
+      }
+      return { ...node, children: node.children.map(updateSize) };
+    }
+    setCode(astToNGC(updateSize(ast)));
+  }, [ast]);
+
+  const handleDropNew = useCallback((parentId: string, type: NGCNodeType, x: number, y: number) => {
+    if (!ast) return;
+    const newNode: NGCNode = {
+      id: generateId(),
+      type,
+      name: `Nieuw${type}`,
+      properties: {
+        ...(DEFAULT_PROPERTIES[type] || {}),
+        Positie: `"${x},${y}"`,
+      },
+      children: [],
+      line: 0,
+      endLine: 0,
+      indent: 8,
+    };
+    function addToParent(node: NGCNode): NGCNode {
+      if (node.id === parentId) {
+        return { ...node, children: [...node.children, newNode] };
+      }
+      return { ...node, children: node.children.map(addToParent) };
+    }
+    setCode(astToNGC(addToParent(ast)));
+    setSelectedId(newNode.id);
+  }, [ast]);
+
   const handleContextMenu = useCallback((e: React.MouseEvent, nodeId: string) => {
     setContextMenu({ x: e.clientX, y: e.clientY, nodeId });
   }, []);
