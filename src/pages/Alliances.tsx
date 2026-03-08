@@ -362,9 +362,20 @@ export default function Alliances() {
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="p-1.5 rounded-lg bg-primary/10 shrink-0">
-            <Handshake className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-          </div>
+          {selectedAlliance && isAllianceOwner ? (
+            <EmojiPickerBtn
+              value={selectedAlliance.icon}
+              onChange={async (newIcon) => {
+                await supabase.from('alliances' as any).update({ icon: newIcon } as any).eq('id', selectedAlliance.id);
+                setSelectedAlliance({ ...selectedAlliance, icon: newIcon });
+                setAlliances(prev => prev.map(a => a.id === selectedAlliance.id ? { ...a, icon: newIcon } : a));
+              }}
+            />
+          ) : (
+            <div className="p-1.5 rounded-lg bg-primary/10 shrink-0">
+              {selectedAlliance ? <span className="text-lg">{selectedAlliance.icon}</span> : <Handshake className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />}
+            </div>
+          )}
           <div className="min-w-0">
             <h1 className="text-base sm:text-lg font-bold text-foreground">
               {selectedAlliance ? selectedAlliance.name : 'Allianties'}
