@@ -481,6 +481,19 @@ export default function GroupChats() {
                 const name = profile?.display_name || 'Onbekend';
                 const showTime = i === 0 || (new Date(msg.created_at).getTime() - new Date(messages[i - 1].created_at).getTime() > 300000);
                 const showName = !isMine && (i === 0 || messages[i - 1].user_id !== msg.user_id);
+                
+                // Calculate read status for own messages
+                let readByOthers = 0;
+                let totalOthers = 0;
+                if (isMine) {
+                  const otherMemberIds = memberIds.filter(id => id !== myId);
+                  totalOthers = otherMemberIds.length;
+                  readByOthers = otherMemberIds.filter(id => {
+                    const lastRead = readStatuses[id];
+                    return lastRead && new Date(lastRead) >= new Date(msg.created_at);
+                  }).length;
+                }
+
                 return (
                   <div key={msg.id}>
                     {showTime && (
@@ -507,6 +520,26 @@ export default function GroupChats() {
                         }`}>
                           {msg.content}
                         </div>
+                        {isMine && totalOthers > 0 && (
+                          <div className="flex items-center gap-1 mt-0.5 px-1">
+                            {readByOthers === totalOthers ? (
+                              <>
+                                <CheckCheck className="h-3 w-3 text-accent" />
+                                <span className="text-[9px] text-accent font-medium">Gelezen</span>
+                              </>
+                            ) : readByOthers > 0 ? (
+                              <>
+                                <CheckCheck className="h-3 w-3 text-muted-foreground/60" />
+                                <span className="text-[9px] text-muted-foreground/60 font-medium">Gelezen door {readByOthers}/{totalOthers}</span>
+                              </>
+                            ) : (
+                              <>
+                                <Check className="h-3 w-3 text-muted-foreground/40" />
+                                <span className="text-[9px] text-muted-foreground/40 font-medium">Bezorgd</span>
+                              </>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
