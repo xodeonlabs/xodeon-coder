@@ -490,14 +490,24 @@ export default function Dashboard() {
     setLoading(false);
   }
 
+  function handleNewAppClick() {
+    setShowNewAppDialog(true);
+  }
+
   async function createApp() {
     if (!session?.user?.id) return;
+    setShowNewAppDialog(false);
     setCreating(true);
     clearCache(CACHE_KEYS.apps(session.user.id));
     const { data, error } = await supabase.from('apps').insert({ owner_id: session.user.id, name: 'Nieuwe App', ngc_code: DEFAULT_NGC_CODE }).select().single();
     if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
     else if (data) { navigate(`/editor/${data.id}`); }
     setCreating(false);
+  }
+
+  function useTemplateFlow() {
+    setShowNewAppDialog(false);
+    navigate('/templates');
   }
 
   async function duplicateApp(app: App) {
