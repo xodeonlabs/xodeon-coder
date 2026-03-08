@@ -367,6 +367,80 @@ export default function Settings() {
           </div>
         </div>
 
+        {/* Bewaartermijnen overzicht */}
+        <div className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+          <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
+            <Clock className="h-5 w-5 text-primary" />
+            Bewaartermijnen
+          </h2>
+          <p className="text-xs text-muted-foreground mb-4">Overzicht van alle actieve chat-bewaartermijnen en kosten.</p>
+
+          {retentionLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+            </div>
+          ) : retentionItems.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">Geen actieve bewaartermijnen gevonden.</p>
+          ) : (
+            <>
+              <div className="space-y-1.5">
+                {retentionItems.map((item, i) => {
+                  const cost = retentionCostPerMonth(item.hours);
+                  const isUpgraded = item.hours > 12;
+                  return (
+                    <div
+                      key={`${item.type}-${item.id || i}`}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-colors ${
+                        isUpgraded ? 'border-primary/20 bg-primary/5' : 'border-border/30 bg-secondary/20'
+                      }`}
+                    >
+                      <span className="text-lg shrink-0">{item.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-foreground truncate">{item.label}</span>
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-secondary/60 text-muted-foreground font-medium shrink-0">
+                            {item.type === 'app' ? '📱 App' : item.type === 'org' ? '🏢 Bedrijf' : item.type === 'alliance' ? '🤝 Alliantie' : item.type === 'group' ? '👥 Groep' : '💬 Privé'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className={`text-xs font-semibold ${isUpgraded ? 'text-primary' : 'text-muted-foreground'}`}>
+                          {formatRetention(item.hours)}
+                        </span>
+                        {cost > 0 ? (
+                          <span className="text-[10px] font-bold text-yellow-500 flex items-center gap-0.5">
+                            🪙 {cost}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-medium text-muted-foreground/60">Gratis</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Summary */}
+              {(() => {
+                const totalCost = retentionItems.reduce((sum, item) => sum + retentionCostPerMonth(item.hours), 0);
+                const upgradedCount = retentionItems.filter(item => item.hours > 12).length;
+                return (
+                  <div className="mt-4 pt-3 border-t border-border/30 flex items-center justify-between">
+                    <div className="text-xs text-muted-foreground">
+                      <span className="font-medium text-foreground">{upgradedCount}</span> van {retentionItems.length} chats met verlengde bewaring
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Coins className="h-3.5 w-3.5 text-yellow-500" />
+                      <span className="text-sm font-bold text-foreground">{totalCost}</span>
+                      <span className="text-[10px] text-muted-foreground">coins totaal</span>
+                    </div>
+                  </div>
+                );
+              })()}
+            </>
+          )}
+        </div>
+
         {/* Danger zone */}
         <div className="rounded-xl border border-destructive/30 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
           <h2 className="text-lg font-bold text-destructive mb-2 flex items-center gap-2">
