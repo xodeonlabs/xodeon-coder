@@ -345,6 +345,7 @@ export default function Alliances() {
   }
 
   const totalViews = sharedApps.reduce((s, a) => s + a.views, 0);
+  const isAllianceOwner = selectedAlliance?.created_by === session?.user?.id;
 
   if (loading) {
     return (
