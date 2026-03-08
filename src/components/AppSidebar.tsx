@@ -153,7 +153,11 @@ export function AppSidebar() {
                           {unreadGroups > 9 ? '9+' : unreadGroups}
                         </span>
                       )}
-                      {!collapsed && <span>{item.title}</span>}
+                      {item.url === '/berichten' && unreadMessages > 0 && (
+                        <span className="ml-auto min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1">
+                          {unreadMessages > 9 ? '9+' : unreadMessages}
+                        </span>
+                      )}
                     </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
