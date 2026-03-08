@@ -131,7 +131,8 @@ export default function OrganizationPage() {
   const [iconPickerOrgId, setIconPickerOrgId] = useState<string | null>(null);
 
   // Ad management
-  const [orgAd, setOrgAd] = useState<{ id: string; emoji: string; title: string; description: string; url: string } | null>(null);
+  const [orgAds, setOrgAds] = useState<{ id: string; emoji: string; title: string; description: string; url: string }[]>([]);
+  const [editingAdId, setEditingAdId] = useState<string | null>(null);
   const [showAdForm, setShowAdForm] = useState(false);
   const [adEmoji, setAdEmoji] = useState('🚀');
   const [adTitle, setAdTitle] = useState('');
@@ -373,13 +374,13 @@ export default function OrganizationPage() {
     }
     if (!appsRes.error) setOrgApps((appsRes.data as unknown as OrgApp[]) || []);
     if (!coinsRes.error) setOrgCoins((coinsRes.data as unknown as OrgCoin[]) || []);
-    if (!adsRes.error && adsRes.data && adsRes.data.length > 0) {
-      const ad = adsRes.data[0] as any;
-      setOrgAd({ id: ad.id, emoji: ad.emoji, title: ad.title, description: ad.description, url: ad.url });
+    if (!adsRes.error && adsRes.data) {
+      setOrgAds((adsRes.data as any[]).map(ad => ({ id: ad.id, emoji: ad.emoji, title: ad.title, description: ad.description, url: ad.url })));
     } else {
-      setOrgAd(null);
+      setOrgAds([]);
     }
     setShowAdForm(false);
+    setEditingAdId(null);
     setLoadingMembers(false);
     // Load join requests for owner/admin
     loadJoinRequests(org.id);
@@ -538,13 +539,14 @@ export default function OrganizationPage() {
       is_active: true,
       pages: ['dashboard', 'organizations'],
     };
-    if (orgAd) {
-      const { error } = await supabase.from('ads' as any).update(adData).eq('id', orgAd.id);
+    if (editingAdId) {
+      const { error } = await supabase.from('ads' as any).update(adData).eq('id', editingAdId);
       if (error) {
         toast({ title: 'Fout', description: error.message, variant: 'destructive' });
       } else {
-        setOrgAd({ id: orgAd.id, ...adData });
+        setOrgAds(orgAds.map(a => a.id === editingAdId ? { id: editingAdId, ...adData } : a));
         setShowAdForm(false);
+        setEditingAdId(null);
         toast({ title: 'Advertentie bijgewerkt!' });
       }
     } else {
@@ -552,7 +554,7 @@ export default function OrganizationPage() {
       if (error) {
         toast({ title: 'Fout', description: error.message, variant: 'destructive' });
       } else if (data) {
-        setOrgAd({ id: (data as any).id, ...adData });
+        setOrgAds([...orgAds, { id: (data as any).id, ...adData }]);
         setShowAdForm(false);
         toast({ title: 'Advertentie aangemaakt!' });
       }
@@ -560,13 +562,11 @@ export default function OrganizationPage() {
     setAdSaving(false);
   }
 
-  async function deleteOrgAd() {
-    if (!orgAd) return;
+  async function deleteOrgAd(adId: string) {
     if (!confirm('Weet je zeker dat je de advertentie wilt verwijderen?')) return;
-    const { error } = await supabase.from('ads' as any).delete().eq('id', orgAd.id);
+    const { error } = await supabase.from('ads' as any).delete().eq('id', adId);
     if (!error) {
-      setOrgAd(null);
-      setShowAdForm(false);
+      setOrgAds(orgAds.filter(a => a.id !== adId));
       toast({ title: 'Advertentie verwijderd' });
     }
   }
@@ -1012,45 +1012,50 @@ export default function OrganizationPage() {
             )}
           </div>
 
-          {/* Advertentie */}
+          {/* Advertenties */}
           {(selectedOrg.owner_id === session?.user?.id || members.find(m => m.user_id === session?.user?.id && m.role === 'admin')) && (
             <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                     <Megaphone className="h-5 w-5 text-accent" />
-                    Advertentie
+                    Advertenties ({orgAds.length}/{[1,2,3,5,10][(((selectedOrg as any).level ?? 1) - 1)] ?? 1})
                   </h3>
                   <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
                     <Coins className="h-3 w-3" /> 10 coins per maand per actieve advertentie
                   </p>
                 </div>
-                {orgAd && !showAdForm && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => { setAdEmoji(orgAd.emoji); setAdTitle(orgAd.title); setAdDescription(orgAd.description); setAdUrl(orgAd.url); setShowAdForm(true); }}
-                      className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-                      title="Bewerken"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button onClick={deleteOrgAd} className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Verwijderen">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                )}
               </div>
 
-              {orgAd && !showAdForm ? (
-                <div className="flex items-center gap-3 rounded-lg border border-border/40 p-3" style={{ background: 'hsl(var(--background))' }}>
-                  <span className="text-2xl">{orgAd.emoji}</span>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-sm text-foreground">{orgAd.title}</p>
-                    <p className="text-xs text-muted-foreground truncate">{orgAd.description}</p>
-                    {orgAd.url && <p className="text-xs text-primary truncate mt-0.5">{orgAd.url}</p>}
-                  </div>
+              {/* Existing ads list */}
+              {orgAds.length > 0 && !showAdForm && (
+                <div className="space-y-2 mb-3">
+                  {orgAds.map(ad => (
+                    <div key={ad.id} className="flex items-center gap-3 rounded-lg border border-border/40 p-3" style={{ background: 'hsl(var(--background))' }}>
+                      <span className="text-2xl">{ad.emoji}</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-sm text-foreground">{ad.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{ad.description}</p>
+                        {ad.url && <p className="text-xs text-primary truncate mt-0.5">{ad.url}</p>}
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => { setEditingAdId(ad.id); setAdEmoji(ad.emoji); setAdTitle(ad.title); setAdDescription(ad.description); setAdUrl(ad.url); setShowAdForm(true); }}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                          title="Bewerken"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button onClick={() => deleteOrgAd(ad.id)} className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Verwijderen">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ) : showAdForm ? (
+              )}
+
+              {showAdForm ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <div>
@@ -1091,25 +1096,25 @@ export default function OrganizationPage() {
                       disabled={adSaving || !adTitle.trim()}
                       className="px-4 py-2 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
                     >
-                      {adSaving ? 'Opslaan...' : orgAd ? 'Bijwerken' : 'Aanmaken'}
+                      {adSaving ? 'Opslaan...' : editingAdId ? 'Bijwerken' : 'Aanmaken'}
                     </button>
                     <button
-                      onClick={() => setShowAdForm(false)}
+                      onClick={() => { setShowAdForm(false); setEditingAdId(null); }}
                       className="px-4 py-2 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
                     >
                       Annuleren
                     </button>
                   </div>
                 </div>
-              ) : (
+              ) : orgAds.length < ([1,2,3,5,10][(((selectedOrg as any).level ?? 1) - 1)] ?? 1) ? (
                 <button
-                  onClick={() => { setAdEmoji('🚀'); setAdTitle(''); setAdDescription(''); setAdUrl(''); setShowAdForm(true); }}
+                  onClick={() => { setEditingAdId(null); setAdEmoji('🚀'); setAdTitle(''); setAdDescription(''); setAdUrl(''); setShowAdForm(true); }}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors w-full justify-center"
                 >
                   <Plus className="h-4 w-4" />
-                  Advertentie maken (max. {[1,2,3,5,10][(((selectedOrg as any).level ?? 1) - 1)] ?? 1})
+                  Advertentie toevoegen
                 </button>
-              )}
+              ) : null}
             </div>
           )}
 
