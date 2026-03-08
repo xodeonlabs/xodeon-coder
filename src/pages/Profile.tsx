@@ -200,16 +200,18 @@ export default function Profile() {
       const ext = file.name.split('.').pop() || 'png';
       const path = `${session.user.id}/banner_${Date.now()}.${ext}`;
       
-      // Delete old banner first to avoid conflicts
-      const { data: existing } = await supabase.storage.from('avatars').list(session.user.id, { search: 'banner_' });
-      if (existing && existing.length > 0) {
-        const toDelete = existing.filter(f => f.name.startsWith('banner_')).map(f => `${session.user.id}/${f.name}`);
-        if (toDelete.length > 0) await supabase.storage.from('avatars').remove(toDelete);
-      }
+      // Delete old banners first to avoid conflicts
+      try {
+        const { data: existing } = await supabase.storage.from('avatars').list(session.user.id);
+        if (existing && existing.length > 0) {
+          const toDelete = existing.filter(f => f.name.startsWith('banner_')).map(f => `${session.user.id}/${f.name}`);
+          if (toDelete.length > 0) await supabase.storage.from('avatars').remove(toDelete);
+        }
+      } catch (_) { /* ignore cleanup errors */ }
 
       const { error: uploadErr } = await supabase.storage
         .from('avatars')
-        .upload(path, file, { cacheControl: '3600', upsert: false });
+        .upload(path, file, { cacheControl: '3600', upsert: true });
       if (uploadErr) throw uploadErr;
       const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
       const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
