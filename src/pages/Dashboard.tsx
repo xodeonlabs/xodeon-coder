@@ -102,7 +102,13 @@ export default function Dashboard() {
     } catch { /* ignore */ }
   }, []);
 
-  useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); }, []);
+  useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); checkAdminRole(); }, []);
+
+  async function checkAdminRole() {
+    if (!session?.user?.id) return;
+    const { data } = await supabase.from('user_roles').select('role').eq('user_id', session.user.id).eq('role', 'admin' as any);
+    setIsAdmin(!!(data && data.length > 0));
+  }
 
   async function fetchOrgs() {
     const { data } = await supabase.from('organizations').select('id, name').order('name');
