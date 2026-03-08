@@ -264,30 +264,30 @@ export default function OrganizationPage() {
   return (
     <div className="min-h-screen" style={{ background: 'hsl(var(--background))' }}>
       {/* Header */}
-      <header className="border-b border-border/50 px-6 py-4 flex items-center justify-between backdrop-blur-sm" style={{ background: 'hsl(var(--ide-toolbar) / 0.8)' }}>
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/')} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
+      <header className="border-b border-border/50 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between backdrop-blur-sm" style={{ background: 'hsl(var(--ide-toolbar) / 0.8)' }}>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button onClick={() => navigate('/')} className="p-1.5 sm:p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
             <ArrowLeft className="h-4 w-4" />
           </button>
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center">
-            <Building2 className="h-4 w-4 text-white" />
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center">
+            <Building2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
           </div>
-          <h1 className="text-xl font-bold text-foreground tracking-tight">Bedrijven</h1>
+          <h1 className="text-base sm:text-xl font-bold text-foreground tracking-tight">Bedrijven</h1>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
         {/* Actions */}
-        <div className="flex items-center gap-3 mb-10">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mb-6 sm:mb-10">
           <button
             onClick={() => { setShowCreate(true); setShowJoin(false); }}
-            className="flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 active:scale-95"
+            className="flex items-center justify-center gap-2 rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 active:scale-95"
           >
             <Plus className="h-4 w-4" /> Bedrijf starten
           </button>
           <button
             onClick={() => { setShowJoin(true); setShowCreate(false); }}
-            className="flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all border border-border text-foreground hover:bg-secondary active:scale-95"
+            className="flex items-center justify-center gap-2 rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 text-sm font-semibold transition-all border border-border text-foreground hover:bg-secondary active:scale-95"
           >
             <LogIn className="h-4 w-4" /> Bedrijf joinen
           </button>
@@ -359,9 +359,9 @@ export default function OrganizationPage() {
                 style={{ background: 'hsl(var(--card))' }}
                 onClick={() => viewMembers(org)}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center shrink-0">
                       <Building2 className="h-5 w-5 text-accent" />
                     </div>
                     <div>
@@ -371,7 +371,7 @@ export default function OrganizationPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                  <div className="flex items-center gap-2 ml-13 sm:ml-0" onClick={e => e.stopPropagation()}>
                     <button
                       onClick={() => copyCode(org.join_code)}
                       className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-mono bg-secondary text-muted-foreground hover:text-foreground transition-colors"
@@ -395,7 +395,7 @@ export default function OrganizationPage() {
         {/* Members panel */}
         {selectedOrg && (
           <>
-          <div className="mt-8 rounded-xl border border-border/50 p-6" style={{ background: 'hsl(var(--card))' }}>
+          <div className="mt-6 sm:mt-8 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
             <h3 className="text-lg font-bold text-foreground mb-1 flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
               Leden van {selectedOrg.name}
@@ -411,11 +411,11 @@ export default function OrganizationPage() {
             ) : (
               <div className="space-y-2">
                 {members.map(member => (
-                  <div key={member.id} className="flex items-center justify-between rounded-lg px-4 py-3 bg-background/50">
-                    <div className="flex items-center gap-3">
+                  <div key={member.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 bg-background/50">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                       {roleIcon(member.role)}
-                      <span className="text-sm text-foreground font-mono">{member.user_id.slice(0, 8)}...</span>
-                      <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-secondary">{roleLabel(member.role)}</span>
+                      <span className="text-sm text-foreground font-mono truncate">{member.user_id.slice(0, 8)}...</span>
+                      <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-secondary shrink-0">{roleLabel(member.role)}</span>
                     </div>
                     {selectedOrg.owner_id === session?.user?.id && member.role !== 'owner' && (
                       <div className="flex items-center gap-2">
@@ -438,7 +438,7 @@ export default function OrganizationPage() {
             )}
           </div>
 
-          <div className="mt-6 rounded-xl border border-border/50 p-6" style={{ background: 'hsl(var(--card))' }}>
+          <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
             <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
               <AppWindow className="h-5 w-5 text-accent" />
               Apps van {selectedOrg.name}
@@ -465,9 +465,9 @@ export default function OrganizationPage() {
           </div>
 
           {/* Bedrijfskluis */}
-          <div className="mt-6 rounded-xl border border-border/50 p-6" style={{ background: 'hsl(var(--card))' }}>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+          <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
                 <Coins className="h-5 w-5 text-yellow-400" />
                 Bedrijfskluis
               </h3>
@@ -478,7 +478,6 @@ export default function OrganizationPage() {
                 >
                   <ArrowDownCircle className="h-3.5 w-3.5" /> Storten
                 </button>
-                {/* Alleen admins/owners kunnen opnemen */}
                 {(() => {
                   const myMember = members.find(m => m.user_id === session?.user?.id);
                   const isAdminOrOwner = myMember && (myMember.role === 'owner' || myMember.role === 'admin');
@@ -495,11 +494,11 @@ export default function OrganizationPage() {
             </div>
 
             {/* Balance display */}
-            <div className="rounded-xl p-6 mb-4 text-center" style={{ background: 'hsl(var(--background))' }}>
+            <div className="rounded-xl p-4 sm:p-6 mb-4 text-center" style={{ background: 'hsl(var(--background))' }}>
               <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Totaal saldo</p>
               <div className="flex items-center justify-center gap-2">
-                <Coins className="h-8 w-8 text-yellow-400" />
-                <span className="text-4xl font-bold text-foreground font-mono">
+                <Coins className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400" />
+                <span className="text-3xl sm:text-4xl font-bold text-foreground font-mono">
                   {orgCoins.reduce((sum, c) => sum + c.balance, 0).toLocaleString('nl-NL')}
                 </span>
               </div>
@@ -520,7 +519,7 @@ export default function OrganizationPage() {
                 <h4 className="text-sm font-semibold text-foreground mb-3">
                   {showDeposit ? '💰 Coins storten' : '💸 Coins opnemen'}
                 </h4>
-                <div className="flex gap-3 mb-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-3">
                   <input
                     type="number"
                     placeholder="Bedrag"

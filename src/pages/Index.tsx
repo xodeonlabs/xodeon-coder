@@ -97,8 +97,9 @@ const Index = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [leftOpen, setLeftOpen] = useState(true);
-  const [rightOpen, setRightOpen] = useState(true);
+  const isMobileInit = typeof window !== 'undefined' && window.innerWidth < 768;
+  const [leftOpen, setLeftOpen] = useState(!isMobileInit);
+  const [rightOpen, setRightOpen] = useState(!isMobileInit);
   const [activeTab, setActiveTab] = useState<string>('global');
   const [editorMode, setEditorMode] = useState<'code' | 'design'>('code');
   const [leftTab, setLeftTab] = useState<'explorer' | 'versions'>('explorer');
