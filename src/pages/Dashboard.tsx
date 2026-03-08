@@ -841,7 +841,7 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="flex items-center gap-2.5 shrink-0">
-            <button onClick={createApp} disabled={creating} className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs sm:text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 disabled:opacity-50 active:scale-[0.98]">
+            <button onClick={handleNewAppClick} disabled={creating} className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs sm:text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 disabled:opacity-50 active:scale-[0.98]">
               <Plus className="h-4 w-4" />
               Nieuwe App
             </button>
