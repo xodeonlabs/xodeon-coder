@@ -166,7 +166,7 @@ export function parseNGC(code: string): ParseResult {
       }
 
       // Try to parse as child node
-      const childResult = parseNode(idx, headerLine.indent);
+      const childResult = parseNode(idx, headerLine.indent, nodePath);
       if (childResult) {
         node.children.push(childResult.node);
         node.endLine = childResult.node.endLine;
