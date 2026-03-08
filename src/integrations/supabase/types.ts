@@ -268,6 +268,35 @@ export type Database = {
           },
         ]
       }
+      org_chat_read_status: {
+        Row: {
+          id: string
+          last_read_at: string
+          organization_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          last_read_at?: string
+          organization_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          last_read_at?: string
+          organization_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_chat_read_status_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_coin_transactions: {
         Row: {
           amount: number

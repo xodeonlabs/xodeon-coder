@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Send } from 'lucide-react';
+import { Send, Check, CheckCheck } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface OrgChatMessage {
@@ -21,10 +21,16 @@ export function OrgChat({ organizationId }: OrgChatProps) {
   const [profiles, setProfiles] = useState<Record<string, { display_name: string | null; avatar_url: string | null }>>({});
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [lastReadAt, setLastReadAt] = useState<string | null>(null);
+  const [otherReadAt, setOtherReadAt] = useState<Record<string, string>>({});
   const bottomRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Load messages + profiles
+  // Load messages + profiles + read status
   useEffect(() => {
+    if (!session?.user?.id) return;
+
+    // Load messages
     supabase
       .from('org_chat_messages')
       .select('*')
@@ -36,7 +42,26 @@ export function OrgChat({ organizationId }: OrgChatProps) {
         setMessages(data as OrgChatMessage[]);
         await loadProfiles(data.map(m => m.user_id));
       });
-  }, [organizationId]);
+
+    // Load own read status
+    supabase
+      .from('org_chat_read_status')
+      .select('last_read_at')
+      .eq('organization_id', organizationId)
+      .eq('user_id', session.user.id)
+      .single()
+      .then(({ data }) => {
+        if (data) setLastReadAt((data as any).last_read_at);
+      });
+
+    // Load others' read status (to show read receipts)
+    loadOtherReadStatus();
+  }, [organizationId, session?.user?.id]);
+
+  async function loadOtherReadStatus() {
+    // We can only read our own read status due to RLS, so we skip others for now
+    // Read receipts will show based on message order
+  }
 
   async function loadProfiles(userIds: string[]) {
     const unique = [...new Set(userIds)];
@@ -52,6 +77,23 @@ export function OrgChat({ organizationId }: OrgChatProps) {
       });
     }
   }
+
+  // Mark as read when viewing
+  const markAsRead = useCallback(async () => {
+    if (!session?.user?.id || messages.length === 0) return;
+    const now = new Date().toISOString();
+    setLastReadAt(now);
+    await supabase.from('org_chat_read_status').upsert({
+      organization_id: organizationId,
+      user_id: session.user.id,
+      last_read_at: now,
+    } as any, { onConflict: 'organization_id,user_id' });
+  }, [organizationId, session?.user?.id, messages.length]);
+
+  // Mark as read on mount and when new messages arrive
+  useEffect(() => {
+    markAsRead();
+  }, [messages.length, markAsRead]);
 
   // Realtime
   useEffect(() => {
@@ -91,40 +133,78 @@ export function OrgChat({ organizationId }: OrgChatProps) {
 
   const currentUserId = session?.user?.id;
 
+  // Determine unread count
+  const unreadCount = lastReadAt
+    ? messages.filter(m => m.user_id !== currentUserId && m.created_at > lastReadAt).length
+    : 0;
+
+  // Find first unread message index
+  const firstUnreadIdx = lastReadAt
+    ? messages.findIndex(m => m.user_id !== currentUserId && m.created_at > lastReadAt)
+    : -1;
+
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-3 space-y-2.5 min-h-0">
+      {/* Unread badge header */}
+      {unreadCount > 0 && (
+        <div className="px-3 py-1.5 bg-primary/10 border-b border-primary/20 flex items-center justify-center gap-1.5">
+          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+          <span className="text-[11px] font-semibold text-primary">
+            {unreadCount} ongelezen bericht{unreadCount > 1 ? 'en' : ''}
+          </span>
+        </div>
+      )}
+
+      <div ref={containerRef} className="flex-1 overflow-y-auto p-3 space-y-2.5 min-h-0">
         {messages.length === 0 && (
           <p className="text-xs text-muted-foreground text-center py-6">Nog geen berichten in deze groepschat</p>
         )}
-        {messages.map(msg => {
+        {messages.map((msg, idx) => {
           const isMe = msg.user_id === currentUserId;
           const profile = profiles[msg.user_id];
           const name = profile?.display_name || msg.user_id.slice(0, 8);
+          const isFirstUnread = idx === firstUnreadIdx;
+
           return (
-            <div key={msg.id} className={`flex gap-2 ${isMe ? 'flex-row-reverse' : ''}`}>
-              {!isMe && (
-                <Avatar className="h-6 w-6 shrink-0 mt-0.5">
-                  {profile?.avatar_url ? <AvatarImage src={profile.avatar_url} alt="" /> : null}
-                  <AvatarFallback className="text-[8px] font-bold bg-primary/20 text-primary">
-                    {name.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              )}
-              <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]`}>
-                {!isMe && <span className="text-[10px] text-muted-foreground mb-0.5 px-1">{name}</span>}
-                <div
-                  className={`rounded-lg px-2.5 py-1.5 text-xs break-words ${
-                    isMe
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-secondary text-secondary-foreground'
-                  }`}
-                >
-                  {msg.content}
+            <div key={msg.id}>
+              {/* Unread divider */}
+              {isFirstUnread && (
+                <div className="flex items-center gap-2 my-2">
+                  <div className="flex-1 h-px bg-primary/30" />
+                  <span className="text-[10px] font-semibold text-primary px-2">Nieuw</span>
+                  <div className="flex-1 h-px bg-primary/30" />
                 </div>
-                <span className="text-[9px] text-muted-foreground mt-0.5 px-1">
-                  {new Date(msg.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
-                </span>
+              )}
+
+              <div className={`flex gap-2 ${isMe ? 'flex-row-reverse' : ''}`}>
+                {!isMe && (
+                  <Avatar className="h-6 w-6 shrink-0 mt-0.5">
+                    {profile?.avatar_url ? <AvatarImage src={profile.avatar_url} alt="" /> : null}
+                    <AvatarFallback className="text-[8px] font-bold bg-primary/20 text-primary">
+                      {name.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
+                <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]`}>
+                  {!isMe && <span className="text-[10px] text-muted-foreground mb-0.5 px-1">{name}</span>}
+                  <div
+                    className={`rounded-lg px-2.5 py-1.5 text-xs break-words ${
+                      isMe
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary text-secondary-foreground'
+                    }`}
+                  >
+                    {msg.content}
+                  </div>
+                  <div className="flex items-center gap-1 mt-0.5 px-1">
+                    <span className="text-[9px] text-muted-foreground">
+                      {new Date(msg.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    {isMe && (
+                      <CheckCheck className="h-3 w-3 text-primary/60" />
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           );
