@@ -418,6 +418,111 @@ export type Database = {
           },
         ]
       }
+      chat_group_members: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "chat_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_group_messages: {
+        Row: {
+          content: string
+          created_at: string
+          group_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          group_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          group_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_group_messages_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "chat_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_groups: {
+        Row: {
+          chat_retention_hours: number
+          created_at: string
+          created_by: string
+          icon: string | null
+          id: string
+          name: string
+          organization_id: string | null
+          type: Database["public"]["Enums"]["chat_group_type"]
+          updated_at: string
+        }
+        Insert: {
+          chat_retention_hours?: number
+          created_at?: string
+          created_by: string
+          icon?: string | null
+          id?: string
+          name: string
+          organization_id?: string | null
+          type?: Database["public"]["Enums"]["chat_group_type"]
+          updated_at?: string
+        }
+        Update: {
+          chat_retention_hours?: number
+          created_at?: string
+          created_by?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          organization_id?: string | null
+          type?: Database["public"]["Enums"]["chat_group_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_groups_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           app_id: string
@@ -971,6 +1076,8 @@ export type Database = {
       is_app_collaborator: { Args: { _app_id: string }; Returns: boolean }
       is_app_org_member: { Args: { _app_id: string }; Returns: boolean }
       is_app_owner: { Args: { _app_id: string }; Returns: boolean }
+      is_group_creator: { Args: { _group_id: string }; Returns: boolean }
+      is_group_member: { Args: { _group_id: string }; Returns: boolean }
       is_org_member: { Args: { _org_id: string }; Returns: boolean }
       is_org_owner: { Args: { _org_id: string }; Returns: boolean }
       is_own_app: { Args: { _app_id: string }; Returns: boolean }
@@ -978,6 +1085,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "owner"
+      chat_group_type: "friend_group" | "private" | "org_channel"
       org_role: "owner" | "admin" | "member"
     }
     CompositeTypes: {
@@ -1107,6 +1215,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user", "owner"],
+      chat_group_type: ["friend_group", "private", "org_channel"],
       org_role: ["owner", "admin", "member"],
     },
   },
