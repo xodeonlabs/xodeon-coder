@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { NGCNode } from '@/lib/ngc-ast';
-import { createRuntime, NGCRuntime, resolveVarRefs, parseVarDefinition, parseListDefinition, parseDataCommand, clearPersistedState } from '@/lib/ngc-runtime';
+import { createRuntime, NGCRuntime, resolveVarRefs, parseVarDefinition, parseListDefinition, parseDataCommand, parseCoinsCommand, clearPersistedState } from '@/lib/ngc-runtime';
 
 interface PreviewProps {
   ast: NGCNode | null;
