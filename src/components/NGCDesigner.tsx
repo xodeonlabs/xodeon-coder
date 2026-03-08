@@ -156,6 +156,35 @@ function DraggableNode({
         {node.type}: {node.name}
       </div>
 
+      {/* Delete button */}
+      {isSelected && onDelete && (
+        <button
+          onMouseDown={e => e.stopPropagation()}
+          onClick={e => {
+            e.stopPropagation();
+            onDelete(node.id);
+          }}
+          style={{
+            position: 'absolute',
+            top: -18,
+            right: 0,
+            width: 16,
+            height: 16,
+            background: '#ef4444',
+            border: 'none',
+            borderRadius: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            zIndex: 200,
+          }}
+          title="Verwijderen"
+        >
+          <Trash2 size={10} color="#fff" />
+        </button>
+      )}
+
       {/* Resize handle */}
       {isSelected && size && (
         <div
