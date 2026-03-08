@@ -69,7 +69,7 @@ const PublicApp = () => {
         <span className="text-[10px] text-muted-foreground">Gemaakt met NGC Studio</span>
       </div>
       <div className="flex-1 overflow-auto">
-        <NGCPreview ast={ast} />
+        <NGCPreview ast={ast} organizationId={orgId} />
       </div>
     </div>
   );

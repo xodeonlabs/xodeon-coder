@@ -36,7 +36,7 @@ const Preview = () => {
         </button>
       </div>
       <div className="flex-1 overflow-auto">
-        <NGCPreview ast={ast} />
+        <NGCPreview ast={ast} organizationId={orgId} />
       </div>
     </div>
   );
