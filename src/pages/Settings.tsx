@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff, Clock, Coins, Pencil, Bell, BellOff } from 'lucide-react';
-import { getNotificationSoundEnabled, setNotificationSoundEnabled, getNotificationToastEnabled, setNotificationToastEnabled, getDoNotDisturbEnabled, setDoNotDisturbEnabled } from '@/hooks/useNotificationSound';
+import { getNotificationSoundEnabled, setNotificationSoundEnabled, getNotificationToastEnabled, setNotificationToastEnabled, useDoNotDisturb } from '@/hooks/useNotificationSound';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { getCached, setCache, clearCache, CACHE_TTL } from '@/lib/cache';
 
