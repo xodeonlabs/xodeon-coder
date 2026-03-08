@@ -39,13 +39,17 @@ export default function Settings() {
     }
     supabase
       .from('profiles')
-      .select('display_name, bio, username')
+      .select('display_name, bio, username, social_links, show_email')
       .eq('id', session.user.id)
       .single()
       .then(({ data }) => {
         if (data?.display_name) setDisplayName(data.display_name);
         if ((data as any)?.bio) setBio((data as any).bio);
         if ((data as any)?.username) setUsername((data as any).username);
+        if ((data as any)?.show_email) setShowEmail((data as any).show_email);
+        if ((data as any)?.social_links && typeof (data as any).social_links === 'object') {
+          setSocialLinks(prev => ({ ...prev, ...(data as any).social_links }));
+        }
         if (data) setCache(cacheKey, { display_name: data.display_name, bio: (data as any)?.bio, username: (data as any)?.username });
       });
   }, [session?.user]);
