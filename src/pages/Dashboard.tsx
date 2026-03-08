@@ -904,3 +904,91 @@ function ModalActionBtn({ onClick, disabled, loading, label }: { onClick: () => 
     </button>
   );
 }
+
+interface ContractListProps {
+  contracts: Contract[];
+  currentUserId: string;
+  onRespond: (id: string, action: 'accepted' | 'rejected' | 'counter', counterPct?: number) => void;
+  appNames?: Record<string, string>;
+  showAppName?: boolean;
+}
+
+function ContractList({ contracts: items, currentUserId, onRespond, appNames, showAppName }: ContractListProps) {
+  const [counterValues, setCounterValues] = useState<Record<string, number>>({});
+
+  if (items.length === 0) {
+    return <p className="text-sm text-muted-foreground/50 py-4 text-center">Geen contracten gevonden.</p>;
+  }
+
+  const statusLabels: Record<string, { label: string; color: string }> = {
+    pending: { label: 'Wachtend', color: 'text-yellow-400' },
+    counter: { label: 'Tegenvoorstel', color: 'text-orange-400' },
+    accepted: { label: 'Geaccepteerd', color: 'text-emerald-400' },
+    rejected: { label: 'Afgewezen', color: 'text-destructive' },
+  };
+
+  return (
+    <div className="space-y-3 max-h-[400px] overflow-y-auto">
+      {items.map(c => {
+        const isCollaborator = c.collaborator_id === currentUserId;
+        const isOwner = c.proposed_by === currentUserId || !isCollaborator;
+        const statusInfo = statusLabels[c.status] || { label: c.status, color: 'text-muted-foreground' };
+        const canRespond = (c.status === 'pending' && isCollaborator) || (c.status === 'counter' && isOwner);
+        const displayPct = c.status === 'counter' && c.counter_percentage ? c.counter_percentage : c.percentage;
+
+        return (
+          <div key={c.id} className="glass-card rounded-xl p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Handshake className="h-4 w-4 text-accent/70" />
+                <span className="text-sm font-medium text-foreground">
+                  {showAppName && appNames?.[c.app_id] ? appNames[c.app_id] : 'Contract'}
+                </span>
+              </div>
+              <span className={`text-[10px] font-semibold uppercase tracking-wider ${statusInfo.color}`}>
+                {statusInfo.label}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="flex-1 bg-secondary/30 rounded-full h-2 overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-accent to-primary rounded-full transition-all" style={{ width: `${displayPct * 2}%` }} />
+              </div>
+              <span className="text-sm font-bold text-foreground tabular-nums">{displayPct}%</span>
+            </div>
+
+            {c.status === 'counter' && c.counter_percentage && (
+              <p className="text-[10px] text-muted-foreground">
+                Tegenvoorstel: {c.counter_percentage}% (origineel: {c.percentage}%)
+              </p>
+            )}
+
+            {canRespond && (
+              <div className="flex items-center gap-2 pt-1">
+                <button onClick={() => onRespond(c.id, 'accepted')} className="px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors">
+                  Accepteren
+                </button>
+                <button onClick={() => onRespond(c.id, 'rejected')} className="px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 transition-colors">
+                  Afwijzen
+                </button>
+                {isCollaborator && c.status === 'pending' && (
+                  <div className="flex items-center gap-1.5 ml-auto">
+                    <input
+                      type="number" min={1} max={50}
+                      value={counterValues[c.id] ?? c.percentage}
+                      onChange={e => setCounterValues(prev => ({ ...prev, [c.id]: parseInt(e.target.value) || 1 }))}
+                      className="w-14 px-2 py-1 text-[11px] rounded-lg border border-border/40 bg-background/80 text-foreground text-center focus:outline-none focus:ring-1 focus:ring-accent/40"
+                    />
+                    <button onClick={() => onRespond(c.id, 'counter', counterValues[c.id] ?? c.percentage)} className="px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-colors">
+                      Tegenvoorstel
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
