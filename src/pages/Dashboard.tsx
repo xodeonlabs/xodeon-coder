@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { AdBanner } from '@/components/AdBanner';
 import { AppIcon, IconPicker } from '@/components/IconPicker';
+import { CoinConfirmDialog } from '@/components/CoinConfirmDialog';
 import confetti from 'canvas-confetti';
 
 // 🎨 Surprise 10: Unique gradient accents per app card
