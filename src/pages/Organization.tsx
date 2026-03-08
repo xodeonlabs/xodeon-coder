@@ -131,7 +131,8 @@ export default function OrganizationPage() {
   const [iconPickerOrgId, setIconPickerOrgId] = useState<string | null>(null);
 
   // Ad management
-  const [orgAd, setOrgAd] = useState<{ id: string; emoji: string; title: string; description: string; url: string } | null>(null);
+  const [orgAds, setOrgAds] = useState<{ id: string; emoji: string; title: string; description: string; url: string }[]>([]);
+  const [editingAdId, setEditingAdId] = useState<string | null>(null);
   const [showAdForm, setShowAdForm] = useState(false);
   const [adEmoji, setAdEmoji] = useState('🚀');
   const [adTitle, setAdTitle] = useState('');
