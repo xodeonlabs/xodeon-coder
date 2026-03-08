@@ -288,6 +288,8 @@ export default function OrganizationPage() {
     }
     setShowAdForm(false);
     setLoadingMembers(false);
+    // Load join requests for owner/admin
+    loadJoinRequests(org.id);
   }
 
   const [personalCoins, setPersonalCoins] = useState(0);
