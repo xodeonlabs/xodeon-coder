@@ -1128,7 +1128,7 @@ export default function AdminPanel() {
                         <div>
                           <label className="text-[11px] text-muted-foreground mb-1 block">Categorie</label>
                           <div className="flex flex-wrap gap-1.5">
-                            {['algemeen', 'game', 'tool', 'shop', 'educatie'].map(cat => (
+                            {(adminCategories.length > 0 ? adminCategories.map(c => c.value) : ['algemeen', 'game', 'tool', 'shop', 'educatie']).map(cat => (
                               <button
                                 key={cat}
                                 onClick={() => setTemplateEditCategory(cat)}
