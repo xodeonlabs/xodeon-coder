@@ -130,13 +130,78 @@ export default function OrganizationPage() {
   async function viewMembers(org: Organization) {
     setSelectedOrg(org);
     setLoadingMembers(true);
-    const [membersRes, appsRes] = await Promise.all([
+    setShowDeposit(false);
+    setShowWithdraw(false);
+    const [membersRes, appsRes, coinsRes, txRes] = await Promise.all([
       supabase.from('organization_members').select('*').eq('organization_id', org.id).order('created_at', { ascending: true }),
       supabase.from('apps').select('id, name, updated_at').eq('organization_id', org.id as any).order('updated_at', { ascending: false }),
+      supabase.from('org_coins').select('*').eq('organization_id', org.id),
+      supabase.from('org_coin_transactions').select('*').eq('organization_id', org.id).order('created_at', { ascending: false }).limit(20),
     ]);
     if (!membersRes.error) setMembers((membersRes.data as unknown as OrgMember[]) || []);
     if (!appsRes.error) setOrgApps((appsRes.data as unknown as OrgApp[]) || []);
+    if (!coinsRes.error) setOrgCoins((coinsRes.data as unknown as OrgCoin[]) || []);
+    if (!txRes.error) setTransactions((txRes.data as unknown as CoinTransaction[]) || []);
     setLoadingMembers(false);
+  }
+
+  async function handleCoinTransaction(type: 'deposit' | 'withdraw') {
+    if (!selectedOrg || !session?.user?.id || !txAmount.trim()) return;
+    const amount = parseInt(txAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast({ title: 'Fout', description: 'Voer een geldig bedrag in', variant: 'destructive' });
+      return;
+    }
+
+    setTxProcessing(true);
+    try {
+      // Get or create coin record
+      let coin = orgCoins.find(c => c.name === 'coins');
+      if (!coin) {
+        const { data, error } = await supabase.from('org_coins')
+          .insert({ organization_id: selectedOrg.id, name: 'coins', balance: 0 } as any)
+          .select()
+          .single();
+        if (error) throw error;
+        coin = data as unknown as OrgCoin;
+      }
+
+      const currentBalance = coin.balance;
+      if (type === 'withdraw' && currentBalance < amount) {
+        toast({ title: 'Onvoldoende saldo', description: `Kluis heeft maar ${currentBalance} coins`, variant: 'destructive' });
+        setTxProcessing(false);
+        return;
+      }
+
+      const newBalance = type === 'deposit' ? currentBalance + amount : currentBalance - amount;
+
+      // Update balance
+      const { error: updateErr } = await supabase.from('org_coins')
+        .update({ balance: newBalance, updated_at: new Date().toISOString() } as any)
+        .eq('id', coin.id);
+      if (updateErr) throw updateErr;
+
+      // Log transaction
+      await supabase.from('org_coin_transactions').insert({
+        organization_id: selectedOrg.id,
+        coin_name: 'coins',
+        amount,
+        type,
+        user_id: session.user.id,
+        note: txNote || (type === 'deposit' ? 'Storting' : 'Opname'),
+      } as any);
+
+      toast({ title: type === 'deposit' ? '💰 Gestort!' : '💸 Opgenomen!', description: `${amount} coins ${type === 'deposit' ? 'gestort in' : 'opgenomen uit'} de kluis` });
+      setTxAmount('');
+      setTxNote('');
+      setShowDeposit(false);
+      setShowWithdraw(false);
+      // Refresh
+      viewMembers(selectedOrg);
+    } catch (err: any) {
+      toast({ title: 'Fout', description: err.message, variant: 'destructive' });
+    }
+    setTxProcessing(false);
   }
 
   async function removeMember(memberId: string) {
