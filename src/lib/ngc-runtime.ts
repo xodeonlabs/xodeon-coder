@@ -21,6 +21,7 @@ export interface NGCRuntime {
   lists: Record<string, string[]>;
   data: Record<string, DataRecord[]>;
   coins: Record<string, number>;
+  ownerCoins: Record<string, number>;
   coinCodes: Record<string, CoinCode[]>;
   getVar: (name: string) => string;
   setVar: (name: string, value: string) => void;
@@ -34,11 +35,13 @@ export interface NGCRuntime {
   dataFind: (table: string, key: string, value: string) => DataRecord | undefined;
   dataClear: (table: string) => void;
   dataUpdate: (table: string, id: string, key: string, value: string) => void;
-  // Coins API
+  // Coins API — trade-based: coins transfer between owner pool and user
   coinsGet: (name: string) => number;
+  coinsOwnerGet: (name: string) => number;
   coinsSet: (name: string, amount: number) => void;
-  coinsAdd: (name: string, amount: number) => void;
-  coinsRemove: (name: string, amount: number) => boolean;
+  coinsOwnerSet: (name: string, amount: number) => void;
+  coinsAdd: (name: string, amount: number) => boolean; // owner→user transfer
+  coinsRemove: (name: string, amount: number) => boolean; // user→owner transfer
   coinsRegisterCode: (name: string, code: string, amount: number) => void;
   coinsRedeemCode: (name: string, code: string) => { success: boolean; amount: number };
 }
@@ -55,10 +58,11 @@ function saveState(
   lists: Record<string, string[]>,
   data: Record<string, DataRecord[]>,
   coins: Record<string, number>,
+  ownerCoins: Record<string, number>,
   coinCodes: Record<string, CoinCode[]>
 ) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ variables, lists, data, coins, coinCodes }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ variables, lists, data, coins, ownerCoins, coinCodes }));
   } catch { /* ignore quota errors */ }
 }
 
@@ -67,6 +71,7 @@ function loadState(): {
   lists: Record<string, string[]>;
   data: Record<string, DataRecord[]>;
   coins: Record<string, number>;
+  ownerCoins: Record<string, number>;
   coinCodes: Record<string, CoinCode[]>;
 } | null {
   try {
@@ -86,15 +91,17 @@ export function createRuntime(): NGCRuntime {
   const lists: Record<string, string[]> = saved?.lists ?? {};
   const data: Record<string, DataRecord[]> = saved?.data ?? {};
   const coins: Record<string, number> = saved?.coins ?? {};
+  const ownerCoins: Record<string, number> = saved?.ownerCoins ?? {};
   const coinCodes: Record<string, CoinCode[]> = saved?.coinCodes ?? {};
 
-  const save = () => saveState(variables, lists, data, coins, coinCodes);
+  const save = () => saveState(variables, lists, data, coins, ownerCoins, coinCodes);
 
   return {
     variables,
     lists,
     data,
     coins,
+    ownerCoins,
     coinCodes,
     getVar(name: string) {
       return variables[name] ?? '';
@@ -155,22 +162,36 @@ export function createRuntime(): NGCRuntime {
       }
     },
 
-    // Coins API
+    // Coins API — trade-based: transfers between owner pool and user
     coinsGet(name: string) {
       return coins[name] ?? 0;
+    },
+    coinsOwnerGet(name: string) {
+      return ownerCoins[name] ?? 0;
     },
     coinsSet(name: string, amount: number) {
       coins[name] = Math.max(0, amount);
       save();
     },
-    coinsAdd(name: string, amount: number) {
-      coins[name] = (coins[name] ?? 0) + amount;
+    coinsOwnerSet(name: string, amount: number) {
+      ownerCoins[name] = Math.max(0, amount);
       save();
     },
+    // Coins.Add: transfer from owner → user
+    coinsAdd(name: string, amount: number) {
+      const ownerCurrent = ownerCoins[name] ?? 0;
+      if (ownerCurrent < amount) return false;
+      ownerCoins[name] = ownerCurrent - amount;
+      coins[name] = (coins[name] ?? 0) + amount;
+      save();
+      return true;
+    },
+    // Coins.Remove: transfer from user → owner
     coinsRemove(name: string, amount: number) {
       const current = coins[name] ?? 0;
       if (current < amount) return false;
       coins[name] = current - amount;
+      ownerCoins[name] = (ownerCoins[name] ?? 0) + amount;
       save();
       return true;
     },
@@ -200,6 +221,7 @@ export function resolveVarRefs(text: string, runtime: NGCRuntime): string {
   return text
     .replace(/Var\((\w+)\)/g, (_, name) => runtime.getVar(name))
     .replace(/Coins\((\w+)\)/g, (_, name) => String(runtime.coinsGet(name)))
+    .replace(/OwnerCoins\((\w+)\)/g, (_, name) => String(runtime.coinsOwnerGet(name)))
     .replace(/\{(\w+)\}/g, (_, name) => runtime.getVar(name));
 }
 
