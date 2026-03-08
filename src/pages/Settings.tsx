@@ -61,6 +61,7 @@ export default function Settings() {
   const [savingPassword, setSavingPassword] = useState(false);
   const [retentionItems, setRetentionItems] = useState<RetentionItem[]>([]);
   const [retentionLoading, setRetentionLoading] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(() => getNotificationSoundEnabled());
 
   const isScrollingRef = useRef(false);
 
