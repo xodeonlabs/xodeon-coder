@@ -153,11 +153,11 @@ export default function OrganizationPage() {
       // Fetch profiles for all members
       const userIds = mems.map(m => m.user_id);
       if (userIds.length > 0) {
-        const { data: profiles } = await supabase.from('profiles').select('id, display_name, avatar_url').in('id', userIds);
+        const { data: profiles } = await supabase.from('profiles').select('id, display_name, avatar_url, bio').in('id', userIds);
         if (profiles) {
-          const map: Record<string, { display_name: string | null; avatar_url: string | null }> = {};
+          const map: Record<string, { display_name: string | null; avatar_url: string | null; bio: string | null }> = {};
           for (const p of profiles) {
-            map[p.id] = { display_name: p.display_name, avatar_url: p.avatar_url };
+            map[p.id] = { display_name: p.display_name, avatar_url: p.avatar_url, bio: (p as any).bio ?? null };
           }
           setMemberProfiles(map);
         }
