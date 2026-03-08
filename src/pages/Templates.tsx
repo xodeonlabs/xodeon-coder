@@ -36,6 +36,8 @@ export default function Templates() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('alle');
   const [showMine, setShowMine] = useState(false);
+  const [friends, setFriends] = useState<string[]>([]);
+  const [userOrgs, setUserOrgs] = useState<string[]>([]);
 
   useEffect(() => { loadTemplates(); }, []);
 
