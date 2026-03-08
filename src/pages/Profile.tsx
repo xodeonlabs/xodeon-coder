@@ -232,6 +232,7 @@ export default function Profile() {
                   {initials}
                 </AvatarFallback>
               </Avatar>
+              <StatusDot isDnd={profile?.is_dnd ?? false} size="md" className="absolute bottom-1 right-1" />
             </div>
 
             {/* Name & Bio */}
