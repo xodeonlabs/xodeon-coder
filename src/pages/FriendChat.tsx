@@ -6,7 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ArrowLeft, Send, MessageCircle, Gamepad2 } from 'lucide-react';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { SnakeGame } from '@/components/SnakeGame';
-import { StatusDot } from '@/components/StatusDot';
+import { StatusDot, getOnlineStatus } from '@/components/StatusDot';
 
 interface ChatFriend {
   id: string;
@@ -17,6 +17,7 @@ interface ChatFriend {
   lastMessageAt?: string;
   unread?: number;
   is_dnd?: boolean;
+  last_seen_at?: string | null;
 }
 
 interface Message {
@@ -70,7 +71,7 @@ export default function FriendChatPage() {
 
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, display_name, avatar_url, username, is_dnd')
+      .select('id, display_name, avatar_url, username, is_dnd, last_seen_at')
       .in('id', friendIds);
 
     if (!profiles) { setLoading(false); return; }
@@ -229,7 +230,7 @@ export default function FriendChatPage() {
                     {selectedFriend.display_name?.slice(0, 2).toUpperCase() || '??'}
                   </AvatarFallback>
                 </Avatar>
-                <StatusDot isDnd={(selectedFriend as any).is_dnd ?? false} className="absolute -bottom-0.5 -right-0.5" />
+                <StatusDot status={getOnlineStatus((selectedFriend as any).is_dnd ?? false, (selectedFriend as any).last_seen_at)} className="absolute -bottom-0.5 -right-0.5" />
               </div>
               <div className="min-w-0">
                 <h2 className="text-sm font-bold text-foreground truncate">{selectedFriend.display_name || 'Anoniem'}</h2>
@@ -292,7 +293,7 @@ export default function FriendChatPage() {
                           {friend.unread}
                         </span>
                       ) : (
-                        <StatusDot isDnd={(friend as any).is_dnd ?? false} className="absolute -bottom-0.5 -right-0.5" />
+                        <StatusDot status={getOnlineStatus((friend as any).is_dnd ?? false, (friend as any).last_seen_at)} className="absolute -bottom-0.5 -right-0.5" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">

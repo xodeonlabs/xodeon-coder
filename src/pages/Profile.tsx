@@ -8,7 +8,7 @@ import { ArrowLeft, Calendar, Code2, Users, Eye, ExternalLink, Settings, Sparkle
 import { FriendButton } from '@/components/FriendButton';
 import { FriendsList } from '@/components/FriendsList';
 import { ActivityTimeline } from '@/components/ActivityTimeline';
-import { StatusDot } from '@/components/StatusDot';
+import { StatusDot, getOnlineStatus } from '@/components/StatusDot';
 import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -25,6 +25,7 @@ interface ProfileData {
   show_email: boolean;
   email?: string;
   is_dnd?: boolean;
+  last_seen_at?: string | null;
 }
 
 interface ProfileStats {
@@ -59,18 +60,18 @@ export default function Profile() {
       if (isUuid) {
         const res = await supabase
           .from('profiles')
-          .select('id, display_name, avatar_url, bio, created_at, username, social_links, show_email, public_email, is_dnd')
+          .select('id, display_name, avatar_url, bio, created_at, username, social_links, show_email, public_email, is_dnd, last_seen_at')
           .eq('id', username)
           .single();
-        prof = res.data ? { ...res.data, email: (res.data as any).public_email, is_dnd: (res.data as any).is_dnd } as ProfileData : null;
+        prof = res.data ? { ...res.data, email: (res.data as any).public_email, is_dnd: (res.data as any).is_dnd, last_seen_at: (res.data as any).last_seen_at } as ProfileData : null;
         error = res.error;
       } else {
         const res = await supabase
           .from('profiles')
-          .select('id, display_name, avatar_url, bio, created_at, username, social_links, show_email, public_email, is_dnd')
+          .select('id, display_name, avatar_url, bio, created_at, username, social_links, show_email, public_email, is_dnd, last_seen_at')
           .eq('username', username)
           .single();
-        prof = res.data ? { ...res.data, email: (res.data as any).public_email, is_dnd: (res.data as any).is_dnd } as ProfileData : null;
+        prof = res.data ? { ...res.data, email: (res.data as any).public_email, is_dnd: (res.data as any).is_dnd, last_seen_at: (res.data as any).last_seen_at } as ProfileData : null;
         error = res.error;
       }
 
@@ -225,7 +226,7 @@ export default function Profile() {
                   {initials}
                 </AvatarFallback>
               </Avatar>
-              <StatusDot isDnd={profile?.is_dnd ?? false} size="md" className="absolute bottom-1 right-1" />
+              <StatusDot status={getOnlineStatus(profile?.is_dnd ?? false, (profile as any)?.last_seen_at)} size="lg" className="absolute bottom-1 right-1" />
             </div>
 
             <div className="flex-1 text-center sm:text-left pb-2">

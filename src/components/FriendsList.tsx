@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users } from 'lucide-react';
-import { StatusDot } from '@/components/StatusDot';
+import { StatusDot, getOnlineStatus } from '@/components/StatusDot';
 
 interface Friend {
   id: string;
@@ -12,6 +12,7 @@ interface Friend {
   avatar_url: string | null;
   username: string | null;
   is_dnd?: boolean;
+  last_seen_at?: string | null;
 }
 
 export function FriendsList({ userId }: { userId: string }) {
@@ -44,7 +45,7 @@ export function FriendsList({ userId }: { userId: string }) {
 
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, display_name, avatar_url, username, is_dnd')
+      .select('id, display_name, avatar_url, username, is_dnd, last_seen_at')
       .in('id', friendIds);
 
     setFriends(profiles || []);
@@ -92,7 +93,7 @@ export function FriendsList({ userId }: { userId: string }) {
                     {initials}
                   </AvatarFallback>
                 </Avatar>
-                <StatusDot isDnd={(friend as any).is_dnd ?? false} className="absolute -bottom-0.5 -right-0.5" />
+                <StatusDot status={getOnlineStatus((friend as any).is_dnd ?? false, (friend as any).last_seen_at)} className="absolute -bottom-0.5 -right-0.5" />
               </div>
               <span className="text-[11px] text-muted-foreground font-medium truncate max-w-[72px]">
                 {friend.display_name || 'Anoniem'}

@@ -7,7 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ArrowLeft, Send, Plus, Users, Hash, UserPlus, Trash2, X, Search, Gamepad2, Check, CheckCheck } from 'lucide-react';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { SnakeGame } from '@/components/SnakeGame';
-import { StatusDot } from '@/components/StatusDot';
+import { StatusDot, getOnlineStatus } from '@/components/StatusDot';
 
 interface ChatGroup {
   id: string;
@@ -33,6 +33,7 @@ interface MemberProfile {
   avatar_url: string | null;
   username: string | null;
   is_dnd?: boolean;
+  last_seen_at?: string | null;
 }
 
 export default function GroupChats() {
@@ -102,7 +103,7 @@ export default function GroupChats() {
     if (ids.length > 0) {
       const { data: profs } = await supabase
         .from('profiles')
-        .select('id, display_name, avatar_url, username, is_dnd')
+        .select('id, display_name, avatar_url, username, is_dnd, last_seen_at')
         .in('id', ids);
       const map: Record<string, MemberProfile> = {};
       (profs || []).forEach(p => { map[p.id] = p; });
@@ -140,7 +141,7 @@ export default function GroupChats() {
         setMessages(prev => [...prev, msg]);
         // Load profile if unknown
         if (!profiles[msg.user_id]) {
-          supabase.from('profiles').select('id, display_name, avatar_url, username, is_dnd').eq('id', msg.user_id).maybeSingle().then(({ data }) => {
+          supabase.from('profiles').select('id, display_name, avatar_url, username, is_dnd, last_seen_at').eq('id', msg.user_id).maybeSingle().then(({ data }) => {
             if (data) setProfiles(prev => ({ ...prev, [data.id]: data }));
           });
         }
@@ -512,7 +513,7 @@ export default function GroupChats() {
                             {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
                             <AvatarFallback className="text-[8px] font-bold bg-primary/20 text-primary">{name.slice(0, 2).toUpperCase()}</AvatarFallback>
                           </Avatar>
-                          <StatusDot isDnd={profile?.is_dnd ?? false} className="absolute -bottom-0.5 -right-0.5 h-2 w-2 border" />
+                          <StatusDot status={getOnlineStatus(profile?.is_dnd ?? false, profile?.last_seen_at)} className="absolute -bottom-0.5 -right-0.5 h-2 w-2 border" />
                         </div>
                       )}
                       {!isMine && !showName && <div className="w-6" />}
