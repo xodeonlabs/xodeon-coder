@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Search, Download, Plus, Trash2, Eye, EyeOff, Sparkles, LayoutGrid, Code, Gamepad2, ShoppingCart, BookOpen } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
 interface Template {
   id: string;
@@ -18,14 +19,33 @@ interface Template {
   created_at: string;
 }
 
-const CATEGORIES = [
-  { value: 'alle', label: 'Alle', icon: LayoutGrid },
-  { value: 'algemeen', label: 'Algemeen', icon: Sparkles },
-  { value: 'game', label: 'Games', icon: Gamepad2 },
-  { value: 'tool', label: 'Tools', icon: Code },
-  { value: 'shop', label: 'Shops', icon: ShoppingCart },
-  { value: 'educatie', label: 'Educatie', icon: BookOpen },
+interface CategoryRow {
+  id: string;
+  value: string;
+  label: string;
+  icon: string;
+  sort_order: number;
+}
+
+// Fallback if DB categories haven't loaded yet
+const FALLBACK_CATEGORIES = [
+  { value: 'alle', label: 'Alle', icon: 'layout-grid' },
+  { value: 'algemeen', label: 'Algemeen', icon: 'sparkles' },
+  { value: 'game', label: 'Games', icon: 'gamepad-2' },
+  { value: 'tool', label: 'Tools', icon: 'code' },
+  { value: 'shop', label: 'Shops', icon: 'shopping-cart' },
+  { value: 'educatie', label: 'Educatie', icon: 'book-open' },
 ];
+
+function LucideIcon({ name, className }: { name: string; className?: string }) {
+  const pascalName = name
+    .split('-')
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
+  const IconComponent = (LucideIcons as any)[pascalName];
+  if (!IconComponent || typeof IconComponent !== 'function') return <Sparkles className={className} />;
+  return <IconComponent className={className} />;
+}
 
 export default function Templates() {
   const { session } = useAuth();
