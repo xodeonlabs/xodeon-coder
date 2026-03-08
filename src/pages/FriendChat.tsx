@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ArrowLeft, Send, MessageCircle } from 'lucide-react';
+import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 
 interface ChatFriend {
   id: string;
