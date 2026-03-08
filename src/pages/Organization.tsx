@@ -519,7 +519,7 @@ export default function OrganizationPage() {
                 <h4 className="text-sm font-semibold text-foreground mb-3">
                   {showDeposit ? '💰 Coins storten' : '💸 Coins opnemen'}
                 </h4>
-                <div className="flex gap-3 mb-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-3">
                   <input
                     type="number"
                     placeholder="Bedrag"
