@@ -91,6 +91,22 @@ const DEFAULT_NGC_CODE = `App:
                 Kleur="#94a3b8"
 `;
 
+interface OrgMembership {
+  organization_id: string;
+  role: string;
+}
+
+interface Contract {
+  id: string;
+  app_id: string;
+  collaborator_id: string;
+  proposed_by: string;
+  percentage: number;
+  counter_percentage: number | null;
+  status: string;
+  created_at: string;
+}
+
 export default function Dashboard() {
   const { session, signOut } = useAuth();
   const navigate = useNavigate();
@@ -100,10 +116,12 @@ export default function Dashboard() {
   const [creating, setCreating] = useState(false);
   const [inviteAppId, setInviteAppId] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
+  const [invitePercentage, setInvitePercentage] = useState(10);
   const [inviting, setInviting] = useState(false);
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [editingNameValue, setEditingNameValue] = useState('');
   const [orgs, setOrgs] = useState<Org[]>([]);
+  const [orgMemberships, setOrgMemberships] = useState<OrgMembership[]>([]);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [templateDesc, setTemplateDesc] = useState('');
@@ -116,6 +134,8 @@ export default function Dashboard() {
   const [unreadOrgMessages, setUnreadOrgMessages] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [iconPickerAppId, setIconPickerAppId] = useState<string | null>(null);
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [contractAppId, setContractAppId] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadCoins() {
