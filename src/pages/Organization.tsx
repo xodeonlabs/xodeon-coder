@@ -61,6 +61,13 @@ export default function OrganizationPage() {
   const [members, setMembers] = useState<OrgMember[]>([]);
   const [orgApps, setOrgApps] = useState<OrgApp[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
+  const [orgCoins, setOrgCoins] = useState<OrgCoin[]>([]);
+  const [transactions, setTransactions] = useState<CoinTransaction[]>([]);
+  const [showDeposit, setShowDeposit] = useState(false);
+  const [showWithdraw, setShowWithdraw] = useState(false);
+  const [txAmount, setTxAmount] = useState('');
+  const [txNote, setTxNote] = useState('');
+  const [txProcessing, setTxProcessing] = useState(false);
 
   useEffect(() => { fetchOrgs(); }, []);
 
