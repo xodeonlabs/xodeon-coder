@@ -8,6 +8,7 @@ const PublicApp = () => {
   const { slug } = useParams<{ slug: string }>();
   const [code, setCode] = useState('');
   const [appName, setAppName] = useState('');
+  const [orgId, setOrgId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
