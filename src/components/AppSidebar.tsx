@@ -303,7 +303,7 @@ export function AppSidebar() {
                 toggleDnd();
                 toast(!dndEnabled ? 'Niet storen ingeschakeld' : 'Niet storen uitgeschakeld', { position: 'bottom-right', duration: 2000 });
               }}
-              className={`p-1.5 rounded-lg transition-all ${dndEnabled ? 'text-destructive bg-destructive/10' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
+              className={`p-1.5 rounded-lg transition-all ${dndEnabled ? 'text-destructive bg-destructive/10' : 'text-emerald-500 bg-emerald-500/10 hover:bg-emerald-500/20'}`}
               title={dndEnabled ? 'Niet storen uit' : 'Niet storen aan'}
             >
               {dndEnabled ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
