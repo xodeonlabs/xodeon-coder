@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, FileText, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield, Sparkles, Zap, Handshake, Percent, LayoutGrid, Menu, MessageCircle, Pin, PinOff, CopyPlus, Code, TrendingUp, BookTemplate } from 'lucide-react';
+import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, FileText, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield, Sparkles, Zap, Handshake, Percent, LayoutGrid, Menu, MessageCircle, Pin, PinOff, CopyPlus, Code, TrendingUp, BookTemplate, FileQuestion } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 
@@ -221,6 +222,7 @@ export default function Dashboard() {
   const [apps, setApps] = useState<App[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [showNewAppDialog, setShowNewAppDialog] = useState(false);
   const [inviteAppId, setInviteAppId] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
   const [invitePercentage, setInvitePercentage] = useState(10);
@@ -305,7 +307,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'n') { e.preventDefault(); createApp(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') { e.preventDefault(); handleNewAppClick(); }
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); navigate('/analytics'); }
     };
     window.addEventListener('keydown', handler);
@@ -488,14 +490,24 @@ export default function Dashboard() {
     setLoading(false);
   }
 
+  function handleNewAppClick() {
+    setShowNewAppDialog(true);
+  }
+
   async function createApp() {
     if (!session?.user?.id) return;
+    setShowNewAppDialog(false);
     setCreating(true);
     clearCache(CACHE_KEYS.apps(session.user.id));
     const { data, error } = await supabase.from('apps').insert({ owner_id: session.user.id, name: 'Nieuwe App', ngc_code: DEFAULT_NGC_CODE }).select().single();
     if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
     else if (data) { navigate(`/editor/${data.id}`); }
     setCreating(false);
+  }
+
+  function useTemplateFlow() {
+    setShowNewAppDialog(false);
+    navigate('/templates');
   }
 
   async function duplicateApp(app: App) {
@@ -829,7 +841,7 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="flex items-center gap-2.5 shrink-0">
-            <button onClick={createApp} disabled={creating} className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs sm:text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 disabled:opacity-50 active:scale-[0.98]">
+            <button onClick={handleNewAppClick} disabled={creating} className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs sm:text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 disabled:opacity-50 active:scale-[0.98]">
               <Plus className="h-4 w-4" />
               Nieuwe App
             </button>
@@ -870,7 +882,7 @@ export default function Dashboard() {
               <div className="mb-5 text-6xl">🚀</div>
               <h3 className="text-xl font-bold text-foreground font-display mb-2">Begin je avontuur!</h3>
               <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">{quote.emoji} {quote.text}</p>
-              <button onClick={createApp} disabled={creating} className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 transition-all active:scale-[0.98]">
+              <button onClick={handleNewAppClick} disabled={creating} className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 transition-all active:scale-[0.98]">
                 <Plus className="h-5 w-5" /> Maak je eerste app
               </button>
               <p className="text-[10px] text-muted-foreground/40 mt-4">💡 Ctrl+N om snel een app aan te maken</p>
@@ -1191,6 +1203,43 @@ export default function Dashboard() {
         description={coinConfirm.description}
         onConfirm={() => { coinConfirm.onConfirm(); setCoinConfirm(prev => ({ ...prev, open: false })); }}
       />
+
+      {/* New App Dialog */}
+      <Dialog open={showNewAppDialog} onOpenChange={setShowNewAppDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Nieuwe app aanmaken</DialogTitle>
+            <DialogDescription>Hoe wil je beginnen?</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 mt-2">
+            <button
+              onClick={createApp}
+              disabled={creating}
+              className="flex flex-col items-center gap-3 p-6 rounded-xl border border-border/40 hover:border-primary/40 hover:bg-primary/5 transition-all group"
+            >
+              <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                <FileCode className="h-6 w-6 text-primary" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-semibold text-foreground">Vanaf nul</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Begin met een leeg project</p>
+              </div>
+            </button>
+            <button
+              onClick={useTemplateFlow}
+              className="flex flex-col items-center gap-3 p-6 rounded-xl border border-border/40 hover:border-primary/40 hover:bg-primary/5 transition-all group"
+            >
+              <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                <BookTemplate className="h-6 w-6 text-primary" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-semibold text-foreground">Template</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Start vanuit een bestaand sjabloon</p>
+              </div>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
