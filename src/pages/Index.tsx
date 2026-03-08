@@ -89,7 +89,7 @@ function duplicateNode(node: NGCNode, nodeId: string): NGCNode {
 }
 
 const Index = () => {
-  const { signOut } = useAuth();
+  const { session, signOut } = useAuth();
   const { toast } = useToast();
   const { appId } = useParams<{ appId: string }>();
   const navigate = useNavigate();
