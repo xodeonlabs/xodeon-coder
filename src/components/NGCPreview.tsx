@@ -686,6 +686,13 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
         )}
       </div>
 
+      <CoinConfirmDialog
+        open={coinConfirm.open}
+        onOpenChange={(open) => { if (!open) setCoinConfirm(prev => ({ ...prev, open: false })); }}
+        amount={coinConfirm.amount}
+        description={coinConfirm.description}
+        onConfirm={() => { coinConfirm.onConfirm(); setCoinConfirm(prev => ({ ...prev, open: false })); }}
+      />
     </div>
   );
 }
