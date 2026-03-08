@@ -650,25 +650,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Mobile dropdown menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden mt-3 pb-2 border-t border-border/20 pt-3 animate-slide-up">
-            <div className="flex flex-col gap-1">
-              <MobileNavItem onClick={() => { navigate('/templates'); setMobileMenuOpen(false); }} icon={<LayoutGrid className="h-4 w-4" />} label="Templates" />
-              <MobileNavItem onClick={() => { navigate('/berichten'); setMobileMenuOpen(false); }} icon={<MessageCircle className="h-4 w-4" />} label="Berichten" />
-              <MobileNavItem onClick={() => { navigate('/groepen'); setMobileMenuOpen(false); }} icon={<Users className="h-4 w-4" />} label="Groepen" />
-              <MobileNavItem onClick={() => { navigate('/analytics'); setMobileMenuOpen(false); }} icon={<BarChart3 className="h-4 w-4" />} label="Analytics" />
-              <MobileNavItem onClick={() => { navigate('/organization'); setMobileMenuOpen(false); }} icon={<Building2 className="h-4 w-4" />} label="Bedrijven" badge={unreadOrgMessages} />
-              <MobileNavItem onClick={() => { navigate('/alliances'); setMobileMenuOpen(false); }} icon={<Handshake className="h-4 w-4" />} label="Allianties" />
-              {isAdmin && <MobileNavItem onClick={() => { navigate('/admin'); setMobileMenuOpen(false); }} icon={<Shield className="h-4 w-4" />} label="Admin" variant="destructive" />}
-              <MobileNavItem onClick={() => { navigate('/settings'); setMobileMenuOpen(false); }} icon={<Settings className="h-4 w-4" />} label="Instellingen" />
-              <MobileNavItem onClick={() => { navigate(`/profiel/${profileUsername || session?.user?.id}`); setMobileMenuOpen(false); }} icon={<Users className="h-4 w-4" />} label="Mijn profiel" />
-              <div className="border-t border-border/20 mt-1 pt-1">
-                <MobileNavItem onClick={() => { signOut(); setMobileMenuOpen(false); }} icon={<LogOut className="h-4 w-4" />} label="Uitloggen" variant="destructive" />
-              </div>
-            </div>
-          </div>
-        )}
       </header>
 
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
