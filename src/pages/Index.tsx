@@ -444,7 +444,17 @@ const Index = () => {
         </button>
 
         {/* Code Editor / Designer */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div
+          ref={editorContainerRef}
+          className="flex-1 flex flex-col min-w-0 relative"
+          onMouseMove={(e) => {
+            const rect = editorContainerRef.current?.getBoundingClientRect();
+            if (rect) {
+              updateCursor(e.clientX - rect.left, e.clientY - rect.top, activeTab);
+            }
+          }}
+        >
+          <LiveCursors cursors={cursors.filter(c => c.section === activeTab)} containerRef={editorContainerRef} />
           {/* Mode toggle + Page Tabs */}
           <div className="flex items-center border-b border-border shrink-0" style={{ background: 'hsl(var(--ide-explorer-bg))' }}>
             {/* Mode toggle */}
