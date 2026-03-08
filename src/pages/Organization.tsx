@@ -1118,26 +1118,23 @@ export default function OrganizationPage() {
             </div>
           )}
 
-          {/* Upgrades - alleen zichtbaar voor eigenaar */}
+          {/* Upgrades snelkoppeling */}
           {selectedOrg.owner_id === session?.user?.id && (
-            <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
-              <h3 className="text-lg font-bold text-foreground flex items-center gap-2 mb-4">
-                <ArrowUp className="h-5 w-5 text-primary" />
-                Upgrades
-              </h3>
-              <OrgUpgrades
-                orgId={selectedOrg.id}
-                orgName={selectedOrg.name}
-                currentLevel={(selectedOrg as any).level ?? 1}
-                orgBalance={orgCoins.reduce((sum, c) => sum + c.balance, 0)}
-                isOwner={selectedOrg.owner_id === session?.user?.id}
-                levelPaidUntil={(selectedOrg as any).level_paid_until}
-                onUpgrade={(newLevel) => {
-                  setSelectedOrg({ ...selectedOrg, level: newLevel } as any);
-                  viewMembers({ ...selectedOrg, level: newLevel } as any);
-                }}
-              />
-            </div>
+            <button
+              onClick={() => navigate('/upgrades')}
+              className="mt-4 sm:mt-6 w-full flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 p-4 sm:p-5 transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 text-primary">
+                  <ArrowUp className="h-5 w-5" />
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-bold text-foreground">Upgrades & Levels</p>
+                  <p className="text-[11px] text-muted-foreground">Level {(selectedOrg as any).level ?? 1} — Beheer je bedrijfslevel</p>
+                </div>
+              </div>
+              <ArrowUp className="h-4 w-4 text-muted-foreground rotate-90 group-hover:translate-x-0.5 transition-transform" />
+            </button>
           )}
 
           <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
