@@ -19,6 +19,7 @@ interface Organization {
   owner_id: string;
   created_at: string;
   icon?: string;
+  bio?: string;
 }
 
 interface OrgMember {
