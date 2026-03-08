@@ -50,8 +50,8 @@ export default function GroupChats() {
   const [showCreate, setShowCreate] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
   const [showGame, setShowGame] = useState(false);
-
-  // Create form
+  const [readStatuses, setReadStatuses] = useState<Record<string, string>>({});
+  // Maps group_id -> { user_id -> last_read_at } for all members
   const [newName, setNewName] = useState('');
   const [newIcon, setNewIcon] = useState('💬');
   const [newType, setNewType] = useState<'friend_group' | 'private' | 'org_channel'>('friend_group');
