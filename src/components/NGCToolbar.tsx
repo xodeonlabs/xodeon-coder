@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ExternalLink, LogOut, AlertCircle, CheckCircle, ArrowLeft, Pencil, Share2, X, Menu } from 'lucide-react';
 import { ParseError } from '@/lib/ngc-ast';
-import { AppIcon } from '@/components/IconPicker';
+import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { useNavigate } from 'react-router-dom';
 
 interface ToolbarProps {
