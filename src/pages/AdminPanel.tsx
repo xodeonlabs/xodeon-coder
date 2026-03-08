@@ -128,18 +128,20 @@ export default function AdminPanel() {
 
   async function fetchAll() {
     setLoading(true);
-    const [profilesRes, rolesRes, appsRes, orgsRes, adsRes] = await Promise.all([
+    const [profilesRes, rolesRes, appsRes, orgsRes, adsRes, logsRes] = await Promise.all([
       supabase.from('profiles').select('*'),
       supabase.from('user_roles').select('*'),
       supabase.from('apps').select('id, name, owner_id, is_public, updated_at').order('updated_at', { ascending: false }),
       supabase.from('organizations').select('id, name, owner_id'),
       supabase.from('ads' as any).select('*').order('sort_order', { ascending: true }),
+      supabase.from('admin_activity_log' as any).select('*').order('created_at', { ascending: false }).limit(100),
     ]);
     if (profilesRes.data) setProfiles(profilesRes.data as UserProfile[]);
     if (rolesRes.data) setRoles(rolesRes.data as unknown as UserRoleRow[]);
     if (appsRes.data) setApps(appsRes.data as unknown as AppRow[]);
     if (orgsRes.data) setOrgs(orgsRes.data as unknown as OrgRow[]);
     if (adsRes.data) setAds(adsRes.data as unknown as AdRow[]);
+    if (logsRes.data) setActivityLogs(logsRes.data as any[]);
 
     try {
       const { data: fnData, error: fnError } = await supabase.functions.invoke('admin-list-users');
@@ -149,6 +151,17 @@ export default function AdminPanel() {
     } catch { /* ignore */ }
 
     setLoading(false);
+  }
+
+  async function logAction(action: string, targetType: string, targetId?: string, details?: string) {
+    if (!session?.user?.id) return;
+    await (supabase.from('admin_activity_log' as any) as any).insert({
+      admin_id: session.user.id,
+      action,
+      target_type: targetType,
+      target_id: targetId || null,
+      details: details || '',
+    });
   }
 
   async function removeRole(roleId: string) {
