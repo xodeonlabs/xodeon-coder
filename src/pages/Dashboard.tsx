@@ -1294,7 +1294,7 @@ export default function Dashboard() {
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <button
-                onClick={() => setTemplateDialog({ open: false, app: null, name: '', category: 'algemeen' })}
+                onClick={() => setTemplateDialog({ open: false, app: null, name: '', category: 'algemeen', description: '', visibility: 'public' })}
                 className="px-4 py-2 text-sm font-medium rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/30 transition-colors"
               >
                 Annuleren
