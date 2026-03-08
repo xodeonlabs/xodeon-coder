@@ -24,6 +24,13 @@ export default function Settings() {
   useEffect(() => {
     if (!session?.user) return;
     setEmail(session.user.email || '');
+    const cacheKey = `profile:${session.user.id}`;
+    const cached = getCached<{ display_name: string | null; bio: string | null }>(cacheKey, CACHE_TTL.medium);
+    if (cached) {
+      if (cached.display_name) setDisplayName(cached.display_name);
+      if (cached.bio) setBio(cached.bio);
+      return;
+    }
     supabase
       .from('profiles')
       .select('display_name, bio')
@@ -32,6 +39,7 @@ export default function Settings() {
       .then(({ data }) => {
         if (data?.display_name) setDisplayName(data.display_name);
         if ((data as any)?.bio) setBio((data as any).bio);
+        if (data) setCache(cacheKey, { display_name: data.display_name, bio: (data as any)?.bio });
       });
   }, [session?.user]);
 

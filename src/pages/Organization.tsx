@@ -81,6 +81,9 @@ export default function OrganizationPage() {
   useEffect(() => { fetchOrgs(); }, []);
 
   async function fetchOrgs() {
+    const cacheKey = `orgs-list:${session?.user?.id}`;
+    const cached = getCached<Organization[]>(cacheKey, CACHE_TTL.medium);
+    if (cached) { setOrgs(cached); setLoading(false); return; }
     const { data, error } = await supabase
       .from('organizations')
       .select('*')
@@ -89,6 +92,7 @@ export default function OrganizationPage() {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
       setOrgs((data as unknown as Organization[]) || []);
+      setCache(cacheKey, (data as unknown as Organization[]) || []);
     }
     setLoading(false);
   }
