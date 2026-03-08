@@ -288,7 +288,7 @@ export function AppSidebar() {
             className="cursor-pointer shrink-0 relative"
           >
             <ProfileAvatar size="sm" />
-            <StatusDot isDnd={dndEnabled} className="absolute -top-0.5 -right-0.5" />
+            <StatusDot status={dndEnabled ? 'dnd' : 'online'} className="absolute -top-0.5 -right-0.5" />
           </div>
           {!collapsed && (
             <div className="flex-1 min-w-0">
