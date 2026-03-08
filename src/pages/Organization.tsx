@@ -691,7 +691,7 @@ export default function OrganizationPage() {
       {iconPickerOrgId && (
         <IconPicker
           value={orgs.find(o => o.id === iconPickerOrgId)?.icon || 'building-2'}
-          onSelect={(icon) => changeOrgIcon(iconPickerOrgId, icon)}
+          onChange={(icon) => changeOrgIcon(iconPickerOrgId, icon)}
           onClose={() => setIconPickerOrgId(null)}
         />
       )}
