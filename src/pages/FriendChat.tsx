@@ -17,6 +17,7 @@ interface ChatFriend {
   lastMessageAt?: string;
   unread?: number;
   is_dnd?: boolean;
+  last_seen_at?: string | null;
 }
 
 interface Message {
