@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 const NOTIFICATION_SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
 const STORAGE_KEY = 'ngc-notification-sound';
