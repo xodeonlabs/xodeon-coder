@@ -647,12 +647,6 @@ export default function Dashboard() {
             <div onClick={() => navigate(`/profiel/${profileUsername || session?.user?.id}`)} className="cursor-pointer">
               <ProfileAvatar size="sm" />
             </div>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl text-foreground/80 hover:bg-secondary/50 transition-all"
-            >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
           </div>
         </div>
 
