@@ -600,7 +600,7 @@ const LIBRARY: Folder[] = [
   },
 ];
 
-export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: (code: string) => void; onCreateTemplate?: (code: string, name: string) => void }) {
+export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => void }) {
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
   const [communityTemplates, setCommunityTemplates] = useState<Template[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
@@ -699,25 +699,9 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
     toast({ title: 'Code ingevoegd', description: snippet.label });
   };
 
-  const handleCreateTemplate = (snippet: Snippet | Template, name: string) => {
-    if (onCreateTemplate) {
-      const code = 'code' in snippet ? snippet.code : (snippet as any).ngc_code;
-      onCreateTemplate(code, name);
-      toast({ title: 'App aangemaakt', description: `"${name}" wordt geladen...` });
-    }
-  };
-
-  const handleCreateFromCommunity = async (template: Template) => {
-    if (onCreateTemplate) {
-      handleCreateTemplate(template, (template as any).name);
-      // Increment downloads if this is a real template row
-      if (!template.is_fallback) {
-        await (supabase
-          .from('templates' as any) as any)
-          .update({ downloads: (template as any).downloads + 1 })
-          .eq('id', (template as any).id);
-      }
-    }
+  const handleUseTemplate = (template: Template) => {
+    onInsert(template.ngc_code);
+    toast({ title: 'Template ingevoegd', description: template.name });
   };
 
   return (
@@ -777,7 +761,7 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
                       {folder.snippets.map(snippet => (
                         <button
                           key={snippet.label}
-                          onClick={() => isTemplates && onCreateTemplate ? handleCreateTemplate(snippet, folder.name) : handleCopy(snippet)}
+                          onClick={() => handleCopy(snippet)}
                           className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded-sm hover:bg-primary/10 transition-colors text-left group"
                         >
                           <div className="flex-1 min-w-0">
@@ -786,11 +770,7 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
                               <div className="text-muted-foreground/60 text-[10px] truncate">{snippet.description}</div>
                             )}
                           </div>
-                          {isTemplates && onCreateTemplate ? (
-                            <div className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors">⚡</div>
-                          ) : (
-                            <Copy className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors" />
-                          )}
+                          <Copy className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors" />
                         </button>
                       ))}
                     </div>
@@ -819,7 +799,7 @@ export function NGCComponentLibrary({ onInsert, onCreateTemplate }: { onInsert: 
               communityTemplates.map(template => (
                 <button
                   key={(template as any).id}
-                  onClick={() => handleCreateFromCommunity(template)}
+                  onClick={() => handleUseTemplate(template)}
                   className="flex items-center gap-2 w-full px-2.5 py-2 text-xs rounded-sm hover:bg-accent/10 transition-colors text-left group bg-secondary/30"
                 >
                   <div className="flex-1 min-w-0">
