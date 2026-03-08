@@ -39,6 +39,9 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
   const [pendingCode, setPendingCode] = useState<string | null>(null);
   const [view, setView] = useState<'list' | 'chat'>('list');
   const [loadingConvos, setLoadingConvos] = useState(true);
+  const [editingConvoId, setEditingConvoId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState('');
+  const editInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Load conversations
