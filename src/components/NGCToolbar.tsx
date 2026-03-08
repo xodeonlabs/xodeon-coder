@@ -186,6 +186,12 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
           >
             <ExternalLink className="h-4 w-4" /> Preview
           </button>
+          <button
+            onClick={() => { handleExportHtml(); setMobileMenuOpen(false); }}
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-secondary/50 transition-colors"
+          >
+            <Download className="h-4 w-4" /> Export HTML
+          </button>
           {onShareTemplate && (
             <button
               onClick={() => { setShowShareDialog(true); setMobileMenuOpen(false); }}
