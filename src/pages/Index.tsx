@@ -589,7 +589,7 @@ const Index = () => {
                 </div>
 
                 {leftTab === 'explorer' ? (
-                  <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0">
+                  <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0" autoSaveId="ngc-explorer-panels">
                     <ResizablePanel defaultSize={33} minSize={15}>
                       <div className="h-full overflow-y-auto">
                         <NGCExplorer
