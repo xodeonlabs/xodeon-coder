@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      ads: {
+        Row: {
+          created_at: string
+          description: string
+          emoji: string
+          gradient: string
+          id: string
+          is_active: boolean
+          sort_order: number
+          title: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          emoji?: string
+          gradient?: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          title: string
+          url?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          emoji?: string
+          gradient?: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          title?: string
+          url?: string
+        }
+        Relationships: []
+      }
       ai_conversations: {
         Row: {
           app_id: string
