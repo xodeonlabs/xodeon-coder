@@ -909,54 +909,57 @@ export default function AdminPanel() {
         </div>
       )}
 
-      {/* Confirm ban/delete dialog */}
-      {confirmAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setConfirmAction(null)}>
-          <div className="rounded-2xl border border-border/50 p-5 sm:p-6 w-full max-w-sm shadow-2xl" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`p-2.5 rounded-xl ${confirmAction.action === 'delete' ? 'bg-destructive/15' : confirmAction.action === 'ban' ? 'bg-orange-500/15' : 'bg-primary/15'}`}>
-                {confirmAction.action === 'delete' ? <Trash2 className="h-5 w-5 text-destructive" /> :
-                 confirmAction.action === 'ban' ? <Ban className="h-5 w-5 text-orange-500" /> :
-                 <ShieldOff className="h-5 w-5 text-primary" />}
+      {/* Confirm dialog */}
+      {confirmAction && (() => {
+        const typeLabels: Record<string, string> = { user: 'Gebruiker', app: 'App', org: 'Bedrijf' };
+        const typeLabel = typeLabels[confirmAction.type] || '';
+        const isDelete = confirmAction.action === 'delete';
+        const isBan = confirmAction.action === 'ban';
+        
+        const title = isDelete ? `${typeLabel} verwijderen` : isBan ? 'Gebruiker blokkeren' : 'Gebruiker deblokkeren';
+        const description = isDelete
+          ? `Weet je zeker dat je ${typeLabel.toLowerCase()} "${confirmAction.name}" wilt verwijderen? Dit kan niet ongedaan worden gemaakt.`
+          : isBan ? 'Deze gebruiker wordt geblokkeerd en kan niet meer inloggen.'
+          : 'Deze gebruiker wordt gedeblokkeerd en kan weer inloggen.';
+        const buttonLabel = managingUser ? 'Bezig...' : isDelete ? 'Verwijderen' : isBan ? 'Blokkeren' : 'Deblokkeren';
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setConfirmAction(null)}>
+            <div className="rounded-2xl border border-border/50 p-5 sm:p-6 w-full max-w-sm shadow-2xl" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`p-2.5 rounded-xl ${isDelete ? 'bg-destructive/15' : isBan ? 'bg-orange-500/15' : 'bg-primary/15'}`}>
+                  {isDelete ? <Trash2 className="h-5 w-5 text-destructive" /> :
+                   isBan ? <Ban className="h-5 w-5 text-orange-500" /> :
+                   <ShieldOff className="h-5 w-5 text-primary" />}
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-foreground">{title}</h3>
+                  <p className="text-xs text-muted-foreground">{confirmAction.name}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base font-bold text-foreground">
-                  {confirmAction.action === 'delete' ? 'Gebruiker verwijderen' :
-                   confirmAction.action === 'ban' ? 'Gebruiker blokkeren' : 'Gebruiker deblokkeren'}
-                </h3>
-                <p className="text-xs text-muted-foreground">{confirmAction.name}</p>
+              <p className="text-sm text-muted-foreground mb-5">{description}</p>
+              <div className="flex justify-end gap-2">
+                <button onClick={() => setConfirmAction(null)} className="px-4 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
+                  Annuleren
+                </button>
+                <button
+                  onClick={handleConfirmAction}
+                  disabled={managingUser}
+                  className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all active:scale-95 disabled:opacity-50 ${
+                    isDelete
+                      ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                      : isBan
+                      ? 'bg-orange-500 text-white hover:bg-orange-600'
+                      : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                  }`}
+                >
+                  {buttonLabel}
+                </button>
               </div>
-            </div>
-            <p className="text-sm text-muted-foreground mb-5">
-              {confirmAction.action === 'delete'
-                ? 'Weet je zeker dat je deze gebruiker wilt verwijderen? Dit kan niet ongedaan worden gemaakt. Alle data van deze gebruiker wordt verwijderd.'
-                : confirmAction.action === 'ban'
-                ? 'Deze gebruiker wordt geblokkeerd en kan niet meer inloggen.'
-                : 'Deze gebruiker wordt gedeblokkeerd en kan weer inloggen.'}
-            </p>
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setConfirmAction(null)} className="px-4 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
-                Annuleren
-              </button>
-              <button
-                onClick={() => manageUser(confirmAction.userId, confirmAction.action)}
-                disabled={managingUser}
-                className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all active:scale-95 disabled:opacity-50 ${
-                  confirmAction.action === 'delete'
-                    ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
-                    : confirmAction.action === 'ban'
-                    ? 'bg-orange-500 text-white hover:bg-orange-600'
-                    : 'bg-primary text-primary-foreground hover:bg-primary/90'
-                }`}
-              >
-                {managingUser ? 'Bezig...' :
-                 confirmAction.action === 'delete' ? 'Verwijderen' :
-                 confirmAction.action === 'ban' ? 'Blokkeren' : 'Deblokkeren'}
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
