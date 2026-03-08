@@ -97,8 +97,8 @@ export default function Upgrades() {
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Desktop header */}
-        <div className="hidden lg:flex items-center gap-3 mb-6">
-          <button onClick={() => navigate(-1)} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
+        <div className="flex items-center gap-3 mb-4 sm:mb-6">
+          <button onClick={() => navigate('/organization')} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
             <ArrowLeft className="h-4 w-4" />
           </button>
           <div className="p-2 rounded-xl bg-primary/10">
