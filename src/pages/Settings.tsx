@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { ArrowLeft, Save, Mail, User, Lock, Trash2 } from 'lucide-react';
+import { getCached, setCache, clearCache, CACHE_TTL } from '@/lib/cache';
 
 export default function Settings() {
   const { session } = useAuth();
