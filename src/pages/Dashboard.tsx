@@ -133,6 +133,34 @@ export default function Dashboard() {
     loadCoins();
   }, [session?.user?.id]);
 
+  // 👋 Surprise 2: Time-based greeting
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    if (h < 6) return 'Goedenacht';
+    if (h < 12) return 'Goedemorgen';
+    if (h < 18) return 'Goedemiddag';
+    return 'Goedenavond';
+  };
+
+  // 💬 Surprise 6: Random quote
+  const [quote] = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)]);
+
+  // ⌨️ Surprise 4: Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+        e.preventDefault();
+        createApp();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        navigate('/analytics');
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [session?.user?.id]);
+
   useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); }, []);
   useEffect(() => { checkAdminRole(); }, [session?.user?.id]);
 
