@@ -19,6 +19,7 @@ import AdminPanel from "./pages/AdminPanel";
 import Alliances from "./pages/Alliances";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import FriendChat from "./pages/FriendChat";
 
 const queryClient = new QueryClient();
 
