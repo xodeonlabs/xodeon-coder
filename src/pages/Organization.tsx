@@ -553,6 +553,20 @@ export default function OrganizationPage() {
             )}
           </div>
 
+          {/* Bedrijfschat */}
+          <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
+            <div className="px-4 sm:px-6 py-3 border-b border-border/50">
+              <h3 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
+                <MessageCircle className="h-5 w-5 text-primary" />
+                Groepschat
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Chat met alle leden van {selectedOrg.name}</p>
+            </div>
+            <div style={{ height: 350 }}>
+              <OrgChat organizationId={selectedOrg.id} />
+            </div>
+          </div>
+
           {/* Bedrijfskluis */}
           <div className="mt-4 sm:mt-6 rounded-xl border border-border/50 p-4 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
