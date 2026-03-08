@@ -18,13 +18,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <AppSidebar />
         </div>
 
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0 flex flex-col">
+          <div className="flex-1">
+            {children}
+          </div>
           {showAd && (
-            <div className="px-4 sm:px-6 pt-3">
+            <div className="hidden lg:block px-4 sm:px-6 pb-4 pt-2">
               <AdBanner page={location.pathname.replace('/', '') || 'dashboard'} />
             </div>
           )}
-          {children}
         </main>
       </div>
     </SidebarProvider>
