@@ -494,6 +494,33 @@ export type Database = {
           },
         ]
       }
+      friend_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          read_at: string | null
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       friendships: {
         Row: {
           created_at: string
@@ -912,6 +939,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      are_friends: {
+        Args: { _user1: string; _user2: string }
+        Returns: boolean
+      }
       has_org_role: {
         Args: {
           _org_id: string

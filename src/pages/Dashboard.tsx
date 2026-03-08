@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, FileText, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield, Sparkles, Zap, Handshake, Percent, LayoutGrid, Menu } from 'lucide-react';
+import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, FileText, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield, Sparkles, Zap, Handshake, Percent, LayoutGrid, Menu, MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { AdBanner } from '@/components/AdBanner';
@@ -588,6 +588,7 @@ export default function Dashboard() {
             </div>
 
             <NavBtn onClick={() => navigate('/templates')} icon={<LayoutGrid className="h-4 w-4" />} label="Templates" />
+            <NavBtn onClick={() => navigate('/berichten')} icon={<MessageCircle className="h-4 w-4" />} label="Berichten" />
             <NavBtn onClick={() => navigate('/analytics')} icon={<BarChart3 className="h-4 w-4" />} label="Analytics" />
             <NavBtn onClick={() => navigate('/organization')} icon={<Building2 className="h-4 w-4" />} label="Bedrijven" badge={unreadOrgMessages} />
             <NavBtn onClick={() => navigate('/alliances')} icon={<Handshake className="h-4 w-4" />} label="Allianties" />
@@ -631,6 +632,7 @@ export default function Dashboard() {
           <div className="md:hidden mt-3 pb-2 border-t border-border/20 pt-3 animate-slide-up">
             <div className="flex flex-col gap-1">
               <MobileNavItem onClick={() => { navigate('/templates'); setMobileMenuOpen(false); }} icon={<LayoutGrid className="h-4 w-4" />} label="Templates" />
+              <MobileNavItem onClick={() => { navigate('/berichten'); setMobileMenuOpen(false); }} icon={<MessageCircle className="h-4 w-4" />} label="Berichten" />
               <MobileNavItem onClick={() => { navigate('/analytics'); setMobileMenuOpen(false); }} icon={<BarChart3 className="h-4 w-4" />} label="Analytics" />
               <MobileNavItem onClick={() => { navigate('/organization'); setMobileMenuOpen(false); }} icon={<Building2 className="h-4 w-4" />} label="Bedrijven" badge={unreadOrgMessages} />
               <MobileNavItem onClick={() => { navigate('/alliances'); setMobileMenuOpen(false); }} icon={<Handshake className="h-4 w-4" />} label="Allianties" />
