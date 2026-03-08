@@ -8,12 +8,30 @@ interface PropertiesProps {
 
 function isColorValue(value: string): boolean {
   const clean = value.replace(/^"|"$/g, '');
-  return /^#([0-9a-fA-F]{3,8})$/.test(clean);
+  return /^#([0-9a-fA-F]{3,8})$/.test(clean) || /^rgb\(\d+,\d+,\d+\)$/.test(clean.replace(/\s/g, ''));
+}
+
+function hexToRgb(hex: string): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgb(${r},${g},${b})`;
+}
+
+function rgbToHex(rgb: string): string {
+  const match = rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+  if (!match) return '#000000';
+  const r = parseInt(match[1]).toString(16).padStart(2, '0');
+  const g = parseInt(match[2]).toString(16).padStart(2, '0');
+  const b = parseInt(match[3]).toString(16).padStart(2, '0');
+  return `#${r}${g}${b}`;
 }
 
 function ColorInput({ value, onChange }: { value: string; onChange: (val: string) => void }) {
   const clean = value.replace(/^"|"$/g, '');
   const inputRef = useRef<HTMLInputElement>(null);
+  // Convert rgb to hex for the native color input
+  const hexValue = clean.startsWith('rgb') ? rgbToHex(clean) : clean.startsWith('#') ? clean : '#000000';
 
   return (
     <div className="flex items-center gap-1.5">
@@ -26,8 +44,8 @@ function ColorInput({ value, onChange }: { value: string; onChange: (val: string
       <input
         ref={inputRef}
         type="color"
-        value={clean}
-        onChange={e => onChange(`"${e.target.value}"`)}
+        value={hexValue}
+        onChange={e => onChange(`"${hexToRgb(e.target.value)}"`)}
         className="sr-only"
       />
     </div>
