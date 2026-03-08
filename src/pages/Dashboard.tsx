@@ -259,6 +259,9 @@ export default function Dashboard() {
           <h1 className="text-xl font-bold text-foreground tracking-tight">NGC Studio</h1>
         </div>
         <div className="flex items-center gap-4">
+          <button onClick={() => navigate('/analytics')} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
+            <BarChart3 className="h-4 w-4" /> Analytics
+          </button>
           <button onClick={() => navigate('/organization')} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
             <Building2 className="h-4 w-4" /> Bedrijven
           </button>
