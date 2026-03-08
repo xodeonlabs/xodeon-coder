@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useSwipe } from '@/hooks/useSwipe';
-import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Plus, Code, MousePointer, History } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Plus, Code, MousePointer, History, Maximize, Minimize, Eye, Copy, Undo2, FileCode } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { NGCCodeEditor } from '@/components/NGCCodeEditor';
@@ -12,6 +12,8 @@ import { NGCContextMenu } from '@/components/NGCContextMenu';
 import { NGCToolbar } from '@/components/NGCToolbar';
 import { NGCDesigner } from '@/components/NGCDesigner';
 import { NGCVersionPanel } from '@/components/NGCVersionPanel';
+import { CommandPalette } from '@/components/CommandPalette';
+import { StatusBar } from '@/components/StatusBar';
 import { parseNGC, astToNGC } from '@/lib/ngc-parser';
 import { NGCNode, NGCNodeType, DEFAULT_PROPERTIES, generateId } from '@/lib/ngc-ast';
 import { splitCodeIntoSections, mergeSections, CodeSection } from '@/lib/ngc-code-sections';
