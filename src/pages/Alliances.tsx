@@ -513,7 +513,7 @@ export default function Alliances() {
                 </div>
 
                 {/* Vault */}
-                {userOrgId && (
+                {isAllianceOwner && userOrgId && (
                   <div className="rounded-xl border border-border/40 p-5" style={{ background: 'hsl(var(--card))' }}>
                     <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
                       <Coins className="h-4 w-4 text-primary" /> Alliantie Kluis
