@@ -93,6 +93,10 @@ export default function OrganizationPage() {
 
   async function createOrg() {
     if (!newOrgName.trim() || !session?.user?.id) return;
+    if (orgs.length >= 3) {
+      toast({ title: 'Limiet bereikt', description: 'Je kunt maximaal 3 bedrijven joinen of aanmaken.', variant: 'destructive' });
+      return;
+    }
     setCreating(true);
     try {
       const { data, error } = await supabase
