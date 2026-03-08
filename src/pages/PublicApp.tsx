@@ -13,13 +13,13 @@ const PublicApp = () => {
 
   useEffect(() => {
     if (!slug) return;
-    (supabase
+    supabase
       .from('apps')
-      .select('ngc_code, name') as any)
+      .select('ngc_code, name')
       .eq('slug', slug)
       .eq('is_public', true)
       .single()
-      .then(({ data, error }: any) => {
+      .then(({ data, error }) => {
         if (error || !data) {
           setNotFound(true);
         } else {

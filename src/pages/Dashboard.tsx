@@ -175,7 +175,7 @@ export default function Dashboard() {
     const cleanSlug = slugValue.trim().toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/^-|-$/g, '');
     if (!cleanSlug) { toast({ title: 'Ongeldige slug', variant: 'destructive' }); return; }
     setSavingSlug(true);
-    const { error } = await (supabase.from('apps').update({ slug: cleanSlug, is_public: true } as any) as any).eq('id', publishAppId);
+    const { error } = await supabase.from('apps').update({ slug: cleanSlug, is_public: true }).eq('id', publishAppId);
     if (error) {
       toast({ title: 'Fout', description: error.message?.includes('unique') ? 'Deze URL is al in gebruik. Kies een andere.' : error.message, variant: 'destructive' });
     } else {
