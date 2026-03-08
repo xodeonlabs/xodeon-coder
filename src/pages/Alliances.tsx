@@ -68,7 +68,26 @@ export default function Alliances() {
   const [userOrgId, setUserOrgId] = useState<string | null>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { loadAlliances(); }, [session?.user?.id]);
+  // Admin state
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newIcon, setNewIcon] = useState('🤝');
+  const [creating, setCreating] = useState(false);
+  const [allOrgs, setAllOrgs] = useState<OrgInfo[]>([]);
+  const [showAddOrg, setShowAddOrg] = useState(false);
+  const [addOrgId, setAddOrgId] = useState('');
+
+  useEffect(() => {
+    loadAlliances();
+    checkAdmin();
+  }, [session?.user?.id]);
+
+  async function checkAdmin() {
+    if (!session?.user?.id) return;
+    const { data } = await supabase.from('user_roles').select('role').eq('user_id', session.user.id).eq('role', 'admin').maybeSingle();
+    setIsAdmin(!!data);
+  }
 
   async function loadAlliances() {
     if (!session?.user?.id) return;
