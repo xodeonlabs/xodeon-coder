@@ -569,7 +569,7 @@ const Index = () => {
         {/* Left Panel */}
         {leftOpen && (
           <>
-            <ResizablePanel defaultSize={15} minSize={8} maxSize={50} order={1}>
+            <ResizablePanel defaultSize={15} minSize={5} maxSize={70} order={1}>
               <div
                 className="h-full flex flex-col"
                 style={{ background: 'hsl(var(--ide-explorer-bg))' }}
@@ -660,7 +660,7 @@ const Index = () => {
         </button>
 
         {/* Code Editor / Designer (center) */}
-        <ResizablePanel defaultSize={leftOpen && rightOpen ? 55 : leftOpen || rightOpen ? 70 : 90} minSize={30} order={2}>
+        <ResizablePanel defaultSize={leftOpen && rightOpen ? 55 : leftOpen || rightOpen ? 70 : 90} minSize={15} order={2}>
           <div
             ref={editorContainerRef}
             className="h-full flex flex-col min-w-0 relative"
@@ -805,7 +805,7 @@ const Index = () => {
         {rightOpen && (
           <>
             <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={20} minSize={10} maxSize={50} order={3}>
+            <ResizablePanel defaultSize={20} minSize={5} maxSize={70} order={3}>
               <div className="h-full flex flex-col" {...rightPanelSwipe}>
                 {/* Right panel tab switcher */}
                 <div className="flex border-b border-border shrink-0">
