@@ -68,7 +68,7 @@ const PublicApp = () => {
       >
         <span className="text-xs font-medium text-foreground">{appName}</span>
         <div className="flex items-center gap-1.5">
-          <img src="/ngc-logo.png" alt="NGC" className="h-4 object-contain" />
+          <div className="h-4 w-4 rounded-sm overflow-hidden shrink-0"><img src="/ngc-logo.png" alt="NGC" className="h-full w-full object-cover" /></div>
           <span className="text-[10px] text-muted-foreground">NGC Studio</span>
         </div>
       </div>
