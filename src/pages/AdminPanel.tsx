@@ -105,8 +105,8 @@ export default function AdminPanel() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [emojiSearch, setEmojiSearch] = useState('');
 
-  // User management
-  const [confirmAction, setConfirmAction] = useState<{ userId: string; action: 'ban' | 'unban' | 'delete'; name: string } | null>(null);
+  // Management confirmations
+  const [confirmAction, setConfirmAction] = useState<{ id: string; action: string; type: 'user' | 'app' | 'org'; name: string } | null>(null);
   const [managingUser, setManagingUser] = useState(false);
 
   useEffect(() => {
@@ -312,6 +312,53 @@ export default function AdminPanel() {
     }
   }
 
+  async function deleteApp(id: string) {
+    const app = apps.find(a => a.id === id);
+    const { data, error } = await supabase.functions.invoke('admin-delete-resource', {
+      body: { type: 'app', target_id: id },
+    });
+    if (error || data?.error) {
+      toast({ title: 'Fout', description: error?.message || data?.error, variant: 'destructive' });
+    } else {
+      await logAction('App verwijderd', 'app', id, app?.name || '');
+      setApps(apps.filter(a => a.id !== id));
+      toast({ title: 'App verwijderd' });
+    }
+  }
+
+  async function deleteOrg(id: string) {
+    const org = orgs.find(o => o.id === id);
+    const { data, error } = await supabase.functions.invoke('admin-delete-resource', {
+      body: { type: 'org', target_id: id },
+    });
+    if (error || data?.error) {
+      toast({ title: 'Fout', description: error?.message || data?.error, variant: 'destructive' });
+    } else {
+      await logAction('Bedrijf verwijderd', 'org', id, org?.name || '');
+      setOrgs(orgs.filter(o => o.id !== id));
+      toast({ title: 'Bedrijf verwijderd' });
+    }
+  }
+
+  async function handleConfirmAction() {
+    if (!confirmAction) return;
+    setManagingUser(true);
+    try {
+      if (confirmAction.type === 'user') {
+        await manageUser(confirmAction.id, confirmAction.action as 'ban' | 'unban' | 'delete');
+      } else if (confirmAction.type === 'app') {
+        await deleteApp(confirmAction.id);
+        setConfirmAction(null);
+      } else if (confirmAction.type === 'org') {
+        await deleteOrg(confirmAction.id);
+        setConfirmAction(null);
+      }
+    } catch (e: any) {
+      toast({ title: 'Fout', description: e.message, variant: 'destructive' });
+    }
+    setManagingUser(false);
+  }
+
   const GRADIENT_PRESETS = [
     { label: 'Groen', value: 'linear-gradient(135deg, hsl(145 40% 14%), hsl(var(--secondary)))' },
     { label: 'Blauw', value: 'linear-gradient(135deg, hsl(200 40% 14%), hsl(var(--secondary)))' },
@@ -491,7 +538,7 @@ export default function AdminPanel() {
                           <div className="flex items-center gap-1 ml-1">
                             {isUserBanned(profile.id) ? (
                               <button
-                                onClick={() => setConfirmAction({ userId: profile.id, action: 'unban', name: displayLabel })}
+                                onClick={() => setConfirmAction({ id: profile.id, action: 'unban', type: 'user', name: displayLabel })}
                                 className="p-1 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
                                 title="Deblokkeren"
                               >
@@ -499,7 +546,7 @@ export default function AdminPanel() {
                               </button>
                             ) : (
                               <button
-                                onClick={() => setConfirmAction({ userId: profile.id, action: 'ban', name: displayLabel })}
+                                onClick={() => setConfirmAction({ id: profile.id, action: 'ban', type: 'user', name: displayLabel })}
                                 className="p-1 rounded-lg text-muted-foreground hover:text-orange-500 hover:bg-orange-500/10 transition-colors"
                                 title="Blokkeren"
                               >
@@ -507,7 +554,7 @@ export default function AdminPanel() {
                               </button>
                             )}
                             <button
-                              onClick={() => setConfirmAction({ userId: profile.id, action: 'delete', name: displayLabel })}
+                              onClick={() => setConfirmAction({ id: profile.id, action: 'delete', type: 'user', name: displayLabel })}
                               className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                               title="Verwijderen"
                             >
@@ -534,18 +581,26 @@ export default function AdminPanel() {
               {apps.map(app => (
                 <div
                   key={app.id}
-                  onClick={() => navigate(`/editor/${app.id}`)}
-                  className="flex items-center justify-between rounded-lg px-4 py-3 bg-background/50 cursor-pointer hover:bg-secondary/30 transition-colors"
+                  className="flex items-center justify-between rounded-lg px-4 py-3 bg-background/50 hover:bg-secondary/30 transition-colors"
                 >
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1 cursor-pointer" onClick={() => navigate(`/editor/${app.id}`)}>
                     <p className="text-sm font-semibold text-foreground truncate">{app.name}</p>
                     <p className="text-[11px] text-muted-foreground">
                       Eigenaar: {getUserName(app.owner_id)} · {app.is_public ? '🌍 Publiek' : '🔒 Privé'}
                     </p>
                   </div>
-                  <span className="text-xs text-muted-foreground shrink-0">
-                    {new Date(app.updated_at).toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' })}
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(app.updated_at).toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' })}
+                    </span>
+                    <button
+                      onClick={() => setConfirmAction({ id: app.id, action: 'delete', type: 'app', name: app.name })}
+                      className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                      title="Verwijderen"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
               ))}
               {apps.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">Geen apps gevonden.</p>}
@@ -566,6 +621,13 @@ export default function AdminPanel() {
                     <p className="text-sm font-semibold text-foreground truncate">{org.name}</p>
                     <p className="text-[11px] text-muted-foreground">Eigenaar: {getUserName(org.owner_id)}</p>
                   </div>
+                  <button
+                    onClick={() => setConfirmAction({ id: org.id, action: 'delete', type: 'org', name: org.name })}
+                    className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0"
+                    title="Verwijderen"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               ))}
               {orgs.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">Geen bedrijven gevonden.</p>}
@@ -853,54 +915,57 @@ export default function AdminPanel() {
         </div>
       )}
 
-      {/* Confirm ban/delete dialog */}
-      {confirmAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setConfirmAction(null)}>
-          <div className="rounded-2xl border border-border/50 p-5 sm:p-6 w-full max-w-sm shadow-2xl" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`p-2.5 rounded-xl ${confirmAction.action === 'delete' ? 'bg-destructive/15' : confirmAction.action === 'ban' ? 'bg-orange-500/15' : 'bg-primary/15'}`}>
-                {confirmAction.action === 'delete' ? <Trash2 className="h-5 w-5 text-destructive" /> :
-                 confirmAction.action === 'ban' ? <Ban className="h-5 w-5 text-orange-500" /> :
-                 <ShieldOff className="h-5 w-5 text-primary" />}
+      {/* Confirm dialog */}
+      {confirmAction && (() => {
+        const typeLabels: Record<string, string> = { user: 'Gebruiker', app: 'App', org: 'Bedrijf' };
+        const typeLabel = typeLabels[confirmAction.type] || '';
+        const isDelete = confirmAction.action === 'delete';
+        const isBan = confirmAction.action === 'ban';
+        
+        const title = isDelete ? `${typeLabel} verwijderen` : isBan ? 'Gebruiker blokkeren' : 'Gebruiker deblokkeren';
+        const description = isDelete
+          ? `Weet je zeker dat je ${typeLabel.toLowerCase()} "${confirmAction.name}" wilt verwijderen? Dit kan niet ongedaan worden gemaakt.`
+          : isBan ? 'Deze gebruiker wordt geblokkeerd en kan niet meer inloggen.'
+          : 'Deze gebruiker wordt gedeblokkeerd en kan weer inloggen.';
+        const buttonLabel = managingUser ? 'Bezig...' : isDelete ? 'Verwijderen' : isBan ? 'Blokkeren' : 'Deblokkeren';
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setConfirmAction(null)}>
+            <div className="rounded-2xl border border-border/50 p-5 sm:p-6 w-full max-w-sm shadow-2xl" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`p-2.5 rounded-xl ${isDelete ? 'bg-destructive/15' : isBan ? 'bg-orange-500/15' : 'bg-primary/15'}`}>
+                  {isDelete ? <Trash2 className="h-5 w-5 text-destructive" /> :
+                   isBan ? <Ban className="h-5 w-5 text-orange-500" /> :
+                   <ShieldOff className="h-5 w-5 text-primary" />}
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-foreground">{title}</h3>
+                  <p className="text-xs text-muted-foreground">{confirmAction.name}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base font-bold text-foreground">
-                  {confirmAction.action === 'delete' ? 'Gebruiker verwijderen' :
-                   confirmAction.action === 'ban' ? 'Gebruiker blokkeren' : 'Gebruiker deblokkeren'}
-                </h3>
-                <p className="text-xs text-muted-foreground">{confirmAction.name}</p>
+              <p className="text-sm text-muted-foreground mb-5">{description}</p>
+              <div className="flex justify-end gap-2">
+                <button onClick={() => setConfirmAction(null)} className="px-4 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
+                  Annuleren
+                </button>
+                <button
+                  onClick={handleConfirmAction}
+                  disabled={managingUser}
+                  className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all active:scale-95 disabled:opacity-50 ${
+                    isDelete
+                      ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                      : isBan
+                      ? 'bg-orange-500 text-white hover:bg-orange-600'
+                      : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                  }`}
+                >
+                  {buttonLabel}
+                </button>
               </div>
-            </div>
-            <p className="text-sm text-muted-foreground mb-5">
-              {confirmAction.action === 'delete'
-                ? 'Weet je zeker dat je deze gebruiker wilt verwijderen? Dit kan niet ongedaan worden gemaakt. Alle data van deze gebruiker wordt verwijderd.'
-                : confirmAction.action === 'ban'
-                ? 'Deze gebruiker wordt geblokkeerd en kan niet meer inloggen.'
-                : 'Deze gebruiker wordt gedeblokkeerd en kan weer inloggen.'}
-            </p>
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setConfirmAction(null)} className="px-4 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
-                Annuleren
-              </button>
-              <button
-                onClick={() => manageUser(confirmAction.userId, confirmAction.action)}
-                disabled={managingUser}
-                className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all active:scale-95 disabled:opacity-50 ${
-                  confirmAction.action === 'delete'
-                    ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
-                    : confirmAction.action === 'ban'
-                    ? 'bg-orange-500 text-white hover:bg-orange-600'
-                    : 'bg-primary text-primary-foreground hover:bg-primary/90'
-                }`}
-              >
-                {managingUser ? 'Bezig...' :
-                 confirmAction.action === 'delete' ? 'Verwijderen' :
-                 confirmAction.action === 'ban' ? 'Blokkeren' : 'Deblokkeren'}
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
