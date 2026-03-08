@@ -105,6 +105,15 @@ const Index = () => {
 
   const isRemoteUpdate = useRef(false);
 
+  // Feature states
+  const [zenMode, setZenMode] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [undoStack, setUndoStack] = useState<string[]>([]);
+  const undoRef = useRef<string[]>([]);
+
   // Swipe gestures for mobile panel toggling
   const leftPanelSwipe = useSwipe(
     () => setLeftOpen(false),  // swipe left → close left panel
