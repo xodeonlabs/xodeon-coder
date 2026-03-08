@@ -47,7 +47,7 @@ interface AuthUser {
 interface UserRoleRow {
   id: string;
   user_id: string;
-  role: 'admin' | 'moderator' | 'user';
+  role: 'owner' | 'admin' | 'moderator' | 'user';
 }
 
 interface AppRow {
