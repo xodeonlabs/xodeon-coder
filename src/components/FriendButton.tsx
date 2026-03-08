@@ -93,7 +93,15 @@ export function FriendButton({ targetUserId, onStatusChange }: FriendButtonProps
     setActing(false);
   }
 
-  if (!myId || myId === targetUserId || loading) return null;
+  if (!myId || myId === targetUserId) return null;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center px-4 py-2">
+        <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const disabled = acting;
 
