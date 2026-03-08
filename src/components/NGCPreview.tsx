@@ -42,9 +42,9 @@ function initRuntime(ast: NGCNode, runtime: NGCRuntime) {
     // Check for coins definition
     const coinsDef = parseCoinsCommand(ast.name);
     if (coinsDef && coinsDef.operation === 'Set') {
-      // Initialize coins: use defined amount for the app, plus give user 100 start coins
+      // Gebruiker start altijd met 100 coins
       if (!(coinsDef.name in runtime.coins)) {
-        runtime.coinsSet(coinsDef.name, (coinsDef.amount ?? 0) + 100);
+        runtime.coinsSet(coinsDef.name, 100);
       }
     }
     // Check for coins code registration
