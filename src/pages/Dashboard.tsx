@@ -120,7 +120,7 @@ export default function Dashboard() {
   }
 
   async function fetchOrgs() {
-    const { data } = await supabase.from('organizations').select('id, name').order('name');
+    const { data } = await supabase.from('organizations').select('id, name, icon' as any).order('name');
     if (data) setOrgs(data as unknown as Org[]);
   }
 
