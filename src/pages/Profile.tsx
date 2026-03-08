@@ -51,7 +51,6 @@ export default function Profile() {
     async function load() {
       setLoading(true);
 
-      // Try lookup by username first, then fallback to UUID
       let prof: ProfileData | null = null;
       let error: any = null;
 
@@ -136,7 +135,6 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        {/* Skeleton hero */}
         <div className="relative h-48 sm:h-64">
           <Skeleton className="absolute inset-0 rounded-none" />
         </div>
@@ -185,20 +183,16 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero banner with gradient + glow */}
       <div className="relative h-48 sm:h-64 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5" />
         <div className="absolute inset-0">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full bg-primary/10 blur-[100px]" />
           <div className="absolute top-0 right-0 w-[400px] h-[200px] rounded-full bg-accent/8 blur-[80px]" />
         </div>
-        {/* Mesh pattern overlay */}
         <div className="absolute inset-0 opacity-[0.03]" style={{
           backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)',
           backgroundSize: '24px 24px',
         }} />
-
-        {/* Nav */}
         <div className="absolute top-0 left-0 right-0 px-4 sm:px-6 py-3 flex items-center justify-between z-20">
           <button
             onClick={() => navigate(-1)}
@@ -218,12 +212,9 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Profile content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        {/* Avatar + Name section - overlapping hero */}
         <div className="relative -mt-16 sm:-mt-20 z-10 mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6">
-            {/* Avatar */}
             <div className="relative">
               <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary/40 to-accent/40 blur-sm" />
               <Avatar className="relative h-28 w-28 sm:h-32 sm:w-32 border-4 border-background ring-2 ring-primary/20">
@@ -237,7 +228,6 @@ export default function Profile() {
               <StatusDot isDnd={profile?.is_dnd ?? false} size="md" className="absolute bottom-1 right-1" />
             </div>
 
-            {/* Name & Bio */}
             <div className="flex-1 text-center sm:text-left pb-2">
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground font-display tracking-tight">
                 {profile?.display_name || 'Anonieme gebruiker'}
@@ -251,9 +241,7 @@ export default function Profile() {
                   {profile.bio}
                 </p>
               )}
-              {/* Social links & email */}
               <SocialBar profile={profile!} />
-              {/* Friend button */}
               <div className="mt-3 flex justify-center sm:justify-start">
                 <FriendButton targetUserId={profile!.id} />
               </div>
@@ -261,7 +249,6 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Stats cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8 sm:mb-10">
           <StatCard icon={<Code2 className="h-5 w-5 sm:h-6 sm:w-6" />} value={stats.appCount} label="Publieke apps" color="primary" />
           <StatCard icon={<Users className="h-5 w-5 sm:h-6 sm:w-6" />} value={stats.orgCount} label="Bedrijven" color="accent" />
@@ -269,16 +256,9 @@ export default function Profile() {
           <StatCard icon={<Eye className="h-5 w-5 sm:h-6 sm:w-6" />} value={stats.totalViews} label="App views" color="primary" />
         </div>
 
-        {/* Friends list */}
         <FriendsList userId={profile!.id} />
-
-        {/* Activity timeline */}
         <ActivityTimeline userId={profile!.id} />
-
-        {/* Apps gallery */}
         <PublicApps userId={profile!.id} isOwner={isOwnProfile} />
-
-        {/* Footer spacer */}
         <div className="h-12" />
       </div>
     </div>
@@ -524,7 +504,6 @@ function PublicApps({ userId, isOwner = false }: { userId: string; isOwner?: boo
         <span className="ml-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold tabular-nums">{apps.length}</span>
       </div>
 
-      {/* Hidden file input for banner */}
       <input
         ref={bannerRef}
         type="file"
@@ -644,7 +623,6 @@ function PublicApps({ userId, isOwner = false }: { userId: string; isOwner?: boo
         })}
       </div>
 
-      {/* Icon picker modal */}
       {iconPickerApp && (
         <IconPicker
           value={apps.find(a => a.id === iconPickerApp)?.icon || 'file-code'}
@@ -652,178 +630,6 @@ function PublicApps({ userId, isOwner = false }: { userId: string; isOwner?: boo
           onClose={() => setIconPickerApp(null)}
         />
       )}
-    </div>
-  );
-}
-
-        .select('id, name, icon, slug, created_at, ngc_code')
-        .eq('owner_id', userId)
-        .eq('is_public', true)
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (!data || data.length === 0) {
-        setLoading(false);
-        return;
-      }
-      setApps(data);
-
-      const imageMap: Record<string, string[]> = {};
-      await Promise.all(
-        data.map(async (app) => {
-          const { data: files } = await supabase.storage
-            .from('app-images')
-            .list(app.id, { limit: 3, sortBy: { column: 'created_at', order: 'desc' } });
-          if (files && files.length > 0) {
-            imageMap[app.id] = files
-              .filter(f => f.name.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i))
-              .map(f => supabase.storage.from('app-images').getPublicUrl(`${app.id}/${f.name}`).data.publicUrl);
-          }
-        })
-      );
-      setAppImages(imageMap);
-
-      const appIds = data.map(a => a.id);
-      const viewMap: Record<string, number> = {};
-      await Promise.all(
-        appIds.map(async (id) => {
-          const { count } = await supabase
-            .from('app_views')
-            .select('id', { count: 'exact', head: true })
-            .eq('app_id', id);
-          viewMap[id] = count ?? 0;
-        })
-      );
-      setAppViews(viewMap);
-      setLoading(false);
-    }
-    load();
-  }, [userId]);
-
-  function extractDescription(code: string): string | null {
-    const match = code.match(/Tekst="([^"]{10,120})"/);
-    return match ? match[1] : null;
-  }
-
-  if (loading) {
-    return (
-      <div>
-        <div className="flex items-center gap-2 mb-5">
-          <Sparkles className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-bold text-foreground font-display uppercase tracking-wider">Publieke Apps</h3>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="h-64 rounded-2xl" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (apps.length === 0) {
-    return (
-      <div className="rounded-2xl border border-border/30 bg-card/50 p-8 sm:p-12 text-center">
-        <div className="text-4xl mb-3 opacity-40">📱</div>
-        <p className="text-sm text-muted-foreground">Nog geen publieke apps</p>
-      </div>
-    );
-  }
-
-  return (
-    <div>
-      <div className="flex items-center gap-2 mb-5">
-        <Sparkles className="h-4 w-4 text-primary" />
-        <h3 className="text-sm font-bold text-foreground font-display uppercase tracking-wider">Publieke Apps</h3>
-        <span className="ml-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold tabular-nums">{apps.length}</span>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {apps.map((app, idx) => {
-          const images = appImages[app.id] || [];
-          const views = appViews[app.id] ?? 0;
-          const desc = extractDescription(app.ngc_code);
-          const date = new Date(app.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
-
-          return (
-            <div
-              key={app.id}
-              onClick={() => app.slug ? navigate(`/app/${app.slug}`) : null}
-              className={`group relative rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1 ${app.slug ? 'cursor-pointer' : ''} animate-slide-up`}
-              style={{ animationDelay: `${Math.min(idx * 80, 400)}ms` }}
-            >
-              {/* Screenshot / Placeholder */}
-              {images.length > 0 ? (
-                <div className="aspect-[16/10] bg-muted/20 overflow-hidden relative">
-                  <img
-                    src={images[0]}
-                    alt={`Screenshot van ${app.name}`}
-                    className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
-                    loading="lazy"
-                  />
-                  {/* Gradient overlay at bottom */}
-                  <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-card to-transparent" />
-                  {/* Extra thumbnails */}
-                  {images.length > 1 && (
-                    <div className="absolute top-3 right-3 flex gap-1.5">
-                      {images.slice(1, 3).map((img, i) => (
-                        <div key={i} className="w-9 h-9 rounded-lg border-2 border-background/90 overflow-hidden shadow-lg backdrop-blur-sm">
-                          <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {/* External link indicator */}
-                  {app.slug && (
-                    <div className="absolute top-3 left-3 p-1.5 rounded-lg bg-background/60 backdrop-blur-md text-foreground/70 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="aspect-[16/10] bg-gradient-to-br from-primary/8 via-accent/5 to-muted/10 flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute inset-0 opacity-[0.03]" style={{
-                    backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)',
-                    backgroundSize: '20px 20px',
-                  }} />
-                  <span className="text-5xl opacity-40 group-hover:scale-110 transition-transform duration-500">{app.icon || '📱'}</span>
-                  <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-card to-transparent" />
-                </div>
-              )}
-
-              {/* Content */}
-              <div className="p-4 sm:p-5">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/15 to-accent/10 border border-primary/10 flex items-center justify-center shrink-0 text-sm">
-                    {app.icon || '📱'}
-                  </div>
-                  <h4 className="text-sm font-bold text-foreground font-display truncate flex-1">{app.name}</h4>
-                </div>
-
-                {desc && (
-                  <p className="text-xs text-muted-foreground line-clamp-2 mb-3 leading-relaxed pl-[42px]">{desc}</p>
-                )}
-
-                <div className="flex items-center gap-3 text-[11px] text-muted-foreground pt-3 border-t border-border/30">
-                  <span className="flex items-center gap-1">
-                    <Eye className="h-3 w-3" />
-                    {views.toLocaleString('nl-NL')}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {date}
-                  </span>
-                  {app.slug && (
-                    <span className="ml-auto px-2 py-0.5 rounded-md bg-primary/8 text-primary/70 text-[10px] font-mono font-medium">
-                      /{app.slug}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 }
