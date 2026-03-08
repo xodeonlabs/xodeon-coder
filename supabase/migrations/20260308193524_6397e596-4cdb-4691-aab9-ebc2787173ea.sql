@@ -1,0 +1,1 @@
+ALTER TABLE public.templates ADD COLUMN visibility text NOT NULL DEFAULT 'public';
