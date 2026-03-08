@@ -287,9 +287,7 @@ export function AppSidebar() {
             className="cursor-pointer shrink-0 relative"
           >
             <ProfileAvatar size="sm" />
-            {dndEnabled && (
-              <span className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full bg-destructive border-2 border-background animate-pulse" title="Niet storen" />
-            )}
+            <span className={`absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background ${dndEnabled ? 'bg-destructive animate-pulse' : 'bg-emerald-500'}`} title={dndEnabled ? 'Niet storen' : 'Beschikbaar'} />
           </div>
           {!collapsed && (
             <div className="flex-1 min-w-0">
