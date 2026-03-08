@@ -74,7 +74,7 @@ function highlightLine(line: string): JSX.Element[] {
     return [<span key={0} className="syntax-comment">{line || ' '}</span>];
   }
 
-  const keywords = ['App', 'Page', 'Frame', 'Button', 'Text', 'TextBox', 'Image', 'Var', 'Function', 'List', 'Data'];
+  const keywords = ['App', 'Page', 'Frame', 'Button', 'Text', 'TextBox', 'Image', 'Var', 'Function', 'List', 'Data', 'Coins'];
   const events = ['Click', 'Hover', 'Start', 'Changed'];
   const controlFlow = ['If', 'Repeat', 'Wait', 'until', 'while', 'Add', 'Delete', 'Clear', 'Get', 'GaNaar'];
 
