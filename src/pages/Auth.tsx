@@ -126,7 +126,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-background px-4">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-background px-4 py-6">
       {/* Background effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-primary/5 blur-[120px] animate-glow-pulse" />
@@ -136,18 +136,18 @@ const Auth = () => {
 
       <div className="w-full max-w-[420px] relative z-10 animate-scale-in">
         {/* Logo & Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl border border-primary/20 mb-5 shadow-lg shadow-primary/10 overflow-hidden">
+        <div className="text-center mb-5 sm:mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-2xl border border-primary/20 mb-4 sm:mb-5 shadow-lg shadow-primary/10 overflow-hidden">
             <img src="/ngc-logo.png" alt="NGC" className="h-full w-full object-cover rounded-2xl" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground font-display tracking-tight">
+          <h1 className="text-xl sm:text-3xl font-bold text-foreground font-display tracking-tight">
             {modeTitle[mode]}
           </h1>
-          <p className="text-sm text-muted-foreground mt-2">{modeSubtitle[mode]}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 sm:mt-2">{modeSubtitle[mode]}</p>
         </div>
 
         {/* Card */}
-        <div className="glass-card-highlight rounded-2xl p-6 sm:p-8 shadow-2xl shadow-black/20">
+        <div className="glass-card-highlight rounded-2xl p-5 sm:p-8 shadow-2xl shadow-black/20">
           <form onSubmit={mode === 'magic-link' ? handleMagicLink : handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
