@@ -922,6 +922,38 @@ export type Database = {
         }
         Relationships: []
       }
+      pinned_apps: {
+        Row: {
+          app_id: string
+          created_at: string
+          id: string
+          sort_order: number
+          user_id: string
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          id?: string
+          sort_order?: number
+          user_id: string
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          id?: string
+          sort_order?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pinned_apps_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
