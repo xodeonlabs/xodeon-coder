@@ -114,6 +114,8 @@ const Index = () => {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const undoRef = useRef<string[]>([]);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchShowReplace, setSearchShowReplace] = useState(false);
 
   // Swipe gestures for mobile panel toggling
   const leftPanelSwipe = useSwipe(
