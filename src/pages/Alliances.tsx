@@ -636,8 +636,18 @@ export default function Alliances() {
             {/* Chat */}
             {tab === 'chat' && (
               <div className="rounded-xl border border-border/40 overflow-hidden flex flex-col" style={{ background: 'hsl(var(--card))', height: '500px' }}>
-                <div className="px-4 py-3 border-b border-border/30">
+              <div className="px-4 py-3 border-b border-border/30 flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-foreground">Alliantie Chat</h2>
+                  {isAllianceOwner && (
+                    <ChatRetentionSelector
+                      currentHours={(selectedAlliance as any).chat_retention_hours ?? 48}
+                      onUpdate={async (hours) => {
+                        const { error } = await supabase.from('alliances').update({ chat_retention_hours: hours } as any).eq('id', selectedAlliance.id);
+                        if (!error) setSelectedAlliance({ ...selectedAlliance, chat_retention_hours: hours } as any);
+                      }}
+                      label="Bewaring"
+                    />
+                  )}
                 </div>
                 <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
                   {chatMessages.length === 0 && (
