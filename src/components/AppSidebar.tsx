@@ -247,6 +247,37 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Pinned Apps */}
+        {pinnedApps.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>{collapsed ? '' : 'Vastgepind'}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {pinnedApps.map((app) => (
+                  <SidebarMenuItem key={app.id}>
+                    <SidebarMenuButton
+                      isActive={location.pathname === `/editor/${app.id}`}
+                      tooltip={collapsed ? app.name : undefined}
+                      onClick={() => navigate(`/editor/${app.id}`)}
+                      className={`flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                        location.pathname === `/editor/${app.id}`
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40'
+                      }`}
+                    >
+                      <AppIcon iconName={app.icon || 'file-code'} size={16} />
+                      <span className="flex-1 truncate">{app.name}</span>
+                      {!collapsed && (
+                        <Pin className="h-3 w-3 text-primary/50 shrink-0" />
+                      )}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border/20 p-3">
