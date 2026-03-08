@@ -422,20 +422,33 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {myApps.map(app => (
               <div key={app.id} className="group rounded-xl border border-border/40 p-5 transition-all hover:border-primary/60 hover:shadow-lg hover:shadow-primary/10 cursor-pointer hover:-translate-y-1" style={{ background: 'hsl(var(--card))' }} onClick={() => navigate(`/editor/${app.id}`)}>
-                <div className="flex items-start justify-between mb-4">
-                  {editingNameId === app.id ? (
-                    <input
-                      autoFocus
-                      className="font-semibold text-foreground bg-background border border-primary/30 rounded-lg px-2 py-1 text-sm w-full mr-2 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      value={editingNameValue}
-                      onChange={e => setEditingNameValue(e.target.value)}
-                      onBlur={() => renameApp(app.id, editingNameValue)}
-                      onKeyDown={e => { if (e.key === 'Enter') renameApp(app.id, editingNameValue); if (e.key === 'Escape') setEditingNameId(null); }}
-                      onClick={e => e.stopPropagation()}
-                    />
-                  ) : (
-                    <h3 className="font-semibold text-base text-foreground truncate pr-2">{app.name}</h3>
-                  )}
+                <div className="flex items-start gap-3 mb-4">
+                  {/* App icon */}
+                  <button
+                    onClick={e => { e.stopPropagation(); setIconPickerAppId(app.id); }}
+                    className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center shrink-0 text-primary hover:from-primary/30 hover:to-accent/20 transition-colors group/icon"
+                    title="Icoon wijzigen"
+                  >
+                    <AppIcon iconName={app.icon || 'file-code'} size={20} />
+                  </button>
+                  <div className="flex-1 min-w-0">
+                    {editingNameId === app.id ? (
+                      <input
+                        autoFocus
+                        className="font-semibold text-foreground bg-background border border-primary/30 rounded-lg px-2 py-1 text-sm w-full focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        value={editingNameValue}
+                        onChange={e => setEditingNameValue(e.target.value)}
+                        onBlur={() => renameApp(app.id, editingNameValue)}
+                        onKeyDown={e => { if (e.key === 'Enter') renameApp(app.id, editingNameValue); if (e.key === 'Escape') setEditingNameId(null); }}
+                        onClick={e => e.stopPropagation()}
+                      />
+                    ) : (
+                      <h3 className="font-semibold text-base text-foreground truncate">{app.name}</h3>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Gewijzigd: {new Date(app.updated_at).toLocaleDateString('nl-NL', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </p>
+                  </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <span title={app.is_public ? 'Publiek' : 'Privé'}>
                       {app.is_public ? <Globe className="h-4 w-4 text-primary" /> : <Lock className="h-4 w-4 text-muted-foreground" />}
@@ -444,7 +457,6 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 mb-3">
-                  <p className="text-sm text-muted-foreground">Gewijzigd: {new Date(app.updated_at).toLocaleDateString('nl-NL', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                   {app.organization_id && (
                     <span className="text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent flex items-center gap-1">
                       <Building2 className="h-3 w-3" />
