@@ -91,6 +91,7 @@ const Index = () => {
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
   const [activeTab, setActiveTab] = useState<string>('global');
+  const [editorMode, setEditorMode] = useState<'code' | 'design'>('code');
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isRemoteUpdate = useRef(false);
