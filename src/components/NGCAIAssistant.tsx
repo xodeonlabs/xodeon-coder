@@ -33,6 +33,7 @@ function extractNGCCode(text: string): string | null {
 
 export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssistantProps) {
   const { session } = useAuth();
+  const { toast } = useToast();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConvoId, setActiveConvoId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -43,6 +44,7 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
   const [loadingConvos, setLoadingConvos] = useState(true);
   const [editingConvoId, setEditingConvoId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
+  const [coinConfirm, setCoinConfirm] = useState<{ open: boolean; amount: number; description: string; onConfirm: () => void }>({ open: false, amount: 0, description: '', onConfirm: () => {} });
   const editInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
