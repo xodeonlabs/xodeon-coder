@@ -224,7 +224,7 @@ function NGCNodeRenderer({
       return (
         <div style={{ ...baseStyle, background: color || '#1e293b', borderRadius: `${radius}px`, overflow: 'hidden' }}>
           {node.children.map(child => (
-            <NGCNodeRenderer key={child.id} node={child} runtime={runtime} onRuntimeChange={onRuntimeChange} onNavigate={onNavigate} />
+            <NGCNodeRenderer key={child.id} node={child} runtime={runtime} onRuntimeChange={onRuntimeChange} onNavigate={onNavigate} coinHandlers={coinHandlers} />
           ))}
         </div>
       );
