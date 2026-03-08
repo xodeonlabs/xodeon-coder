@@ -6,6 +6,7 @@ import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Bu
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { AdBanner } from '@/components/AdBanner';
+import { AppIcon, IconPicker } from '@/components/IconPicker';
 
 interface App {
   id: string;
