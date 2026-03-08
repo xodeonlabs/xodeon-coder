@@ -359,8 +359,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!session?.user?.id) return;
+    const cached = getCached<string>(CACHE_KEYS.displayName(session.user.id), CACHE_TTL.long);
+    if (cached) { setDisplayName(cached); return; }
     supabase.from('profiles').select('display_name').eq('id', session.user.id).single()
-      .then(({ data }) => { if (data?.display_name) setDisplayName(data.display_name); });
+      .then(({ data }) => { if (data?.display_name) { setDisplayName(data.display_name); setCache(CACHE_KEYS.displayName(session.user.id), data.display_name); } });
   }, [session?.user?.id]);
 
   async function deleteApp(id: string, name: string) {
