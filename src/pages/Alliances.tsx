@@ -12,6 +12,7 @@ interface Alliance {
   name: string;
   icon: string;
   created_at: string;
+  created_by: string;
 }
 
 interface AllianceMember {
