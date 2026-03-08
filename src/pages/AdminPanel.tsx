@@ -1129,9 +1129,10 @@ export default function AdminPanel() {
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-semibold text-foreground truncate">{t.name}</span>
                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground capitalize">{t.category}</span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent/10 text-accent capitalize">{t.visibility === 'friends' ? '👥 Vrienden' : t.visibility === 'org' ? '🏢 Bedrijf' : '🌍 Publiek'}</span>
                             {!t.is_published && <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">Concept</span>}
                           </div>
-                          <p className="text-[11px] text-muted-foreground mt-0.5">{t.downloads} downloads · {new Date(t.created_at).toLocaleDateString('nl')}</p>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">{t.description ? `${t.description.slice(0, 60)}${t.description.length > 60 ? '...' : ''} · ` : ''}{t.downloads} downloads · {new Date(t.created_at).toLocaleDateString('nl')}</p>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
                           <button
