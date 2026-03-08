@@ -58,10 +58,11 @@ function saveState(
   lists: Record<string, string[]>,
   data: Record<string, DataRecord[]>,
   coins: Record<string, number>,
+  ownerCoins: Record<string, number>,
   coinCodes: Record<string, CoinCode[]>
 ) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ variables, lists, data, coins, coinCodes }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ variables, lists, data, coins, ownerCoins, coinCodes }));
   } catch { /* ignore quota errors */ }
 }
 
@@ -70,6 +71,7 @@ function loadState(): {
   lists: Record<string, string[]>;
   data: Record<string, DataRecord[]>;
   coins: Record<string, number>;
+  ownerCoins: Record<string, number>;
   coinCodes: Record<string, CoinCode[]>;
 } | null {
   try {
