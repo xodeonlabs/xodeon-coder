@@ -124,6 +124,26 @@ function DraggableNode({
     document.addEventListener('mouseup', handleMouseUp);
   }, [node.id, size, onSizeChange]);
 
+  const isImageNode = node.type === 'Image';
+
+  const handleImageDragOver = useCallback((e: React.DragEvent) => {
+    if (!isImageNode) return;
+    if (e.dataTransfer.types.includes('ngc/image-url')) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = 'copy';
+    }
+  }, [isImageNode]);
+
+  const handleImageDrop = useCallback((e: React.DragEvent) => {
+    if (!isImageNode) return;
+    const url = e.dataTransfer.getData('ngc/image-url');
+    if (!url) return;
+    e.preventDefault();
+    e.stopPropagation();
+    onPropertyChange?.(node.id, 'Bron', `"${url}"`);
+  }, [isImageNode, node.id, onPropertyChange]);
+
   return (
     <div
       style={{
@@ -138,6 +158,8 @@ function DraggableNode({
       }}
       onMouseDown={handleMouseDown}
       onClick={e => { e.stopPropagation(); onSelect(node.id); }}
+      onDragOver={handleImageDragOver}
+      onDrop={handleImageDrop}
     >
       {children}
 
