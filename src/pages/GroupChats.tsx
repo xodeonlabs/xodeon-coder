@@ -507,10 +507,13 @@ export default function GroupChats() {
                     )}
                     <div className={`flex ${isMine ? 'justify-end' : 'justify-start'} gap-2`}>
                       {!isMine && showName && (
-                        <Avatar className="h-6 w-6 shrink-0 mt-0.5">
-                          {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
-                          <AvatarFallback className="text-[8px] font-bold bg-primary/20 text-primary">{name.slice(0, 2).toUpperCase()}</AvatarFallback>
-                        </Avatar>
+                        <div className="relative shrink-0 mt-0.5">
+                          <Avatar className="h-6 w-6">
+                            {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
+                            <AvatarFallback className="text-[8px] font-bold bg-primary/20 text-primary">{name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <StatusDot isDnd={profile?.is_dnd ?? false} className="absolute -bottom-0.5 -right-0.5 h-2 w-2 border" />
+                        </div>
                       )}
                       {!isMine && !showName && <div className="w-6" />}
                       <div className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} max-w-[75%]`}>
