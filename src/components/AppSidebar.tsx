@@ -161,21 +161,17 @@ export function AppSidebar() {
               {isAdmin && (
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    asChild
                     isActive={isActive('/admin')}
                     tooltip={collapsed ? 'Admin' : undefined}
+                    onClick={() => navigate('/admin')}
+                    className={`flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                      isActive('/admin')
+                        ? 'bg-destructive/10 text-destructive'
+                        : 'text-destructive/60 hover:text-destructive hover:bg-destructive/10'
+                    }`}
                   >
-                    <button
-                      onClick={() => navigate('/admin')}
-                      className={`flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-sm font-medium transition-all ${
-                        isActive('/admin')
-                          ? 'bg-destructive/10 text-destructive'
-                          : 'text-destructive/60 hover:text-destructive hover:bg-destructive/10'
-                      }`}
-                    >
-                      <Shield className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>Admin</span>}
-                    </button>
+                    <Shield className="h-4 w-4 shrink-0" />
+                    <span>Admin</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
