@@ -32,6 +32,7 @@ interface MemberProfile {
   display_name: string | null;
   avatar_url: string | null;
   username: string | null;
+  is_dnd?: boolean;
 }
 
 export default function GroupChats() {
