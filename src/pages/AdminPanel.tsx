@@ -920,7 +920,7 @@ export default function AdminPanel() {
 
       {/* Confirm dialog */}
       {confirmAction && (() => {
-        const typeLabels: Record<string, string> = { user: 'Gebruiker', app: 'App', org: 'Bedrijf' };
+        const typeLabels: Record<string, string> = { user: 'Gebruiker', app: 'App', org: 'Bedrijf', ad: 'Advertentie' };
         const typeLabel = typeLabels[confirmAction.type] || '';
         const isDelete = confirmAction.action === 'delete';
         const isBan = confirmAction.action === 'ban';
