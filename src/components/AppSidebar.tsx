@@ -29,6 +29,7 @@ export function AppSidebar() {
   const { session, signOut } = useAuth();
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
+  const { play: playNotification } = useNotificationSound();
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [coins, setCoins] = useState(0);
