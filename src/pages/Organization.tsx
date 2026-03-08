@@ -224,6 +224,7 @@ export default function OrganizationPage() {
   }
 
   const [personalCoins, setPersonalCoins] = useState(0);
+  const [coinConfirm, setCoinConfirm] = useState<{ open: boolean; amount: number; description: string; onConfirm: () => void }>({ open: false, amount: 0, description: '', onConfirm: () => {} });
   useEffect(() => {
     setPersonalCoins(getPersonalCoins());
   }, [showDeposit, showWithdraw, txProcessing]);
