@@ -527,7 +527,7 @@ export default function Dashboard() {
   }
 
   function openTemplateDialog(app: App) {
-    setTemplateDialog({ open: true, app, name: app.name, category: 'algemeen' });
+    setTemplateDialog({ open: true, app, name: app.name, category: 'algemeen', description: '', visibility: 'public' });
   }
 
   async function confirmConvertToTemplate() {
