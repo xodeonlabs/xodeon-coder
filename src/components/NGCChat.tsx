@@ -20,17 +20,28 @@ export function NGCChat({ appId }: NGCChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [profiles, setProfiles] = useState<Record<string, string>>({});
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Load messages
+  // Load messages and profiles
   useEffect(() => {
     supabase
       .from('chat_messages')
       .select('*')
       .eq('app_id', appId)
       .order('created_at', { ascending: true })
-      .then(({ data }) => {
-        if (data) setMessages(data as ChatMessage[]);
+      .then(async ({ data }) => {
+        if (!data) return;
+        setMessages(data as ChatMessage[]);
+        const userIds = [...new Set(data.map(m => m.user_id))];
+        if (userIds.length > 0) {
+          const { data: profs } = await supabase.from('profiles').select('id, display_name').in('id', userIds);
+          if (profs) {
+            const map: Record<string, string> = {};
+            for (const p of profs) { if (p.display_name) map[p.id] = p.display_name; }
+            setProfiles(map);
+          }
+        }
       });
   }, [appId]);
 
@@ -79,7 +90,7 @@ export function NGCChat({ appId }: NGCChatProps) {
         )}
         {messages.map(msg => {
           const isMe = msg.user_id === currentUserId;
-          const shortName = msg.user_email.split('@')[0];
+          const shortName = profiles[msg.user_id] || msg.user_email.split('@')[0];
           return (
             <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
               <span className="text-[10px] text-muted-foreground mb-0.5 px-1">{shortName}</span>
