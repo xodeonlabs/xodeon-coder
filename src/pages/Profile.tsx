@@ -308,7 +308,7 @@ export default function Profile() {
                   {initials}
                 </AvatarFallback>
               </Avatar>
-              <StatusDot status={getOnlineStatus(profile?.is_dnd ?? false, (profile as any)?.last_seen_at)} size="lg" className="absolute bottom-1 right-1" />
+              <StatusDot status={liveStatus} size="lg" className="absolute bottom-1 right-1" />
             </div>
 
             <div className="flex-1 text-center sm:text-left pb-2">
