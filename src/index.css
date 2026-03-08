@@ -179,3 +179,23 @@
   .syntax-function { color: hsl(var(--syntax-function)); }
   .syntax-event { color: hsl(var(--syntax-event)); }
 }
+
+/* Surprise animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+}
