@@ -780,7 +780,7 @@ export default function OrganizationPage() {
                       className="w-10 h-10 rounded-lg bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center shrink-0 text-accent hover:from-accent/30 hover:to-accent/10 transition-colors"
                       title="Icoon wijzigen"
                     >
-                      <AppIcon iconName={org.icon || 'building-2'} size={20} />
+                      <span className="text-xl">{org.icon || '🏢'}</span>
                     </button>
                     <div>
                       <h3 className="font-semibold text-foreground">{org.name}</h3>
