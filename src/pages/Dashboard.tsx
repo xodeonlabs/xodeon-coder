@@ -278,11 +278,6 @@ export default function Dashboard() {
               <Coins className="h-4 w-4" />
               <span className="text-xs sm:text-sm font-semibold">{totalCoins}</span>
             </div>
-            <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-primary/10 text-primary" title="Eigenaar pool">
-              <Coins className="h-4 w-4" />
-              <span className="text-xs sm:text-sm font-semibold">{totalOwnerCoins}</span>
-              <span className="text-[10px] text-muted-foreground">pool</span>
-            </div>
           </div>
           <button onClick={() => navigate('/analytics')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
             <BarChart3 className="h-4 w-4" /> <span className="hidden sm:inline">Analytics</span>
