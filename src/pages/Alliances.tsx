@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Handshake, Users, MessageCircle, Coins, Send, BarChart3, Building2, Eye } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ArrowLeft, Handshake, Users, MessageCircle, Coins, Send, BarChart3, Building2, Eye, Plus, Trash2, UserPlus } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface Alliance {
@@ -67,7 +68,83 @@ export default function Alliances() {
   const [userOrgId, setUserOrgId] = useState<string | null>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { loadAlliances(); }, [session?.user?.id]);
+  // Admin state
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newIcon, setNewIcon] = useState('🤝');
+  const [creating, setCreating] = useState(false);
+  const [allOrgs, setAllOrgs] = useState<OrgInfo[]>([]);
+  const [showAddOrg, setShowAddOrg] = useState(false);
+  const [addOrgId, setAddOrgId] = useState('');
+
+  useEffect(() => {
+    loadAlliances();
+    checkAdmin();
+  }, [session?.user?.id]);
+
+  async function checkAdmin() {
+    if (!session?.user?.id) return;
+    const { data } = await supabase.from('user_roles').select('role').eq('user_id', session.user.id).eq('role', 'admin').maybeSingle();
+    setIsAdmin(!!data);
+  }
+
+  async function createAlliance() {
+    if (!newName.trim() || !session?.user?.id || creating) return;
+    setCreating(true);
+    const { error } = await supabase.from('alliances' as any).insert({
+      name: newName.trim(),
+      icon: newIcon,
+      created_by: session.user.id,
+    } as any);
+    if (error) {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    } else {
+      // Create coin pool
+      const { data: newAlliance } = await supabase.from('alliances' as any).select('id').eq('name', newName.trim()).order('created_at', { ascending: false }).limit(1).single();
+      if (newAlliance) {
+        await supabase.from('alliance_coins' as any).insert({ alliance_id: (newAlliance as any).id, balance: 0 } as any);
+      }
+      toast({ title: '✅ Alliantie aangemaakt!' });
+      setNewName('');
+      setNewIcon('🤝');
+      setShowCreate(false);
+      loadAlliances();
+    }
+    setCreating(false);
+  }
+
+  async function deleteAlliance(id: string) {
+    if (!confirm('Weet je zeker dat je deze alliantie wilt verwijderen?')) return;
+    const { error } = await supabase.from('alliances' as any).delete().eq('id', id);
+    if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    else { toast({ title: 'Alliantie verwijderd' }); loadAlliances(); }
+  }
+
+  async function loadAllOrgs() {
+    const { data } = await supabase.from('organizations').select('id, name, icon');
+    setAllOrgs((data as unknown as OrgInfo[]) || []);
+  }
+
+  async function addOrgToAlliance() {
+    if (!selectedAlliance || !addOrgId) return;
+    const { error } = await supabase.from('alliance_members' as any).insert({ alliance_id: selectedAlliance.id, organization_id: addOrgId } as any);
+    if (error) {
+      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Bedrijf toegevoegd!' });
+      setAddOrgId('');
+      setShowAddOrg(false);
+      selectAlliance(selectedAlliance);
+    }
+  }
+
+  async function removeOrgFromAlliance(memberId: string) {
+    if (!confirm('Bedrijf verwijderen uit alliantie?')) return;
+    const { error } = await supabase.from('alliance_members' as any).delete().eq('id', memberId);
+    if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+    else if (selectedAlliance) selectAlliance(selectedAlliance);
+  }
 
   async function loadAlliances() {
     if (!session?.user?.id) return;
@@ -237,32 +314,75 @@ export default function Alliances() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {!selectedAlliance ? (
           /* Alliance list */
-          alliances.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-5xl mb-4">🤝</p>
-              <h2 className="text-lg font-bold text-foreground mb-2">Geen allianties</h2>
-              <p className="text-sm text-muted-foreground">Een platform-admin kan allianties aanmaken tussen bedrijven.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {alliances.map(alliance => (
-                <button
-                  key={alliance.id}
-                  onClick={() => selectAlliance(alliance)}
-                  className="text-left rounded-2xl border border-border/40 p-5 transition-all hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5"
-                  style={{ background: 'hsl(var(--card))' }}
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="text-2xl">{alliance.icon}</span>
-                    <h3 className="text-sm font-semibold text-foreground">{alliance.name}</h3>
+          <>
+            {isAdmin && !showCreate && (
+              <button
+                onClick={() => setShowCreate(true)}
+                className="mb-6 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                <Plus className="h-4 w-4" /> Alliantie aanmaken
+              </button>
+            )}
+
+            {isAdmin && showCreate && (
+              <div className="mb-6 rounded-xl border border-border/40 p-5 space-y-3" style={{ background: 'hsl(var(--card))' }}>
+                <h3 className="text-sm font-semibold text-foreground">Nieuwe alliantie</h3>
+                <div className="flex items-center gap-3">
+                  <EmojiPickerBtn value={newIcon} onChange={setNewIcon} />
+                  <input
+                    value={newName}
+                    onChange={e => setNewName(e.target.value)}
+                    placeholder="Naam van de alliantie"
+                    className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={createAlliance} disabled={creating || !newName.trim()} className="px-4 py-2 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors">
+                    {creating ? 'Bezig...' : 'Aanmaken'}
+                  </button>
+                  <button onClick={() => setShowCreate(false)} className="px-4 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
+                    Annuleren
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {alliances.length === 0 ? (
+              <div className="text-center py-20">
+                <p className="text-5xl mb-4">🤝</p>
+                <h2 className="text-lg font-bold text-foreground mb-2">Geen allianties</h2>
+                <p className="text-sm text-muted-foreground">{isAdmin ? 'Maak een alliantie aan met de knop hierboven.' : 'Een platform-admin kan allianties aanmaken tussen bedrijven.'}</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {alliances.map(alliance => (
+                  <div
+                    key={alliance.id}
+                    className="relative text-left rounded-2xl border border-border/40 p-5 transition-all hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
+                    style={{ background: 'hsl(var(--card))' }}
+                    onClick={() => selectAlliance(alliance)}
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-2xl">{alliance.icon}</span>
+                      <h3 className="text-sm font-semibold text-foreground flex-1">{alliance.name}</h3>
+                      {isAdmin && (
+                        <button
+                          onClick={e => { e.stopPropagation(); deleteAlliance(alliance.id); }}
+                          className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          title="Verwijderen"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Aangemaakt op {new Date(alliance.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </p>
                   </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Aangemaakt op {new Date(alliance.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </p>
-                </button>
-              ))}
-            </div>
-          )
+                ))}
+              </div>
+            )}
+          </>
         ) : (
           /* Alliance detail */
           <>
@@ -303,7 +423,41 @@ export default function Alliances() {
 
                 {/* Member orgs */}
                 <div className="rounded-xl border border-border/40 p-5" style={{ background: 'hsl(var(--card))' }}>
-                  <h2 className="text-sm font-semibold text-foreground mb-4">Leden</h2>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-sm font-semibold text-foreground">Leden</h2>
+                    {isAdmin && (
+                      <button
+                        onClick={() => { setShowAddOrg(true); loadAllOrgs(); }}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                      >
+                        <UserPlus className="h-3 w-3" /> Bedrijf toevoegen
+                      </button>
+                    )}
+                  </div>
+
+                  {isAdmin && showAddOrg && (
+                    <div className="mb-4 p-3 rounded-lg border border-border/30 bg-secondary/20 space-y-2">
+                      <select
+                        value={addOrgId}
+                        onChange={e => setAddOrgId(e.target.value)}
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      >
+                        <option value="">Selecteer een bedrijf...</option>
+                        {allOrgs.filter(o => !members.some(m => m.organization_id === o.id)).map(o => (
+                          <option key={o.id} value={o.id}>{o.icon || '🏢'} {o.name}</option>
+                        ))}
+                      </select>
+                      <div className="flex gap-2">
+                        <button onClick={addOrgToAlliance} disabled={!addOrgId} className="px-3 py-1.5 rounded-lg text-[11px] font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors">
+                          Toevoegen
+                        </button>
+                        <button onClick={() => setShowAddOrg(false)} className="px-3 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors">
+                          Annuleren
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-3">
                     {members.map(m => {
                       const org = orgs[m.organization_id];
@@ -316,6 +470,15 @@ export default function Alliances() {
                             <p className="text-sm font-medium text-foreground truncate">{org?.name || 'Onbekend'}</p>
                             <p className="text-[10px] text-muted-foreground">Lid sinds {new Date(m.joined_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                           </div>
+                          {isAdmin && (
+                            <button
+                              onClick={() => removeOrgFromAlliance(m.id)}
+                              className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                              title="Verwijderen"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          )}
                         </div>
                       );
                     })}
@@ -458,5 +621,33 @@ function StatCard({ label, value, icon }: { label: string; value: number; icon: 
       </div>
       <p className="text-2xl font-bold text-foreground">{value}</p>
     </div>
+  );
+}
+
+const EMOJI_OPTIONS = ['🤝','🏢','⚡','🔥','💎','🌟','🎯','🚀','💡','🏆','👑','🎉','✨','🌈','🛡️','⭐'];
+
+function EmojiPickerBtn({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button className="w-12 h-10 text-center text-lg rounded-lg border border-border bg-background hover:bg-secondary/50 transition-colors focus:outline-none focus:ring-1 focus:ring-primary/50">
+          {value}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-48 p-2" align="start">
+        <div className="grid grid-cols-4 gap-1">
+          {EMOJI_OPTIONS.map(e => (
+            <button
+              key={e}
+              onClick={() => { onChange(e); setOpen(false); }}
+              className={`w-9 h-9 text-lg rounded-lg hover:bg-secondary/70 transition-colors flex items-center justify-center ${e === value ? 'bg-primary/15 ring-1 ring-primary/40' : ''}`}
+            >
+              {e}
+            </button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
