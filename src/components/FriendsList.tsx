@@ -4,12 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users } from 'lucide-react';
+import { StatusDot } from '@/components/StatusDot';
 
 interface Friend {
   id: string;
   display_name: string | null;
   avatar_url: string | null;
   username: string | null;
+  is_dnd?: boolean;
 }
 
 export function FriendsList({ userId }: { userId: string }) {
