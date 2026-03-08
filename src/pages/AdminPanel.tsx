@@ -815,7 +815,7 @@ export default function AdminPanel() {
                   <div className="min-w-0 flex-1 cursor-pointer" onClick={() => navigate(`/editor/${app.id}`)}>
                     <p className="text-sm font-semibold text-foreground truncate">{app.name}</p>
                     <p className="text-[11px] text-muted-foreground">
-                      Eigenaar: {getUserName(app.owner_id)} · {app.is_public ? '🌍 Publiek' : '🔒 Privé'}
+                      Eigenaar: <UserLink userId={app.owner_id} /> · {app.is_public ? '🌍 Publiek' : '🔒 Privé'}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
