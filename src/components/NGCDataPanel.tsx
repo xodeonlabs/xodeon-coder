@@ -202,8 +202,14 @@ function ImageUploadSection({ appId }: { appId: string }) {
       {images.length > 0 ? (
         <div className="grid grid-cols-2 gap-1.5">
           {images.map(img => (
-            <div key={img.name} className="group relative rounded-md border border-border overflow-hidden bg-secondary/20">
-              <img src={img.url} alt={img.name} className="w-full h-16 object-cover" />
+            <div key={img.name} className="group relative rounded-md border border-border overflow-hidden bg-secondary/20 cursor-grab active:cursor-grabbing"
+              draggable
+              onDragStart={e => {
+                e.dataTransfer.setData('ngc/image-url', img.url);
+                e.dataTransfer.effectAllowed = 'copy';
+              }}
+            >
+              <img src={img.url} alt={img.name} className="w-full h-16 object-cover pointer-events-none" />
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
                 <button
                   onClick={() => copyUrl(img.url)}
