@@ -52,6 +52,7 @@ export type Database = {
           gradient: string
           id: string
           is_active: boolean
+          organization_id: string | null
           pages: string[]
           sort_order: number
           title: string
@@ -64,6 +65,7 @@ export type Database = {
           gradient?: string
           id?: string
           is_active?: boolean
+          organization_id?: string | null
           pages?: string[]
           sort_order?: number
           title: string
@@ -76,12 +78,21 @@ export type Database = {
           gradient?: string
           id?: string
           is_active?: boolean
+          organization_id?: string | null
           pages?: string[]
           sort_order?: number
           title?: string
           url?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ads_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ai_conversations: {
         Row: {
