@@ -86,6 +86,7 @@ export default function Dashboard() {
   const [savingSlug, setSavingSlug] = useState(false);
   const [totalCoins, setTotalCoins] = useState(0);
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [unreadOrgMessages, setUnreadOrgMessages] = useState(0);
 
   useEffect(() => {
     try {
@@ -100,11 +101,54 @@ export default function Dashboard() {
     } catch { /* ignore */ }
   }, []);
 
-  useEffect(() => { fetchApps(); fetchOrgs(); }, []);
+  useEffect(() => { fetchApps(); fetchOrgs(); fetchUnreadCount(); }, []);
 
   async function fetchOrgs() {
     const { data } = await supabase.from('organizations').select('id, name').order('name');
     if (data) setOrgs(data as unknown as Org[]);
+  }
+
+  async function fetchUnreadCount() {
+    if (!session?.user?.id) return;
+    // Get all orgs the user is a member of
+    const { data: memberships } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .eq('user_id', session.user.id);
+    if (!memberships || memberships.length === 0) return;
+
+    const orgIds = memberships.map(m => m.organization_id);
+
+    // Get read statuses
+    const { data: readStatuses } = await supabase
+      .from('org_chat_read_status')
+      .select('organization_id, last_read_at')
+      .eq('user_id', session.user.id)
+      .in('organization_id', orgIds);
+
+    const readMap: Record<string, string> = {};
+    if (readStatuses) {
+      for (const rs of readStatuses) {
+        readMap[rs.organization_id] = rs.last_read_at;
+      }
+    }
+
+    // Count unread messages across all orgs
+    let total = 0;
+    for (const orgId of orgIds) {
+      const lastRead = readMap[orgId];
+      let query = supabase
+        .from('org_chat_messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('organization_id', orgId)
+        .neq('user_id', session.user.id);
+      if (lastRead) {
+        query = query.gt('created_at', lastRead);
+      }
+      const { count } = await query;
+      if (count) total += count;
+    }
+    setUnreadOrgMessages(total);
   }
 
   async function linkAppToOrg(appId: string, orgId: string | null) {
@@ -299,8 +343,13 @@ export default function Dashboard() {
           <button onClick={() => navigate('/analytics')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
             <BarChart3 className="h-4 w-4" /> <span className="hidden sm:inline">Analytics</span>
           </button>
-          <button onClick={() => navigate('/organization')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
+          <button onClick={() => navigate('/organization')} className="relative flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
             <Building2 className="h-4 w-4" /> <span className="hidden sm:inline">Bedrijven</span>
+            {unreadOrgMessages > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1 animate-scale-in">
+                {unreadOrgMessages > 99 ? '99+' : unreadOrgMessages}
+              </span>
+            )}
           </button>
           <button onClick={() => navigate('/settings')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all" title="Instellingen">
             <Settings className="h-4 w-4" /> <span className="hidden sm:inline">Account</span>
