@@ -106,6 +106,23 @@ export default function GroupChats() {
       (profs || []).forEach(p => { map[p.id] = p; });
       setProfiles(map);
     }
+
+    // Load read statuses for all members of this group
+    const { data: readData } = await supabase
+      .from('chat_group_read_status' as any)
+      .select('user_id, last_read_at')
+      .eq('group_id', group.id);
+    const statusMap: Record<string, string> = {};
+    (readData as any[] || []).forEach((r: any) => { statusMap[r.user_id] = r.last_read_at; });
+    setReadStatuses(statusMap);
+
+    // Mark as read for current user
+    if (myId) {
+      await supabase.from('chat_group_read_status' as any).upsert(
+        { group_id: group.id, user_id: myId, last_read_at: new Date().toISOString() } as any,
+        { onConflict: 'group_id,user_id' }
+      );
+    }
   }
 
   // Realtime messages
