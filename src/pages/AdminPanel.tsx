@@ -6,6 +6,30 @@ import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, Megaphone, Plus, Eye, EyeOff, GripVertical } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
+const EMOJI_LIST = [
+  { emoji: '🚀', label: 'rocket' }, { emoji: '🎮', label: 'game' }, { emoji: '🐍', label: 'snake' },
+  { emoji: '💡', label: 'lightbulb idea' }, { emoji: '🎯', label: 'target' }, { emoji: '🔥', label: 'fire' },
+  { emoji: '⭐', label: 'star' }, { emoji: '❤️', label: 'heart' }, { emoji: '🎵', label: 'music' },
+  { emoji: '📱', label: 'phone mobile' }, { emoji: '💻', label: 'laptop computer' }, { emoji: '🖥️', label: 'desktop monitor' },
+  { emoji: '🎨', label: 'art palette' }, { emoji: '📷', label: 'camera photo' }, { emoji: '🎬', label: 'film movie' },
+  { emoji: '📚', label: 'books' }, { emoji: '✏️', label: 'pencil write' }, { emoji: '🔧', label: 'wrench tool' },
+  { emoji: '⚡', label: 'lightning energy' }, { emoji: '🌍', label: 'globe world earth' }, { emoji: '🏠', label: 'home house' },
+  { emoji: '🛒', label: 'shopping cart' }, { emoji: '💰', label: 'money bag' }, { emoji: '🎁', label: 'gift present' },
+  { emoji: '🏆', label: 'trophy winner' }, { emoji: '👑', label: 'crown king' }, { emoji: '💎', label: 'gem diamond' },
+  { emoji: '🔒', label: 'lock security' }, { emoji: '🔑', label: 'key' }, { emoji: '🛡️', label: 'shield protect' },
+  { emoji: '📊', label: 'chart stats' }, { emoji: '📈', label: 'graph trending up' }, { emoji: '🗓️', label: 'calendar date' },
+  { emoji: '⏰', label: 'clock time alarm' }, { emoji: '🌟', label: 'glowing star' }, { emoji: '✨', label: 'sparkles' },
+  { emoji: '🎉', label: 'party celebration' }, { emoji: '🎪', label: 'circus tent' }, { emoji: '🎲', label: 'dice game' },
+  { emoji: '🧩', label: 'puzzle' }, { emoji: '🤖', label: 'robot ai' }, { emoji: '👾', label: 'alien space invader' },
+  { emoji: '🦊', label: 'fox' }, { emoji: '🐱', label: 'cat' }, { emoji: '🐶', label: 'dog' },
+  { emoji: '☕', label: 'coffee' }, { emoji: '🍕', label: 'pizza food' }, { emoji: '🍎', label: 'apple fruit' },
+  { emoji: '🌈', label: 'rainbow' }, { emoji: '☀️', label: 'sun' }, { emoji: '🌙', label: 'moon night' },
+  { emoji: '🎸', label: 'guitar' }, { emoji: '🎧', label: 'headphones' }, { emoji: '📡', label: 'satellite signal' },
+  { emoji: '🧪', label: 'test tube science' }, { emoji: '🔬', label: 'microscope' }, { emoji: '💊', label: 'pill medicine' },
+  { emoji: '🚗', label: 'car' }, { emoji: '✈️', label: 'airplane travel' }, { emoji: '🚂', label: 'train' },
+  { emoji: '📝', label: 'memo note' }, { emoji: '📌', label: 'pin' }, { emoji: '🏷️', label: 'tag label' },
+];
+
 interface UserProfile {
   id: string;
   display_name: string | null;
