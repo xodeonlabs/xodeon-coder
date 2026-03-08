@@ -547,7 +547,7 @@ export default function Dashboard() {
       toast({ title: '📦 Template aangemaakt!', description: `"${templateDialog.name}" is nu beschikbaar als template.` });
       confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
     }
-    setTemplateDialog({ open: false, app: null, name: '', category: 'algemeen' });
+    setTemplateDialog({ open: false, app: null, name: '', category: 'algemeen', description: '', visibility: 'public' });
   }
 
   async function createTemplate() {
