@@ -77,8 +77,11 @@ export default function Alliances() {
   const [allOrgs, setAllOrgs] = useState<OrgInfo[]>([]);
   const [myOwnedOrgs, setMyOwnedOrgs] = useState<OrgInfo[]>([]);
   const [selectedOrgForCreate, setSelectedOrgForCreate] = useState('');
+  const [inviteOrgId, setInviteOrgId] = useState('');
   const [showAddOrg, setShowAddOrg] = useState(false);
   const [addOrgId, setAddOrgId] = useState('');
+  const [vaultAmount, setVaultAmount] = useState('');
+  const [vaultLoading, setVaultLoading] = useState(false);
 
   useEffect(() => {
     loadAlliances();
