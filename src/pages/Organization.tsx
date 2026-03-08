@@ -147,7 +147,22 @@ export default function OrganizationPage() {
       supabase.from('apps').select('id, name, updated_at').eq('organization_id', org.id as any).order('updated_at', { ascending: false }),
       supabase.from('org_coins').select('*').eq('organization_id', org.id),
     ]);
-    if (!membersRes.error) setMembers((membersRes.data as unknown as OrgMember[]) || []);
+    if (!membersRes.error) {
+      const mems = (membersRes.data as unknown as OrgMember[]) || [];
+      setMembers(mems);
+      // Fetch profiles for all members
+      const userIds = mems.map(m => m.user_id);
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase.from('profiles').select('id, display_name, avatar_url').in('id', userIds);
+        if (profiles) {
+          const map: Record<string, { display_name: string | null; avatar_url: string | null }> = {};
+          for (const p of profiles) {
+            map[p.id] = { display_name: p.display_name, avatar_url: p.avatar_url };
+          }
+          setMemberProfiles(map);
+        }
+      }
+    }
     if (!appsRes.error) setOrgApps((appsRes.data as unknown as OrgApp[]) || []);
     if (!coinsRes.error) setOrgCoins((coinsRes.data as unknown as OrgCoin[]) || []);
     setLoadingMembers(false);
