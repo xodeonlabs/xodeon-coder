@@ -10,19 +10,17 @@ import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { CoinConfirmDialog } from '@/components/CoinConfirmDialog';
 import confetti from 'canvas-confetti';
 
-// 🎨 Surprise 10: Unique gradient accents per app card
 const APP_GRADIENTS = [
-  'from-blue-500/20 to-cyan-500/10',
-  'from-purple-500/20 to-pink-500/10',
-  'from-emerald-500/20 to-teal-500/10',
-  'from-orange-500/20 to-amber-500/10',
-  'from-rose-500/20 to-red-500/10',
-  'from-indigo-500/20 to-violet-500/10',
-  'from-lime-500/20 to-green-500/10',
-  'from-fuchsia-500/20 to-purple-500/10',
+  'from-blue-500/15 to-cyan-500/5',
+  'from-purple-500/15 to-pink-500/5',
+  'from-emerald-500/15 to-teal-500/5',
+  'from-orange-500/15 to-amber-500/5',
+  'from-rose-500/15 to-red-500/5',
+  'from-indigo-500/15 to-violet-500/5',
+  'from-lime-500/15 to-green-500/5',
+  'from-fuchsia-500/15 to-purple-500/5',
 ];
 
-// 💬 Surprise 6: Motivational quotes
 const QUOTES = [
   { text: 'De beste apps beginnen met één regel code.', emoji: '✨' },
   { text: 'Elke expert was ooit een beginner.', emoji: '🌱' },
@@ -126,7 +124,6 @@ export default function Dashboard() {
       if (data) {
         setTotalCoins((data as any).balance ?? 100);
       } else {
-        // Create coins row for existing user
         await supabase.from('user_coins' as any).insert({ user_id: session.user.id, balance: 100 } as any);
         setTotalCoins(100);
       }
@@ -134,7 +131,6 @@ export default function Dashboard() {
     loadCoins();
   }, [session?.user?.id]);
 
-  // 👋 Surprise 2: Time-based greeting
   const getGreeting = () => {
     const h = new Date().getHours();
     if (h < 6) return 'Goedenacht';
@@ -143,20 +139,12 @@ export default function Dashboard() {
     return 'Goedenavond';
   };
 
-  // 💬 Surprise 6: Random quote
   const [quote] = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)]);
 
-  // ⌨️ Surprise 4: Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
-        e.preventDefault();
-        createApp();
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        navigate('/analytics');
-      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') { e.preventDefault(); createApp(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); navigate('/analytics'); }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -178,41 +166,17 @@ export default function Dashboard() {
 
   async function fetchUnreadCount() {
     if (!session?.user?.id) return;
-    // Get all orgs the user is a member of
-    const { data: memberships } = await supabase
-      .from('organization_members')
-      .select('organization_id')
-      .eq('user_id', session.user.id);
+    const { data: memberships } = await supabase.from('organization_members').select('organization_id').eq('user_id', session.user.id);
     if (!memberships || memberships.length === 0) return;
-
     const orgIds = memberships.map(m => m.organization_id);
-
-    // Get read statuses
-    const { data: readStatuses } = await supabase
-      .from('org_chat_read_status')
-      .select('organization_id, last_read_at')
-      .eq('user_id', session.user.id)
-      .in('organization_id', orgIds);
-
+    const { data: readStatuses } = await supabase.from('org_chat_read_status').select('organization_id, last_read_at').eq('user_id', session.user.id).in('organization_id', orgIds);
     const readMap: Record<string, string> = {};
-    if (readStatuses) {
-      for (const rs of readStatuses) {
-        readMap[rs.organization_id] = rs.last_read_at;
-      }
-    }
-
-    // Count unread messages across all orgs
+    if (readStatuses) { for (const rs of readStatuses) { readMap[rs.organization_id] = rs.last_read_at; } }
     let total = 0;
     for (const orgId of orgIds) {
       const lastRead = readMap[orgId];
-      let query = supabase
-        .from('org_chat_messages')
-        .select('id', { count: 'exact', head: true })
-        .eq('organization_id', orgId)
-        .neq('user_id', session.user.id);
-      if (lastRead) {
-        query = query.gt('created_at', lastRead);
-      }
+      let query = supabase.from('org_chat_messages').select('id', { count: 'exact', head: true }).eq('organization_id', orgId).neq('user_id', session.user.id);
+      if (lastRead) query = query.gt('created_at', lastRead);
       const { count } = await query;
       if (count) total += count;
     }
@@ -221,43 +185,25 @@ export default function Dashboard() {
 
   async function linkAppToOrg(appId: string, orgId: string | null) {
     const { error } = await supabase.from('apps').update({ organization_id: orgId } as any).eq('id', appId);
-    if (error) {
-      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
-    } else {
-      setApps(apps.map(a => a.id === appId ? { ...a, organization_id: orgId } : a));
-      toast({ title: orgId ? 'Gekoppeld aan bedrijf' : 'Ontkoppeld van bedrijf' });
-    }
+    if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
+    else { setApps(apps.map(a => a.id === appId ? { ...a, organization_id: orgId } : a)); toast({ title: orgId ? 'Gekoppeld aan bedrijf' : 'Ontkoppeld van bedrijf' }); }
   }
 
-  // Auto-save guest code as a new app after login/signup
   useEffect(() => {
     const guestCode = localStorage.getItem('ngc_guest_code');
     if (!guestCode || !session?.user?.id) return;
     localStorage.removeItem('ngc_guest_code');
-
     (async () => {
-      const { data, error } = await supabase
-        .from('apps')
-        .insert({ owner_id: session.user.id, name: 'Gast Project', ngc_code: guestCode })
-        .select()
-        .single();
-      if (!error && data) {
-        toast({ title: 'Gastcode opgeslagen!', description: 'Je gastproject is bewaard als "Gast Project".' });
-        navigate(`/editor/${data.id}`);
-      } else {
-        toast({ title: 'Opslaan mislukt', description: error?.message || 'Onbekende fout', variant: 'destructive' });
-        fetchApps();
-      }
+      const { data, error } = await supabase.from('apps').insert({ owner_id: session.user.id, name: 'Gast Project', ngc_code: guestCode }).select().single();
+      if (!error && data) { toast({ title: 'Gastcode opgeslagen!' }); navigate(`/editor/${data.id}`); }
+      else { toast({ title: 'Opslaan mislukt', description: error?.message || 'Onbekende fout', variant: 'destructive' }); fetchApps(); }
     })();
   }, [session?.user?.id]);
 
   async function fetchApps() {
     const { data, error } = await supabase.from('apps').select('*').order('updated_at', { ascending: false });
-    if (error) {
-      toast({ title: 'Fout bij laden', description: error.message, variant: 'destructive' });
-    } else {
-      setApps(data || []);
-    }
+    if (error) { toast({ title: 'Fout bij laden', description: error.message, variant: 'destructive' }); }
+    else { setApps(data || []); }
     setLoading(false);
   }
 
@@ -265,33 +211,17 @@ export default function Dashboard() {
     if (!session?.user?.id) return;
     setCreating(true);
     const { data, error } = await supabase.from('apps').insert({ owner_id: session.user.id, name: 'Nieuwe App', ngc_code: DEFAULT_NGC_CODE }).select().single();
-    if (error) {
-      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
-    } else if (data) {
-      navigate(`/editor/${data.id}`);
-    }
+    if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
+    else if (data) { navigate(`/editor/${data.id}`); }
     setCreating(false);
   }
 
   async function createTemplate() {
     if (!session?.user?.id || !templateName.trim()) return;
     setCreatingTemplate(true);
-    const { data, error } = await supabase.from('apps').insert({
-      owner_id: session.user.id,
-      name: templateName.trim(),
-      ngc_code: DEFAULT_NGC_CODE,
-      is_public: true,
-      is_remixable: true,
-    }).select().single();
-    if (error) {
-      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
-    } else if (data) {
-      toast({ title: 'Template aangemaakt', description: `"${templateName.trim()}" is publiek beschikbaar.` });
-      setShowTemplateDialog(false);
-      setTemplateName('');
-      setTemplateDesc('');
-      navigate(`/editor/${data.id}`);
-    }
+    const { data, error } = await supabase.from('apps').insert({ owner_id: session.user.id, name: templateName.trim(), ngc_code: DEFAULT_NGC_CODE, is_public: true, is_remixable: true }).select().single();
+    if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
+    else if (data) { toast({ title: 'Template aangemaakt' }); setShowTemplateDialog(false); setTemplateName(''); setTemplateDesc(''); navigate(`/editor/${data.id}`); }
     setCreatingTemplate(false);
   }
 
@@ -307,20 +237,17 @@ export default function Dashboard() {
     setSavingSlug(true);
     const { error } = await supabase.from('apps').update({ slug: cleanSlug, is_public: true }).eq('id', publishAppId);
     if (error) {
-      toast({ title: 'Fout', description: error.message?.includes('unique') ? 'Deze URL is al in gebruik. Kies een andere.' : error.message, variant: 'destructive' });
+      toast({ title: 'Fout', description: error.message?.includes('unique') ? 'Deze URL is al in gebruik.' : error.message, variant: 'destructive' });
     } else {
       setApps(apps.map(a => a.id === publishAppId ? { ...a, slug: cleanSlug, is_public: true } : a));
       toast({ title: '🎉 Gepubliceerd!', description: `Je app is nu beschikbaar op /app/${cleanSlug}` });
-      // 🎉 Surprise 1: Confetti!
       confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 }, colors: ['#38bdf8', '#818cf8', '#f472b6', '#34d399', '#fbbf24'] });
       setTimeout(() => confetti({ particleCount: 50, spread: 120, origin: { y: 0.5 } }), 300);
     }
     setSavingSlug(false);
   }
 
-  function getAppUrl(slug: string) {
-    return `${window.location.origin}/app/${slug}`;
-  }
+  function getAppUrl(slug: string) { return `${window.location.origin}/app/${slug}`; }
 
   async function copyAppLink(slug: string) {
     await navigator.clipboard.writeText(getAppUrl(slug));
@@ -334,14 +261,10 @@ export default function Dashboard() {
   }, [session?.user?.id]);
 
   async function deleteApp(id: string, name: string) {
-    if (!confirm(`Weet je zeker dat je "${name}" wilt verwijderen?`)) return;
+    if (!confirm(`Weet je zeker dat je \"${name}\" wilt verwijderen?`)) return;
     const { error } = await supabase.from('apps').delete().eq('id', id);
-    if (error) {
-      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
-    } else {
-      setApps(apps.filter(a => a.id !== id));
-      toast({ title: 'Verwijderd', description: `"${name}" is verwijderd.` });
-    }
+    if (error) { toast({ title: 'Fout', description: error.message, variant: 'destructive' }); }
+    else { setApps(apps.filter(a => a.id !== id)); toast({ title: 'Verwijderd' }); }
   }
 
   async function togglePublic(app: App) {
@@ -354,7 +277,6 @@ export default function Dashboard() {
     if (!error) setApps(apps.map(a => a.id === app.id ? { ...a, is_remixable: !a.is_remixable } : a));
   }
 
-  // Coin confirm dialog state
   const [coinConfirm, setCoinConfirm] = useState<{ open: boolean; amount: number; description: string; onConfirm: () => void }>({ open: false, amount: 0, description: '', onConfirm: () => {} });
 
   function requestCoinConfirm(amount: number, description: string, onConfirm: () => void) {
@@ -365,60 +287,41 @@ export default function Dashboard() {
     const app = apps.find(a => a.id === id);
     if (!app) return;
     const currentHours = app.chat_retention_hours ?? 12;
-
-    // Only charge if increasing beyond 12 hours
     if (hours > 12 && hours > currentHours) {
       const extraBlocks = Math.ceil((hours - Math.max(currentHours, 12)) / 12);
       const cost = extraBlocks * 5;
-
       if (cost > 0) {
         const { data: authData } = await supabase.auth.getUser();
         if (!authData?.user) return;
-
         const { data: coinRow } = await supabase.from('user_coins').select('id, balance').eq('user_id', authData.user.id).maybeSingle();
         const balance = (coinRow as any)?.balance ?? 0;
-
-        if (balance < cost) {
-          toast({ title: 'Niet genoeg coins', description: `Je hebt ${cost} coins nodig maar je hebt er ${balance}.`, variant: 'destructive' });
-          return;
-        }
-
-        // Show confirmation dialog
+        if (balance < cost) { toast({ title: 'Niet genoeg coins', description: `Je hebt ${cost} coins nodig maar je hebt er ${balance}.`, variant: 'destructive' }); return; }
         requestCoinConfirm(cost, `Bewaartijd verlengen naar ${hours >= 24 ? Math.round(hours / 24) + ' dag(en)' : hours + ' uur'}`, async () => {
           await supabase.from('user_coins').update({ balance: balance - cost, updated_at: new Date().toISOString() } as any).eq('id', (coinRow as any).id);
-          toast({ title: `${cost} coins afgeschreven`, description: `Bewaartijd verlengd naar ${hours >= 24 ? Math.round(hours / 24) + ' dag(en)' : hours + ' uur'}` });
+          toast({ title: `${cost} coins afgeschreven` });
           const { error } = await supabase.from('apps').update({ chat_retention_hours: hours } as any).eq('id', id);
-          if (!error) {
-            setApps(prev => prev.map(a => a.id === id ? { ...a, chat_retention_hours: hours } : a));
-          }
+          if (!error) setApps(prev => prev.map(a => a.id === id ? { ...a, chat_retention_hours: hours } : a));
         });
         return;
       }
     }
-
     const { error } = await supabase.from('apps').update({ chat_retention_hours: hours } as any).eq('id', id);
     if (!error) {
       setApps(apps.map(a => a.id === id ? { ...a, chat_retention_hours: hours } : a));
-      if (hours <= 12) {
-        toast({ title: 'Bewaartermijn bijgewerkt', description: `Chat wordt nu ${hours} uur bewaard` });
-      }
+      if (hours <= 12) toast({ title: 'Bewaartermijn bijgewerkt' });
     }
   }
 
   async function renameApp(id: string, newName: string) {
     if (!newName.trim()) return;
     const { error } = await supabase.from('apps').update({ name: newName.trim() }).eq('id', id);
-    if (!error) {
-      setApps(apps.map(a => a.id === id ? { ...a, name: newName.trim() } : a));
-    }
+    if (!error) setApps(apps.map(a => a.id === id ? { ...a, name: newName.trim() } : a));
     setEditingNameId(null);
   }
 
   async function updateAppIcon(id: string, icon: string) {
     const { error } = await supabase.from('apps').update({ icon } as any).eq('id', id);
-    if (!error) {
-      setApps(apps.map(a => a.id === id ? { ...a, icon } : a));
-    }
+    if (!error) setApps(apps.map(a => a.id === id ? { ...a, icon } : a));
     setIconPickerAppId(null);
   }
 
@@ -426,20 +329,12 @@ export default function Dashboard() {
     if (!inviteAppId || !inviteEmail.trim()) return;
     setInviting(true);
     try {
-      const { data, error } = await supabase.functions.invoke('invite-collaborator', {
-        body: { email: inviteEmail.trim(), app_id: inviteAppId },
-      });
+      const { data, error } = await supabase.functions.invoke('invite-collaborator', { body: { email: inviteEmail.trim(), app_id: inviteAppId } });
       if (error) throw error;
-      if (data?.error) {
-        toast({ title: 'Fout', description: data.error, variant: 'destructive' });
-      } else {
-        toast({ title: 'Verstuurd', description: data?.message || 'Uitnodiging is verwerkt.' });
-        setInviteEmail('');
-        setInviteAppId(null);
-      }
+      if (data?.error) { toast({ title: 'Fout', description: data.error, variant: 'destructive' }); }
+      else { toast({ title: 'Verstuurd' }); setInviteEmail(''); setInviteAppId(null); }
     } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : 'Onbekende fout';
-      toast({ title: 'Fout', description: errorMessage, variant: 'destructive' });
+      toast({ title: 'Fout', description: e instanceof Error ? e.message : 'Onbekende fout', variant: 'destructive' });
     }
     setInviting(false);
   }
@@ -448,122 +343,121 @@ export default function Dashboard() {
   const sharedApps = apps.filter(a => a.owner_id !== session?.user?.id);
 
   return (
-    <div className="min-h-screen" style={{ background: 'hsl(var(--background))' }}>
+    <div className="min-h-screen bg-background">
+      {/* Background effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-[600px] h-[400px] rounded-full bg-primary/[0.03] blur-[120px]" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[300px] rounded-full bg-accent/[0.03] blur-[100px]" />
+      </div>
+
       {/* Header */}
-      <header className="border-b border-border/50 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between backdrop-blur-sm gap-2" style={{ background: 'hsl(var(--ide-toolbar) / 0.8)' }}>
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <img src="/ngc-logo.png" alt="NGC Logo" className="h-7 sm:h-8 rounded-full object-contain shrink-0" />
-          <h1 className="text-base sm:text-xl font-bold text-foreground tracking-tight truncate">NGC Studio</h1>
-        </div>
-        <div className="flex items-center gap-1 sm:gap-4">
-          <div className="flex items-center gap-3">
-            {/* ✨ Surprise 3 & 8: Sparkle coins with tooltip */}
-            <div className="relative group/coins flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-accent/10 text-accent cursor-default" title="Jouw coins">
-              <Coins className="h-4 w-4 animate-pulse" />
-              <span className="text-xs sm:text-sm font-semibold">{totalCoins}</span>
-              <Sparkles className="h-3 w-3 opacity-0 group-hover/coins:opacity-100 transition-opacity text-yellow-400" />
+      <header className="sticky top-0 z-40 border-b border-border/30 px-4 sm:px-6 py-3 glass-card">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center border border-primary/10 shrink-0">
+              <img src="/ngc-logo.png" alt="NGC" className="h-5 object-contain" />
+            </div>
+            <h1 className="text-base sm:text-lg font-bold text-foreground font-display tracking-tight truncate">NGC Studio</h1>
+          </div>
+
+          <nav className="flex items-center gap-1 sm:gap-2">
+            {/* Coins */}
+            <div className="relative group/coins flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-accent/5 border border-accent/10 text-accent cursor-default transition-colors hover:bg-accent/10">
+              <Coins className="h-3.5 w-3.5" />
+              <span className="text-xs font-semibold tabular-nums">{totalCoins}</span>
               {/* Tooltip */}
-              <div className="absolute top-full mt-2 right-0 hidden group-hover/coins:block z-50 rounded-xl border border-border/50 p-4 shadow-xl min-w-[200px]" style={{ background: 'hsl(var(--card))' }}>
-                <div className="text-xs text-muted-foreground mb-2">💰 Coin Overzicht</div>
-                <div className="text-2xl font-bold text-foreground mb-1">{totalCoins} coins</div>
-                <div className="text-[10px] text-muted-foreground">
-                  Gebruik coins voor chat-retentie, advertenties en meer.
-                </div>
-                <div className="mt-2 pt-2 border-t border-border/30 text-[10px] text-muted-foreground/60">
-                  ⌨️ Ctrl+N = Nieuwe App · Ctrl+K = Analytics
+              <div className="absolute top-full mt-2 right-0 hidden group-hover/coins:block z-50 glass-card-highlight rounded-xl p-4 shadow-2xl min-w-[200px] animate-scale-in">
+                <div className="text-xs text-muted-foreground mb-1.5">💰 Coin Overzicht</div>
+                <div className="text-xl font-bold text-foreground font-display">{totalCoins}</div>
+                <div className="text-[10px] text-muted-foreground mt-1">Gebruik coins voor retentie, ads en meer.</div>
+                <div className="mt-2 pt-2 border-t border-border/20 text-[10px] text-muted-foreground/50">
+                  ⌨️ Ctrl+N Nieuwe app · Ctrl+K Analytics
                 </div>
               </div>
             </div>
-          </div>
-          <button onClick={() => navigate('/analytics')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
-            <BarChart3 className="h-4 w-4" /> <span className="hidden sm:inline">Analytics</span>
-          </button>
-          <button onClick={() => navigate('/organization')} className="relative flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all">
-            <Building2 className="h-4 w-4" /> <span className="hidden sm:inline">Bedrijven</span>
-            {unreadOrgMessages > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1 animate-scale-in">
-                {unreadOrgMessages > 99 ? '99+' : unreadOrgMessages}
-              </span>
-            )}
-          </button>
-          {isAdmin && (
-            <button onClick={() => navigate('/admin')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-destructive hover:text-destructive hover:bg-destructive/10 transition-all" title="Admin Paneel">
-              <Shield className="h-4 w-4" /> <span className="hidden sm:inline">Admin</span>
+
+            <NavBtn onClick={() => navigate('/analytics')} icon={<BarChart3 className="h-4 w-4" />} label="Analytics" />
+            <NavBtn onClick={() => navigate('/organization')} icon={<Building2 className="h-4 w-4" />} label="Bedrijven" badge={unreadOrgMessages} />
+            {isAdmin && <NavBtn onClick={() => navigate('/admin')} icon={<Shield className="h-4 w-4" />} label="Admin" variant="destructive" />}
+            <NavBtn onClick={() => navigate('/settings')} icon={<Settings className="h-4 w-4" />} label="Account" />
+
+            <span className="hidden lg:inline text-xs text-muted-foreground truncate max-w-[140px]">{displayName || session?.user?.email}</span>
+            <ProfileAvatar size="sm" editable />
+            <button onClick={signOut} className="p-1.5 rounded-lg text-muted-foreground/60 hover:text-foreground hover:bg-secondary/50 transition-all" title="Uitloggen">
+              <LogOut className="h-4 w-4" />
             </button>
-          )}
-          <button onClick={() => navigate('/settings')} className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all" title="Instellingen">
-            <Settings className="h-4 w-4" /> <span className="hidden sm:inline">Account</span>
-          </button>
-          <span className="hidden md:inline text-sm text-muted-foreground truncate max-w-[180px]">{displayName || session?.user?.email}</span>
-          <ProfileAvatar size="sm" editable />
-          <button onClick={signOut} className="p-1.5 sm:p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all" title="Uitloggen">
-            <LogOut className="h-4 w-4" />
-          </button>
+          </nav>
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <AdBanner className="mb-6" page="dashboard" />
-        {/* Create button */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 sm:mb-12">
+
+        {/* Hero section */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-10 animate-slide-up">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground font-display tracking-tight">
               {getGreeting()}{displayName ? `, ${displayName}` : ''} 👋
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
-              {quote.emoji} <em>{quote.text}</em>
+            <p className="text-sm text-muted-foreground mt-1.5 italic">
+              {quote.emoji} {quote.text}
             </p>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <button onClick={() => setShowTemplateDialog(true)} className="flex items-center gap-1.5 sm:gap-2 rounded-xl px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold transition-all border border-primary/30 text-primary hover:bg-primary/10 active:scale-95">
-              <FileCode className="h-4 w-4 sm:h-5 sm:w-5" />
-              Template
+          <div className="flex items-center gap-2.5 shrink-0">
+            <button onClick={() => setShowTemplateDialog(true)} className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium transition-all border border-border/40 text-muted-foreground hover:text-foreground hover:border-border/60 hover:bg-secondary/30 active:scale-[0.98]">
+              <FileCode className="h-4 w-4" />
+              <span className="hidden sm:inline">Template</span>
             </button>
-            <button onClick={createApp} disabled={creating} className="flex items-center gap-1.5 sm:gap-2 rounded-xl px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 disabled:opacity-50 active:scale-95">
-              <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
+            <button onClick={createApp} disabled={creating} className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs sm:text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 disabled:opacity-50 active:scale-[0.98]">
+              <Plus className="h-4 w-4" />
               Nieuwe App
             </button>
           </div>
         </div>
 
+        {/* Content */}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary/20 border-t-primary"></div>
+          <div className="flex items-center justify-center py-24">
+            <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
           </div>
         ) : myApps.length === 0 ? (
-          <div className="rounded-xl border border-border/40 p-16 text-center relative overflow-hidden" style={{ background: 'hsl(var(--card))' }}>
+          <div className="glass-card-highlight rounded-2xl p-12 sm:p-16 text-center relative overflow-hidden animate-scale-in">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
             <div className="relative">
-              <div className="mb-4 text-5xl">🚀</div>
-              <p className="text-lg font-medium text-foreground mb-2">Begin je avontuur!</p>
-              <p className="text-sm text-muted-foreground mb-6">{quote.emoji} {quote.text}</p>
-              <button onClick={createApp} disabled={creating} className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95">
-                <Plus className="h-5 w-5" />
-                Maak je eerste app
+              <div className="mb-5 text-6xl">🚀</div>
+              <h3 className="text-xl font-bold text-foreground font-display mb-2">Begin je avontuur!</h3>
+              <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">{quote.emoji} {quote.text}</p>
+              <button onClick={createApp} disabled={creating} className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 transition-all active:scale-[0.98]">
+                <Plus className="h-5 w-5" /> Maak je eerste app
               </button>
-              <p className="text-[10px] text-muted-foreground/40 mt-4">💡 Tip: Ctrl+N om snel een app aan te maken</p>
+              <p className="text-[10px] text-muted-foreground/40 mt-4">💡 Ctrl+N om snel een app aan te maken</p>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {myApps.map((app, idx) => (
-              <div key={app.id} className={`group rounded-xl border border-border/40 p-5 transition-all hover:border-primary/60 hover:shadow-xl hover:shadow-primary/15 cursor-pointer hover:-translate-y-1.5 relative overflow-hidden`} style={{ background: 'hsl(var(--card))' }} onClick={() => navigate(`/editor/${app.id}`)}>
-                {/* 🌈 Surprise 5 & 10: Animated gradient overlay */}
+              <div
+                key={app.id}
+                className="group glass-card rounded-2xl p-5 transition-all hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 cursor-pointer hover:-translate-y-1 relative overflow-hidden animate-slide-up"
+                style={{ animationDelay: `${Math.min(idx * 60, 300)}ms` }}
+                onClick={() => navigate(`/editor/${app.id}`)}
+              >
+                {/* Gradient overlay */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${APP_GRADIENTS[idx % APP_GRADIENTS.length]} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
-                <div className="relative flex items-start gap-3 mb-4">
-                  {/* App icon */}
+
+                <div className="relative flex items-start gap-3 mb-3">
                   <button
                     onClick={e => { e.stopPropagation(); setIconPickerAppId(app.id); }}
-                    className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center shrink-0 text-primary hover:from-primary/30 hover:to-accent/20 transition-colors group/icon"
+                    className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/15 to-accent/5 border border-primary/10 flex items-center justify-center shrink-0 text-primary hover:from-primary/25 hover:to-accent/15 transition-colors"
                     title="Icoon wijzigen"
                   >
-                    <AppIcon iconName={app.icon || 'file-code'} size={20} />
+                    <AppIcon iconName={app.icon || 'file-code'} size={18} />
                   </button>
                   <div className="flex-1 min-w-0">
                     {editingNameId === app.id ? (
                       <input
                         autoFocus
-                        className="font-semibold text-foreground bg-background border border-primary/30 rounded-lg px-2 py-1 text-sm w-full focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="font-semibold text-foreground bg-background border border-primary/30 rounded-lg px-2 py-1 text-sm w-full focus:outline-none focus:ring-2 focus:ring-primary/40"
                         value={editingNameValue}
                         onChange={e => setEditingNameValue(e.target.value)}
                         onBlur={() => renameApp(app.id, editingNameValue)}
@@ -571,81 +465,65 @@ export default function Dashboard() {
                         onClick={e => e.stopPropagation()}
                       />
                     ) : (
-                      <h3 className="font-semibold text-base text-foreground truncate">{app.name}</h3>
+                      <h3 className="font-semibold text-sm text-foreground truncate">{app.name}</h3>
                     )}
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Gewijzigd: {new Date(app.updated_at).toLocaleDateString('nl-NL', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    <p className="text-[11px] text-muted-foreground/70 mt-0.5">
+                      {new Date(app.updated_at).toLocaleDateString('nl-NL', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span title={app.is_public ? 'Publiek' : 'Privé'}>
-                      {app.is_public ? <Globe className="h-4 w-4 text-primary" /> : <Lock className="h-4 w-4 text-muted-foreground" />}
-                    </span>
-                    {app.is_remixable && <span title="Remixbaar"><Copy className="h-4 w-4 text-accent" /></span>}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {app.is_public ? <Globe className="h-3.5 w-3.5 text-primary/70" /> : <Lock className="h-3.5 w-3.5 text-muted-foreground/40" />}
+                    {app.is_remixable && <Copy className="h-3.5 w-3.5 text-accent/70" />}
                   </div>
                 </div>
-                <div className="flex items-center gap-2 mb-3">
+
+                {/* Tags */}
+                <div className="relative flex items-center gap-1.5 mb-3 flex-wrap">
                   {app.organization_id && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent flex items-center gap-1">
-                      <AppIcon iconName={orgs.find(o => o.id === app.organization_id)?.icon || 'building-2'} size={12} />
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/10 text-accent/80 border border-accent/10 flex items-center gap-1">
+                      <AppIcon iconName={orgs.find(o => o.id === app.organization_id)?.icon || 'building-2'} size={10} />
                       {orgs.find(o => o.id === app.organization_id)?.name || 'Bedrijf'}
                     </span>
                   )}
                   {app.slug && (
                     <button
                       onClick={e => { e.stopPropagation(); copyAppLink(app.slug!); }}
-                      className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary flex items-center gap-1 hover:bg-primary/20 transition-colors"
+                      className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary/80 border border-primary/10 flex items-center gap-1 hover:bg-primary/15 transition-colors"
                       title={getAppUrl(app.slug)}
                     >
-                      <Link className="h-3 w-3" />
+                      <Link className="h-2.5 w-2.5" />
                       /app/{app.slug}
                     </button>
                   )}
                 </div>
-                <div className="flex items-center gap-1.5 flex-wrap opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+
+                {/* Actions (on hover) */}
+                <div className="relative flex items-center gap-1 flex-wrap opacity-0 group-hover:opacity-100 transition-opacity duration-200" onClick={e => e.stopPropagation()}>
                   {orgs.length > 0 && (
-                    <select
-                      value={app.organization_id || ''}
-                      onChange={e => linkAppToOrg(app.id, e.target.value || null)}
-                      className="text-xs rounded-lg border border-border bg-background px-2 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 max-w-[120px]"
-                      title="Koppel aan bedrijf"
+                    <select value={app.organization_id || ''} onChange={e => linkAppToOrg(app.id, e.target.value || null)}
+                      className="text-[11px] rounded-lg border border-border/40 bg-background/80 px-1.5 py-1 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 max-w-[100px]"
                     >
                       <option value="">Geen bedrijf</option>
                       {orgs.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
                     </select>
                   )}
-                  <select
-                    value={app.chat_retention_hours ?? 12}
-                    onChange={e => updateRetention(app.id, parseInt(e.target.value))}
-                    className="text-xs rounded-lg border border-border bg-background px-2 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 max-w-[120px]"
-                    title="Chat bewaartermijn"
+                  <select value={app.chat_retention_hours ?? 12} onChange={e => updateRetention(app.id, parseInt(e.target.value))}
+                    className="text-[11px] rounded-lg border border-border/40 bg-background/80 px-1.5 py-1 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 max-w-[110px]"
                   >
                     <option value={1}>1 uur</option>
                     <option value={6}>6 uur</option>
-                    <option value={12}>12 uur (gratis)</option>
-                    <option value={24}>24 uur (5🪙)</option>
-                    <option value={48}>2 dagen (15🪙)</option>
-                    <option value={168}>1 week (65🪙)</option>
-                    <option value={720}>30 dagen (295🪙)</option>
+                    <option value={12}>12u (gratis)</option>
+                    <option value={24}>24u (5🪙)</option>
+                    <option value={48}>2d (15🪙)</option>
+                    <option value={168}>1w (65🪙)</option>
+                    <option value={720}>30d (295🪙)</option>
                   </select>
-                  <button onClick={() => { setEditingNameId(app.id); setEditingNameValue(app.name); }} className="rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Naam wijzigen">
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button onClick={() => togglePublic(app)} className="rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title={app.is_public ? 'Maak privé' : 'Maak publiek'}>
-                    {app.is_public ? <Lock className="h-4 w-4" /> : <Globe className="h-4 w-4" />}
-                  </button>
-                  <button onClick={() => toggleRemixable(app)} className="rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title={app.is_remixable ? 'Remix uit' : 'Remix aan'}>
-                    <Copy className="h-4 w-4" />
-                  </button>
-                  <button onClick={() => { setInviteAppId(app.id); setInviteEmail(''); }} className="rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Samenwerker uitnodigen">
-                    <UserPlus className="h-4 w-4" />
-                  </button>
-                  <button onClick={() => openPublishDialog(app)} className="rounded-lg p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors" title="Publiceren / Deel-link">
-                    <ExternalLink className="h-4 w-4" />
-                  </button>
-                  <button onClick={() => deleteApp(app.id, app.name)} className="rounded-lg p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors ml-auto" title="Verwijderen">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  <ActionBtn onClick={() => { setEditingNameId(app.id); setEditingNameValue(app.name); }} icon={<Pencil className="h-3.5 w-3.5" />} title="Hernoemen" />
+                  <ActionBtn onClick={() => togglePublic(app)} icon={app.is_public ? <Lock className="h-3.5 w-3.5" /> : <Globe className="h-3.5 w-3.5" />} title={app.is_public ? 'Maak privé' : 'Maak publiek'} />
+                  <ActionBtn onClick={() => toggleRemixable(app)} icon={<Copy className="h-3.5 w-3.5" />} title={app.is_remixable ? 'Remix uit' : 'Remix aan'} />
+                  <ActionBtn onClick={() => { setInviteAppId(app.id); setInviteEmail(''); }} icon={<UserPlus className="h-3.5 w-3.5" />} title="Uitnodigen" />
+                  <ActionBtn onClick={() => openPublishDialog(app)} icon={<ExternalLink className="h-3.5 w-3.5" />} title="Publiceren" className="hover:text-primary" />
+                  <ActionBtn onClick={() => deleteApp(app.id, app.name)} icon={<Trash2 className="h-3.5 w-3.5" />} title="Verwijderen" className="ml-auto hover:text-destructive hover:bg-destructive/10" />
                 </div>
               </div>
             ))}
@@ -653,219 +531,134 @@ export default function Dashboard() {
         )}
 
         {/* Shared apps */}
-        {/* Shared apps */}
         {sharedApps.length > 0 && (
-          <div className="mt-14 pt-12 border-t border-border/40">
-            <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-accent/10"><Users className="h-5 w-5 text-accent" /></div>
+          <div className="mt-12 pt-10 border-t border-border/20">
+            <h2 className="text-xl font-bold text-foreground font-display mb-5 flex items-center gap-2.5">
+              <div className="p-1.5 rounded-lg bg-accent/10 border border-accent/10"><Users className="h-4 w-4 text-accent" /></div>
               Gedeeld met mij
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {sharedApps.map(app => (
-                <div key={app.id} className="rounded-xl border border-border/40 p-5 transition-all hover:border-accent/60 hover:shadow-lg hover:shadow-accent/10 cursor-pointer hover:-translate-y-1" style={{ background: 'hsl(var(--card))' }} onClick={() => navigate(`/editor/${app.id}`)}>
-                  <h3 className="font-semibold text-base text-foreground truncate mb-2">{app.name}</h3>
-                  <p className="text-sm text-muted-foreground">Gewijzigd: {new Date(app.updated_at).toLocaleDateString('nl-NL', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                <div key={app.id} className="glass-card rounded-2xl p-5 transition-all hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 cursor-pointer hover:-translate-y-1" onClick={() => navigate(`/editor/${app.id}`)}>
+                  <h3 className="font-semibold text-sm text-foreground truncate mb-1.5">{app.name}</h3>
+                  <p className="text-[11px] text-muted-foreground/60">{new Date(app.updated_at).toLocaleDateString('nl-NL', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* 📅 Surprise 9: Mini activity bar */}
+        {/* Activity bar */}
         {myApps.length > 0 && (
-          <div className="mt-12 rounded-xl border border-border/30 p-5" style={{ background: 'hsl(var(--card) / 0.5)' }}>
-            <div className="flex items-center gap-3 mb-3">
-              <Zap className="h-4 w-4 text-accent" />
-              <span className="text-xs font-semibold text-foreground">Activiteit</span>
+          <div className="mt-10 glass-card rounded-2xl p-5 animate-slide-up delay-300">
+            <div className="flex items-center gap-2 mb-3">
+              <Zap className="h-3.5 w-3.5 text-accent" />
+              <span className="text-xs font-semibold text-foreground font-display">Activiteit</span>
+              <span className="text-[10px] text-muted-foreground/40 ml-auto">30 dagen</span>
             </div>
-            <div className="flex items-end gap-1 h-8">
+            <div className="flex items-end gap-[3px] h-10">
               {Array.from({ length: 30 }, (_, i) => {
-                const d = new Date();
-                d.setDate(d.getDate() - (29 - i));
+                const d = new Date(); d.setDate(d.getDate() - (29 - i));
                 const dayStr = d.toISOString().split('T')[0];
-                const appsUpdated = myApps.filter(a => a.updated_at.startsWith(dayStr)).length;
-                const h = appsUpdated ? Math.min(100, 30 + appsUpdated * 30) : 8;
+                const count = myApps.filter(a => a.updated_at.startsWith(dayStr)).length;
+                const h = count ? Math.min(100, 25 + count * 25) : 6;
                 return (
-                  <div
-                    key={i}
-                    className="flex-1 rounded-sm transition-all hover:opacity-80"
-                    style={{
-                      height: `${h}%`,
-                      background: appsUpdated > 0 ? 'hsl(var(--primary))' : 'hsl(var(--muted))',
-                      opacity: appsUpdated > 0 ? 0.8 : 0.3,
-                    }}
-                    title={`${dayStr}: ${appsUpdated} app(s) bijgewerkt`}
-                  />
+                  <div key={i} className="flex-1 rounded-full transition-all hover:opacity-90" style={{ height: `${h}%`, background: count > 0 ? 'hsl(var(--primary))' : 'hsl(var(--muted))', opacity: count > 0 ? 0.7 : 0.2 }} title={`${dayStr}: ${count} update(s)`} />
                 );
               })}
             </div>
-            <div className="flex justify-between mt-1.5">
-              <span className="text-[9px] text-muted-foreground/50">30 dagen geleden</span>
-              <span className="text-[9px] text-muted-foreground/50">vandaag</span>
-            </div>
           </div>
         )}
-      </div>
+      </main>
 
+      {/* Modal Overlay helper */}
       {/* Invite Dialog */}
       {inviteAppId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setInviteAppId(null)}>
-          <div className="rounded-2xl border border-border/50 p-8 w-full max-w-md shadow-2xl" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10"><UserPlus className="h-5 w-5 text-primary" /></div>
-                Samenwerker uitnodigen
-              </h3>
-              <button onClick={() => setInviteAppId(null)} className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg p-1.5 transition-colors">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <p className="text-base text-muted-foreground mb-6">Voer het e-mailadres in van de gebruiker die je wilt uitnodigen.</p>
+        <ModalOverlay onClose={() => setInviteAppId(null)}>
+          <ModalCard>
+            <ModalHeader icon={<UserPlus className="h-5 w-5 text-primary" />} title="Samenwerker uitnodigen" onClose={() => setInviteAppId(null)} />
+            <p className="text-sm text-muted-foreground mb-5">Voer het e-mailadres in van de gebruiker die je wilt uitnodigen.</p>
             <input
-              type="email"
-              placeholder="email@voorbeeld.nl"
-              value={inviteEmail}
+              type="email" placeholder="email@voorbeeld.nl" value={inviteEmail}
               onChange={e => setInviteEmail(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && inviteCollaborator()}
-              className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 mb-6"
+              className="w-full rounded-xl border border-border/40 bg-background/80 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40 mb-5"
               autoFocus
             />
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setInviteAppId(null)} className="px-5 py-2.5 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
-                Annuleren
-              </button>
-              <button onClick={inviteCollaborator} disabled={inviting || !inviteEmail.trim()} className="px-6 py-2.5 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all active:scale-95">
-                {inviting ? 'Uitnodigen...' : 'Uitnodigen'}
-              </button>
-            </div>
-          </div>
-        </div>
+            <ModalFooter>
+              <ModalCancelBtn onClick={() => setInviteAppId(null)} />
+              <ModalActionBtn onClick={inviteCollaborator} disabled={inviting || !inviteEmail.trim()} loading={inviting} label="Uitnodigen" />
+            </ModalFooter>
+          </ModalCard>
+        </ModalOverlay>
       )}
 
       {/* Template Dialog */}
       {showTemplateDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowTemplateDialog(false)}>
-          <div className="rounded-2xl border border-border/50 p-8 w-full max-w-md shadow-2xl" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10"><FileCode className="h-5 w-5 text-primary" /></div>
-                Template aanmaken
-              </h3>
-              <button onClick={() => setShowTemplateDialog(false)} className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg p-1.5 transition-colors">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <p className="text-sm text-muted-foreground mb-6">Maak een publieke template die anderen kunnen remixen.</p>
-            <div className="space-y-4 mb-6">
+        <ModalOverlay onClose={() => setShowTemplateDialog(false)}>
+          <ModalCard>
+            <ModalHeader icon={<FileCode className="h-5 w-5 text-primary" />} title="Template aanmaken" onClose={() => setShowTemplateDialog(false)} />
+            <p className="text-sm text-muted-foreground mb-5">Maak een publieke template die anderen kunnen remixen.</p>
+            <div className="space-y-3 mb-5">
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Naam</label>
-                <input
-                  type="text"
-                  placeholder="Mijn Template"
-                  value={templateName}
-                  onChange={e => setTemplateName(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && createTemplate()}
-                  className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  autoFocus
-                />
+                <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase tracking-wider">Naam</label>
+                <input type="text" placeholder="Mijn Template" value={templateName} onChange={e => setTemplateName(e.target.value)} onKeyDown={e => e.key === 'Enter' && createTemplate()} className="w-full rounded-xl border border-border/40 bg-background/80 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40" autoFocus />
               </div>
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Beschrijving (optioneel)</label>
-                <textarea
-                  placeholder="Korte beschrijving van de template..."
-                  value={templateDesc}
-                  onChange={e => setTemplateDesc(e.target.value)}
-                  rows={3}
-                  className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
-                />
+                <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase tracking-wider">Beschrijving (optioneel)</label>
+                <textarea placeholder="Korte beschrijving..." value={templateDesc} onChange={e => setTemplateDesc(e.target.value)} rows={3} className="w-full rounded-xl border border-border/40 bg-background/80 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none" />
               </div>
             </div>
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setShowTemplateDialog(false)} className="px-5 py-2.5 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
-                Annuleren
-              </button>
-              <button onClick={createTemplate} disabled={creatingTemplate || !templateName.trim()} className="px-6 py-2.5 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all active:scale-95">
-                {creatingTemplate ? 'Aanmaken...' : 'Aanmaken'}
-              </button>
-            </div>
-          </div>
-        </div>
+            <ModalFooter>
+              <ModalCancelBtn onClick={() => setShowTemplateDialog(false)} />
+              <ModalActionBtn onClick={createTemplate} disabled={creatingTemplate || !templateName.trim()} loading={creatingTemplate} label="Aanmaken" />
+            </ModalFooter>
+          </ModalCard>
+        </ModalOverlay>
       )}
 
       {/* Publish Dialog */}
       {publishAppId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setPublishAppId(null)}>
-          <div className="rounded-2xl border border-border/50 p-8 w-full max-w-md shadow-2xl" style={{ background: 'hsl(var(--card))' }} onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10"><ExternalLink className="h-5 w-5 text-primary" /></div>
-                App publiceren
-              </h3>
-              <button onClick={() => setPublishAppId(null)} className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg p-1.5 transition-colors">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <p className="text-sm text-muted-foreground mb-6">Kies een unieke URL voor je app. Iedereen met de link kan je app bekijken.</p>
+        <ModalOverlay onClose={() => setPublishAppId(null)}>
+          <ModalCard>
+            <ModalHeader icon={<ExternalLink className="h-5 w-5 text-primary" />} title="App publiceren" onClose={() => setPublishAppId(null)} />
+            <p className="text-sm text-muted-foreground mb-5">Kies een unieke URL voor je app.</p>
             <div className="mb-4">
-              <label className="block text-xs font-medium text-muted-foreground mb-1.5">Publieke URL</label>
-              <div className="flex items-center gap-0 rounded-lg border border-border overflow-hidden bg-background">
-                <span className="px-3 py-3 text-xs text-muted-foreground bg-secondary/50 shrink-0 border-r border-border">{window.location.origin}/app/</span>
-                <input
-                  type="text"
-                  value={slugValue}
-                  onChange={e => setSlugValue(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                  className="flex-1 px-3 py-3 text-sm text-foreground bg-transparent focus:outline-none"
-                  placeholder="mijn-app"
-                  autoFocus
-                />
+              <label className="block text-[10px] font-medium text-muted-foreground mb-1 uppercase tracking-wider">Publieke URL</label>
+              <div className="flex items-center gap-0 rounded-xl border border-border/40 overflow-hidden bg-background/80">
+                <span className="px-3 py-2.5 text-xs text-muted-foreground/50 bg-secondary/30 shrink-0 border-r border-border/20">/app/</span>
+                <input type="text" value={slugValue} onChange={e => setSlugValue(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} className="flex-1 px-3 py-2.5 text-sm text-foreground bg-transparent focus:outline-none" placeholder="mijn-app" autoFocus />
               </div>
-              <p className="text-[10px] text-muted-foreground/60 mt-1.5">Alleen kleine letters, cijfers en streepjes.</p>
             </div>
-
             {apps.find(a => a.id === publishAppId)?.slug && (
-              <div className="mb-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
-                <p className="text-xs text-muted-foreground mb-2">Huidige link:</p>
+              <div className="mb-4 p-3 rounded-xl bg-primary/5 border border-primary/10">
+                <p className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-wider">Huidige link</p>
                 <div className="flex items-center gap-2">
                   <code className="text-xs text-primary flex-1 truncate">{getAppUrl(apps.find(a => a.id === publishAppId)!.slug!)}</code>
-                  <button onClick={() => copyAppLink(apps.find(a => a.id === publishAppId)!.slug!)} className="text-xs px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0">
-                    Kopieer
-                  </button>
-                  <a href={getAppUrl(apps.find(a => a.id === publishAppId)!.slug!)} target="_blank" rel="noopener noreferrer" className="text-xs px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0">
-                    Open
-                  </a>
+                  <button onClick={() => copyAppLink(apps.find(a => a.id === publishAppId)!.slug!)} className="text-[10px] px-2 py-1 rounded-lg bg-primary/10 text-primary hover:bg-primary/15 transition-colors">Kopieer</button>
+                  <a href={getAppUrl(apps.find(a => a.id === publishAppId)!.slug!)} target="_blank" rel="noopener noreferrer" className="text-[10px] px-2 py-1 rounded-lg bg-primary/10 text-primary hover:bg-primary/15 transition-colors">Open</a>
                 </div>
                 <button
                   onClick={async () => {
-                    if (!confirm('Weet je zeker dat je de publicatie wilt intrekken? Je app is daarna niet meer bereikbaar via de publieke link.')) return;
+                    if (!confirm('Publicatie intrekken?')) return;
                     const { error } = await supabase.from('apps').update({ is_public: false, slug: null }).eq('id', publishAppId!);
-                    if (!error) {
-                      setApps(apps.map(a => a.id === publishAppId ? { ...a, is_public: false, slug: null } : a));
-                      toast({ title: 'Publicatie ingetrokken', description: 'Je app is niet meer publiek toegankelijk.' });
-                      setPublishAppId(null);
-                    } else {
-                      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
-                    }
+                    if (!error) { setApps(apps.map(a => a.id === publishAppId ? { ...a, is_public: false, slug: null } : a)); toast({ title: 'Publicatie ingetrokken' }); setPublishAppId(null); }
+                    else toast({ title: 'Fout', description: error.message, variant: 'destructive' });
                   }}
-                  className="mt-3 w-full px-3 py-2 text-xs font-medium rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
+                  className="mt-3 w-full px-3 py-2 text-xs font-medium rounded-xl border border-destructive/20 text-destructive hover:bg-destructive/10 transition-colors"
                 >
                   Publicatie intrekken
                 </button>
               </div>
             )}
-
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setPublishAppId(null)} className="px-5 py-2.5 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
-                Annuleren
-              </button>
-              <button onClick={saveSlug} disabled={savingSlug || !slugValue.trim()} className="px-6 py-2.5 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all active:scale-95">
-                {savingSlug ? 'Opslaan...' : 'Publiceren'}
-              </button>
-            </div>
-          </div>
-        </div>
+            <ModalFooter>
+              <ModalCancelBtn onClick={() => setPublishAppId(null)} />
+              <ModalActionBtn onClick={saveSlug} disabled={savingSlug || !slugValue.trim()} loading={savingSlug} label="Publiceren" />
+            </ModalFooter>
+          </ModalCard>
+        </ModalOverlay>
       )}
 
-      {/* Icon Picker */}
       {iconPickerAppId && (
         <IconPicker
           value={apps.find(a => a.id === iconPickerAppId)?.icon || 'file-code'}
@@ -882,5 +675,79 @@ export default function Dashboard() {
         onConfirm={() => { coinConfirm.onConfirm(); setCoinConfirm(prev => ({ ...prev, open: false })); }}
       />
     </div>
+  );
+}
+
+/* ─── Sub-components ─── */
+
+function NavBtn({ onClick, icon, label, badge, variant }: { onClick: () => void; icon: React.ReactNode; label: string; badge?: number; variant?: 'destructive' }) {
+  return (
+    <button onClick={onClick} className={`relative flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all active:scale-[0.97] ${variant === 'destructive' ? 'text-destructive hover:bg-destructive/10' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40'}`}>
+      {icon}
+      <span className="hidden sm:inline">{label}</span>
+      {!!badge && badge > 0 && (
+        <span className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold px-1 animate-scale-in">
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
+    </button>
+  );
+}
+
+function ActionBtn({ onClick, icon, title, className = '' }: { onClick: () => void; icon: React.ReactNode; title: string; className?: string }) {
+  return (
+    <button onClick={onClick} className={`rounded-lg p-1.5 text-muted-foreground/60 hover:text-foreground hover:bg-secondary/50 transition-colors ${className}`} title={title}>
+      {icon}
+    </button>
+  );
+}
+
+function ModalOverlay({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4 animate-scale-in" onClick={onClose}>
+      {children}
+    </div>
+  );
+}
+
+function ModalCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="glass-card-highlight rounded-2xl p-6 sm:p-8 w-full max-w-md shadow-2xl shadow-black/30" onClick={e => e.stopPropagation()}>
+      {children}
+    </div>
+  );
+}
+
+function ModalHeader({ icon, title, onClose }: { icon: React.ReactNode; title: string; onClose: () => void }) {
+  return (
+    <div className="flex items-center justify-between mb-5">
+      <h3 className="text-lg font-bold text-foreground font-display flex items-center gap-2.5">
+        <div className="p-1.5 rounded-lg bg-primary/10 border border-primary/10">{icon}</div>
+        {title}
+      </h3>
+      <button onClick={onClose} className="text-muted-foreground/40 hover:text-foreground hover:bg-secondary/50 rounded-lg p-1 transition-colors">
+        <X className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
+function ModalFooter({ children }: { children: React.ReactNode }) {
+  return <div className="flex justify-end gap-2.5">{children}</div>;
+}
+
+function ModalCancelBtn({ onClick }: { onClick: () => void }) {
+  return (
+    <button onClick={onClick} className="px-4 py-2 text-sm font-medium rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/30 transition-colors">
+      Annuleren
+    </button>
+  );
+}
+
+function ModalActionBtn({ onClick, disabled, loading, label }: { onClick: () => void; disabled: boolean; loading: boolean; label: string }) {
+  return (
+    <button onClick={onClick} disabled={disabled} className="px-5 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/25 disabled:opacity-50 transition-all active:scale-[0.98]">
+      {loading ? 'Bezig...' : label}
+    </button>
   );
 }
