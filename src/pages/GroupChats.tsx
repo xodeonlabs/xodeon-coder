@@ -7,6 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ArrowLeft, Send, Plus, Users, Hash, UserPlus, Trash2, X, Search, Gamepad2, Check, CheckCheck } from 'lucide-react';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { SnakeGame } from '@/components/SnakeGame';
+import { StatusDot } from '@/components/StatusDot';
 
 interface ChatGroup {
   id: string;
