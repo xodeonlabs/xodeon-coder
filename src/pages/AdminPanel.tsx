@@ -901,6 +901,35 @@ export default function AdminPanel() {
                 />
               </div>
               <div>
+                <label className="text-xs font-medium text-foreground uppercase tracking-wide">Pagina's</label>
+                <div className="flex flex-wrap gap-2 mt-1.5">
+                  {PAGE_OPTIONS.map(opt => {
+                    const checked = adForm.pages.includes(opt.value);
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          setAdForm({
+                            ...adForm,
+                            pages: checked
+                              ? adForm.pages.filter(p => p !== opt.value)
+                              : [...adForm.pages, opt.value],
+                          });
+                        }}
+                        className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
+                          checked
+                            ? 'bg-primary/10 border-primary text-primary ring-1 ring-primary/30'
+                            : 'border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
                 <label className="text-xs font-medium text-foreground uppercase tracking-wide">Kleur</label>
                 <div className="flex flex-wrap gap-2 mt-1.5">
                   {GRADIENT_PRESETS.map(g => (
