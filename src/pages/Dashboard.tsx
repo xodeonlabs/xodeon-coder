@@ -545,12 +545,12 @@ export default function Dashboard() {
 
                 {/* Actions (on hover) */}
                 <div className="relative flex items-center gap-1 flex-wrap opacity-0 group-hover:opacity-100 transition-opacity duration-200" onClick={e => e.stopPropagation()}>
-                  {orgs.length > 0 && (
+                  {adminOrgs.length > 0 && (
                     <select value={app.organization_id || ''} onChange={e => linkAppToOrg(app.id, e.target.value || null)}
                       className="text-[11px] rounded-lg border border-border/40 bg-background/80 px-1.5 py-1 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 max-w-[100px]"
                     >
                       <option value="">Geen bedrijf</option>
-                      {orgs.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
+                      {adminOrgs.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
                     </select>
                   )}
                   <select value={app.chat_retention_hours ?? 12} onChange={e => updateRetention(app.id, parseInt(e.target.value))}
