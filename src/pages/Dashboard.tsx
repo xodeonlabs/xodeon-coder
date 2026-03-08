@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, FileText, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield, Sparkles, Zap, Handshake, Percent } from 'lucide-react';
+import { Plus, Globe, Lock, Copy, Trash2, LogOut, Users, UserPlus, X, Pencil, Building2, FileCode, FileText, Link, ExternalLink, BarChart3, Coins, Clock, Settings, Shield, Sparkles, Zap, Handshake, Percent, LayoutGrid } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { AdBanner } from '@/components/AdBanner';
@@ -531,6 +531,7 @@ export default function Dashboard() {
               </div>
             </div>
 
+            <NavBtn onClick={() => navigate('/templates')} icon={<LayoutGrid className="h-4 w-4" />} label="Templates" />
             <NavBtn onClick={() => navigate('/analytics')} icon={<BarChart3 className="h-4 w-4" />} label="Analytics" />
             <NavBtn onClick={() => navigate('/organization')} icon={<Building2 className="h-4 w-4" />} label="Bedrijven" badge={unreadOrgMessages} />
             {isAdmin && <NavBtn onClick={() => navigate('/admin')} icon={<Shield className="h-4 w-4" />} label="Admin" variant="destructive" />}
