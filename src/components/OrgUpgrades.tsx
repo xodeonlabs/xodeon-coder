@@ -254,7 +254,7 @@ export function OrgUpgrades({ orgId, orgName, currentLevel, orgBalance, isOwner,
             <p className="text-[11px] text-muted-foreground">Huidige rang van {orgName}</p>
           </div>
         </div>
-        {currentLevel >= 5 && (
+        {currentLevel >= 10 && (
           <span className="ml-auto px-3 py-1 text-xs font-bold rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
             MAX LEVEL
           </span>

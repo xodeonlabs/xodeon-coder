@@ -182,7 +182,7 @@ export default function AdminPanel() {
       supabase.from('profiles').select('*'),
       supabase.from('user_roles').select('*'),
       supabase.from('apps').select('id, name, owner_id, is_public, updated_at').order('updated_at', { ascending: false }),
-      supabase.from('organizations').select('id, name, owner_id'),
+      supabase.from('organizations').select('id, name, owner_id, level'),
       supabase.from('ads' as any).select('*').order('sort_order', { ascending: true }),
       supabase.from('admin_activity_log' as any).select('*').order('created_at', { ascending: false }).limit(100),
     ]);
