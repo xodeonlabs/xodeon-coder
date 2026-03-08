@@ -407,61 +407,81 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
       });
   }, [organizationId, updateCount]);
 
-  // DB-synced coin operations (user_coins for personal, org_coins for org apps)
+  // DB-synced coin operations with 10% platform fee
+  const PLATFORM_FEE_RATE = 0.10;
+
   const dbCoinsAdd = useCallback(async (name: string, amount: number): Promise<boolean> => {
+    const fee = Math.floor(amount * PLATFORM_FEE_RATE);
+    const netAmount = amount - fee;
+
     if (organizationId) {
-      // Org path: withdraw from org vault, add to user runtime
+      // Org path: withdraw from org vault (full amount), user gets net
       const { data } = await supabase.from('org_coins').select('id, balance').eq('organization_id', organizationId).eq('name', 'coins').single();
       if (!data || (data as any).balance < amount) return false;
       const newOrgBalance = (data as any).balance - amount;
       await supabase.from('org_coins').update({ balance: newOrgBalance, updated_at: new Date().toISOString() } as any).eq('id', (data as any).id);
-      runtime.coins[name] = (runtime.coins[name] ?? 0) + amount;
+      runtime.coins[name] = (runtime.coins[name] ?? 0) + netAmount;
       const { data: authData } = await supabase.auth.getUser();
       if (authData?.user) {
         await supabase.from('org_coin_transactions').insert({
-          organization_id: organizationId, coin_name: 'coins', amount, type: 'withdraw',
-          user_id: authData.user.id, note: `App: Coins.Add(${name}, ${amount})`,
+          organization_id: organizationId, coin_name: 'coins', amount: netAmount, type: 'withdraw',
+          user_id: authData.user.id, note: `App: Coins.Add(${name}, ${amount}) → ${netAmount} na 10% fee`,
         } as any);
+        if (fee > 0) {
+          await supabase.from('org_coin_transactions').insert({
+            organization_id: organizationId, coin_name: 'coins', amount: fee, type: 'platform_fee',
+            user_id: authData.user.id, note: `Platformkosten 10% van ${amount}`,
+          } as any);
+        }
       }
       setOrgBalance(newOrgBalance);
       return true;
     }
-    // Personal path: add to user_coins in DB
-    runtime.coinsAdd(name, amount);
+    // Personal path: user gets net amount
+    runtime.coinsAdd(name, netAmount);
     const { data: authData } = await supabase.auth.getUser();
     if (authData?.user) {
       const { data: coinRow } = await supabase.from('user_coins').select('id, balance').eq('user_id', authData.user.id).maybeSingle();
       if (coinRow) {
-        await supabase.from('user_coins').update({ balance: (coinRow as any).balance + amount, updated_at: new Date().toISOString() } as any).eq('id', (coinRow as any).id);
+        await supabase.from('user_coins').update({ balance: (coinRow as any).balance + netAmount, updated_at: new Date().toISOString() } as any).eq('id', (coinRow as any).id);
       } else {
-        await supabase.from('user_coins').insert({ user_id: authData.user.id, balance: 100 + amount } as any);
+        await supabase.from('user_coins').insert({ user_id: authData.user.id, balance: 100 + netAmount } as any);
       }
     }
     return true;
   }, [organizationId, runtime]);
 
   const dbCoinsRemove = useCallback(async (name: string, amount: number): Promise<boolean> => {
+    const fee = Math.floor(amount * PLATFORM_FEE_RATE);
+    const netReturn = amount - fee;
+
     if (organizationId) {
-      // Org path: remove from user runtime, deposit back to org vault
+      // Org path: remove full amount from user, org gets net back
       const current = runtime.coins[name] ?? 0;
       if (current < amount) return false;
       runtime.coins[name] = current - amount;
       const { data } = await supabase.from('org_coins').select('id, balance').eq('organization_id', organizationId).eq('name', 'coins').single();
       if (data) {
-        const newOrgBalance = (data as any).balance + amount;
+        const newOrgBalance = (data as any).balance + netReturn;
         await supabase.from('org_coins').update({ balance: newOrgBalance, updated_at: new Date().toISOString() } as any).eq('id', (data as any).id);
         setOrgBalance(newOrgBalance);
       }
       const { data: authData } = await supabase.auth.getUser();
       if (authData?.user) {
         await supabase.from('org_coin_transactions').insert({
-          organization_id: organizationId, coin_name: 'coins', amount, type: 'deposit',
-          user_id: authData.user.id, note: `App: Coins.Remove(${name}, ${amount})`,
+          organization_id: organizationId, coin_name: 'coins', amount: netReturn, type: 'deposit',
+          user_id: authData.user.id, note: `App: Coins.Remove(${name}, ${amount}) → ${netReturn} na 10% fee`,
         } as any);
+        if (fee > 0) {
+          await supabase.from('org_coin_transactions').insert({
+            organization_id: organizationId, coin_name: 'coins', amount: fee, type: 'platform_fee',
+            user_id: authData.user.id, note: `Platformkosten 10% van ${amount}`,
+          } as any);
+        }
       }
       return true;
     }
-    // Personal path: remove from user_coins in DB
+    // Personal path: remove full amount, DB gets net back
     const success = runtime.coinsRemove(name, amount);
     if (!success) return false;
     const { data: authData } = await supabase.auth.getUser();
