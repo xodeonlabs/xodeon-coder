@@ -106,7 +106,7 @@ export default function AdminPanel() {
   const [emojiSearch, setEmojiSearch] = useState('');
 
   // Management confirmations
-  const [confirmAction, setConfirmAction] = useState<{ id: string; action: string; type: 'user' | 'app' | 'org'; name: string } | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ id: string; action: string; type: 'user' | 'app' | 'org' | 'ad'; name: string } | null>(null);
   const [managingUser, setManagingUser] = useState(false);
 
   useEffect(() => {
@@ -351,6 +351,9 @@ export default function AdminPanel() {
         setConfirmAction(null);
       } else if (confirmAction.type === 'org') {
         await deleteOrg(confirmAction.id);
+        setConfirmAction(null);
+      } else if (confirmAction.type === 'ad') {
+        await deleteAd(confirmAction.id);
         setConfirmAction(null);
       }
     } catch (e: any) {
@@ -690,7 +693,7 @@ export default function AdminPanel() {
                         <Pencil className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => deleteAd(ad.id)}
+                        onClick={() => setConfirmAction({ id: ad.id, action: 'delete', type: 'ad', name: ad.title })}
                         className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                         title="Verwijderen"
                       >
@@ -917,7 +920,7 @@ export default function AdminPanel() {
 
       {/* Confirm dialog */}
       {confirmAction && (() => {
-        const typeLabels: Record<string, string> = { user: 'Gebruiker', app: 'App', org: 'Bedrijf' };
+        const typeLabels: Record<string, string> = { user: 'Gebruiker', app: 'App', org: 'Bedrijf', ad: 'Advertentie' };
         const typeLabel = typeLabels[confirmAction.type] || '';
         const isDelete = confirmAction.action === 'delete';
         const isBan = confirmAction.action === 'ban';
