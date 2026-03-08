@@ -484,8 +484,18 @@ export default function OrganizationPage() {
                 {members.map(member => (
                   <div key={member.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 bg-background/50">
                     <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                      <Avatar className="h-7 w-7 border border-border/50 shrink-0">
+                        {memberProfiles[member.user_id]?.avatar_url ? (
+                          <AvatarImage src={memberProfiles[member.user_id].avatar_url!} alt="" />
+                        ) : null}
+                        <AvatarFallback className="text-[10px] font-bold bg-primary/20 text-primary">
+                          {(memberProfiles[member.user_id]?.display_name || member.user_id).slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
                       {roleIcon(member.role)}
-                      <span className="text-sm text-foreground font-mono truncate">{member.user_id.slice(0, 8)}...</span>
+                      <span className="text-sm text-foreground truncate">
+                        {memberProfiles[member.user_id]?.display_name || `${member.user_id.slice(0, 8)}...`}
+                      </span>
                       <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-secondary shrink-0">{roleLabel(member.role)}</span>
                     </div>
                     {selectedOrg.owner_id === session?.user?.id && member.role !== 'owner' && (
