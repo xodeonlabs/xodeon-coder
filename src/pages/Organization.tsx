@@ -197,6 +197,15 @@ export default function OrganizationPage() {
       return;
     }
 
+    // Server-side role check for withdrawals
+    if (type === 'withdraw') {
+      const myMember = members.find(m => m.user_id === session.user.id);
+      if (!myMember || (myMember.role !== 'owner' && myMember.role !== 'admin')) {
+        toast({ title: 'Geen toegang', description: 'Alleen admins en owners mogen coins opnemen', variant: 'destructive' });
+        return;
+      }
+    }
+
     setTxProcessing(true);
     try {
       // Get or create coin record
