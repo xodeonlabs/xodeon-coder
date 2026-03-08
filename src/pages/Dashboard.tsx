@@ -242,10 +242,16 @@ export default function Dashboard() {
             <h2 className="text-3xl font-bold text-foreground">Mijn Apps</h2>
             <p className="text-base text-muted-foreground mt-2">Maak en beheer je NGC applicaties</p>
           </div>
-          <button onClick={createApp} disabled={creating} className="flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 disabled:opacity-50 active:scale-95">
-            <Plus className="h-5 w-5" />
-            Nieuwe App
-          </button>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setShowTemplateDialog(true)} className="flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all border border-primary/30 text-primary hover:bg-primary/10 active:scale-95">
+              <FileCode className="h-5 w-5" />
+              Template aanmaken
+            </button>
+            <button onClick={createApp} disabled={creating} className="flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:shadow-primary/20 disabled:opacity-50 active:scale-95">
+              <Plus className="h-5 w-5" />
+              Nieuwe App
+            </button>
+          </div>
         </div>
 
         {loading ? (
