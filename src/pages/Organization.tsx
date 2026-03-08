@@ -79,7 +79,18 @@ export default function OrganizationPage() {
   const [adUrl, setAdUrl] = useState('');
   const [adSaving, setAdSaving] = useState(false);
 
-  useEffect(() => { fetchOrgs(); }, []);
+  // Solliciteren state
+  const [showApply, setShowApply] = useState(false);
+  const [allPublicOrgs, setAllPublicOrgs] = useState<Organization[]>([]);
+  const [applySearch, setApplySearch] = useState('');
+  const [applying, setApplying] = useState<string | null>(null);
+  const [myRequests, setMyRequests] = useState<{ id: string; organization_id: string; status: string }[]>([]);
+  
+  // Join requests for org owners/admins
+  const [joinRequests, setJoinRequests] = useState<{ id: string; user_id: string; status: string; created_at: string }[]>([]);
+  const [requestProfiles, setRequestProfiles] = useState<Record<string, { display_name: string | null; avatar_url: string | null }>>({});
+
+  useEffect(() => { fetchOrgs(); fetchMyRequests(); }, []);
 
   async function fetchOrgs() {
     const cacheKey = `orgs-list:${session?.user?.id}`;
