@@ -49,7 +49,7 @@ const App = () => (
           <Route path="/preview/:appId" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
           <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
           <Route path="/app/:slug" element={<PublicApp />} />
-          <Route path="/profiel/:userId" element={<Profile />} />
+          <Route path="/profiel/:username" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

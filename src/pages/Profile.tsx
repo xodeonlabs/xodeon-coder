@@ -114,7 +114,7 @@ export default function Profile() {
     }
 
     load();
-  }, [userId]);
+  }, [username]);
 
   if (loading) {
     return (
