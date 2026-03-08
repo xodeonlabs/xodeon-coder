@@ -275,6 +275,7 @@ export default function AdminPanel() {
         description: adForm.description,
         url: adForm.url,
         gradient: adForm.gradient,
+        pages: adForm.pages,
       }).eq('id', editingAd.id);
       if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
       else {
