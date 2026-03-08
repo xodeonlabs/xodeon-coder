@@ -134,31 +134,27 @@ export function AppSidebar() {
               {NAV_ITEMS.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
-                    asChild
                     isActive={isActive(item.url)}
                     tooltip={collapsed ? item.title : undefined}
+                    onClick={() => navigate(item.url)}
+                    className={`flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                      isActive(item.url)
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40'
+                    }`}
                   >
-                    <button
-                      onClick={() => navigate(item.url)}
-                      className={`flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-sm font-medium transition-all ${
-                        isActive(item.url)
-                          ? 'bg-primary/10 text-primary'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40'
-                      }`}
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span className="flex-1">{item.title}</span>}
-                      {item.url === '/groepen' && unreadGroups > 0 && (
-                        <span className="ml-auto min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1">
-                          {unreadGroups > 9 ? '9+' : unreadGroups}
-                        </span>
-                      )}
-                      {item.url === '/berichten' && unreadMessages > 0 && (
-                        <span className="ml-auto min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1">
-                          {unreadMessages > 9 ? '9+' : unreadMessages}
-                        </span>
-                      )}
-                    </button>
+                    <item.icon className="h-4 w-4 shrink-0" />
+                    <span className="flex-1">{item.title}</span>
+                    {item.url === '/groepen' && unreadGroups > 0 && (
+                      <span className="ml-auto min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1">
+                        {unreadGroups > 9 ? '9+' : unreadGroups}
+                      </span>
+                    )}
+                    {item.url === '/berichten' && unreadMessages > 0 && (
+                      <span className="ml-auto min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1">
+                        {unreadMessages > 9 ? '9+' : unreadMessages}
+                      </span>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
