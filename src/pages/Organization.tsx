@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle, MessageCircle } from 'lucide-react';
+import { Building2, Plus, Users, Copy, ArrowLeft, Crown, Shield, User, Trash2, LogIn, AppWindow, Coins, ArrowUpCircle, ArrowDownCircle, MessageCircle, Megaphone, Pencil } from 'lucide-react';
 import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { OrgChat } from '@/components/OrgChat';
