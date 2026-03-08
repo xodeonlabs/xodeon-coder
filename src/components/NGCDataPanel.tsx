@@ -235,7 +235,7 @@ function ImageUploadSection({ appId }: { appId: string }) {
       )}
 
       <p className="text-[9px] text-muted-foreground/50 mt-2 text-center">
-        Hover over een afbeelding → kopieer URL → plak in Bron=""
+        💡 Sleep een afbeelding naar een Image component in Ontwerp modus
       </p>
     </div>
   );

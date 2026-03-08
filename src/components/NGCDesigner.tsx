@@ -460,6 +460,7 @@ export function NGCDesigner({ ast, selectedId, onSelect, onPositionChange, onSiz
             onPositionChange={onPositionChange}
             onSizeChange={onSizeChange}
             onDelete={onDelete}
+            onPropertyChange={onPropertyChange}
           >
             <DesignerNodeContent node={child} runtime={runtime} />
           </DraggableNode>
