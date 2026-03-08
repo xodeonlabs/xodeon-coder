@@ -161,6 +161,137 @@ export type Database = {
           },
         ]
       }
+      alliance_chat_messages: {
+        Row: {
+          alliance_id: string
+          content: string
+          created_at: string
+          id: string
+          organization_id: string
+          user_id: string
+        }
+        Insert: {
+          alliance_id: string
+          content: string
+          created_at?: string
+          id?: string
+          organization_id: string
+          user_id: string
+        }
+        Update: {
+          alliance_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          organization_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alliance_chat_messages_alliance_id_fkey"
+            columns: ["alliance_id"]
+            isOneToOne: false
+            referencedRelation: "alliances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alliance_chat_messages_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      alliance_coins: {
+        Row: {
+          alliance_id: string
+          balance: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          alliance_id: string
+          balance?: number
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          alliance_id?: string
+          balance?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alliance_coins_alliance_id_fkey"
+            columns: ["alliance_id"]
+            isOneToOne: true
+            referencedRelation: "alliances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      alliance_members: {
+        Row: {
+          alliance_id: string
+          id: string
+          joined_at: string
+          organization_id: string
+        }
+        Insert: {
+          alliance_id: string
+          id?: string
+          joined_at?: string
+          organization_id: string
+        }
+        Update: {
+          alliance_id?: string
+          id?: string
+          joined_at?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alliance_members_alliance_id_fkey"
+            columns: ["alliance_id"]
+            isOneToOne: false
+            referencedRelation: "alliances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alliance_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      alliances: {
+        Row: {
+          created_at: string
+          created_by: string
+          icon: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          icon?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          icon?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       app_versions: {
         Row: {
           app_id: string
@@ -715,6 +846,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_alliance_admin: { Args: { _alliance_id: string }; Returns: boolean }
+      is_alliance_member: { Args: { _alliance_id: string }; Returns: boolean }
       is_app_collaborator: { Args: { _app_id: string }; Returns: boolean }
       is_app_org_member: { Args: { _app_id: string }; Returns: boolean }
       is_app_owner: { Args: { _app_id: string }; Returns: boolean }
