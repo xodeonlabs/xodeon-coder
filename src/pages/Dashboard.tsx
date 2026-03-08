@@ -649,6 +649,11 @@ export default function Dashboard() {
         <AdBanner className="mb-6" page="dashboard" />
         <FriendRequests />
 
+        {/* User search */}
+        <div className="mb-6">
+          <UserSearch />
+        </div>
+
         {/* Hero section */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-10 animate-slide-up">
           <div>
