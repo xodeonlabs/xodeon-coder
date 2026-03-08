@@ -141,7 +141,7 @@ export default function GroupChats() {
         setMessages(prev => [...prev, msg]);
         // Load profile if unknown
         if (!profiles[msg.user_id]) {
-          supabase.from('profiles').select('id, display_name, avatar_url, username, is_dnd').eq('id', msg.user_id).maybeSingle().then(({ data }) => {
+          supabase.from('profiles').select('id, display_name, avatar_url, username, is_dnd, last_seen_at').eq('id', msg.user_id).maybeSingle().then(({ data }) => {
             if (data) setProfiles(prev => ({ ...prev, [data.id]: data }));
           });
         }
