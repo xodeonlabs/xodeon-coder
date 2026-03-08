@@ -7,19 +7,12 @@ interface PropertiesProps {
 }
 
 function isColorValue(value: string): boolean {
-  const clean = value.replace(/^"|"$/g, '');
-  return /^#([0-9a-fA-F]{3,8})$/.test(clean) || /^rgb\(\d+,\d+,\d+\)$/.test(clean.replace(/\s/g, ''));
-}
-
-function hexToRgb(hex: string): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgb(${r},${g},${b})`;
+  const clean = value.replace(/^"|"$/g, '').replace(/\s/g, '');
+  return /^#([0-9a-fA-F]{3,8})$/.test(clean) || /^rgba?\(\d+,\d+,\d+(,[\d.]+)?\)$/.test(clean);
 }
 
 function rgbToHex(rgb: string): string {
-  const match = rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+  const match = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
   if (!match) return '#000000';
   const r = parseInt(match[1]).toString(16).padStart(2, '0');
   const g = parseInt(match[2]).toString(16).padStart(2, '0');
@@ -27,11 +20,27 @@ function rgbToHex(rgb: string): string {
   return `#${r}${g}${b}`;
 }
 
+function getAlpha(value: string): number {
+  const match = value.match(/rgba\(\d+,\s*\d+,\s*\d+,\s*([\d.]+)\)/);
+  return match ? parseFloat(match[1]) : 1;
+}
+
 function ColorInput({ value, onChange }: { value: string; onChange: (val: string) => void }) {
   const clean = value.replace(/^"|"$/g, '');
   const inputRef = useRef<HTMLInputElement>(null);
-  // Convert rgb to hex for the native color input
   const hexValue = clean.startsWith('rgb') ? rgbToHex(clean) : clean.startsWith('#') ? clean : '#000000';
+  const alpha = getAlpha(clean);
+
+  const handleColorChange = (hex: string, a: number) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    if (a < 1) {
+      onChange(`"rgba(${r},${g},${b},${a})"`);
+    } else {
+      onChange(`"rgb(${r},${g},${b})"`);
+    }
+  };
 
   return (
     <div className="flex items-center gap-1.5">
@@ -45,8 +54,18 @@ function ColorInput({ value, onChange }: { value: string; onChange: (val: string
         ref={inputRef}
         type="color"
         value={hexValue}
-        onChange={e => onChange(`"${hexToRgb(e.target.value)}"`)}
+        onChange={e => handleColorChange(e.target.value, alpha)}
         className="sr-only"
+      />
+      <input
+        type="range"
+        min="0"
+        max="1"
+        step="0.05"
+        value={alpha}
+        onChange={e => handleColorChange(hexValue, parseFloat(e.target.value))}
+        className="w-14 h-3 accent-primary cursor-pointer"
+        title={`Transparantie: ${Math.round(alpha * 100)}%`}
       />
     </div>
   );
@@ -63,7 +82,6 @@ export function NGCProperties({ node, onPropertyChange }: PropertiesProps) {
 
   return (
     <div className="overflow-auto h-full p-2 space-y-1">
-      {/* Node info */}
       <div className="mb-3 space-y-1">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">Type</span>
