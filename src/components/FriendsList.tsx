@@ -93,7 +93,7 @@ export function FriendsList({ userId }: { userId: string }) {
                     {initials}
                   </AvatarFallback>
                 </Avatar>
-                <StatusDot isDnd={(friend as any).is_dnd ?? false} className="absolute -bottom-0.5 -right-0.5" />
+                <StatusDot status={getOnlineStatus((friend as any).is_dnd ?? false, (friend as any).last_seen_at)} className="absolute -bottom-0.5 -right-0.5" />
               </div>
               <span className="text-[11px] text-muted-foreground font-medium truncate max-w-[72px]">
                 {friend.display_name || 'Anoniem'}

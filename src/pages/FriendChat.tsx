@@ -293,7 +293,7 @@ export default function FriendChatPage() {
                           {friend.unread}
                         </span>
                       ) : (
-                        <StatusDot isDnd={(friend as any).is_dnd ?? false} className="absolute -bottom-0.5 -right-0.5" />
+                        <StatusDot status={getOnlineStatus((friend as any).is_dnd ?? false, (friend as any).last_seen_at)} className="absolute -bottom-0.5 -right-0.5" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
