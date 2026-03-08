@@ -374,13 +374,13 @@ export default function OrganizationPage() {
     }
     if (!appsRes.error) setOrgApps((appsRes.data as unknown as OrgApp[]) || []);
     if (!coinsRes.error) setOrgCoins((coinsRes.data as unknown as OrgCoin[]) || []);
-    if (!adsRes.error && adsRes.data && adsRes.data.length > 0) {
-      const ad = adsRes.data[0] as any;
-      setOrgAd({ id: ad.id, emoji: ad.emoji, title: ad.title, description: ad.description, url: ad.url });
+    if (!adsRes.error && adsRes.data) {
+      setOrgAds((adsRes.data as any[]).map(ad => ({ id: ad.id, emoji: ad.emoji, title: ad.title, description: ad.description, url: ad.url })));
     } else {
-      setOrgAd(null);
+      setOrgAds([]);
     }
     setShowAdForm(false);
+    setEditingAdId(null);
     setLoadingMembers(false);
     // Load join requests for owner/admin
     loadJoinRequests(org.id);
