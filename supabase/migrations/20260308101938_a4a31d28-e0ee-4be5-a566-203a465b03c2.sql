@@ -1,0 +1,1 @@
+ALTER TABLE public.ads ADD COLUMN pages text[] NOT NULL DEFAULT ARRAY['dashboard', 'organizations'];
