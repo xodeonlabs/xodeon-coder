@@ -271,7 +271,10 @@ export default function AdminPanel() {
         gradient: adForm.gradient,
       }).eq('id', editingAd.id);
       if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
-      else toast({ title: 'Advertentie bijgewerkt!' });
+      else {
+        await logAction('Advertentie bijgewerkt', 'ad', editingAd.id, adForm.title);
+        toast({ title: 'Advertentie bijgewerkt!' });
+      }
     } else {
       const { error } = await (supabase.from('ads' as any) as any).insert({
         emoji: adForm.emoji,
@@ -282,8 +285,10 @@ export default function AdminPanel() {
         sort_order: ads.length,
       });
       if (error) toast({ title: 'Fout', description: error.message, variant: 'destructive' });
-      else toast({ title: 'Advertentie toegevoegd!' });
-    }
+      else {
+        await logAction('Advertentie aangemaakt', 'ad', undefined, adForm.title);
+        toast({ title: 'Advertentie toegevoegd!' });
+      }
     setShowAdForm(false);
     setSavingAd(false);
     fetchAll();
