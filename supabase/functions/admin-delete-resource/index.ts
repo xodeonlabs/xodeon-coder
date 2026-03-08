@@ -71,7 +71,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ error: "Invalid type. Use: app, org" }), {
+    if (type === "alliance") {
+      const { error } = await adminClient.from("alliances").delete().eq("id", target_id);
+      if (error) throw error;
+      return new Response(JSON.stringify({ success: true, message: "Alliance deleted" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ error: "Invalid type. Use: app, org, alliance" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
