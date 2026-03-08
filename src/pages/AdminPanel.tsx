@@ -672,7 +672,7 @@ export default function AdminPanel() {
               </div>
               <div>
                 <label className="text-xs font-medium text-foreground uppercase tracking-wide">Kleur</label>
-                <div className="flex gap-2 mt-1.5">
+                <div className="flex flex-wrap gap-2 mt-1.5">
                   {GRADIENT_PRESETS.map(g => (
                     <button
                       key={g.label}
