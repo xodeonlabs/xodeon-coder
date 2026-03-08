@@ -44,7 +44,7 @@ export function FriendsList({ userId }: { userId: string }) {
 
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, display_name, avatar_url, username')
+      .select('id, display_name, avatar_url, username, is_dnd')
       .in('id', friendIds);
 
     setFriends(profiles || []);
