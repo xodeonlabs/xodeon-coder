@@ -211,7 +211,27 @@ export default function AdminPanel() {
     setChatSending(null);
   }
 
-  async function removeRole(roleId: string) {
+  async function addCollaborator() {
+    if (!collabEmail.trim() || !collabAppId) return;
+    setCollabAdding(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-add-collaborator', {
+        body: { email: collabEmail.trim(), app_id: collabAppId },
+      });
+      if (error) throw error;
+      if (data?.error) {
+        toast({ title: 'Fout', description: data.error, variant: 'destructive' });
+      } else {
+        toast({ title: 'Collaborator toegevoegd' });
+        setCollabEmail('');
+        setCollabAppId(null);
+      }
+    } catch (e: any) {
+      toast({ title: 'Fout', description: e.message, variant: 'destructive' });
+    }
+    setCollabAdding(false);
+  }
+
     const { error } = await supabase.from('user_roles').delete().eq('id', roleId);
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
