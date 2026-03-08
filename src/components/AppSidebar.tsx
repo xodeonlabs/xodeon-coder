@@ -106,8 +106,17 @@ export function AppSidebar() {
     if (!session?.user?.id) return;
     supabase.from('user_roles').select('role').eq('user_id', session.user.id).in('role', ['admin', 'owner']).maybeSingle()
       .then(({ data }) => setIsAdmin(!!data));
-    supabase.from('user_coins').select('balance').eq('user_id', session.user.id).maybeSingle()
+    const fetchCoins = () => supabase.from('user_coins').select('balance').eq('user_id', session.user.id).maybeSingle()
       .then(({ data }) => setCoins((data as any)?.balance ?? 0));
+    fetchCoins();
+    const coinsChannel = supabase
+      .channel('sidebar-coins')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_coins', filter: `user_id=eq.${session.user.id}` }, (payload) => {
+        if (payload.new) setCoins((payload.new as any)?.balance ?? 0);
+        else fetchCoins();
+      })
+      .subscribe();
+    const cleanupCoins = () => supabase.removeChannel(coinsChannel);
     supabase.from('profiles').select('display_name, username').eq('id', session.user.id).single()
       .then(({ data }) => {
         if (data?.display_name) setDisplayName(data.display_name);
@@ -115,6 +124,7 @@ export function AppSidebar() {
       });
     fetchUnreadGroups();
     fetchUnreadMessages();
+    return () => { cleanupCoins(); };
   }, [session?.user?.id, fetchUnreadGroups, fetchUnreadMessages]);
 
   // Realtime: listen for new group messages and friend messages
