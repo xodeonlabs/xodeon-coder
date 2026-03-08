@@ -101,6 +101,9 @@ export default function AdminPanel() {
   const [chatReplyInputs, setChatReplyInputs] = useState<Record<string, string>>({});
   const [chatSending, setChatSending] = useState<string | null>(null);
   const [tab, setTab] = useState<'users' | 'apps' | 'orgs' | 'ads' | 'chats' | 'activity'>('users');
+  const [collabAppId, setCollabAppId] = useState<string | null>(null);
+  const [collabEmail, setCollabEmail] = useState('');
+  const [collabAdding, setCollabAdding] = useState(false);
 
   // Add role
   const [addRoleUserId, setAddRoleUserId] = useState('');
@@ -206,6 +209,27 @@ export default function AdminPanel() {
       toast({ title: 'Fout', description: e.message, variant: 'destructive' });
     }
     setChatSending(null);
+  }
+
+  async function addCollaborator() {
+    if (!collabEmail.trim() || !collabAppId) return;
+    setCollabAdding(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-add-collaborator', {
+        body: { email: collabEmail.trim(), app_id: collabAppId },
+      });
+      if (error) throw error;
+      if (data?.error) {
+        toast({ title: 'Fout', description: data.error, variant: 'destructive' });
+      } else {
+        toast({ title: 'Collaborator toegevoegd' });
+        setCollabEmail('');
+        setCollabAppId(null);
+      }
+    } catch (e: any) {
+      toast({ title: 'Fout', description: e.message, variant: 'destructive' });
+    }
+    setCollabAdding(false);
   }
 
   async function removeRole(roleId: string) {
@@ -649,6 +673,13 @@ export default function AdminPanel() {
                       {new Date(app.updated_at).toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' })}
                     </span>
                     <button
+                      onClick={() => { setCollabAppId(app.id); setCollabEmail(''); }}
+                      className="p-1 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                      title="Persoon toevoegen"
+                    >
+                      <UserPlus className="h-3.5 w-3.5" />
+                    </button>
+                    <button
                       onClick={() => setConfirmAction({ id: app.id, action: 'delete', type: 'app', name: app.name })}
                       className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                       title="Verwijderen"
@@ -658,6 +689,37 @@ export default function AdminPanel() {
                   </div>
                 </div>
               ))}
+              {/* Add collaborator inline form */}
+              {collabAppId && (
+                <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 mt-2">
+                  <p className="text-xs font-semibold text-foreground mb-2">
+                    Persoon toevoegen aan: <span className="text-primary">{apps.find(a => a.id === collabAppId)?.name}</span>
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      className="flex-1 rounded-lg bg-background border border-border px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      placeholder="E-mailadres van de gebruiker..."
+                      value={collabEmail}
+                      onChange={e => setCollabEmail(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && addCollaborator()}
+                      disabled={collabAdding}
+                    />
+                    <button
+                      onClick={addCollaborator}
+                      disabled={collabAdding || !collabEmail.trim()}
+                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 transition-colors"
+                    >
+                      {collabAdding ? '...' : 'Toevoegen'}
+                    </button>
+                    <button
+                      onClick={() => setCollabAppId(null)}
+                      className="px-2 py-1.5 text-xs rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                    >
+                      Annuleer
+                    </button>
+                  </div>
+                </div>
+              )}
               {apps.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">Geen apps gevonden.</p>}
             </div>
           </div>
