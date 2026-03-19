@@ -138,7 +138,7 @@ const Auth = () => {
         {/* Logo & Header */}
         <div className="text-center mb-5 sm:mb-8">
           <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-2xl border border-primary/20 mb-4 sm:mb-5 shadow-lg shadow-primary/10 overflow-hidden">
-            <img src="/ngc-logo.png" alt="NGC" className="h-full w-full object-cover rounded-2xl" />
+            <img src="/xodeon-logo.png" alt="Xodeon Labs" className="h-full w-full object-cover rounded-2xl" />
           </div>
           <h1 className="text-xl sm:text-3xl font-bold text-foreground font-display tracking-tight">
             {modeTitle[mode]}

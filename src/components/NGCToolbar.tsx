@@ -92,7 +92,7 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
           >
             <AppIcon iconName={appIcon || 'file-code'} size={14} />
           </button>
-          <div className="h-5 w-5 rounded overflow-hidden shrink-0"><img src="/ngc-logo.png" alt="NGC" className="h-full w-full object-cover" /></div>
+          <div className="h-5 w-5 rounded overflow-hidden shrink-0"><img src="/xodeon-logo.png" alt="Xodeon Labs" className="h-full w-full object-cover" /></div>
         </div>
         <div className="hidden sm:block h-4 w-px bg-border/30"></div>
         {editing ? (
