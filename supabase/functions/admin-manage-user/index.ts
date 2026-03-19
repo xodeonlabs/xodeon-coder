@@ -59,14 +59,21 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Invalid user ID format" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Protect owner from being managed
+    // Protect owners from being managed
+    const PROTECTED_EMAILS = ["xodeonlabs@gmail.com", "jbrb@outlook.be", "bastien.gaillard@campusvoeren.be"];
+    
     const { data: targetRoles } = await adminClient
       .from("user_roles")
       .select("role")
       .eq("user_id", target_user_id)
       .eq("role", "owner");
-    if (targetRoles && targetRoles.length > 0) {
-      return new Response(JSON.stringify({ error: "Cannot manage the platform owner" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    
+    // Also check by email
+    const { data: targetUser } = await adminClient.auth.admin.getUserById(target_user_id);
+    const targetEmail = targetUser?.user?.email?.toLowerCase() || "";
+    
+    if ((targetRoles && targetRoles.length > 0) || PROTECTED_EMAILS.includes(targetEmail)) {
+      return new Response(JSON.stringify({ error: "Cannot manage a protected platform owner" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     if (action === "ban") {
