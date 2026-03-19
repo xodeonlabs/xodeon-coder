@@ -1193,6 +1193,7 @@ export type Database = {
       is_org_member: { Args: { _org_id: string }; Returns: boolean }
       is_org_owner: { Args: { _org_id: string }; Returns: boolean }
       is_own_app: { Args: { _app_id: string }; Returns: boolean }
+      is_protected_owner: { Args: { _user_id: string }; Returns: boolean }
       join_organization_by_code: { Args: { _code: string }; Returns: string }
     }
     Enums: {
