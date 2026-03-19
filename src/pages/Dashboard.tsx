@@ -1002,9 +1002,9 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 shrink-0">
             <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center border border-primary/10 shrink-0 overflow-hidden">
-              <img src="/ngc-logo.png" alt="NGC" className="h-full w-full object-cover rounded-xl" />
+              <img src="/xodeon-logo.png" alt="Xodeon Labs" className="h-full w-full object-cover rounded-xl" />
             </div>
-            <h1 className="hidden sm:block text-lg font-bold text-foreground font-display tracking-tight">NGC Studio</h1>
+            <h1 className="hidden sm:block text-lg font-bold text-foreground font-display tracking-tight">Xodeon Labs</h1>
           </div>
 
           {/* Desktop nav */}

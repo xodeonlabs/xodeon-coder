@@ -59,8 +59,8 @@ const Guest = () => {
         style={{ background: 'hsl(var(--ide-toolbar))' }}
       >
         <div className="flex items-center gap-3">
-          <div className="h-6 w-6 rounded-md overflow-hidden shrink-0"><img src="/ngc-logo.png" alt="NGC" className="h-full w-full object-cover" /></div>
-          <span className="text-xs font-bold text-foreground">NGC Editor</span>
+          <div className="h-6 w-6 rounded-md overflow-hidden shrink-0"><img src="/xodeon-logo.png" alt="Xodeon Labs" className="h-full w-full object-cover" /></div>
+          <span className="text-xs font-bold text-foreground">Xodeon Labs</span>
           <span className="text-[10px] px-1.5 py-0.5 rounded font-medium" style={{ background: '#f59e0b22', color: '#f59e0b' }}>
             GUEST
           </span>

@@ -105,8 +105,8 @@ const PublicApp = () => {
             </button>
           )}
           <div className="flex items-center gap-1.5">
-            <div className="h-4 w-4 rounded-sm overflow-hidden shrink-0"><img src="/ngc-logo.png" alt="NGC" className="h-full w-full object-cover" /></div>
-            <span className="text-[10px] text-muted-foreground">NGC Studio</span>
+            <div className="h-4 w-4 rounded-sm overflow-hidden shrink-0"><img src="/xodeon-logo.png" alt="Xodeon Labs" className="h-full w-full object-cover" /></div>
+            <span className="text-[10px] text-muted-foreground">Xodeon Labs</span>
           </div>
         </div>
       </div>
