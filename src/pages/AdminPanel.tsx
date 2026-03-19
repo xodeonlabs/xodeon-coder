@@ -756,31 +756,36 @@ export default function AdminPanel() {
             onClick={() => { setTab('alliances'); loadAdminAlliances(); }}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'alliances' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
-            <Handshake className="h-4 w-4" /> Allianties
+            <Handshake className="h-3 w-3" />
+            <span className="hidden xs:inline">Allianties</span>
           </button>
           <button
             onClick={() => { setTab('templates'); loadAdminTemplates(); loadAdminCategories(); }}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'templates' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
-            <BookTemplate className="h-4 w-4" /> Templates
+            <BookTemplate className="h-3 w-3" />
+            <span className="hidden xs:inline">Templates</span>
           </button>
           <button
             onClick={() => { setTab('categories'); loadAdminCategories(); }}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'categories' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
-            <Tags className="h-4 w-4" /> Categorieën
+            <Tags className="h-3 w-3" />
+            <span className="hidden xs:inline">Categorieën</span>
           </button>
           <button
             onClick={() => setTab('activity')}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'activity' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
-            <Activity className="h-4 w-4" /> Activiteit
+            <Activity className="h-3 w-3" />
+            <span className="hidden xs:inline">Activiteit</span>
           </button>
           <button
             onClick={() => { setTab('coins'); loadAllCoins(); }}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'coins' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
-            <Coins className="h-4 w-4" /> Coins
+            <Coins className="h-3 w-3" />
+            <span className="hidden xs:inline">Coins</span>
           </button>
         </div>
 
