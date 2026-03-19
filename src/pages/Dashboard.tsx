@@ -11,8 +11,8 @@ import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { CoinConfirmDialog } from '@/components/CoinConfirmDialog';
 import confetti from 'canvas-confetti';
 import { getCached, setCache, clearCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache';
-import { useDailyBonus } from '@/hooks/useDailyBonus';
-import { DailyBonusOverlay } from '@/components/DailyBonusOverlay';
+import { useWeeklyMonthlyBonus } from '@/hooks/useWeeklyMonthlyBonus';
+import { BonusOverlay } from '@/components/BonusOverlay';
 import { FriendRequests } from '@/components/FriendRequests';
 import { UserSearch } from '@/components/UserSearch';
 
@@ -437,7 +437,7 @@ export default function Dashboard() {
   const { session, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const dailyBonus = useDailyBonus(session?.user?.id);
+  const bonuses = useWeeklyMonthlyBonus(session?.user?.id);
   const [showBonusOverlay, setShowBonusOverlay] = useState(true);
   const [apps, setApps] = useState<App[]>([]);
   const [loading, setLoading] = useState(true);
@@ -988,8 +988,8 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {showBonusOverlay && !dailyBonus.loading && (dailyBonus.claimed || dailyBonus.alreadyClaimed) && (
-        <DailyBonusOverlay state={dailyBonus} onClose={() => setShowBonusOverlay(false)} />
+      {showBonusOverlay && !bonuses.loading && (bonuses.bonuses.daily.claimed || bonuses.bonuses.weekly.claimed || bonuses.bonuses.monthly.claimed || bonuses.bonuses.daily.alreadyClaimed) && (
+        <BonusOverlay state={bonuses} onClose={() => setShowBonusOverlay(false)} />
       )}
       {/* Background effects */}
       <div className="fixed inset-0 pointer-events-none">
