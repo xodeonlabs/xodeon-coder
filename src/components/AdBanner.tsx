@@ -30,6 +30,7 @@ export function AdBanner({ className = '', page, organizationId }: AdBannerProps
   const [isAnimating, setIsAnimating] = useState(false);
   const [ads, setAds] = useState<Ad[]>([]);
   const navigate = useNavigate();
+  const { censorText } = require('@/lib/profanity-filter-enhanced');
 
   useEffect(() => {
     const cacheKey = CACHE_KEYS.ads((page || 'all') + '_v2');
@@ -102,6 +103,11 @@ export function AdBanner({ className = '', page, organizationId }: AdBannerProps
   const hasExternalUrl = ad.url && ad.url.trim().length > 0;
   const adHref = hasExternalUrl ? ad.url : (ad.organization_id ? `/bedrijf/${ad.organization_id}` : '#');
   const isExternal = hasExternalUrl;
+
+  // Enhanced censuur
+  const { censorText } = require('@/lib/profanity-filter-enhanced');
+  const censoredTitle = censorText(ad.title);
+  const censoredDescription = censorText(ad.description);
 
   const handleClick = (e: React.MouseEvent) => {
     if (!isExternal) {
