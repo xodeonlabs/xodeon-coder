@@ -26,79 +26,79 @@
   }
   
   :root {
-    --background: 225 25% 8%;
-    --foreground: 210 30% 94%;
+    --background: 230 28% 7%;
+    --foreground: 220 30% 94%;
 
-    --card: 225 22% 11%;
-    --card-foreground: 210 30% 94%;
+    --card: 230 24% 10%;
+    --card-foreground: 220 30% 94%;
 
-    --popover: 225 22% 12%;
-    --popover-foreground: 210 30% 94%;
+    --popover: 230 24% 11%;
+    --popover-foreground: 220 30% 94%;
 
-    --primary: 210 100% 60%;
-    --primary-foreground: 225 25% 4%;
+    --primary: 195 100% 50%;
+    --primary-foreground: 230 28% 4%;
 
-    --secondary: 225 18% 16%;
-    --secondary-foreground: 210 20% 85%;
+    --secondary: 230 20% 15%;
+    --secondary-foreground: 220 20% 85%;
 
-    --muted: 225 16% 14%;
-    --muted-foreground: 220 15% 50%;
+    --muted: 230 18% 13%;
+    --muted-foreground: 225 15% 48%;
 
-    --accent: 175 70% 45%;
-    --accent-foreground: 210 30% 96%;
+    --accent: 270 65% 60%;
+    --accent-foreground: 220 30% 96%;
 
     --destructive: 0 72% 55%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 220 40% 98%;
 
-    --border: 225 16% 16%;
-    --input: 225 16% 16%;
-    --ring: 210 100% 60%;
+    --border: 230 18% 15%;
+    --input: 230 18% 15%;
+    --ring: 195 100% 50%;
 
     --radius: 0.75rem;
 
     /* Glass effects */
-    --glass: 225 22% 12% / 0.6;
-    --glass-border: 225 16% 22% / 0.5;
-    --glass-highlight: 210 100% 60% / 0.08;
+    --glass: 230 24% 11% / 0.6;
+    --glass-border: 230 18% 20% / 0.5;
+    --glass-highlight: 195 100% 50% / 0.08;
 
     /* IDE specific tokens */
-    --ide-editor-bg: 225 25% 7%;
-    --ide-gutter: 225 16% 14%;
-    --ide-gutter-text: 220 15% 35%;
-    --ide-line-highlight: 210 35% 12%;
-    --ide-selection: 210 60% 22%;
-    --ide-explorer-bg: 225 22% 9%;
-    --ide-panel-header: 225 20% 12%;
-    --ide-toolbar: 225 22% 8%;
-    --ide-tab-active: 210 100% 60%;
-    --ide-tab-inactive: 225 16% 14%;
-    --ide-context-menu: 225 22% 12%;
-    --ide-scrollbar: 225 16% 14%;
-    --ide-scrollbar-thumb: 225 16% 24%;
+    --ide-editor-bg: 230 28% 6%;
+    --ide-gutter: 230 18% 13%;
+    --ide-gutter-text: 225 15% 35%;
+    --ide-line-highlight: 230 30% 11%;
+    --ide-selection: 260 50% 22%;
+    --ide-explorer-bg: 230 24% 8%;
+    --ide-panel-header: 230 22% 11%;
+    --ide-toolbar: 230 24% 7%;
+    --ide-tab-active: 195 100% 50%;
+    --ide-tab-inactive: 230 18% 13%;
+    --ide-context-menu: 230 24% 11%;
+    --ide-scrollbar: 230 18% 13%;
+    --ide-scrollbar-thumb: 230 18% 22%;
     --ide-success: 155 65% 45%;
     --ide-warning: 45 90% 55%;
     --ide-error: 0 72% 55%;
-    --ide-info: 210 100% 60%;
+    --ide-info: 195 100% 50%;
 
     /* Syntax highlighting */
-    --syntax-keyword: 210 100% 65%;
+    --syntax-keyword: 195 100% 60%;
     --syntax-string: 155 60% 55%;
     --syntax-number: 35 85% 60%;
-    --syntax-comment: 220 15% 38%;
-    --syntax-property: 285 55% 65%;
+    --syntax-comment: 225 15% 38%;
+    --syntax-property: 270 60% 68%;
     --syntax-type: 45 90% 60%;
     --syntax-function: 210 80% 70%;
-    --syntax-variable: 210 25% 85%;
+    --syntax-variable: 220 25% 85%;
     --syntax-event: 340 70% 60%;
 
-    --sidebar-background: 225 22% 9%;
-    --sidebar-foreground: 210 20% 85%;
-    --sidebar-primary: 210 100% 60%;
-    --sidebar-primary-foreground: 225 25% 4%;
-    --sidebar-accent: 225 18% 16%;
-    --sidebar-accent-foreground: 210 20% 85%;
-    --sidebar-border: 225 16% 16%;
-    --sidebar-ring: 210 100% 60%;
+    --sidebar-background: 230 24% 8%;
+    --sidebar-foreground: 220 20% 85%;
+    --sidebar-primary: 195 100% 50%;
+    --sidebar-primary-foreground: 230 28% 4%;
+    --sidebar-accent: 230 20% 15%;
+    --sidebar-accent-foreground: 220 20% 85%;
+    --sidebar-border: 230 18% 15%;
+    --sidebar-ring: 195 100% 50%;
   }
 
   .dark {
