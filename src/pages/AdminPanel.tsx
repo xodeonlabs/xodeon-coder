@@ -660,14 +660,22 @@ export default function AdminPanel() {
   }
 
   const GRADIENT_PRESETS = [
-    { label: 'Zacht Blauw', value: 'linear-gradient(135deg, hsl(210 40% 18%), hsl(200 30% 22%))' },
-    { label: 'Zacht Groen', value: 'linear-gradient(135deg, hsl(145 30% 18%), hsl(140 20% 22%))' },
-    { label: 'Mist Blauw', value: 'linear-gradient(135deg, hsl(200 20% 24%), hsl(210 15% 28%))' },
-    { label: 'Mint Groen', value: 'linear-gradient(135deg, hsl(160 20% 24%), hsl(150 15% 28%))' },
-    { label: 'Grijsblauw', value: 'linear-gradient(135deg, hsl(220 10% 22%), hsl(210 10% 26%))' },
-    { label: 'Zandgrijs', value: 'linear-gradient(135deg, hsl(40 10% 90%), hsl(30 10% 85%))' },
-    { label: 'Lichtgroen', value: 'linear-gradient(135deg, hsl(120 15% 30%), hsl(110 10% 34%))' },
-    { label: 'Lichtblauw', value: 'linear-gradient(135deg, hsl(190 15% 30%), hsl(180 10% 34%))' },
+    { label: 'Groen', value: 'linear-gradient(135deg, hsl(145 40% 14%), hsl(var(--secondary)))' },
+    { label: 'Blauw', value: 'linear-gradient(135deg, hsl(200 40% 14%), hsl(var(--secondary)))' },
+    { label: 'Paars', value: 'linear-gradient(135deg, hsl(280 40% 14%), hsl(var(--secondary)))' },
+    { label: 'Goud', value: 'linear-gradient(135deg, hsl(40 40% 14%), hsl(var(--secondary)))' },
+    { label: 'Rood', value: 'linear-gradient(135deg, hsl(0 40% 14%), hsl(var(--secondary)))' },
+    { label: 'Roze', value: 'linear-gradient(135deg, hsl(330 40% 14%), hsl(var(--secondary)))' },
+    { label: 'Cyaan', value: 'linear-gradient(135deg, hsl(180 40% 14%), hsl(var(--secondary)))' },
+    { label: 'Oranje', value: 'linear-gradient(135deg, hsl(25 50% 14%), hsl(var(--secondary)))' },
+    { label: 'Indigo', value: 'linear-gradient(135deg, hsl(240 40% 14%), hsl(var(--secondary)))' },
+    { label: 'Lime', value: 'linear-gradient(135deg, hsl(80 40% 14%), hsl(var(--secondary)))' },
+    { label: 'Magenta', value: 'linear-gradient(135deg, hsl(300 40% 14%), hsl(var(--secondary)))' },
+    { label: 'Warm', value: 'linear-gradient(135deg, hsl(15 45% 16%), hsl(35 40% 12%))' },
+    { label: 'Ocean', value: 'linear-gradient(135deg, hsl(210 50% 16%), hsl(190 40% 12%))' },
+    { label: 'Sunset', value: 'linear-gradient(135deg, hsl(350 45% 16%), hsl(30 50% 12%))' },
+    { label: 'Forest', value: 'linear-gradient(135deg, hsl(140 35% 14%), hsl(100 30% 10%))' },
+    { label: 'Night', value: 'linear-gradient(135deg, hsl(250 35% 12%), hsl(220 40% 8%))' },
   ];
 
   if (isAdmin === null || loading) {

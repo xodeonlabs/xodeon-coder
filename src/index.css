@@ -26,38 +26,38 @@
   }
   
   :root {
-    --background: 210 20% 14%;
-    --foreground: 210 20% 92%;
+    --background: 230 28% 7%;
+    --foreground: 220 30% 94%;
 
-    --card: 210 18% 17%;
-    --card-foreground: 210 20% 92%;
+    --card: 230 24% 10%;
+    --card-foreground: 220 30% 94%;
 
-    --popover: 210 18% 18%;
-    --popover-foreground: 210 20% 92%;
+    --popover: 230 24% 11%;
+    --popover-foreground: 220 30% 94%;
 
-    --primary: 195 60% 45%;
-    --primary-foreground: 210 20% 14%;
+    --primary: 195 100% 50%;
+    --primary-foreground: 230 28% 4%;
 
-    --secondary: 145 20% 18%;
-    --secondary-foreground: 145 20% 92%;
+    --secondary: 230 20% 15%;
+    --secondary-foreground: 220 20% 85%;
 
-    --muted: 210 10% 16%;
-    --muted-foreground: 210 10% 60%;
+    --muted: 230 18% 13%;
+    --muted-foreground: 225 15% 48%;
 
-    --accent: 160 40% 40%;
-    --accent-foreground: 210 20% 96%;
+    --accent: 270 65% 60%;
+    --accent-foreground: 220 30% 96%;
 
-    --destructive: 0 60% 50%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 220 40% 98%;
 
-    --border: 210 10% 18%;
-    --input: 210 10% 18%;
-    --ring: 195 60% 45%;
+    --border: 230 18% 15%;
+    --input: 230 18% 15%;
+    --ring: 195 100% 50%;
 
     --radius: 0.75rem;
 
     /* Glass effects */
-    --glass: 210 18% 18% / 0.6;
+    --glass: 230 24% 11% / 0.6;
     --glass-border: 230 18% 20% / 0.5;
     --glass-highlight: 195 100% 50% / 0.08;
 
