@@ -716,36 +716,41 @@ export default function AdminPanel() {
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {/* Tabs */}
-        <div className="flex items-center gap-2 mb-6 border-b border-border/50 pb-3 overflow-x-auto">
+        <div className="flex items-center gap-1 mb-6 border-b border-border/50 pb-3 overflow-x-auto">
           <button
             onClick={() => setTab('users')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'users' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
+            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${tab === 'users' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
-            <Users className="h-4 w-4" /> Gebruikers & Rollen
+            <Users className="h-3 w-3" />
+            <span className="hidden xs:inline">Gebruikers & Rollen</span>
           </button>
           <button
             onClick={() => setTab('apps')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'apps' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
+            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${tab === 'apps' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
-            <AppWindow className="h-4 w-4" /> Apps
+            <AppWindow className="h-3 w-3" />
+            <span className="hidden xs:inline">Apps</span>
           </button>
           <button
             onClick={() => setTab('orgs')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'orgs' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
+            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${tab === 'orgs' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
-            <Building2 className="h-4 w-4" /> Bedrijven
+            <Building2 className="h-3 w-3" />
+            <span className="hidden xs:inline">Bedrijven</span>
           </button>
           <button
             onClick={() => setTab('ads')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'ads' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
+            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${tab === 'ads' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
-            <Megaphone className="h-4 w-4" /> Advertenties
+            <Megaphone className="h-3 w-3" />
+            <span className="hidden xs:inline">Advertenties</span>
           </button>
           <button
             onClick={() => setTab('chats')}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'chats' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
+            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${tab === 'chats' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}
           >
-            <MessageCircle className="h-4 w-4" /> Chats
+            <MessageCircle className="h-3 w-3" />
+            <span className="hidden xs:inline">Chats</span>
           </button>
           <button
             onClick={() => { setTab('alliances'); loadAdminAlliances(); }}
