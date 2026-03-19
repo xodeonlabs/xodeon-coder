@@ -126,12 +126,13 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-background px-4 py-6">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden px-4 py-6" style={{ background: 'linear-gradient(135deg, hsl(230 28% 7%) 0%, hsl(250 35% 12%) 40%, hsl(270 40% 14%) 60%, hsl(230 28% 7%) 100%)' }}>
       {/* Background effects */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-primary/5 blur-[120px] animate-glow-pulse" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] rounded-full bg-accent/5 blur-[100px] animate-glow-pulse delay-300" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-primary/[0.02] blur-[80px]" />
+        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] animate-glow-pulse" style={{ background: 'hsl(195 100% 50% / 0.08)' }} />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] rounded-full blur-[100px] animate-glow-pulse delay-300" style={{ background: 'hsl(270 65% 60% / 0.08)' }} />
+        <div className="absolute top-[30%] right-[10%] w-[300px] h-[300px] rounded-full blur-[100px] animate-glow-pulse delay-200" style={{ background: 'hsl(195 100% 50% / 0.04)' }} />
+        <div className="absolute bottom-[20%] left-[5%] w-[350px] h-[350px] rounded-full blur-[120px] animate-glow-pulse delay-500" style={{ background: 'hsl(270 65% 60% / 0.05)' }} />
       </div>
 
       <div className="w-full max-w-[420px] relative z-10 animate-scale-in">
