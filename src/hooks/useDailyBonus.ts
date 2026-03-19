@@ -59,13 +59,15 @@ export function useDailyBonus(userId: string | undefined): DailyBonusState {
           return;
         }
 
-        await (supabase
+        const { data, error } = await supabase
           .from('user_coins')
           .update({
             balance: (coinData.balance || 0) + DAILY_BONUS_AMOUNT,
             last_daily_bonus: today,
           } as any)
-          .eq('id', coinData.id) as any);
+          .eq('id', coinData.id) as any;
+
+        if (error) throw error;
 
         setState(prev => ({ ...prev, loading: false, claimed: true }));
       } catch (err) {

@@ -988,7 +988,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {showBonusOverlay && !dailyBonus.loading && dailyBonus.claimed && (
+      {showBonusOverlay && !dailyBonus.loading && (dailyBonus.claimed || dailyBonus.alreadyClaimed) && (
         <DailyBonusOverlay state={dailyBonus} onClose={() => setShowBonusOverlay(false)} />
       )}
       {/* Background effects */}
