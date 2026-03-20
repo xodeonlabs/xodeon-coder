@@ -58,10 +58,10 @@ export function useShop(userId: string | undefined): UseShopState {
 
         // Get user's purchases if logged in
         if (userId) {
-          const { data: purchases, error: purchasesError } = await supabase
-            .from('user_shop_purchases')
+          const { data: purchases, error: purchasesError } = await (supabase
+            .from('user_shop_purchases' as any)
             .select('*')
-            .eq('user_id', userId);
+            .eq('user_id', userId) as any);
 
           if (purchasesError) throw purchasesError;
           purchasedItems = purchases || [];
