@@ -105,11 +105,11 @@ export function useReferral(userId: string | undefined): UseReferralState {
         }
 
         // Record referral
-        const { error: referralError } = await supabase.from('user_referrals').insert({
+        const { error: referralError } = await (supabase.from('user_referrals' as any).insert({
           referrer_id: codeData.user_id,
           referred_id: userId,
           referral_code_id: code,
-        });
+        }) as any);
 
         if (referralError) throw referralError;
 
