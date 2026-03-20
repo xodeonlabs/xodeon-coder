@@ -71,8 +71,8 @@ export function useAchievements(userId: string | undefined): UseAchievementsStat
 
         setState(prev => ({
           ...prev,
-          allAchievements: allAchievs || [],
-          unlockedAchievements: Array.from(unlockedMap.values()),
+          allAchievements: (allAchievs || []) as Achievement[],
+          unlockedAchievements: Array.from(unlockedMap.values()) as UserAchievement[],
           loading: false,
         }));
       } catch (err) {
