@@ -39,11 +39,11 @@ export function useUserStats(userId: string | undefined): UseUserStatsState {
         setState(prev => ({ ...prev, loading: true, error: null }));
 
         // Get coins
-        const { data: coinData, error: coinError } = await supabase
+        const { data: coinData, error: coinError } = await (supabase
           .from('user_coins')
-          .select('balance, created_at')
+          .select('balance')
           .eq('user_id', userId)
-          .maybeSingle();
+          .maybeSingle() as any);
 
         if (coinError) throw coinError;
 
@@ -54,17 +54,17 @@ export function useUserStats(userId: string | undefined): UseUserStatsState {
           .eq('owner_id', userId);
 
         // Get achievements count
-        const { count: achievementCount } = await supabase
-          .from('user_achievements')
+        const { count: achievementCount } = await (supabase
+          .from('user_achievements' as any)
           .select('*', { count: 'exact' })
-          .eq('user_id', userId);
+          .eq('user_id', userId) as any);
 
         // Get friends count (if friendship table exists)
-        const { count: friendCount } = await supabase
-          .from('friendship_requests')
+        const { count: friendCount } = await (supabase
+          .from('friendships')
           .select('*', { count: 'exact' })
-          .or(`requester_id.eq.${userId},receiver_id.eq.${userId}`)
-          .eq('status', 'accepted');
+          .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+          .eq('status', 'accepted') as any);
 
         // Get messages count
         const { count: msgCount } = await supabase

@@ -42,7 +42,8 @@ export function useAdmin() {
       setState(prev => ({ ...prev, loading: true, error: null }));
 
       // Get user count
-      const { count: userCount } = await supabase.auth.admin.listUsers();
+      const usersResult = await supabase.auth.admin.listUsers() as any;
+      const userCount = usersResult?.data?.users?.length ?? 0;
 
       // Get total coins
       const { data: coinData, error: coinError } = await supabase
@@ -158,11 +159,11 @@ export function useAdmin() {
   const suspendUser = useCallback(async (userId: string, reason: string): Promise<boolean> => {
     try {
       // Mark user as suspended in a hypothetical suspension table
-      const { error } = await supabase.from('user_suspensions').insert({
+      const { error } = await (supabase.from('user_suspensions' as any).insert({
         user_id: userId,
         reason,
         suspended_at: new Date().toISOString(),
-      });
+      }) as any);
 
       if (error) throw error;
 
@@ -179,10 +180,10 @@ export function useAdmin() {
   const awardAchievement = useCallback(
     async (userId: string, achievementId: string): Promise<boolean> => {
       try {
-        const { error } = await supabase.from('user_achievements').insert({
+        const { error } = await (supabase.from('user_achievements' as any).insert({
           user_id: userId,
           achievement_id: achievementId,
-        });
+        }) as any);
 
         if (error && !error.message.includes('duplicate')) throw error;
 

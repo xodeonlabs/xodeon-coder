@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { getCached, setCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache';
+import { censorText } from '@/lib/profanity-filter-enhanced';
 
 interface Ad {
   id: string;
@@ -30,7 +31,6 @@ export function AdBanner({ className = '', page, organizationId }: AdBannerProps
   const [isAnimating, setIsAnimating] = useState(false);
   const [ads, setAds] = useState<Ad[]>([]);
   const navigate = useNavigate();
-  const { censorText } = require('@/lib/profanity-filter-enhanced');
 
   useEffect(() => {
     const cacheKey = CACHE_KEYS.ads((page || 'all') + '_v2');
@@ -105,7 +105,6 @@ export function AdBanner({ className = '', page, organizationId }: AdBannerProps
   const isExternal = hasExternalUrl;
 
   // Enhanced censuur
-  const { censorText } = require('@/lib/profanity-filter-enhanced');
   const censoredTitle = censorText(ad.title);
   const censoredDescription = censorText(ad.description);
 

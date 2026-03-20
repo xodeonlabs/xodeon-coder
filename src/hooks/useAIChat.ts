@@ -18,10 +18,16 @@ export interface AIConversation {
   user_id: string;
 }
 
-interface UseAIConversationsState {
+interface UseAIConversationsBaseState {
   conversations: AIConversation[];
   loading: boolean;
   error: string | null;
+}
+
+interface UseAIConversationsState extends UseAIConversationsBaseState {
+  create: (title?: string) => Promise<AIConversation | null>;
+  rename: (conversationId: string, newTitle: string) => Promise<boolean>;
+  remove: (conversationId: string) => Promise<boolean>;
 }
 
 /**
@@ -31,7 +37,7 @@ export function useAIConversations(
   userId: string | undefined,
   appId: string | undefined
 ): UseAIConversationsState {
-  const [state, setState] = useState<UseAIConversationsState>({
+  const [state, setState] = useState<UseAIConversationsBaseState>({
     conversations: [],
     loading: true,
     error: null,
@@ -158,17 +164,23 @@ export function useAIConversations(
   };
 }
 
-interface UseAIChatState {
+interface UseAIChatBaseState {
   messages: AIMessage[];
   loading: boolean;
   error: string | null;
+}
+
+interface UseAIChatState extends UseAIChatBaseState {
+  addMessage: (message: AIMessage) => void;
+  updateLastMessage: (content: string) => void;
+  saveMessage: (role: 'user' | 'assistant', content: string) => Promise<boolean>;
 }
 
 /**
  * Hook to manage AI messages in a conversation
  */
 export function useAIChat(conversationId: string | undefined): UseAIChatState {
-  const [state, setState] = useState<UseAIChatState>({
+  const [state, setState] = useState<UseAIChatBaseState>({
     messages: [],
     loading: true,
     error: null,

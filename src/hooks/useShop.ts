@@ -22,7 +22,7 @@ export interface UserPurchase {
   quantity: number;
 }
 
-interface UseShopState {
+interface UseShopBaseState {
   items: ShopItem[];
   purchasedItems: UserPurchase[];
   loading: boolean;
@@ -30,8 +30,12 @@ interface UseShopState {
   purchasing: boolean;
 }
 
+interface UseShopState extends UseShopBaseState {
+  purchaseItem: (itemId: string, userBalance: number) => Promise<boolean>;
+}
+
 export function useShop(userId: string | undefined): UseShopState {
-  const [state, setState] = useState<UseShopState>({
+  const [state, setState] = useState<UseShopBaseState>({
     items: [],
     purchasedItems: [],
     loading: true,
@@ -46,11 +50,11 @@ export function useShop(userId: string | undefined): UseShopState {
         setState(prev => ({ ...prev, loading: true, error: null }));
 
         // Get all shop items
-        const { data: items, error: itemsError } = await supabase
-          .from('shop_items')
+        const { data: items, error: itemsError } = await (supabase
+          .from('shop_items' as any)
           .select('*')
           .eq('active', true)
-          .order('cost', { ascending: true });
+          .order('cost', { ascending: true }) as any);
 
         if (itemsError) throw itemsError;
 
@@ -58,10 +62,10 @@ export function useShop(userId: string | undefined): UseShopState {
 
         // Get user's purchases if logged in
         if (userId) {
-          const { data: purchases, error: purchasesError } = await supabase
-            .from('user_shop_purchases')
+          const { data: purchases, error: purchasesError } = await (supabase
+            .from('user_shop_purchases' as any)
             .select('*')
-            .eq('user_id', userId);
+            .eq('user_id', userId) as any);
 
           if (purchasesError) throw purchasesError;
           purchasedItems = purchases || [];
@@ -144,11 +148,11 @@ export function useShop(userId: string | undefined): UseShopState {
           ? new Date(Date.now() + item.duration_days * 24 * 60 * 60 * 1000).toISOString()
           : null;
 
-        const { error: purchaseError } = await supabase.from('user_shop_purchases').insert({
+        const { error: purchaseError } = await (supabase.from('user_shop_purchases' as any).insert({
           user_id: userId,
           item_id: itemId,
           expires_at: expiresAt,
-        });
+        }) as any);
 
         if (purchaseError) throw purchaseError;
 

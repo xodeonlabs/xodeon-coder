@@ -67,18 +67,18 @@ export function usePlanLimits(userId: string | undefined): UsePlanLimitsState {
         setState(prev => ({ ...prev, loading: true, error: null }));
 
         // Get user plan
-        const { data: planData, error: planError } = await supabase
-          .from('user_plans')
+        const { data: planData, error: planError } = await (supabase
+          .from('user_plans' as any)
           .select('*')
           .eq('user_id', userId)
-          .maybeSingle();
+          .maybeSingle() as any);
 
         if (planError) throw planError;
 
         // Get plan definitions
-        const { data: planDefs, error: defsError } = await supabase
-          .from('plan_definitions')
-          .select('*');
+        const { data: planDefs, error: defsError } = await (supabase
+          .from('plan_definitions' as any)
+          .select('*') as any);
 
         if (defsError) throw defsError;
 
@@ -134,35 +134,35 @@ export async function logAIUsage(
   costCoins: number
 ): Promise<boolean> {
   try {
-    const { data: plan, error: planError } = await supabase
-      .from('user_plans')
+    const { data: plan, error: planError } = await (supabase
+      .from('user_plans' as any)
       .select('id, ai_messages_used, ai_lines_used')
       .eq('user_id', userId)
-      .maybeSingle();
+      .maybeSingle() as any);
 
     if (planError) throw planError;
 
     if (!plan) return false;
 
     // Update usage
-    const { error: updateError } = await supabase
-      .from('user_plans')
+    const { error: updateError } = await (supabase
+      .from('user_plans' as any)
       .update({
         ai_messages_used: (plan.ai_messages_used || 0) + messagesUsed,
         ai_lines_used: (plan.ai_lines_used || 0) + linesAdded,
       })
-      .eq('user_id', userId);
+      .eq('user_id', userId) as any);
 
     if (updateError) throw updateError;
 
     // Log usage
-    await supabase.from('ai_usage_log').insert({
+    await (supabase.from('ai_usage_log' as any).insert({
       user_id: userId,
       conversation_id: conversationId,
       message_count: messagesUsed,
       lines_added: linesAdded,
       cost_coins: costCoins,
-    });
+    }) as any);
 
     errorLogger.info('logAIUsage', 'Logged AI usage', {
       userId,

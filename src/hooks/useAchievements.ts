@@ -42,25 +42,25 @@ export function useAchievements(userId: string | undefined): UseAchievementsStat
         setState(prev => ({ ...prev, loading: true, error: null }));
 
         // Fetch all achievements
-        const { data: allAchievs, error: allError } = await supabase
-          .from('achievements')
+        const { data: allAchievs, error: allError } = await (supabase
+          .from('achievements' as any)
           .select('*')
-          .order('rarity', { ascending: true });
+          .order('rarity', { ascending: true }) as any);
 
         if (allError) throw allError;
 
         // Fetch user's unlocked achievements
-        const { data: unlockedData, error: unlockedError } = await supabase
-          .from('user_achievements')
+        const { data: unlockedData, error: unlockedError } = await (supabase
+          .from('user_achievements' as any)
           .select('*, achievements(*)')
           .eq('user_id', userId)
-          .order('unlocked_at', { ascending: false });
+          .order('unlocked_at', { ascending: false }) as any);
 
         if (unlockedError) throw unlockedError;
 
         // Map the data
         const unlockedMap = new Map(
-          (unlockedData || []).map(ua => [
+          (unlockedData || []).map((ua: any) => [
             ua.achievement_id,
             {
               ...ua.achievements,
@@ -71,8 +71,8 @@ export function useAchievements(userId: string | undefined): UseAchievementsStat
 
         setState(prev => ({
           ...prev,
-          allAchievements: allAchievs || [],
-          unlockedAchievements: Array.from(unlockedMap.values()),
+          allAchievements: (allAchievs || []) as Achievement[],
+          unlockedAchievements: Array.from(unlockedMap.values()) as UserAchievement[],
           loading: false,
         }));
       } catch (err) {
@@ -104,17 +104,17 @@ export async function checkAndAwardAchievements(
     const awardedIds: string[] = [];
 
     // Get all achievements
-    const { data: achievements } = await supabase.from('achievements').select('*');
+    const { data: achievements } = await (supabase.from('achievements' as any).select('*') as any);
 
     if (!achievements) return awardedIds;
 
     // Get user's current achievements
-    const { data: userAchievs } = await supabase
-      .from('user_achievements')
+    const { data: userAchievs } = await (supabase
+      .from('user_achievements' as any)
       .select('achievement_id')
-      .eq('user_id', userId);
+      .eq('user_id', userId) as any);
 
-    const unlockedIds = new Set((userAchievs || []).map(ua => ua.achievement_id));
+    const unlockedIds = new Set((userAchievs || []).map((ua: any) => ua.achievement_id));
 
     // Check each achievement
     for (const achievement of achievements) {
@@ -157,10 +157,10 @@ export async function checkAndAwardAchievements(
       }
 
       if (shouldAward) {
-        const { error } = await supabase.from('user_achievements').insert({
+        const { error } = await (supabase.from('user_achievements' as any).insert({
           user_id: userId,
           achievement_id: achievement.id,
-        });
+        }) as any);
 
         if (!error) {
           awardedIds.push(achievement.id);

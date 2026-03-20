@@ -17,12 +17,17 @@ export interface ReferralReward {
   description: string;
 }
 
-interface UseReferralState {
+interface UseReferralBaseState {
   referralCode: ReferralCode | null;
   totalRewards: number;
   referredUsers: number;
   loading: boolean;
   error: string | null;
+}
+
+interface UseReferralState extends UseReferralBaseState {
+  generateReferralCode: () => Promise<string | null>;
+  useReferralCode: (code: string) => Promise<boolean>;
 }
 
 const REFERRAL_REWARDS: Record<string, number> = {
@@ -35,7 +40,7 @@ const REFERRAL_REWARDS: Record<string, number> = {
  * Hook for managing user referral codes and rewards
  */
 export function useReferral(userId: string | undefined): UseReferralState {
-  const [state, setState] = useState<UseReferralState>({
+  const [state, setState] = useState<UseReferralBaseState>({
     referralCode: null,
     totalRewards: 0,
     referredUsers: 0,
@@ -50,11 +55,11 @@ export function useReferral(userId: string | undefined): UseReferralState {
     try {
       const code = `REF${Date.now().toString(36).toUpperCase()}`;
 
-      const { data, error } = await supabase.from('user_referral_codes').insert({
+      const { data, error } = await (supabase.from('user_referral_codes' as any).insert({
         user_id: userId,
         code,
         reward_coins: REFERRAL_REWARDS.referrer,
-      });
+      }) as any);
 
       if (error) throw error;
 
@@ -87,11 +92,11 @@ export function useReferral(userId: string | undefined): UseReferralState {
 
       try {
         // Get referrer's user ID from code
-        const { data: codeData, error: codeError } = await supabase
-          .from('user_referral_codes')
+        const { data: codeData, error: codeError } = await (supabase
+          .from('user_referral_codes' as any)
           .select('user_id, reward_coins')
           .eq('code', code)
-          .maybeSingle();
+          .maybeSingle() as any);
 
         if (codeError) throw codeError;
         if (!codeData) {
@@ -105,11 +110,11 @@ export function useReferral(userId: string | undefined): UseReferralState {
         }
 
         // Record referral
-        const { error: referralError } = await supabase.from('user_referrals').insert({
+        const { error: referralError } = await (supabase.from('user_referrals' as any).insert({
           referrer_id: codeData.user_id,
           referred_id: userId,
           referral_code_id: code,
-        });
+        }) as any);
 
         if (referralError) throw referralError;
 
@@ -142,10 +147,10 @@ export function useReferral(userId: string | undefined): UseReferralState {
           .eq('id', referrerCoins.id);
 
         // Increment uses
-        await supabase
-          .from('user_referral_codes')
+        await (supabase
+          .from('user_referral_codes' as any)
           .update({ uses: (codeData.uses || 0) + 1 })
-          .eq('code', code);
+          .eq('code', code) as any);
 
         errorLogger.info('useReferral.use', `Used referral code: ${code}`, {
           userId,

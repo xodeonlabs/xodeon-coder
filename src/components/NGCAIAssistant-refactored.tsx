@@ -94,7 +94,7 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
     const convo = await createConversation();
     if (convo) {
       setActiveConvoId(convo.id);
-      setMessages([]);
+      // messages will reload via useAIChat when activeConvoId changes
       setView('chat');
       setPendingCode(null);
     }
@@ -550,10 +550,10 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
       {coinConfirm.open && (
         <CoinConfirmDialog
           open={coinConfirm.open}
+          onOpenChange={(open) => { if (!open) setCoinConfirm(prev => ({ ...prev, open: false })); }}
           amount={coinConfirm.amount}
           description={coinConfirm.description}
           onConfirm={coinConfirm.onConfirm}
-          onCancel={() => setCoinConfirm(prev => ({ ...prev, open: false }))}
         />
       )}
     </div>
