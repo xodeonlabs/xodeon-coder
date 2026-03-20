@@ -144,11 +144,11 @@ export function useShop(userId: string | undefined): UseShopState {
           ? new Date(Date.now() + item.duration_days * 24 * 60 * 60 * 1000).toISOString()
           : null;
 
-        const { error: purchaseError } = await supabase.from('user_shop_purchases').insert({
+        const { error: purchaseError } = await (supabase.from('user_shop_purchases' as any).insert({
           user_id: userId,
           item_id: itemId,
           expires_at: expiresAt,
-        });
+        }) as any);
 
         if (purchaseError) throw purchaseError;
 
