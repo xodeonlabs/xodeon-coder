@@ -50,11 +50,11 @@ export function useAchievements(userId: string | undefined): UseAchievementsStat
         if (allError) throw allError;
 
         // Fetch user's unlocked achievements
-        const { data: unlockedData, error: unlockedError } = await supabase
-          .from('user_achievements')
+        const { data: unlockedData, error: unlockedError } = await (supabase
+          .from('user_achievements' as any)
           .select('*, achievements(*)')
           .eq('user_id', userId)
-          .order('unlocked_at', { ascending: false });
+          .order('unlocked_at', { ascending: false }) as any);
 
         if (unlockedError) throw unlockedError;
 
