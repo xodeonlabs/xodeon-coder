@@ -142,10 +142,10 @@ export function useReferral(userId: string | undefined): UseReferralState {
           .eq('id', referrerCoins.id);
 
         // Increment uses
-        await supabase
-          .from('user_referral_codes')
+        await (supabase
+          .from('user_referral_codes' as any)
           .update({ uses: (codeData.uses || 0) + 1 })
-          .eq('code', code);
+          .eq('code', code) as any);
 
         errorLogger.info('useReferral.use', `Used referral code: ${code}`, {
           userId,
