@@ -145,13 +145,13 @@ export async function logAIUsage(
     if (!plan) return false;
 
     // Update usage
-    const { error: updateError } = await supabase
-      .from('user_plans')
+    const { error: updateError } = await (supabase
+      .from('user_plans' as any)
       .update({
         ai_messages_used: (plan.ai_messages_used || 0) + messagesUsed,
         ai_lines_used: (plan.ai_lines_used || 0) + linesAdded,
       })
-      .eq('user_id', userId);
+      .eq('user_id', userId) as any);
 
     if (updateError) throw updateError;
 
