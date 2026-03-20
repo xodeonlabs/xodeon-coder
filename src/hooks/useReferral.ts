@@ -50,11 +50,11 @@ export function useReferral(userId: string | undefined): UseReferralState {
     try {
       const code = `REF${Date.now().toString(36).toUpperCase()}`;
 
-      const { data, error } = await supabase.from('user_referral_codes').insert({
+      const { data, error } = await (supabase.from('user_referral_codes' as any).insert({
         user_id: userId,
         code,
         reward_coins: REFERRAL_REWARDS.referrer,
-      });
+      }) as any);
 
       if (error) throw error;
 
