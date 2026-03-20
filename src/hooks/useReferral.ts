@@ -87,11 +87,11 @@ export function useReferral(userId: string | undefined): UseReferralState {
 
       try {
         // Get referrer's user ID from code
-        const { data: codeData, error: codeError } = await supabase
-          .from('user_referral_codes')
+        const { data: codeData, error: codeError } = await (supabase
+          .from('user_referral_codes' as any)
           .select('user_id, reward_coins')
           .eq('code', code)
-          .maybeSingle();
+          .maybeSingle() as any);
 
         if (codeError) throw codeError;
         if (!codeData) {
