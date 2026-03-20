@@ -30,7 +30,6 @@ export function AdBanner({ className = '', page, organizationId }: AdBannerProps
   const [isAnimating, setIsAnimating] = useState(false);
   const [ads, setAds] = useState<Ad[]>([]);
   const navigate = useNavigate();
-  const { censorText } = require('@/lib/profanity-filter-enhanced');
 
   useEffect(() => {
     const cacheKey = CACHE_KEYS.ads((page || 'all') + '_v2');
