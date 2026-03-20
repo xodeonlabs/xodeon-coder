@@ -109,10 +109,10 @@ export async function checkAndAwardAchievements(
     if (!achievements) return awardedIds;
 
     // Get user's current achievements
-    const { data: userAchievs } = await supabase
-      .from('user_achievements')
+    const { data: userAchievs } = await (supabase
+      .from('user_achievements' as any)
       .select('achievement_id')
-      .eq('user_id', userId);
+      .eq('user_id', userId) as any);
 
     const unlockedIds = new Set((userAchievs || []).map(ua => ua.achievement_id));
 
