@@ -76,9 +76,9 @@ export function usePlanLimits(userId: string | undefined): UsePlanLimitsState {
         if (planError) throw planError;
 
         // Get plan definitions
-        const { data: planDefs, error: defsError } = await supabase
-          .from('plan_definitions')
-          .select('*');
+        const { data: planDefs, error: defsError } = await (supabase
+          .from('plan_definitions' as any)
+          .select('*') as any);
 
         if (defsError) throw defsError;
 
