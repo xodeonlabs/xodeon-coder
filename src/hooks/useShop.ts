@@ -22,12 +22,15 @@ export interface UserPurchase {
   quantity: number;
 }
 
-interface UseShopState {
+interface UseShopBaseState {
   items: ShopItem[];
   purchasedItems: UserPurchase[];
   loading: boolean;
   error: string | null;
   purchasing: boolean;
+}
+
+interface UseShopState extends UseShopBaseState {
   purchaseItem: (itemId: string, userBalance: number) => Promise<boolean>;
 }
 
