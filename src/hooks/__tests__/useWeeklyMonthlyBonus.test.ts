@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { useWeeklyMonthlyBonus } from '@/hooks/useWeeklyMonthlyBonus';
 import * as supabase from '@/integrations/supabase/client';
 

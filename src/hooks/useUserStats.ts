@@ -60,11 +60,11 @@ export function useUserStats(userId: string | undefined): UseUserStatsState {
           .eq('user_id', userId) as any);
 
         // Get friends count (if friendship table exists)
-        const { count: friendCount } = await supabase
-          .from('friendship_requests')
+        const { count: friendCount } = await (supabase
+          .from('friendships')
           .select('*', { count: 'exact' })
-          .or(`requester_id.eq.${userId},receiver_id.eq.${userId}`)
-          .eq('status', 'accepted');
+          .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+          .eq('status', 'accepted') as any);
 
         // Get messages count
         const { count: msgCount } = await supabase
