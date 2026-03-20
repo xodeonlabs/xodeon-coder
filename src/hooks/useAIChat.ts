@@ -22,6 +22,9 @@ interface UseAIConversationsState {
   conversations: AIConversation[];
   loading: boolean;
   error: string | null;
+  create: (title?: string) => Promise<AIConversation | null>;
+  rename: (conversationId: string, newTitle: string) => Promise<boolean>;
+  remove: (conversationId: string) => Promise<boolean>;
 }
 
 /**
