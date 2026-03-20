@@ -156,13 +156,13 @@ export async function logAIUsage(
     if (updateError) throw updateError;
 
     // Log usage
-    await supabase.from('ai_usage_log').insert({
+    await (supabase.from('ai_usage_log' as any).insert({
       user_id: userId,
       conversation_id: conversationId,
       message_count: messagesUsed,
       lines_added: linesAdded,
       cost_coins: costCoins,
-    });
+    }) as any);
 
     errorLogger.info('logAIUsage', 'Logged AI usage', {
       userId,

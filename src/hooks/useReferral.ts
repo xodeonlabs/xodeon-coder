@@ -40,7 +40,7 @@ const REFERRAL_REWARDS: Record<string, number> = {
  * Hook for managing user referral codes and rewards
  */
 export function useReferral(userId: string | undefined): UseReferralState {
-  const [state, setState] = useState<UseReferralState>({
+  const [state, setState] = useState<UseReferralBaseState>({
     referralCode: null,
     totalRewards: 0,
     referredUsers: 0,

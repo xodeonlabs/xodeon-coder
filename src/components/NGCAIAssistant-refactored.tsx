@@ -550,10 +550,10 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
       {coinConfirm.open && (
         <CoinConfirmDialog
           open={coinConfirm.open}
+          onOpenChange={(open) => { if (!open) setCoinConfirm(prev => ({ ...prev, open: false })); }}
           amount={coinConfirm.amount}
           description={coinConfirm.description}
           onConfirm={coinConfirm.onConfirm}
-          onCancel={() => setCoinConfirm(prev => ({ ...prev, open: false }))}
         />
       )}
     </div>

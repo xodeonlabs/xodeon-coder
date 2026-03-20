@@ -180,7 +180,7 @@ interface UseAIChatState extends UseAIChatBaseState {
  * Hook to manage AI messages in a conversation
  */
 export function useAIChat(conversationId: string | undefined): UseAIChatState {
-  const [state, setState] = useState<UseAIChatState>({
+  const [state, setState] = useState<UseAIChatBaseState>({
     messages: [],
     loading: true,
     error: null,

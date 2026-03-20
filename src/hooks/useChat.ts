@@ -45,11 +45,11 @@ export function useChat(
 
         const filterColumn = table === 'chat_messages' ? 'app_id' : 'org_id';
 
-        const { data, error } = await supabase
-          .from(table)
+        const { data, error } = await (supabase
+          .from(table as any)
           .select('*')
           .eq(filterColumn, appIdOrOrgId)
-          .order('created_at', { ascending: true })
+          .order('created_at', { ascending: true }) as any);
           .limit(100);
 
         if (error) throw error;

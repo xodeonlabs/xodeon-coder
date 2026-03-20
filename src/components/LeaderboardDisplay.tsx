@@ -82,21 +82,22 @@ export function useLeaderboard(
           achievementCounts.set(ua.user_id, (achievementCounts.get(ua.user_id) || 0) + 1);
         });
 
-        // Build leaderboard entries
+        const profileMap = new Map((profilesData || []).map((p: any) => [p.id, p]));
+
         const entries: LeaderboardEntry[] = (coinData || [])
-          .filter(cd => cd.profiles?.display_name)
-          .map(cd => {
+          .filter((cd: any) => profileMap.has(cd.user_id) && (profileMap.get(cd.user_id) as any)?.display_name)
+          .map((cd: any) => {
+            const profile = profileMap.get(cd.user_id) as any;
             const appsCount = appCounts.get(cd.user_id) || 0;
             const achievementsCount = achievementCounts.get(cd.user_id) || 0;
 
-            // Calculate total score (weighted)
             const totalScore =
               (cd.balance || 0) * 1 + appsCount * 50 + achievementsCount * 100;
 
             return {
               user_id: cd.user_id,
-              display_name: cd.profiles.display_name,
-              avatar_url: cd.profiles.avatar_url,
+              display_name: profile.display_name,
+              avatar_url: profile.avatar_url,
               coins: cd.balance || 0,
               apps_count: appsCount,
               achievements_count: achievementsCount,

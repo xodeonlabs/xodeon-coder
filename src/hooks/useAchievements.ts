@@ -114,7 +114,7 @@ export async function checkAndAwardAchievements(
       .select('achievement_id')
       .eq('user_id', userId) as any);
 
-    const unlockedIds = new Set((userAchievs || []).map(ua => ua.achievement_id));
+    const unlockedIds = new Set((userAchievs || []).map((ua: any) => ua.achievement_id));
 
     // Check each achievement
     for (const achievement of achievements) {

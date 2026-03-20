@@ -35,7 +35,7 @@ interface UseShopState extends UseShopBaseState {
 }
 
 export function useShop(userId: string | undefined): UseShopState {
-  const [state, setState] = useState<UseShopState>({
+  const [state, setState] = useState<UseShopBaseState>({
     items: [],
     purchasedItems: [],
     loading: true,
