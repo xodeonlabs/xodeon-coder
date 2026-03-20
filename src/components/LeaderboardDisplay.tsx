@@ -38,19 +38,23 @@ export function useLeaderboard(
         setState(prev => ({ ...prev, loading: true, error: null }));
 
         // Get user coins and profiles
-        const { data: coinData, error: coinError } = await supabase
+        const { data: coinData, error: coinError } = await (supabase
           .from('user_coins')
-          .select(
-            `
+          .select(`
           user_id,
-          profiles(display_name, avatar_url),
           balance
-        `
-          )
+        `)
           .order('balance', { ascending: false })
-          .limit(limit * 2);
+          .limit(limit * 2) as any);
 
         if (coinError) throw coinError;
+
+        // Get profiles for the users
+        const userIds = (coinData || []).map((cd: any) => cd.user_id);
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, display_name, avatar_url')
+          .in('id', userIds);
 
         // Get app counts
         const { data: appData, error: appError } = await supabase
