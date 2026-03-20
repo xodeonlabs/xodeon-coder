@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { getCached, setCache, CACHE_KEYS, CACHE_TTL } from '@/lib/cache';
+import { censorText } from '@/lib/profanity-filter-enhanced';
 
 interface Ad {
   id: string;
