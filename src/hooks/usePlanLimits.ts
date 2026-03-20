@@ -67,11 +67,11 @@ export function usePlanLimits(userId: string | undefined): UsePlanLimitsState {
         setState(prev => ({ ...prev, loading: true, error: null }));
 
         // Get user plan
-        const { data: planData, error: planError } = await supabase
-          .from('user_plans')
+        const { data: planData, error: planError } = await (supabase
+          .from('user_plans' as any)
           .select('*')
           .eq('user_id', userId)
-          .maybeSingle();
+          .maybeSingle() as any);
 
         if (planError) throw planError;
 
