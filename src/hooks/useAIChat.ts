@@ -37,7 +37,7 @@ export function useAIConversations(
   userId: string | undefined,
   appId: string | undefined
 ): UseAIConversationsState {
-  const [state, setState] = useState<UseAIConversationsState>({
+  const [state, setState] = useState<UseAIConversationsBaseState>({
     conversations: [],
     loading: true,
     error: null,
