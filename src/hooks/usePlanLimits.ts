@@ -134,11 +134,11 @@ export async function logAIUsage(
   costCoins: number
 ): Promise<boolean> {
   try {
-    const { data: plan, error: planError } = await supabase
-      .from('user_plans')
+    const { data: plan, error: planError } = await (supabase
+      .from('user_plans' as any)
       .select('id, ai_messages_used, ai_lines_used')
       .eq('user_id', userId)
-      .maybeSingle();
+      .maybeSingle() as any);
 
     if (planError) throw planError;
 
