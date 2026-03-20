@@ -94,7 +94,7 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
     const convo = await createConversation();
     if (convo) {
       setActiveConvoId(convo.id);
-      setMessages([]);
+      // messages will reload via useAIChat when activeConvoId changes
       setView('chat');
       setPendingCode(null);
     }
