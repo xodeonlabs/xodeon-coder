@@ -49,8 +49,8 @@ export function useChat(
           .from(table as any)
           .select('*')
           .eq(filterColumn, appIdOrOrgId)
-          .order('created_at', { ascending: true }) as any);
-          .limit(100);
+          .order('created_at', { ascending: true })
+          .limit(100) as any);
 
         if (error) throw error;
 
