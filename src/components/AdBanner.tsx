@@ -105,7 +105,6 @@ export function AdBanner({ className = '', page, organizationId }: AdBannerProps
   const isExternal = hasExternalUrl;
 
   // Enhanced censuur
-  const { censorText } = require('@/lib/profanity-filter-enhanced');
   const censoredTitle = censorText(ad.title);
   const censoredDescription = censorText(ad.description);
 

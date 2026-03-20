@@ -165,6 +165,9 @@ interface UseAIChatState {
   messages: AIMessage[];
   loading: boolean;
   error: string | null;
+  addMessage: (message: AIMessage) => void;
+  updateLastMessage: (content: string) => void;
+  saveMessage: (role: 'user' | 'assistant', content: string) => Promise<boolean>;
 }
 
 /**

@@ -58,14 +58,6 @@ export function censorText(text: string, replacement = '*'): string {
     const regex = new RegExp(`\\b${word}\\b`, 'gi');
     result = result.replace(regex, replacement.repeat(word.length));
   });
-// Lijst van ongepaste domeinen
-const BANNED_DOMAINS = [
-  'example1.com', 'example2.com', 'example3.com', 'example4.com', 'example5.com',
-  'example6.com', 'example7.com', 'example8.com', 'example9.com', 'example10.com',
-  'example11.com', 'example12.com', 'example13.com', 'example14.com', 'example15.com',
-  'example16.com', 'example17.com', 'example18.com', 'example19.com', 'example20.com',
-];
-
 
   return result;
 }

@@ -157,10 +157,10 @@ export async function checkAndAwardAchievements(
       }
 
       if (shouldAward) {
-        const { error } = await supabase.from('user_achievements').insert({
+        const { error } = await (supabase.from('user_achievements' as any).insert({
           user_id: userId,
           achievement_id: achievement.id,
-        });
+        }) as any);
 
         if (!error) {
           awardedIds.push(achievement.id);

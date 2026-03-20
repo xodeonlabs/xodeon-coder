@@ -67,9 +67,9 @@ export function useLeaderboard(
         });
 
         // Get achievements counts
-        const { data: achievementData, error: achievError } = await supabase
-          .from('user_achievements')
-          .select('user_id');
+        const { data: achievementData, error: achievError } = await (supabase
+          .from('user_achievements' as any)
+          .select('user_id') as any);
 
         if (achievError) throw achievError;
 

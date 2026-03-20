@@ -23,6 +23,8 @@ interface UseReferralState {
   referredUsers: number;
   loading: boolean;
   error: string | null;
+  generateReferralCode: () => Promise<string | null>;
+  useReferralCode: (code: string) => Promise<boolean>;
 }
 
 const REFERRAL_REWARDS: Record<string, number> = {

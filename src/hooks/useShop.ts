@@ -28,6 +28,7 @@ interface UseShopState {
   loading: boolean;
   error: string | null;
   purchasing: boolean;
+  purchaseItem: (itemId: string, userBalance: number) => Promise<boolean>;
 }
 
 export function useShop(userId: string | undefined): UseShopState {
