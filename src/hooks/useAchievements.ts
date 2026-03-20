@@ -42,10 +42,10 @@ export function useAchievements(userId: string | undefined): UseAchievementsStat
         setState(prev => ({ ...prev, loading: true, error: null }));
 
         // Fetch all achievements
-        const { data: allAchievs, error: allError } = await supabase
-          .from('achievements')
+        const { data: allAchievs, error: allError } = await (supabase
+          .from('achievements' as any)
           .select('*')
-          .order('rarity', { ascending: true });
+          .order('rarity', { ascending: true }) as any);
 
         if (allError) throw allError;
 
