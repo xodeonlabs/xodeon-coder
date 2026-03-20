@@ -39,11 +39,11 @@ export function useUserStats(userId: string | undefined): UseUserStatsState {
         setState(prev => ({ ...prev, loading: true, error: null }));
 
         // Get coins
-        const { data: coinData, error: coinError } = await supabase
+        const { data: coinData, error: coinError } = await (supabase
           .from('user_coins')
-          .select('balance, created_at')
+          .select('balance')
           .eq('user_id', userId)
-          .maybeSingle();
+          .maybeSingle() as any);
 
         if (coinError) throw coinError;
 
