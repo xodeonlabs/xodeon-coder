@@ -42,7 +42,8 @@ export function useAdmin() {
       setState(prev => ({ ...prev, loading: true, error: null }));
 
       // Get user count
-      const { count: userCount } = await supabase.auth.admin.listUsers();
+      const usersResult = await supabase.auth.admin.listUsers() as any;
+      const userCount = usersResult?.data?.users?.length ?? 0;
 
       // Get total coins
       const { data: coinData, error: coinError } = await supabase
