@@ -60,7 +60,7 @@ export function useAchievements(userId: string | undefined): UseAchievementsStat
 
         // Map the data
         const unlockedMap = new Map(
-          (unlockedData || []).map(ua => [
+          (unlockedData || []).map((ua: any) => [
             ua.achievement_id,
             {
               ...ua.achievements,
