@@ -17,12 +17,15 @@ export interface ReferralReward {
   description: string;
 }
 
-interface UseReferralState {
+interface UseReferralBaseState {
   referralCode: ReferralCode | null;
   totalRewards: number;
   referredUsers: number;
   loading: boolean;
   error: string | null;
+}
+
+interface UseReferralState extends UseReferralBaseState {
   generateReferralCode: () => Promise<string | null>;
   useReferralCode: (code: string) => Promise<boolean>;
 }
