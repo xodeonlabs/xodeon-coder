@@ -164,10 +164,13 @@ export function useAIConversations(
   };
 }
 
-interface UseAIChatState {
+interface UseAIChatBaseState {
   messages: AIMessage[];
   loading: boolean;
   error: string | null;
+}
+
+interface UseAIChatState extends UseAIChatBaseState {
   addMessage: (message: AIMessage) => void;
   updateLastMessage: (content: string) => void;
   saveMessage: (role: 'user' | 'assistant', content: string) => Promise<boolean>;
