@@ -104,7 +104,7 @@ export async function checkAndAwardAchievements(
     const awardedIds: string[] = [];
 
     // Get all achievements
-    const { data: achievements } = await supabase.from('achievements').select('*');
+    const { data: achievements } = await (supabase.from('achievements' as any).select('*') as any);
 
     if (!achievements) return awardedIds;
 
