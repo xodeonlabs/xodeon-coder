@@ -46,11 +46,11 @@ export function useShop(userId: string | undefined): UseShopState {
         setState(prev => ({ ...prev, loading: true, error: null }));
 
         // Get all shop items
-        const { data: items, error: itemsError } = await supabase
-          .from('shop_items')
+        const { data: items, error: itemsError } = await (supabase
+          .from('shop_items' as any)
           .select('*')
           .eq('active', true)
-          .order('cost', { ascending: true });
+          .order('cost', { ascending: true }) as any);
 
         if (itemsError) throw itemsError;
 
