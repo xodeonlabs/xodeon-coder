@@ -18,10 +18,13 @@ export interface AIConversation {
   user_id: string;
 }
 
-interface UseAIConversationsState {
+interface UseAIConversationsBaseState {
   conversations: AIConversation[];
   loading: boolean;
   error: string | null;
+}
+
+interface UseAIConversationsState extends UseAIConversationsBaseState {
   create: (title?: string) => Promise<AIConversation | null>;
   rename: (conversationId: string, newTitle: string) => Promise<boolean>;
   remove: (conversationId: string) => Promise<boolean>;
