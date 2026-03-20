@@ -159,11 +159,11 @@ export function useAdmin() {
   const suspendUser = useCallback(async (userId: string, reason: string): Promise<boolean> => {
     try {
       // Mark user as suspended in a hypothetical suspension table
-      const { error } = await supabase.from('user_suspensions').insert({
+      const { error } = await (supabase.from('user_suspensions' as any).insert({
         user_id: userId,
         reason,
         suspended_at: new Date().toISOString(),
-      });
+      }) as any);
 
       if (error) throw error;
 
