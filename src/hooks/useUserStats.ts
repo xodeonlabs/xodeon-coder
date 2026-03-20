@@ -54,10 +54,10 @@ export function useUserStats(userId: string | undefined): UseUserStatsState {
           .eq('owner_id', userId);
 
         // Get achievements count
-        const { count: achievementCount } = await supabase
-          .from('user_achievements')
+        const { count: achievementCount } = await (supabase
+          .from('user_achievements' as any)
           .select('*', { count: 'exact' })
-          .eq('user_id', userId);
+          .eq('user_id', userId) as any);
 
         // Get friends count (if friendship table exists)
         const { count: friendCount } = await supabase
