@@ -25,6 +25,7 @@ const NAV_ITEMS = [
   { title: 'Allianties', url: '/alliances', icon: Handshake },
   { title: 'Analytics', url: '/analytics', icon: BarChart3 },
   { title: 'Templates', url: '/templates', icon: LayoutGrid },
+  { title: 'API Data', url: '/xodeon-data', icon: Database },
 ];
 
 export function AppSidebar() {
