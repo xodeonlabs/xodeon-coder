@@ -28,6 +28,7 @@ const MORE_ITEMS = [
   { title: 'Allianties', url: '/alliances', icon: Building2 },
   { title: 'Analytics', url: '/analytics', icon: BarChart3 },
   { title: 'Templates', url: '/templates', icon: LayoutDashboard },
+  { title: 'API Data', url: '/xodeon-data', icon: Database },
   { title: 'Instellingen', url: '/settings', icon: Settings },
 ];
 
