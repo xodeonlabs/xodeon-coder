@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNotificationSound, getNotificationToastEnabled, getDoNotDisturbEnabled, useDoNotDisturb } from '@/hooks/useNotificationSound';
 import { toast } from 'sonner';
 import {
-  LayoutDashboard, BarChart3, Building2, Handshake, Users,
+  LayoutDashboard, BarChart3, Building2, Handshake, Users, Database,
   MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins, PanelLeftClose, PanelLeftOpen, BellOff, Bell, Pin, PinOff, ArrowUp, Package, Cloud, ExternalLink,
 } from 'lucide-react';
 import {

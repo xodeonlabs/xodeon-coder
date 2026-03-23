@@ -67,6 +67,7 @@ const App = () => (
           <Route path="/berichten" element={<ProtectedRoute><FriendChat /></ProtectedRoute>} />
           <Route path="/groepen" element={<ProtectedRoute><GroupChats /></ProtectedRoute>} />
           <Route path="/upgrades" element={<ProtectedRoute><Upgrades /></ProtectedRoute>} />
+          <Route path="/xodeon-data" element={<ProtectedRoute><XodeonData /></ProtectedRoute>} />
           <Route path="/app/:slug" element={<PublicApp />} />
           <Route path="/profiel/:username" element={<Profile />} />
           <Route path="/bedrijf/:orgId" element={<OrgProfile />} />
