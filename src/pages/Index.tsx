@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef, useDeferredValue, useTransition } from 'react';
 import { useSwipe } from '@/hooks/useSwipe';
 import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Plus, Code, MousePointer, History, Maximize, Minimize, Eye, Copy, Undo2, FileCode, Search, Replace, Sparkles, Blocks } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
@@ -111,6 +111,10 @@ const Index = () => {
   const { cursors, updateCursor } = useLiveCursors(appId);
 
   const isRemoteUpdate = useRef(false);
+  const broadcastThrottle = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Deferred code for preview parsing — keeps typing smooth
+  const deferredCode = useDeferredValue(code);
 
   // Feature states
   const [zenMode, setZenMode] = useState(false);
@@ -161,35 +165,57 @@ const Index = () => {
     });
   }, [appId]);
 
-  // Realtime collaboration: listen for changes from other users
+  // Realtime collaboration: use Broadcast for instant sync + postgres_changes as fallback
   useEffect(() => {
     if (!appId) return;
-    const channel = supabase
+
+    // Fast path: Broadcast channel for instant code sharing between collaborators
+    const broadcastChannel = supabase.channel(`app-broadcast-${appId}`);
+    broadcastChannel
+      .on('broadcast', { event: 'code-update' }, ({ payload }) => {
+        if (payload?.sender_id === session?.user?.id) return; // skip own
+        isRemoteUpdate.current = true;
+        setCode(prev => prev !== payload.code ? payload.code : prev);
+        if (payload.name) setAppName(prev => prev !== payload.name ? payload.name : prev);
+        setTimeout(() => { isRemoteUpdate.current = false; }, 50);
+      })
+      .subscribe();
+
+    // Slow fallback: postgres_changes for when broadcast misses (e.g. page reload)
+    const pgChannel = supabase
       .channel(`app-collab-${appId}`)
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'apps', filter: `id=eq.${appId}` },
         (payload) => {
           const newRecord = payload.new as { ngc_code: string; name: string };
-          // Only apply if it's a remote change (not our own save)
           isRemoteUpdate.current = true;
-          setCode(prev => {
-            if (prev !== newRecord.ngc_code) return newRecord.ngc_code;
-            return prev;
-          });
-          setAppName(prev => {
-            if (prev !== newRecord.name) return newRecord.name;
-            return prev;
-          });
-          setTimeout(() => { isRemoteUpdate.current = false; }, 100);
+          setCode(prev => prev !== newRecord.ngc_code ? newRecord.ngc_code : prev);
+          setAppName(prev => prev !== newRecord.name ? newRecord.name : prev);
+          setTimeout(() => { isRemoteUpdate.current = false; }, 50);
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(broadcastChannel);
+      supabase.removeChannel(pgChannel);
     };
-  }, [appId]);
+  }, [appId, session?.user?.id]);
+
+  // Broadcast code changes to other collaborators instantly (throttled)
+  useEffect(() => {
+    if (loading || !appId || isRemoteUpdate.current) return;
+    if (broadcastThrottle.current) clearTimeout(broadcastThrottle.current);
+    broadcastThrottle.current = setTimeout(() => {
+      supabase.channel(`app-broadcast-${appId}`).send({
+        type: 'broadcast',
+        event: 'code-update',
+        payload: { code, name: appName, sender_id: session?.user?.id },
+      });
+    }, 150); // 150ms throttle for near-instant feel
+    return () => { if (broadcastThrottle.current) clearTimeout(broadcastThrottle.current); };
+  }, [code, appId, loading, appName, session?.user?.id]);
 
   // Save to database
   const saveNow = useCallback(async () => {
@@ -202,7 +228,7 @@ const Index = () => {
     toast({ title: '✓ Opgeslagen', description: 'Je code is opgeslagen', duration: 1500 });
   }, [code, appId, toast]);
 
-  // Auto-save to database with debounce (skip remote updates)
+  // Auto-save with reduced debounce (800ms for snappier feel)
   useEffect(() => {
     if (loading || !appId || isRemoteUpdate.current) return;
     setSaveStatus('unsaved');
@@ -212,7 +238,7 @@ const Index = () => {
       await supabase.from('apps').update({ ngc_code: code }).eq('id', appId);
       setSaveStatus('saved');
       setLastSaved(new Date());
-    }, 1500);
+    }, 800);
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
   }, [code, appId, loading]);
 
@@ -320,10 +346,11 @@ const Index = () => {
   }, [saveNow, handleUndo, zenMode, toggleZenMode]);
 
 
-  const parseResult = useMemo(() => parseNGC(code), [code]);
+  // Use deferred code for AST parsing — keeps typing smooth even with complex apps
+  const parseResult = useMemo(() => parseNGC(deferredCode), [deferredCode]);
   const { ast, errors } = parseResult;
 
-  // Split code into sections for per-page editing
+  // Split code into sections for per-page editing (use immediate code for editor display)
   const sections = useMemo(() => splitCodeIntoSections(code), [code]);
 
   // Get active section's code
