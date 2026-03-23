@@ -25,6 +25,7 @@ import NotFound from "./pages/NotFound";
 import FriendChat from "./pages/FriendChat";
 import GroupChats from "./pages/GroupChats";
 import Upgrades from "./pages/Upgrades";
+import XodeonData from "./pages/XodeonData";
 
 const queryClient = new QueryClient();
 
