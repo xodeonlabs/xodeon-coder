@@ -3,7 +3,7 @@ import { AppSidebar } from '@/components/AppSidebar';
 import { AdBanner } from '@/components/AdBanner';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, MessageCircle, Users, Building2, BarChart3, Shield, Settings, Menu, X, Package, Cloud, ExternalLink,
+  LayoutDashboard, MessageCircle, Users, Building2, BarChart3, Shield, Settings, Menu, X, Package, Cloud, ExternalLink, Database,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,6 +28,7 @@ const MORE_ITEMS = [
   { title: 'Allianties', url: '/alliances', icon: Building2 },
   { title: 'Analytics', url: '/analytics', icon: BarChart3 },
   { title: 'Templates', url: '/templates', icon: LayoutDashboard },
+  { title: 'API Data', url: '/xodeon-data', icon: Database },
   { title: 'Instellingen', url: '/settings', icon: Settings },
 ];
 
