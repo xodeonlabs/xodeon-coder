@@ -36,6 +36,7 @@ function MobileBottomNav() {
   const navigate = useNavigate();
   const { session } = useAuth();
   const [showMore, setShowMore] = useState(false);
+  const [showProducts, setShowProducts] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
