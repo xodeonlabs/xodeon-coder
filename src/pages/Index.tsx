@@ -346,10 +346,11 @@ const Index = () => {
   }, [saveNow, handleUndo, zenMode, toggleZenMode]);
 
 
-  const parseResult = useMemo(() => parseNGC(code), [code]);
+  // Use deferred code for AST parsing — keeps typing smooth even with complex apps
+  const parseResult = useMemo(() => parseNGC(deferredCode), [deferredCode]);
   const { ast, errors } = parseResult;
 
-  // Split code into sections for per-page editing
+  // Split code into sections for per-page editing (use immediate code for editor display)
   const sections = useMemo(() => splitCodeIntoSections(code), [code]);
 
   // Get active section's code
