@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef, useDeferredValue, useTransition } from 'react';
 import { useSwipe } from '@/hooks/useSwipe';
 import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Plus, Code, MousePointer, History, Maximize, Minimize, Eye, Copy, Undo2, FileCode, Search, Replace, Sparkles, Blocks } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
