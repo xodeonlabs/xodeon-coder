@@ -115,15 +115,20 @@ function MobileBottomNav() {
       <nav className="fixed bottom-0 left-0 right-0 z-[80] border-t border-border/30 bg-background/95 backdrop-blur-md lg:hidden safe-area-bottom">
         <div className="flex items-stretch justify-around h-14">
           {MOBILE_NAV.map(item => {
-            const active = item.url === '__more__' ? showMore : isActive(item.url);
+            const active = item.url === '__more__' ? showMore : item.url === '__products__' ? showProducts : isActive(item.url);
             return (
               <button
                 key={item.url}
                 onClick={() => {
                   if (item.url === '__more__') {
                     setShowMore(!showMore);
+                    setShowProducts(false);
+                  } else if (item.url === '__products__') {
+                    setShowProducts(!showProducts);
+                    setShowMore(false);
                   } else {
                     setShowMore(false);
+                    setShowProducts(false);
                     navigate(item.url);
                   }
                 }}
