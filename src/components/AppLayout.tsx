@@ -11,15 +11,20 @@ import { useAuth } from '@/hooks/useAuth';
 
 const HIDE_AD_ROUTES = ['/editor', '/preview'];
 
+const XODEON_PRODUCTS = [
+  { title: 'Xodeon Cloud', url: 'https://xodeon-cloud-backend--gamerdu54n2.replit.app/login', icon: Cloud },
+];
+
 const MOBILE_NAV = [
   { title: 'Home', url: '/', icon: LayoutDashboard },
   { title: 'Berichten', url: '/berichten', icon: MessageCircle },
   { title: 'Groepen', url: '/groepen', icon: Users },
-  { title: 'Bedrijven', url: '/organization', icon: Building2 },
+  { title: 'Producten', url: '__products__', icon: Package },
   { title: 'Meer', url: '__more__', icon: Menu },
 ];
 
 const MORE_ITEMS = [
+  { title: 'Bedrijven', url: '/organization', icon: Building2 },
   { title: 'Allianties', url: '/alliances', icon: Building2 },
   { title: 'Analytics', url: '/analytics', icon: BarChart3 },
   { title: 'Templates', url: '/templates', icon: LayoutDashboard },

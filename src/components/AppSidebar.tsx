@@ -260,6 +260,26 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* Xodeon Producten */}
+        <SidebarGroup>
+          <SidebarGroupLabel>{collapsed ? '' : 'Producten'}</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip={collapsed ? 'Xodeon Cloud' : undefined}
+                  onClick={() => window.open('https://xodeon-cloud-backend--gamerdu54n2.replit.app/login', '_blank')}
+                  className="flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-sm font-medium transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/40"
+                >
+                  <Cloud className="h-4 w-4 shrink-0" />
+                  <span className="flex-1">Xodeon Cloud</span>
+                  <ExternalLink className="h-3 w-3 opacity-50" />
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         {/* Pinned Apps */}
         {pinnedApps.length > 0 && (
           <SidebarGroup>
