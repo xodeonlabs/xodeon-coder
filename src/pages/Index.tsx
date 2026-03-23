@@ -111,6 +111,10 @@ const Index = () => {
   const { cursors, updateCursor } = useLiveCursors(appId);
 
   const isRemoteUpdate = useRef(false);
+  const broadcastThrottle = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Deferred code for preview parsing — keeps typing smooth
+  const deferredCode = useDeferredValue(code);
 
   // Feature states
   const [zenMode, setZenMode] = useState(false);
