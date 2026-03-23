@@ -88,6 +88,29 @@ function MobileBottomNav() {
         </div>
       )}
 
+      {/* Products menu overlay */}
+      {showProducts && (
+        <div className="fixed inset-0 z-[90] bg-black/50" onClick={() => setShowProducts(false)}>
+          <div
+            className="absolute bottom-16 left-2 right-2 rounded-xl border border-border/40 bg-background p-2 shadow-xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Xodeon Producten</p>
+            {XODEON_PRODUCTS.map(product => (
+              <button
+                key={product.title}
+                onClick={() => { window.open(product.url, '_blank'); setShowProducts(false); }}
+                className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+              >
+                <product.icon className="h-4 w-4" />
+                <span className="flex-1 text-left">{product.title}</span>
+                <ExternalLink className="h-3 w-3 opacity-50" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Bottom nav bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-[80] border-t border-border/30 bg-background/95 backdrop-blur-md lg:hidden safe-area-bottom">
         <div className="flex items-stretch justify-around h-14">
