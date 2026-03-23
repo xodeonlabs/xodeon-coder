@@ -3,7 +3,7 @@ import { AppSidebar } from '@/components/AppSidebar';
 import { AdBanner } from '@/components/AdBanner';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, MessageCircle, Users, Building2, BarChart3, Shield, Settings, Menu, X,
+  LayoutDashboard, MessageCircle, Users, Building2, BarChart3, Shield, Settings, Menu, X, Package, Cloud, ExternalLink,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,15 +11,20 @@ import { useAuth } from '@/hooks/useAuth';
 
 const HIDE_AD_ROUTES = ['/editor', '/preview'];
 
+const XODEON_PRODUCTS = [
+  { title: 'Xodeon Cloud', url: 'https://xodeon-cloud-backend--gamerdu54n2.replit.app/login', icon: Cloud },
+];
+
 const MOBILE_NAV = [
   { title: 'Home', url: '/', icon: LayoutDashboard },
   { title: 'Berichten', url: '/berichten', icon: MessageCircle },
   { title: 'Groepen', url: '/groepen', icon: Users },
-  { title: 'Bedrijven', url: '/organization', icon: Building2 },
+  { title: 'Producten', url: '__products__', icon: Package },
   { title: 'Meer', url: '__more__', icon: Menu },
 ];
 
 const MORE_ITEMS = [
+  { title: 'Bedrijven', url: '/organization', icon: Building2 },
   { title: 'Allianties', url: '/alliances', icon: Building2 },
   { title: 'Analytics', url: '/analytics', icon: BarChart3 },
   { title: 'Templates', url: '/templates', icon: LayoutDashboard },
@@ -31,6 +36,7 @@ function MobileBottomNav() {
   const navigate = useNavigate();
   const { session } = useAuth();
   const [showMore, setShowMore] = useState(false);
+  const [showProducts, setShowProducts] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -82,19 +88,47 @@ function MobileBottomNav() {
         </div>
       )}
 
+      {/* Products menu overlay */}
+      {showProducts && (
+        <div className="fixed inset-0 z-[90] bg-black/50" onClick={() => setShowProducts(false)}>
+          <div
+            className="absolute bottom-16 left-2 right-2 rounded-xl border border-border/40 bg-background p-2 shadow-xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Xodeon Producten</p>
+            {XODEON_PRODUCTS.map(product => (
+              <button
+                key={product.title}
+                onClick={() => { window.open(product.url, '_blank'); setShowProducts(false); }}
+                className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+              >
+                <product.icon className="h-4 w-4" />
+                <span className="flex-1 text-left">{product.title}</span>
+                <ExternalLink className="h-3 w-3 opacity-50" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Bottom nav bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-[80] border-t border-border/30 bg-background/95 backdrop-blur-md lg:hidden safe-area-bottom">
         <div className="flex items-stretch justify-around h-14">
           {MOBILE_NAV.map(item => {
-            const active = item.url === '__more__' ? showMore : isActive(item.url);
+            const active = item.url === '__more__' ? showMore : item.url === '__products__' ? showProducts : isActive(item.url);
             return (
               <button
                 key={item.url}
                 onClick={() => {
                   if (item.url === '__more__') {
                     setShowMore(!showMore);
+                    setShowProducts(false);
+                  } else if (item.url === '__products__') {
+                    setShowProducts(!showProducts);
+                    setShowMore(false);
                   } else {
                     setShowMore(false);
+                    setShowProducts(false);
                     navigate(item.url);
                   }
                 }}

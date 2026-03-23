@@ -6,7 +6,7 @@ import { useNotificationSound, getNotificationToastEnabled, getDoNotDisturbEnabl
 import { toast } from 'sonner';
 import {
   LayoutDashboard, BarChart3, Building2, Handshake, Users,
-  MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins, PanelLeftClose, PanelLeftOpen, BellOff, Bell, Pin, PinOff, ArrowUp,
+  MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins, PanelLeftClose, PanelLeftOpen, BellOff, Bell, Pin, PinOff, ArrowUp, Package, Cloud, ExternalLink,
 } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -256,6 +256,26 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Xodeon Producten */}
+        <SidebarGroup>
+          <SidebarGroupLabel>{collapsed ? '' : 'Producten'}</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip={collapsed ? 'Xodeon Cloud' : undefined}
+                  onClick={() => window.open('https://xodeon-cloud-backend--gamerdu54n2.replit.app/login', '_blank')}
+                  className="flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-sm font-medium transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/40"
+                >
+                  <Cloud className="h-4 w-4 shrink-0" />
+                  <span className="flex-1">Xodeon Cloud</span>
+                  <ExternalLink className="h-3 w-3 opacity-50" />
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
