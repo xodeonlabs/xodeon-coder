@@ -23,11 +23,39 @@ const Preview = () => {
 
   useEffect(() => {
     if (!appId) return;
-    supabase.from('apps').select('ngc_code, organization_id').eq('id', appId).single().then(({ data }) => {
-      setCode(data?.ngc_code || '');
-      setOrgId((data as any)?.organization_id || null);
-      setLoading(false);
-    });
+    const loadApp = () => {
+      supabase.from('apps').select('ngc_code, organization_id').eq('id', appId).single().then(({ data }) => {
+        setCode(data?.ngc_code || '');
+        setOrgId((data as any)?.organization_id || null);
+        setLoading(false);
+      });
+    };
+    loadApp();
+
+    // Auto-refresh when app is updated
+    const channel = supabase
+      .channel(`preview-${appId}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'apps', filter: `id=eq.${appId}` }, (payload) => {
+        const newCode = payload.new?.ngc_code;
+        if (newCode && newCode !== code) {
+          setCode(newCode);
+          setOrgId(payload.new?.organization_id || null);
+        }
+      })
+      .subscribe();
+
+    // Admin force-refresh channel
+    const refreshChannel = supabase
+      .channel('admin-force-refresh')
+      .on('broadcast', { event: 'force-refresh' }, () => {
+        window.location.reload();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+      supabase.removeChannel(refreshChannel);
+    };
   }, [appId]);
 
   const { ast } = useMemo(() => parseNGC(code), [code]);

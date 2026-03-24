@@ -34,13 +34,11 @@ const PublicApp = () => {
           setAppName(data.name);
           setAppId(data.id);
           setOrgId((data as any).organization_id || null);
-          // Check if pinned
           if (session?.user?.id) {
             supabase.from('pinned_apps' as any).select('id').eq('user_id', session.user.id).eq('app_id', data.id).maybeSingle().then(({ data: pin }) => {
               setIsPinned(!!pin);
             });
           }
-          // Record page view
           supabase.from('app_views').insert({
             app_id: data.id,
             referrer: document.referrer || null,
@@ -48,7 +46,34 @@ const PublicApp = () => {
         }
         setLoading(false);
       });
+
+    // Admin force-refresh channel
+    const refreshChannel = supabase
+      .channel('admin-force-refresh')
+      .on('broadcast', { event: 'force-refresh' }, () => {
+        window.location.reload();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(refreshChannel); };
   }, [slug, session?.user?.id]);
+
+  // Auto-refresh when app code is updated
+  useEffect(() => {
+    if (!appId) return;
+    const channel = supabase
+      .channel(`public-app-${appId}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'apps', filter: `id=eq.${appId}` }, (payload) => {
+        const newCode = payload.new?.ngc_code;
+        if (newCode) {
+          setCode(newCode);
+          setAppName(payload.new?.name || appName);
+          setOrgId(payload.new?.organization_id || null);
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [appId]);
 
   const togglePin = async () => {
     if (!session?.user?.id || !appId) return;
