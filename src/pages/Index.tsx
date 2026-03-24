@@ -112,6 +112,8 @@ const Index = () => {
 
   const isRemoteUpdate = useRef(false);
   const broadcastThrottle = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typingThrottle = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [typingUsers, setTypingUsers] = useState<{ id: string; email: string }[]>([]);
 
   // Deferred code for preview parsing — keeps typing smooth
   const deferredCode = useDeferredValue(code);
