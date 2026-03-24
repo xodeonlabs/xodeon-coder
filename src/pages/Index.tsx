@@ -920,7 +920,7 @@ const Index = () => {
       </ResizablePanelGroup>
 
       {/* Status Bar */}
-      <StatusBar code={code} saveStatus={saveStatus} lastSaved={lastSaved} />
+      <StatusBar code={code} saveStatus={saveStatus} lastSaved={lastSaved} typingUsers={typingUsers} />
 
       {/* Command Palette */}
       <CommandPalette open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} items={commandItems} />
