@@ -175,11 +175,23 @@ const Index = () => {
     const broadcastChannel = supabase.channel(`app-broadcast-${appId}`);
     broadcastChannel
       .on('broadcast', { event: 'code-update' }, ({ payload }) => {
-        if (payload?.sender_id === session?.user?.id) return; // skip own
+        if (payload?.sender_id === session?.user?.id) return;
         isRemoteUpdate.current = true;
         setCode(prev => prev !== payload.code ? payload.code : prev);
         if (payload.name) setAppName(prev => prev !== payload.name ? payload.name : prev);
         setTimeout(() => { isRemoteUpdate.current = false; }, 50);
+      })
+      .on('broadcast', { event: 'typing' }, ({ payload }) => {
+        if (payload?.sender_id === session?.user?.id) return;
+        setTypingUsers(prev => {
+          const exists = prev.some(u => u.id === payload.sender_id);
+          if (!exists) return [...prev, { id: payload.sender_id, email: payload.email || 'Gebruiker' }];
+          return prev;
+        });
+        // Auto-clear after 2s
+        setTimeout(() => {
+          setTypingUsers(prev => prev.filter(u => u.id !== payload.sender_id));
+        }, 2000);
       })
       .subscribe();
 
