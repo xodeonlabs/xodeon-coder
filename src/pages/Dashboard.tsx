@@ -1111,8 +1111,10 @@ export default function Dashboard() {
 
         {/* Content */}
         {loading ? (
-          <div className="flex items-center justify-center py-24">
+          <div className="flex flex-col items-center justify-center py-12 gap-4">
             <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+            <p className="text-xs text-muted-foreground">Even geduld... speel ondertussen een spelletje!</p>
+            <TetrisGame />
           </div>
         ) : myApps.length === 0 ? (
           <div className="glass-card-highlight rounded-2xl p-12 sm:p-16 text-center relative overflow-hidden animate-scale-in">
