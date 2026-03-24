@@ -227,8 +227,20 @@ const Index = () => {
         event: 'code-update',
         payload: { code, name: appName, sender_id: session?.user?.id },
       });
-    }, 150); // 150ms throttle for near-instant feel
-    return () => { if (broadcastThrottle.current) clearTimeout(broadcastThrottle.current); };
+    }, 150);
+    // Send typing indicator (throttled separately)
+    if (typingThrottle.current) clearTimeout(typingThrottle.current);
+    typingThrottle.current = setTimeout(() => {
+      supabase.channel(`app-broadcast-${appId}`).send({
+        type: 'broadcast',
+        event: 'typing',
+        payload: { sender_id: session?.user?.id, email: session?.user?.email },
+      });
+    }, 300);
+    return () => {
+      if (broadcastThrottle.current) clearTimeout(broadcastThrottle.current);
+      if (typingThrottle.current) clearTimeout(typingThrottle.current);
+    };
   }, [code, appId, loading, appName, session?.user?.id]);
 
   // Save to database
