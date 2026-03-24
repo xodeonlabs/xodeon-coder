@@ -15,6 +15,7 @@ import { useWeeklyMonthlyBonus } from '@/hooks/useWeeklyMonthlyBonus';
 import { BonusOverlay } from '@/components/BonusOverlay';
 import { FriendRequests } from '@/components/FriendRequests';
 import { UserSearch } from '@/components/UserSearch';
+import { TetrisGame } from '@/components/TetrisGame';
 
 const APP_GRADIENTS = [
   'from-blue-500/15 to-cyan-500/5',
