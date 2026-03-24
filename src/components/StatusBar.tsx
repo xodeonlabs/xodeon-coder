@@ -19,7 +19,7 @@ interface StatusBarProps {
   typingUsers?: { id: string; email: string }[];
 }
 
-export function StatusBar({ code, saveStatus, lastSaved }: StatusBarProps) {
+export function StatusBar({ code, saveStatus, lastSaved, typingUsers = [] }: StatusBarProps) {
   const lines = code.split('\n').length;
   const chars = code.length;
 
