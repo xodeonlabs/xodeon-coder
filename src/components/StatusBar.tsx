@@ -51,6 +51,18 @@ export function StatusBar({ code, saveStatus, lastSaved, typingUsers = [] }: Sta
         <span>{componentCount} componenten</span>
       </div>
       <div className="flex items-center gap-3 text-muted-foreground">
+        {typingUsers.length > 0 && (
+          <span className="flex items-center gap-1 text-primary animate-pulse">
+            <span className="inline-flex gap-[2px]">
+              <span className="w-1 h-1 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1 h-1 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1 h-1 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
+            </span>
+            {typingUsers.length === 1
+              ? `${typingUsers[0].email.split('@')[0]} typt...`
+              : `${typingUsers.length} gebruikers typen...`}
+          </span>
+        )}
         <span className="hidden md:inline truncate max-w-[200px]">{tip}</span>
         <span className={saveStatus === 'saved' ? 'text-[hsl(var(--ide-success))]' : saveStatus === 'saving' ? 'text-primary' : 'text-destructive'}>
           {saveLabel}
