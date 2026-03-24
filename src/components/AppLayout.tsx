@@ -11,6 +11,19 @@ import { useAuth } from '@/hooks/useAuth';
 
 const HIDE_AD_ROUTES = ['/editor', '/preview'];
 
+// Listen for admin force-refresh broadcast
+function useAdminForceRefresh() {
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-force-refresh')
+      .on('broadcast', { event: 'force-refresh' }, () => {
+        window.location.reload();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+}
+
 const XODEON_PRODUCTS = [
   { title: 'Xodeon Cloud', url: 'https://xodeon-cloud-backend--gamerdu54n2.replit.app/login', icon: Cloud },
 ];

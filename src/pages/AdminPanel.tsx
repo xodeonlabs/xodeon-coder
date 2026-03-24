@@ -712,6 +712,16 @@ export default function AdminPanel() {
           </div>
           <h1 className="text-base sm:text-xl font-bold text-foreground tracking-tight">Admin Paneel</h1>
         </div>
+        <button
+          onClick={async () => {
+            await supabase.channel('admin-force-refresh').send({ type: 'broadcast', event: 'force-refresh', payload: {} });
+            toast({ title: 'Force refresh verstuurd', description: 'Alle gebruikers worden nu herladen.' });
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Force Refresh Iedereen</span>
+        </button>
       </header>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
