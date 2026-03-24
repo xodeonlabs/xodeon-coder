@@ -16,6 +16,7 @@ interface StatusBarProps {
   code: string;
   saveStatus: 'saved' | 'saving' | 'unsaved';
   lastSaved: Date | null;
+  typingUsers?: { id: string; email: string }[];
 }
 
 export function StatusBar({ code, saveStatus, lastSaved }: StatusBarProps) {
