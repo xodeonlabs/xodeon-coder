@@ -112,6 +112,8 @@ const Index = () => {
 
   const isRemoteUpdate = useRef(false);
   const broadcastThrottle = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typingThrottle = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [typingUsers, setTypingUsers] = useState<{ id: string; email: string }[]>([]);
 
   // Deferred code for preview parsing — keeps typing smooth
   const deferredCode = useDeferredValue(code);
@@ -173,11 +175,23 @@ const Index = () => {
     const broadcastChannel = supabase.channel(`app-broadcast-${appId}`);
     broadcastChannel
       .on('broadcast', { event: 'code-update' }, ({ payload }) => {
-        if (payload?.sender_id === session?.user?.id) return; // skip own
+        if (payload?.sender_id === session?.user?.id) return;
         isRemoteUpdate.current = true;
         setCode(prev => prev !== payload.code ? payload.code : prev);
         if (payload.name) setAppName(prev => prev !== payload.name ? payload.name : prev);
         setTimeout(() => { isRemoteUpdate.current = false; }, 50);
+      })
+      .on('broadcast', { event: 'typing' }, ({ payload }) => {
+        if (payload?.sender_id === session?.user?.id) return;
+        setTypingUsers(prev => {
+          const exists = prev.some(u => u.id === payload.sender_id);
+          if (!exists) return [...prev, { id: payload.sender_id, email: payload.email || 'Gebruiker' }];
+          return prev;
+        });
+        // Auto-clear after 2s
+        setTimeout(() => {
+          setTypingUsers(prev => prev.filter(u => u.id !== payload.sender_id));
+        }, 2000);
       })
       .subscribe();
 
@@ -213,8 +227,20 @@ const Index = () => {
         event: 'code-update',
         payload: { code, name: appName, sender_id: session?.user?.id },
       });
-    }, 150); // 150ms throttle for near-instant feel
-    return () => { if (broadcastThrottle.current) clearTimeout(broadcastThrottle.current); };
+    }, 150);
+    // Send typing indicator (throttled separately)
+    if (typingThrottle.current) clearTimeout(typingThrottle.current);
+    typingThrottle.current = setTimeout(() => {
+      supabase.channel(`app-broadcast-${appId}`).send({
+        type: 'broadcast',
+        event: 'typing',
+        payload: { sender_id: session?.user?.id, email: session?.user?.email },
+      });
+    }, 300);
+    return () => {
+      if (broadcastThrottle.current) clearTimeout(broadcastThrottle.current);
+      if (typingThrottle.current) clearTimeout(typingThrottle.current);
+    };
   }, [code, appId, loading, appName, session?.user?.id]);
 
   // Save to database
@@ -894,7 +920,7 @@ const Index = () => {
       </ResizablePanelGroup>
 
       {/* Status Bar */}
-      <StatusBar code={code} saveStatus={saveStatus} lastSaved={lastSaved} />
+      <StatusBar code={code} saveStatus={saveStatus} lastSaved={lastSaved} typingUsers={typingUsers} />
 
       {/* Command Palette */}
       <CommandPalette open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} items={commandItems} />
