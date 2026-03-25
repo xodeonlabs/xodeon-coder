@@ -953,40 +953,29 @@ const Index = () => {
           </div>
         </ResizablePanel>
 
-        {/* Toggle right — vertical tab strip when collapsed */}
+        {/* Toggle right — vertical tab strip (always visible) */}
         <div
           className="shrink-0 flex flex-col items-center gap-1 py-2 rounded-lg transition-colors"
-          style={{ flexGrow: 0, flexShrink: 0, flexBasis: rightOpen ? '20px' : '24px' }}
+          style={{ flexGrow: 0, flexShrink: 0, flexBasis: '24px' }}
         >
           <button
-            onClick={() => setRightOpen(p => !p)}
-            className="p-1 hover:bg-secondary/60 rounded-md transition-colors"
-            title={rightOpen ? 'Paneel inklappen' : 'Paneel uitklappen'}
+            onClick={() => setActiveRightWidget(w => w === 'components' ? null : 'components')}
+            className={`flex items-center justify-center w-6 py-3 rounded-md transition-colors group ${activeRightWidget === 'components' ? 'bg-primary/10' : 'hover:bg-secondary/60'}`}
+            title="Componenten"
           >
-            {rightOpen ? <PanelRightClose className="h-3.5 w-3.5 text-muted-foreground" /> : <PanelRightOpen className="h-3.5 w-3.5 text-muted-foreground" />}
+            <span className={`text-[10px] font-medium transition-colors ${activeRightWidget === 'components' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Componenten</span>
           </button>
-          {!rightOpen && (
-            <>
-              <button
-                onClick={() => { setRightOpen(true); setRightTab('components'); }}
-                className="flex items-center justify-center w-6 py-3 hover:bg-secondary/60 rounded-md transition-colors group"
-                title="Componenten"
-              >
-                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Componenten</span>
-              </button>
-              <button
-                onClick={() => { setRightOpen(true); setRightTab('ai'); }}
-                className="flex items-center justify-center w-6 py-3 hover:bg-secondary/60 rounded-md transition-colors group"
-                title="AI"
-              >
-                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>AI</span>
-              </button>
-            </>
-          )}
+          <button
+            onClick={() => setActiveRightWidget(w => w === 'ai' ? null : 'ai')}
+            className={`flex items-center justify-center w-6 py-3 rounded-md transition-colors group ${activeRightWidget === 'ai' ? 'bg-primary/10' : 'hover:bg-secondary/60'}`}
+            title="AI"
+          >
+            <span className={`text-[10px] font-medium transition-colors ${activeRightWidget === 'ai' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>AI</span>
+          </button>
         </div>
 
         {/* Right Panel */}
-        {rightOpen && (
+        {activeRightWidget && (
           <>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={20} minSize={5} maxSize={70} order={3}>
@@ -994,24 +983,24 @@ const Index = () => {
                 {/* Right panel tab switcher */}
                 <div className="flex border-b border-border/50 shrink-0">
                   <button
-                    onClick={() => setRightTab('components')}
+                    onClick={() => setActiveRightWidget('components')}
                     className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 rounded-tl-xl ${
-                      rightTab === 'components' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                      activeRightWidget === 'components' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <Blocks className="h-3 w-3" /> Componenten
                   </button>
                   <button
-                    onClick={() => setRightTab('ai')}
+                    onClick={() => setActiveRightWidget('ai')}
                     className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 rounded-tr-xl ${
-                      rightTab === 'ai' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                      activeRightWidget === 'ai' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <Sparkles className="h-3 w-3" /> AI
                   </button>
                 </div>
 
-                {rightTab === 'components' ? (
+                {activeRightWidget === 'components' ? (
                   <div className="flex-1 overflow-auto">
                     <NGCComponentLibrary onInsert={handleInsertCode} />
                   </div>
