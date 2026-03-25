@@ -6,8 +6,9 @@ import { useNotificationSound, getNotificationToastEnabled, getDoNotDisturbEnabl
 import { toast } from 'sonner';
 import {
   LayoutDashboard, BarChart3, Building2, Handshake, Users, Database,
-  MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins, PanelLeftClose, PanelLeftOpen, BellOff, Bell, Pin, PinOff, ArrowUp, Package, Cloud, ExternalLink, Plus,
+  MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins, PanelLeftClose, PanelLeftOpen, BellOff, Bell, Pin, PinOff, ArrowUp, Package, Cloud, ExternalLink, Plus, Sun, Moon,
 } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, SidebarTrigger, useSidebar,
@@ -37,6 +38,7 @@ export function AppSidebar() {
   const { play: playNotification } = useNotificationSound();
 
   const { dndEnabled, toggleDnd } = useDoNotDisturb();
+  const { theme, setTheme } = useTheme();
   const [isAdmin, setIsAdmin] = useState(false);
   const [coins, setCoins] = useState(0);
   const [displayName, setDisplayName] = useState<string | null>(null);
@@ -342,6 +344,13 @@ export function AppSidebar() {
             </div>
           )}
           <div className={`flex ${collapsed ? 'flex-col' : ''} gap-1`}>
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
+              title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+            >
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
             <button
               onClick={() => {
                 toggleDnd();
