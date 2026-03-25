@@ -442,6 +442,34 @@ export default function Settings() {
           </div>
         </div>
 
+        {/* Uiterlijk */}
+        <div id="settings-appearance" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+          <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
+            <Sun className="h-5 w-5 text-primary" />
+            Uiterlijk
+          </h2>
+          <p className="text-xs text-muted-foreground mb-4">Kies tussen licht en donker thema.</p>
+          <div className="flex gap-3">
+            {([
+              { value: 'light', label: 'Licht', icon: Sun },
+              { value: 'dark', label: 'Donker', icon: Moon },
+            ] as const).map(({ value, label, icon: Icon }) => (
+              <button
+                key={value}
+                onClick={() => setTheme(value)}
+                className={`flex-1 flex flex-col items-center gap-2 py-4 px-3 rounded-xl border transition-all ${
+                  theme === value
+                    ? 'border-primary bg-primary/10 text-foreground shadow-md shadow-primary/10'
+                    : 'border-border/50 bg-secondary/30 text-muted-foreground hover:border-border hover:bg-secondary/50'
+                }`}
+              >
+                <Icon className={`h-6 w-6 ${theme === value ? 'text-primary' : ''}`} />
+                <span className="text-sm font-medium">{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Notificaties */}
         <div id="settings-notifications" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
           <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
