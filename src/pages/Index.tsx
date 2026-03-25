@@ -721,8 +721,8 @@ const Index = () => {
           <>
             <ResizablePanel defaultSize={15} minSize={5} maxSize={70} order={1}>
               <div
-                className="h-full flex flex-col rounded-xl overflow-hidden border border-border/50"
-                style={{ background: 'hsl(var(--ide-explorer-bg))' }}
+                className="h-full flex flex-col rounded-xl overflow-hidden border border-border/30 backdrop-blur-xl shadow-lg shadow-black/5"
+                style={{ background: 'hsl(var(--ide-explorer-bg) / 0.7)' }}
                 {...leftPanelSwipe}
               >
                 {/* Left panel tab switcher */}
@@ -813,7 +813,7 @@ const Index = () => {
         <ResizablePanel defaultSize={leftOpen && rightOpen ? 55 : leftOpen || rightOpen ? 70 : 90} minSize={15} order={2}>
           <div
             ref={editorContainerRef}
-            className="h-full flex flex-col min-w-0 relative rounded-xl overflow-hidden border border-border/50"
+            className="h-full flex flex-col min-w-0 relative rounded-xl overflow-hidden border border-border/30 backdrop-blur-xl shadow-lg shadow-black/5"
             {...editorSwipe}
             onMouseMove={(e) => {
               const rect = editorContainerRef.current?.getBoundingClientRect();
@@ -824,7 +824,7 @@ const Index = () => {
           >
             <LiveCursors cursors={cursors.filter(c => c.section === activeTab)} containerRef={editorContainerRef} />
             {/* Mode toggle + Page Tabs */}
-            <div className="flex items-center border-b border-border/50 shrink-0 overflow-x-auto scrollbar-none" style={{ background: 'hsl(var(--ide-explorer-bg))' }}>
+            <div className="flex items-center border-b border-border/30 shrink-0 overflow-x-auto scrollbar-none backdrop-blur-sm" style={{ background: 'hsl(var(--ide-explorer-bg) / 0.5)' }}>
               {/* Mode toggle */}
               <div className="flex items-center border-r border-border/50 shrink-0">
                 <button
@@ -959,7 +959,7 @@ const Index = () => {
           <>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={20} minSize={5} maxSize={70} order={3}>
-              <div className="h-full flex flex-col rounded-xl overflow-hidden border border-border/50" {...rightPanelSwipe}>
+              <div className="h-full flex flex-col rounded-xl overflow-hidden border border-border/30 backdrop-blur-xl shadow-lg shadow-black/5" style={{ background: 'hsl(var(--ide-explorer-bg) / 0.7)' }} {...rightPanelSwipe}>
                 {/* Right panel tab switcher */}
                 <div className="flex border-b border-border/50 shrink-0">
                   <button
