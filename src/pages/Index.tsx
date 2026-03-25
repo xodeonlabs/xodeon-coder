@@ -23,6 +23,7 @@ import { NGCNode, NGCNodeType, DEFAULT_PROPERTIES, generateId } from '@/lib/ngc-
 import { splitCodeIntoSections, mergeSections, CodeSection } from '@/lib/ngc-code-sections';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { useLiveCursors } from '@/hooks/useLiveCursors';
 import { LiveCursors } from '@/components/LiveCursors';
 import { EditorTypingIndicator } from '@/components/EditorTypingIndicator';
@@ -93,6 +94,7 @@ function duplicateNode(node: NGCNode, nodeId: string): NGCNode {
 const Index = () => {
   const { session, signOut } = useAuth();
   const { toast } = useToast();
+  const { play: playNotificationSound } = useNotificationSound();
   const { appId } = useParams<{ appId: string }>();
   const navigate = useNavigate();
   const [code, setCode] = useState(FALLBACK_CODE);
