@@ -385,11 +385,11 @@ const Index = () => {
     setZenMode(z => {
       const newZen = !z;
       if (newZen) {
-        setLeftOpen(false);
-        setRightOpen(false);
+        setActiveLeftWidget(null);
+        setActiveRightWidget(null);
       } else {
-        setLeftOpen(true);
-        setRightOpen(true);
+        setActiveLeftWidget('explorer');
+        setActiveRightWidget('components');
       }
       // Sync DND status with zen mode
       if (session?.user?.id) {
