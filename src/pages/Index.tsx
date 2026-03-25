@@ -883,6 +883,7 @@ const Index = () => {
 
             {editorMode === 'code' ? (
               <>
+                <ActiveCollaboratorsBar collaborators={activeCollaborators} />
                 <EditorTypingIndicator typingUsers={typingUsers} />
                 <div className="flex-1 overflow-hidden relative">
                   <SearchReplace
