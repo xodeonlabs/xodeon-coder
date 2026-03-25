@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLiveCursors } from '@/hooks/useLiveCursors';
 import { LiveCursors } from '@/components/LiveCursors';
 import { EditorTypingIndicator } from '@/components/EditorTypingIndicator';
+import { ActiveCollaboratorsBar, ActiveCollaborator } from '@/components/ActiveCollaboratorsBar';
 const FALLBACK_CODE = 'App:\n    Page Home:\n        Text Hello:\n            Tekst="Hallo!"\n            Positie="50,50"\n            Grootte="200,30"\n            Kleur="#ffffff"\n';
 function findNodeById(node: NGCNode, id: string): NGCNode | null {
   if (node.id === id) return node;
@@ -115,6 +116,7 @@ const Index = () => {
   const broadcastThrottle = useRef<ReturnType<typeof setTimeout> | null>(null);
   const typingThrottle = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [typingUsers, setTypingUsers] = useState<{ id: string; email: string }[]>([]);
+  const [activeCollaborators, setActiveCollaborators] = useState<ActiveCollaborator[]>([]);
 
   // Deferred code for preview parsing — keeps typing smooth
   const deferredCode = useDeferredValue(code);
@@ -167,6 +169,57 @@ const Index = () => {
       }
     });
   }, [appId]);
+
+  // Presence: track active collaborators in the editor
+  useEffect(() => {
+    if (!appId || !session?.user?.id) return;
+
+    const presenceChannel = supabase.channel(`app-presence-${appId}`);
+
+    presenceChannel
+      .on('presence', { event: 'sync' }, () => {
+        const state = presenceChannel.presenceState();
+        const users: ActiveCollaborator[] = [];
+        const seen = new Set<string>();
+        Object.values(state).forEach((entries: any[]) => {
+          entries.forEach((entry) => {
+            if (!seen.has(entry.user_id) && entry.user_id !== session?.user?.id) {
+              seen.add(entry.user_id);
+              users.push({
+                id: entry.user_id,
+                email: entry.email || '',
+                displayName: entry.display_name || null,
+                avatarUrl: entry.avatar_url || null,
+                lastSeenAt: new Date().toISOString(),
+                isDnd: false,
+              });
+            }
+          });
+        });
+        setActiveCollaborators(users);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          // Fetch profile info for presence payload
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('display_name, avatar_url')
+            .eq('id', session.user.id)
+            .single();
+
+          await presenceChannel.track({
+            user_id: session.user.id,
+            email: session.user.email,
+            display_name: profile?.display_name || null,
+            avatar_url: profile?.avatar_url || null,
+          });
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(presenceChannel);
+    };
+  }, [appId, session?.user?.id]);
 
   // Realtime collaboration: use Broadcast for instant sync + postgres_changes as fallback
   useEffect(() => {
@@ -830,6 +883,7 @@ const Index = () => {
 
             {editorMode === 'code' ? (
               <>
+                <ActiveCollaboratorsBar collaborators={activeCollaborators} />
                 <EditorTypingIndicator typingUsers={typingUsers} />
                 <div className="flex-1 overflow-hidden relative">
                   <SearchReplace
