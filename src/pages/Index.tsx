@@ -715,7 +715,7 @@ const Index = () => {
 
       <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden p-1.5 gap-1.5" autoSaveId="ngc-main-panels">
         {/* Left Panel */}
-        {leftOpen && (
+        {activeLeftWidget && (
           <>
             <ResizablePanel defaultSize={15} minSize={5} maxSize={70} order={1}>
               <div
@@ -726,24 +726,24 @@ const Index = () => {
                 {/* Left panel tab switcher */}
                 <div className="flex border-b border-border/50 shrink-0">
                   <button
-                    onClick={() => setLeftTab('explorer')}
+                    onClick={() => setActiveLeftWidget('explorer')}
                     className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors rounded-tl-xl ${
-                      leftTab === 'explorer' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                      activeLeftWidget === 'explorer' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     📂 Explorer
                   </button>
                   <button
-                    onClick={() => setLeftTab('versions')}
+                    onClick={() => setActiveLeftWidget('versions')}
                     className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 rounded-tr-xl ${
-                      leftTab === 'versions' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                      activeLeftWidget === 'versions' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <History className="h-3 w-3" /> Versies
                   </button>
                 </div>
 
-                {leftTab === 'explorer' ? (
+                {activeLeftWidget === 'explorer' ? (
                   <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0" autoSaveId="ngc-explorer-panels">
                     <ResizablePanel defaultSize={33} minSize={15}>
                       <div className="h-full overflow-y-auto">
@@ -797,36 +797,25 @@ const Index = () => {
           </>
         )}
 
-        {/* Toggle left — vertical tab strip when collapsed */}
+        {/* Toggle left — vertical tab strip (always visible) */}
         <div
           className="shrink-0 flex flex-col items-center gap-1 py-2 rounded-lg transition-colors"
-          style={{ flexGrow: 0, flexShrink: 0, flexBasis: leftOpen ? '20px' : '24px' }}
+          style={{ flexGrow: 0, flexShrink: 0, flexBasis: '24px' }}
         >
           <button
-            onClick={() => setLeftOpen(p => !p)}
-            className="p-1 hover:bg-secondary/60 rounded-md transition-colors"
-            title={leftOpen ? 'Paneel inklappen' : 'Paneel uitklappen'}
+            onClick={() => setActiveLeftWidget(w => w === 'explorer' ? null : 'explorer')}
+            className={`flex items-center justify-center w-6 py-3 rounded-md transition-colors group ${activeLeftWidget === 'explorer' ? 'bg-primary/10' : 'hover:bg-secondary/60'}`}
+            title="Explorer"
           >
-            {leftOpen ? <PanelLeftClose className="h-3.5 w-3.5 text-muted-foreground" /> : <PanelLeftOpen className="h-3.5 w-3.5 text-muted-foreground" />}
+            <span className={`text-[10px] font-medium transition-colors ${activeLeftWidget === 'explorer' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Explorer</span>
           </button>
-          {!leftOpen && (
-            <>
-              <button
-                onClick={() => { setLeftOpen(true); setLeftTab('explorer'); }}
-                className="flex items-center justify-center w-6 py-3 hover:bg-secondary/60 rounded-md transition-colors group"
-                title="Explorer"
-              >
-                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Explorer</span>
-              </button>
-              <button
-                onClick={() => { setLeftOpen(true); setLeftTab('versions'); }}
-                className="flex items-center justify-center w-6 py-3 hover:bg-secondary/60 rounded-md transition-colors group"
-                title="Versies"
-              >
-                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Versies</span>
-              </button>
-            </>
-          )}
+          <button
+            onClick={() => setActiveLeftWidget(w => w === 'versions' ? null : 'versions')}
+            className={`flex items-center justify-center w-6 py-3 rounded-md transition-colors group ${activeLeftWidget === 'versions' ? 'bg-primary/10' : 'hover:bg-secondary/60'}`}
+            title="Versies"
+          >
+            <span className={`text-[10px] font-medium transition-colors ${activeLeftWidget === 'versions' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Versies</span>
+          </button>
         </div>
 
         {/* Code Editor / Designer (center) */}
