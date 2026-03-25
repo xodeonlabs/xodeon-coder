@@ -819,7 +819,7 @@ const Index = () => {
         </div>
 
         {/* Code Editor / Designer (center) */}
-        <ResizablePanel defaultSize={leftOpen && rightOpen ? 55 : leftOpen || rightOpen ? 70 : 90} minSize={15} order={2}>
+        <ResizablePanel defaultSize={activeLeftWidget && activeRightWidget ? 55 : activeLeftWidget || activeRightWidget ? 70 : 90} minSize={15} order={2}>
           <div
             ref={editorContainerRef}
             className="h-full flex flex-col min-w-0 relative rounded-xl overflow-hidden border border-border/30 backdrop-blur-xl shadow-lg shadow-black/5"
