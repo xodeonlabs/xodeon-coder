@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTheme } from 'next-themes';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
-import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff, Clock, Coins, Pencil, Bell, BellOff } from 'lucide-react';
+import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff, Clock, Coins, Pencil, Bell, BellOff, Sun, Moon, Monitor } from 'lucide-react';
 import { getNotificationSoundEnabled, setNotificationSoundEnabled, getNotificationToastEnabled, setNotificationToastEnabled, useDoNotDisturb } from '@/hooks/useNotificationSound';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { getCached, setCache, clearCache, CACHE_TTL } from '@/lib/cache';
@@ -35,6 +36,7 @@ const SECTIONS = [
   { id: 'social', label: 'Sociale media', icon: Share2 },
   { id: 'email', label: 'E-mailadres', icon: Mail },
   { id: 'password', label: 'Wachtwoord', icon: Lock },
+  { id: 'appearance', label: 'Uiterlijk', icon: Sun },
   { id: 'notifications', label: 'Notificaties', icon: Bell },
   { id: 'retention', label: 'Bewaartermijnen', icon: Clock },
   { id: 'danger', label: 'Gevarenzone', icon: Trash2 },
@@ -64,6 +66,7 @@ export default function Settings() {
   const [soundEnabled, setSoundEnabled] = useState(() => getNotificationSoundEnabled());
   const [toastEnabled, setToastEnabled] = useState(() => getNotificationToastEnabled());
   const { dndEnabled, toggleDnd } = useDoNotDisturb();
+  const { theme, setTheme } = useTheme();
 
   const isScrollingRef = useRef(false);
 
@@ -436,6 +439,34 @@ export default function Settings() {
               <Lock className="h-3.5 w-3.5" />
               {savingPassword ? 'Bezig...' : 'Wachtwoord wijzigen'}
             </button>
+          </div>
+        </div>
+
+        {/* Uiterlijk */}
+        <div id="settings-appearance" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+          <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
+            <Sun className="h-5 w-5 text-primary" />
+            Uiterlijk
+          </h2>
+          <p className="text-xs text-muted-foreground mb-4">Kies tussen licht en donker thema.</p>
+          <div className="flex gap-3">
+            {([
+              { value: 'light', label: 'Licht', icon: Sun },
+              { value: 'dark', label: 'Donker', icon: Moon },
+            ] as const).map(({ value, label, icon: Icon }) => (
+              <button
+                key={value}
+                onClick={() => setTheme(value)}
+                className={`flex-1 flex flex-col items-center gap-2 py-4 px-3 rounded-xl border transition-all ${
+                  theme === value
+                    ? 'border-primary bg-primary/10 text-foreground shadow-md shadow-primary/10'
+                    : 'border-border/50 bg-secondary/30 text-muted-foreground hover:border-border hover:bg-secondary/50'
+                }`}
+              >
+                <Icon className={`h-6 w-6 ${theme === value ? 'text-primary' : ''}`} />
+                <span className="text-sm font-medium">{label}</span>
+              </button>
+            ))}
           </div>
         </div>
 
