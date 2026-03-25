@@ -206,7 +206,20 @@ export function AppSidebar() {
         {/* Coins */}
         <div className={`mx-3 mb-3 flex items-center gap-2 px-3 py-2 rounded-xl bg-accent/5 border border-accent/10 ${collapsed ? 'justify-center mx-1 px-1' : ''}`}>
           <Coins className="h-4 w-4 text-accent shrink-0" />
-          {!collapsed && <span className="text-xs font-semibold text-accent tabular-nums">{coins} coins</span>}
+          {!collapsed && <span className="text-xs font-semibold text-accent tabular-nums flex-1">{coins} coins</span>}
+          {!collapsed && (
+            <button
+              onClick={async () => {
+                if (!session?.user?.id) return;
+                const { error } = await supabase.from('user_coins').update({ balance: coins + 100 }).eq('user_id', session.user.id);
+                if (!error) setCoins(prev => prev + 100);
+              }}
+              className="h-5 w-5 rounded-md bg-accent/20 hover:bg-accent/40 text-accent flex items-center justify-center transition-colors"
+              title="Gratis 100 coins claimen"
+            >
+              <Plus className="h-3 w-3" />
+            </button>
+          )}
         </div>
 
         <SidebarGroup>
