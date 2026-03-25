@@ -508,11 +508,11 @@ const Index = () => {
       { id: 'code-mode', label: 'Code modus', category: 'Modus', icon: <Code className="h-4 w-4" />, action: () => setEditorMode('code') },
       { id: 'design-mode', label: 'Ontwerp modus', category: 'Modus', icon: <MousePointer className="h-4 w-4" />, action: () => setEditorMode('design') },
       { id: 'new-page', label: 'Nieuwe pagina toevoegen', category: 'Bewerken', icon: <Plus className="h-4 w-4" />, action: handleAddPage },
-      { id: 'left-panel', label: leftOpen ? 'Linkerpaneel inklappen' : 'Linkerpaneel uitklappen', category: 'Weergave', icon: <PanelLeftClose className="h-4 w-4" />, action: () => setLeftOpen(o => !o) },
-      { id: 'right-panel', label: rightOpen ? 'Rechterpaneel inklappen' : 'Rechterpaneel uitklappen', category: 'Weergave', icon: <PanelRightClose className="h-4 w-4" />, action: () => setRightOpen(o => !o) },
+      { id: 'left-panel', label: activeLeftWidget ? 'Linkerpaneel inklappen' : 'Linkerpaneel uitklappen', category: 'Weergave', icon: <PanelLeftClose className="h-4 w-4" />, action: () => setActiveLeftWidget(w => w ? null : 'explorer') },
+      { id: 'right-panel', label: activeRightWidget ? 'Rechterpaneel inklappen' : 'Rechterpaneel uitklappen', category: 'Weergave', icon: <PanelRightClose className="h-4 w-4" />, action: () => setActiveRightWidget(w => w ? null : 'components') },
     );
     return items;
-  }, [ast, sections, zenMode, isFullscreen, leftOpen, rightOpen, toggleZenMode, toggleFullscreen, handleCopyCode, handleUndo, saveNow, handleAddPage]);
+  }, [ast, sections, zenMode, isFullscreen, activeLeftWidget, activeRightWidget, toggleZenMode, toggleFullscreen, handleCopyCode, handleUndo, saveNow, handleAddPage]);
 
   const selectedNode = useMemo(() => {
     if (!ast || !selectedId) return null;
