@@ -76,8 +76,8 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
 
   return (
     <div
-      className="relative flex items-center justify-between px-2 sm:px-4 border-b border-border/30 h-11 sm:h-12 shrink-0 backdrop-blur-sm overflow-visible"
-      style={{ background: 'hsl(var(--ide-toolbar) / 0.85)' }}
+      className="relative flex items-center justify-between px-2 sm:px-4 border-b border-border/20 h-11 sm:h-12 shrink-0 backdrop-blur-xl overflow-visible shadow-sm shadow-black/5"
+      style={{ background: 'hsl(var(--ide-toolbar) / 0.6)' }}
     >
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <button onClick={() => handleNavigate('/')} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors shrink-0" title="Terug naar dashboard">

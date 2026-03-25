@@ -331,11 +331,11 @@ export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
       {/* Autocomplete menu */}
       {suggestions.length > 0 && menuPos && (
         <div
-          className="absolute z-50 rounded-md border border-border shadow-lg overflow-hidden"
+          className="absolute z-50 rounded-xl border border-border/30 shadow-xl shadow-black/20 overflow-hidden backdrop-blur-xl"
           style={{
             top: menuPos.top,
             left: menuPos.left,
-            background: 'hsl(var(--ide-explorer-bg))',
+            background: 'hsl(var(--ide-explorer-bg) / 0.85)',
             minWidth: 200,
             maxWidth: 320,
           }}
