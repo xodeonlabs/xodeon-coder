@@ -345,6 +345,13 @@ export function AppSidebar() {
           )}
           <div className={`flex ${collapsed ? 'flex-col' : ''} gap-1`}>
             <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
+              title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+            >
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+            <button
               onClick={() => {
                 toggleDnd();
                 toast(!dndEnabled ? 'Niet storen ingeschakeld' : 'Niet storen uitgeschakeld', { position: 'bottom-right', duration: 2000 });
