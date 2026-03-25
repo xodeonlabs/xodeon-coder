@@ -25,6 +25,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useLiveCursors } from '@/hooks/useLiveCursors';
 import { LiveCursors } from '@/components/LiveCursors';
+import { EditorTypingIndicator } from '@/components/EditorTypingIndicator';
 const FALLBACK_CODE = 'App:\n    Page Home:\n        Text Hello:\n            Tekst="Hallo!"\n            Positie="50,50"\n            Grootte="200,30"\n            Kleur="#ffffff"\n';
 function findNodeById(node: NGCNode, id: string): NGCNode | null {
   if (node.id === id) return node;
@@ -829,6 +830,7 @@ const Index = () => {
 
             {editorMode === 'code' ? (
               <>
+                <EditorTypingIndicator typingUsers={typingUsers} />
                 <div className="flex-1 overflow-hidden relative">
                   <SearchReplace
                     open={searchOpen}
