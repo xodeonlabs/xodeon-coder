@@ -104,12 +104,10 @@ const Index = () => {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const isMobileInit = typeof window !== 'undefined' && window.innerWidth < 768;
-  const [leftOpen, setLeftOpen] = useState(!isMobileInit);
-  const [rightOpen, setRightOpen] = useState(!isMobileInit);
+  const [activeLeftWidget, setActiveLeftWidget] = useState<'explorer' | 'versions' | null>(!isMobileInit ? 'explorer' : null);
+  const [activeRightWidget, setActiveRightWidget] = useState<'components' | 'ai' | null>(!isMobileInit ? 'components' : null);
   const [activeTab, setActiveTab] = useState<string>('global');
   const [editorMode, setEditorMode] = useState<'code' | 'design'>('code');
-  const [leftTab, setLeftTab] = useState<'explorer' | 'versions'>('explorer');
-  const [rightTab, setRightTab] = useState<'components' | 'ai'>('components');
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const editorContainerRef = useRef<HTMLDivElement>(null);
   const { cursors, updateCursor } = useLiveCursors(appId);
