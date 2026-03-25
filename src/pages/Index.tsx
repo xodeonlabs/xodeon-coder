@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef, useDeferredValue, useTransition } from 'react';
 import { useSwipe } from '@/hooks/useSwipe';
-import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Plus, Code, MousePointer, History, Maximize, Minimize, Eye, Copy, Undo2, FileCode, Search, Replace, Sparkles, Blocks } from 'lucide-react';
+import { PanelLeftClose, PanelRightClose, Plus, Code, MousePointer, History, Maximize, Minimize, Eye, Copy, Undo2, FileCode, Search, Replace, Sparkles, Blocks } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -104,12 +104,10 @@ const Index = () => {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const isMobileInit = typeof window !== 'undefined' && window.innerWidth < 768;
-  const [leftOpen, setLeftOpen] = useState(!isMobileInit);
-  const [rightOpen, setRightOpen] = useState(!isMobileInit);
+  const [activeLeftWidget, setActiveLeftWidget] = useState<'explorer' | 'versions' | null>(!isMobileInit ? 'explorer' : null);
+  const [activeRightWidget, setActiveRightWidget] = useState<'components' | 'ai' | null>(!isMobileInit ? 'components' : null);
   const [activeTab, setActiveTab] = useState<string>('global');
   const [editorMode, setEditorMode] = useState<'code' | 'design'>('code');
-  const [leftTab, setLeftTab] = useState<'explorer' | 'versions'>('explorer');
-  const [rightTab, setRightTab] = useState<'components' | 'ai'>('components');
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const editorContainerRef = useRef<HTMLDivElement>(null);
   const { cursors, updateCursor } = useLiveCursors(appId);
@@ -137,16 +135,16 @@ const Index = () => {
 
   // Swipe gestures for mobile panel toggling
   const leftPanelSwipe = useSwipe(
-    () => setLeftOpen(false),  // swipe left → close left panel
+    () => setActiveLeftWidget(null),  // swipe left → close left panel
     undefined
   );
   const rightPanelSwipe = useSwipe(
     undefined,
-    () => setRightOpen(false)  // swipe right → close right panel
+    () => setActiveRightWidget(null)  // swipe right → close right panel
   );
   const editorSwipe = useSwipe(
-    () => setRightOpen(true),  // swipe left on editor → open right panel
-    () => setLeftOpen(true)    // swipe right on editor → open left panel
+    () => setActiveRightWidget('components'),  // swipe left on editor → open right panel
+    () => setActiveLeftWidget('explorer')    // swipe right on editor → open left panel
   );
 
   // Load app from database
@@ -387,11 +385,11 @@ const Index = () => {
     setZenMode(z => {
       const newZen = !z;
       if (newZen) {
-        setLeftOpen(false);
-        setRightOpen(false);
+        setActiveLeftWidget(null);
+        setActiveRightWidget(null);
       } else {
-        setLeftOpen(true);
-        setRightOpen(true);
+        setActiveLeftWidget('explorer');
+        setActiveRightWidget('components');
       }
       // Sync DND status with zen mode
       if (session?.user?.id) {
@@ -510,11 +508,11 @@ const Index = () => {
       { id: 'code-mode', label: 'Code modus', category: 'Modus', icon: <Code className="h-4 w-4" />, action: () => setEditorMode('code') },
       { id: 'design-mode', label: 'Ontwerp modus', category: 'Modus', icon: <MousePointer className="h-4 w-4" />, action: () => setEditorMode('design') },
       { id: 'new-page', label: 'Nieuwe pagina toevoegen', category: 'Bewerken', icon: <Plus className="h-4 w-4" />, action: handleAddPage },
-      { id: 'left-panel', label: leftOpen ? 'Linkerpaneel inklappen' : 'Linkerpaneel uitklappen', category: 'Weergave', icon: <PanelLeftClose className="h-4 w-4" />, action: () => setLeftOpen(o => !o) },
-      { id: 'right-panel', label: rightOpen ? 'Rechterpaneel inklappen' : 'Rechterpaneel uitklappen', category: 'Weergave', icon: <PanelRightClose className="h-4 w-4" />, action: () => setRightOpen(o => !o) },
+      { id: 'left-panel', label: activeLeftWidget ? 'Linkerpaneel inklappen' : 'Linkerpaneel uitklappen', category: 'Weergave', icon: <PanelLeftClose className="h-4 w-4" />, action: () => setActiveLeftWidget(w => w ? null : 'explorer') },
+      { id: 'right-panel', label: activeRightWidget ? 'Rechterpaneel inklappen' : 'Rechterpaneel uitklappen', category: 'Weergave', icon: <PanelRightClose className="h-4 w-4" />, action: () => setActiveRightWidget(w => w ? null : 'components') },
     );
     return items;
-  }, [ast, sections, zenMode, isFullscreen, leftOpen, rightOpen, toggleZenMode, toggleFullscreen, handleCopyCode, handleUndo, saveNow, handleAddPage]);
+  }, [ast, sections, zenMode, isFullscreen, activeLeftWidget, activeRightWidget, toggleZenMode, toggleFullscreen, handleCopyCode, handleUndo, saveNow, handleAddPage]);
 
   const selectedNode = useMemo(() => {
     if (!ast || !selectedId) return null;
@@ -717,7 +715,7 @@ const Index = () => {
 
       <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden p-1.5 gap-1.5" autoSaveId="ngc-main-panels">
         {/* Left Panel */}
-        {leftOpen && (
+        {activeLeftWidget && (
           <>
             <ResizablePanel defaultSize={15} minSize={5} maxSize={70} order={1}>
               <div
@@ -728,24 +726,24 @@ const Index = () => {
                 {/* Left panel tab switcher */}
                 <div className="flex border-b border-border/50 shrink-0">
                   <button
-                    onClick={() => setLeftTab('explorer')}
+                    onClick={() => setActiveLeftWidget('explorer')}
                     className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors rounded-tl-xl ${
-                      leftTab === 'explorer' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                      activeLeftWidget === 'explorer' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     📂 Explorer
                   </button>
                   <button
-                    onClick={() => setLeftTab('versions')}
+                    onClick={() => setActiveLeftWidget('versions')}
                     className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 rounded-tr-xl ${
-                      leftTab === 'versions' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                      activeLeftWidget === 'versions' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <History className="h-3 w-3" /> Versies
                   </button>
                 </div>
 
-                {leftTab === 'explorer' ? (
+                {activeLeftWidget === 'explorer' ? (
                   <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0" autoSaveId="ngc-explorer-panels">
                     <ResizablePanel defaultSize={33} minSize={15}>
                       <div className="h-full overflow-y-auto">
@@ -799,40 +797,29 @@ const Index = () => {
           </>
         )}
 
-        {/* Toggle left — vertical tab strip when collapsed */}
+        {/* Toggle left — vertical tab strip (always visible) */}
         <div
           className="shrink-0 flex flex-col items-center gap-1 py-2 rounded-lg transition-colors"
-          style={{ flexGrow: 0, flexShrink: 0, flexBasis: leftOpen ? '20px' : '24px' }}
+          style={{ flexGrow: 0, flexShrink: 0, flexBasis: '24px' }}
         >
           <button
-            onClick={() => setLeftOpen(p => !p)}
-            className="p-1 hover:bg-secondary/60 rounded-md transition-colors"
-            title={leftOpen ? 'Paneel inklappen' : 'Paneel uitklappen'}
+            onClick={() => setActiveLeftWidget(w => w === 'explorer' ? null : 'explorer')}
+            className={`flex items-center justify-center w-6 py-3 rounded-md transition-colors group ${activeLeftWidget === 'explorer' ? 'bg-primary/10' : 'hover:bg-secondary/60'}`}
+            title="Explorer"
           >
-            {leftOpen ? <PanelLeftClose className="h-3.5 w-3.5 text-muted-foreground" /> : <PanelLeftOpen className="h-3.5 w-3.5 text-muted-foreground" />}
+            <span className={`text-[10px] font-medium transition-colors ${activeLeftWidget === 'explorer' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Explorer</span>
           </button>
-          {!leftOpen && (
-            <>
-              <button
-                onClick={() => { setLeftOpen(true); setLeftTab('explorer'); }}
-                className="flex items-center justify-center w-6 py-3 hover:bg-secondary/60 rounded-md transition-colors group"
-                title="Explorer"
-              >
-                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Explorer</span>
-              </button>
-              <button
-                onClick={() => { setLeftOpen(true); setLeftTab('versions'); }}
-                className="flex items-center justify-center w-6 py-3 hover:bg-secondary/60 rounded-md transition-colors group"
-                title="Versies"
-              >
-                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Versies</span>
-              </button>
-            </>
-          )}
+          <button
+            onClick={() => setActiveLeftWidget(w => w === 'versions' ? null : 'versions')}
+            className={`flex items-center justify-center w-6 py-3 rounded-md transition-colors group ${activeLeftWidget === 'versions' ? 'bg-primary/10' : 'hover:bg-secondary/60'}`}
+            title="Versies"
+          >
+            <span className={`text-[10px] font-medium transition-colors ${activeLeftWidget === 'versions' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Versies</span>
+          </button>
         </div>
 
         {/* Code Editor / Designer (center) */}
-        <ResizablePanel defaultSize={leftOpen && rightOpen ? 55 : leftOpen || rightOpen ? 70 : 90} minSize={15} order={2}>
+        <ResizablePanel defaultSize={activeLeftWidget && activeRightWidget ? 55 : activeLeftWidget || activeRightWidget ? 70 : 90} minSize={15} order={2}>
           <div
             ref={editorContainerRef}
             className="h-full flex flex-col min-w-0 relative rounded-xl overflow-hidden border border-border/30 backdrop-blur-xl shadow-lg shadow-black/5"
@@ -966,40 +953,29 @@ const Index = () => {
           </div>
         </ResizablePanel>
 
-        {/* Toggle right — vertical tab strip when collapsed */}
+        {/* Toggle right — vertical tab strip (always visible) */}
         <div
           className="shrink-0 flex flex-col items-center gap-1 py-2 rounded-lg transition-colors"
-          style={{ flexGrow: 0, flexShrink: 0, flexBasis: rightOpen ? '20px' : '24px' }}
+          style={{ flexGrow: 0, flexShrink: 0, flexBasis: '24px' }}
         >
           <button
-            onClick={() => setRightOpen(p => !p)}
-            className="p-1 hover:bg-secondary/60 rounded-md transition-colors"
-            title={rightOpen ? 'Paneel inklappen' : 'Paneel uitklappen'}
+            onClick={() => setActiveRightWidget(w => w === 'components' ? null : 'components')}
+            className={`flex items-center justify-center w-6 py-3 rounded-md transition-colors group ${activeRightWidget === 'components' ? 'bg-primary/10' : 'hover:bg-secondary/60'}`}
+            title="Componenten"
           >
-            {rightOpen ? <PanelRightClose className="h-3.5 w-3.5 text-muted-foreground" /> : <PanelRightOpen className="h-3.5 w-3.5 text-muted-foreground" />}
+            <span className={`text-[10px] font-medium transition-colors ${activeRightWidget === 'components' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Componenten</span>
           </button>
-          {!rightOpen && (
-            <>
-              <button
-                onClick={() => { setRightOpen(true); setRightTab('components'); }}
-                className="flex items-center justify-center w-6 py-3 hover:bg-secondary/60 rounded-md transition-colors group"
-                title="Componenten"
-              >
-                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Componenten</span>
-              </button>
-              <button
-                onClick={() => { setRightOpen(true); setRightTab('ai'); }}
-                className="flex items-center justify-center w-6 py-3 hover:bg-secondary/60 rounded-md transition-colors group"
-                title="AI"
-              >
-                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>AI</span>
-              </button>
-            </>
-          )}
+          <button
+            onClick={() => setActiveRightWidget(w => w === 'ai' ? null : 'ai')}
+            className={`flex items-center justify-center w-6 py-3 rounded-md transition-colors group ${activeRightWidget === 'ai' ? 'bg-primary/10' : 'hover:bg-secondary/60'}`}
+            title="AI"
+          >
+            <span className={`text-[10px] font-medium transition-colors ${activeRightWidget === 'ai' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>AI</span>
+          </button>
         </div>
 
         {/* Right Panel */}
-        {rightOpen && (
+        {activeRightWidget && (
           <>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={20} minSize={5} maxSize={70} order={3}>
@@ -1007,24 +983,24 @@ const Index = () => {
                 {/* Right panel tab switcher */}
                 <div className="flex border-b border-border/50 shrink-0">
                   <button
-                    onClick={() => setRightTab('components')}
+                    onClick={() => setActiveRightWidget('components')}
                     className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 rounded-tl-xl ${
-                      rightTab === 'components' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                      activeRightWidget === 'components' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <Blocks className="h-3 w-3" /> Componenten
                   </button>
                   <button
-                    onClick={() => setRightTab('ai')}
+                    onClick={() => setActiveRightWidget('ai')}
                     className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 rounded-tr-xl ${
-                      rightTab === 'ai' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                      activeRightWidget === 'ai' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <Sparkles className="h-3 w-3" /> AI
                   </button>
                 </div>
 
-                {rightTab === 'components' ? (
+                {activeRightWidget === 'components' ? (
                   <div className="flex-1 overflow-auto">
                     <NGCComponentLibrary onInsert={handleInsertCode} />
                   </div>
