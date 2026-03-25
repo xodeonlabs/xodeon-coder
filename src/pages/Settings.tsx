@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
-import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff, Clock, Coins, Pencil, Bell, BellOff } from 'lucide-react';
+import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff, Clock, Coins, Pencil, Bell, BellOff, Sun, Moon, Monitor } from 'lucide-react';
 import { getNotificationSoundEnabled, setNotificationSoundEnabled, getNotificationToastEnabled, setNotificationToastEnabled, useDoNotDisturb } from '@/hooks/useNotificationSound';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { getCached, setCache, clearCache, CACHE_TTL } from '@/lib/cache';
@@ -35,6 +35,7 @@ const SECTIONS = [
   { id: 'social', label: 'Sociale media', icon: Share2 },
   { id: 'email', label: 'E-mailadres', icon: Mail },
   { id: 'password', label: 'Wachtwoord', icon: Lock },
+  { id: 'appearance', label: 'Uiterlijk', icon: Sun },
   { id: 'notifications', label: 'Notificaties', icon: Bell },
   { id: 'retention', label: 'Bewaartermijnen', icon: Clock },
   { id: 'danger', label: 'Gevarenzone', icon: Trash2 },
