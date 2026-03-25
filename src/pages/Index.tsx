@@ -721,7 +721,7 @@ const Index = () => {
           <>
             <ResizablePanel defaultSize={15} minSize={5} maxSize={70} order={1}>
               <div
-                className="h-full flex flex-col rounded-xl overflow-hidden border border-border/30 backdrop-blur-xl shadow-lg shadow-black/5"
+                className="h-full flex flex-col rounded-xl overflow-hidden border border-border/30 backdrop-blur-xl shadow-lg shadow-black/5 animate-in slide-in-from-left-4 fade-in duration-200"
                 style={{ background: 'hsl(var(--ide-explorer-bg) / 0.7)' }}
                 {...leftPanelSwipe}
               >
@@ -1003,7 +1003,7 @@ const Index = () => {
           <>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={20} minSize={5} maxSize={70} order={3}>
-              <div className="h-full flex flex-col rounded-xl overflow-hidden border border-border/30 backdrop-blur-xl shadow-lg shadow-black/5" style={{ background: 'hsl(var(--ide-explorer-bg) / 0.7)' }} {...rightPanelSwipe}>
+              <div className="h-full flex flex-col rounded-xl overflow-hidden border border-border/30 backdrop-blur-xl shadow-lg shadow-black/5 animate-in slide-in-from-right-4 fade-in duration-200" style={{ background: 'hsl(var(--ide-explorer-bg) / 0.7)' }} {...rightPanelSwipe}>
                 {/* Right panel tab switcher */}
                 <div className="flex border-b border-border/50 shrink-0">
                   <button
