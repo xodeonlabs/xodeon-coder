@@ -38,6 +38,7 @@ export function AppSidebar() {
   const { play: playNotification } = useNotificationSound();
 
   const { dndEnabled, toggleDnd } = useDoNotDisturb();
+  const { theme, setTheme } = useTheme();
   const [isAdmin, setIsAdmin] = useState(false);
   const [coins, setCoins] = useState(0);
   const [displayName, setDisplayName] = useState<string | null>(null);
