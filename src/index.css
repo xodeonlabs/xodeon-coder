@@ -101,6 +101,79 @@
     --sidebar-ring: 195 100% 50%;
   }
 
+  .light {
+    --background: 220 20% 97%;
+    --foreground: 230 25% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 230 25% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 230 25% 12%;
+
+    --primary: 195 100% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 15% 92%;
+    --secondary-foreground: 230 20% 25%;
+
+    --muted: 220 15% 94%;
+    --muted-foreground: 225 10% 45%;
+
+    --accent: 270 55% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 88%;
+    --input: 220 15% 88%;
+    --ring: 195 100% 40%;
+
+    --radius: 0.75rem;
+
+    --glass: 0 0% 100% / 0.7;
+    --glass-border: 220 15% 85% / 0.5;
+    --glass-highlight: 195 100% 40% / 0.08;
+
+    --ide-editor-bg: 220 20% 98%;
+    --ide-gutter: 220 15% 94%;
+    --ide-gutter-text: 225 10% 55%;
+    --ide-line-highlight: 220 20% 95%;
+    --ide-selection: 195 60% 88%;
+    --ide-explorer-bg: 220 15% 96%;
+    --ide-panel-header: 220 15% 94%;
+    --ide-toolbar: 0 0% 100%;
+    --ide-tab-active: 195 100% 40%;
+    --ide-tab-inactive: 220 15% 94%;
+    --ide-context-menu: 0 0% 100%;
+    --ide-scrollbar: 220 15% 92%;
+    --ide-scrollbar-thumb: 220 15% 78%;
+    --ide-success: 155 65% 38%;
+    --ide-warning: 45 90% 45%;
+    --ide-error: 0 72% 50%;
+    --ide-info: 195 100% 40%;
+
+    --syntax-keyword: 195 100% 35%;
+    --syntax-string: 155 60% 35%;
+    --syntax-number: 35 85% 40%;
+    --syntax-comment: 225 10% 55%;
+    --syntax-property: 270 50% 45%;
+    --syntax-type: 45 80% 35%;
+    --syntax-function: 210 70% 40%;
+    --syntax-variable: 230 20% 30%;
+    --syntax-event: 340 65% 45%;
+
+    --sidebar-background: 220 15% 96%;
+    --sidebar-foreground: 230 20% 25%;
+    --sidebar-primary: 195 100% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 92%;
+    --sidebar-accent-foreground: 230 20% 25%;
+    --sidebar-border: 220 15% 88%;
+    --sidebar-ring: 195 100% 40%;
+  }
+
   .dark {
     --radius: 0.75rem;
   }
