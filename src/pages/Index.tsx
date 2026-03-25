@@ -692,7 +692,7 @@ const Index = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-background">
+    <div className="flex flex-col h-screen w-full min-w-0 overflow-hidden bg-background">
       <NGCToolbar
         errors={errors}
         appName={appName}
