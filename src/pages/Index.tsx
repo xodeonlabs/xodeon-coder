@@ -692,7 +692,7 @@ const Index = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden">
+    <div className="flex flex-col h-screen w-full min-w-0 overflow-hidden bg-background">
       <NGCToolbar
         errors={errors}
         appName={appName}
@@ -711,30 +711,30 @@ const Index = () => {
         onShareTemplate={handleShareTemplate}
       />
 
-      <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden" autoSaveId="ngc-main-panels">
+      <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden p-1.5 gap-1.5" autoSaveId="ngc-main-panels">
         {/* Left Panel */}
         {leftOpen && (
           <>
             <ResizablePanel defaultSize={15} minSize={5} maxSize={70} order={1}>
               <div
-                className="h-full flex flex-col"
+                className="h-full flex flex-col rounded-xl overflow-hidden border border-border/50"
                 style={{ background: 'hsl(var(--ide-explorer-bg))' }}
                 {...leftPanelSwipe}
               >
                 {/* Left panel tab switcher */}
-                <div className="flex border-b border-border shrink-0">
+                <div className="flex border-b border-border/50 shrink-0">
                   <button
                     onClick={() => setLeftTab('explorer')}
-                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors ${
-                      leftTab === 'explorer' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors rounded-tl-xl ${
+                      leftTab === 'explorer' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     📂 Explorer
                   </button>
                   <button
                     onClick={() => setLeftTab('versions')}
-                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
-                      leftTab === 'versions' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 rounded-tr-xl ${
+                      leftTab === 'versions' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <History className="h-3 w-3" /> Versies
@@ -798,7 +798,7 @@ const Index = () => {
         {/* Toggle left */}
         <button
           onClick={() => setLeftOpen(p => !p)}
-          className="shrink-0 items-center justify-center w-5 hover:bg-secondary/60 transition-colors border-r border-border flex"
+          className="shrink-0 items-center justify-center w-5 hover:bg-secondary/60 transition-colors rounded-md flex"
           title={leftOpen ? 'Paneel inklappen' : 'Paneel uitklappen'}
           style={{ flexGrow: 0, flexShrink: 0, flexBasis: '20px' }}
         >
@@ -809,7 +809,7 @@ const Index = () => {
         <ResizablePanel defaultSize={leftOpen && rightOpen ? 55 : leftOpen || rightOpen ? 70 : 90} minSize={15} order={2}>
           <div
             ref={editorContainerRef}
-            className="h-full flex flex-col min-w-0 relative"
+            className="h-full flex flex-col min-w-0 relative rounded-xl overflow-hidden border border-border/50"
             {...editorSwipe}
             onMouseMove={(e) => {
               const rect = editorContainerRef.current?.getBoundingClientRect();
@@ -820,14 +820,14 @@ const Index = () => {
           >
             <LiveCursors cursors={cursors.filter(c => c.section === activeTab)} containerRef={editorContainerRef} />
             {/* Mode toggle + Page Tabs */}
-            <div className="flex items-center border-b border-border shrink-0 overflow-x-auto scrollbar-none" style={{ background: 'hsl(var(--ide-explorer-bg))' }}>
+            <div className="flex items-center border-b border-border/50 shrink-0 overflow-x-auto scrollbar-none" style={{ background: 'hsl(var(--ide-explorer-bg))' }}>
               {/* Mode toggle */}
-              <div className="flex items-center border-r border-border shrink-0">
+              <div className="flex items-center border-r border-border/50 shrink-0">
                 <button
                   onClick={() => setEditorMode('code')}
-                  className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium transition-colors ${
+                  className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium transition-colors rounded-tl-lg ${
                     editorMode === 'code'
-                      ? 'text-foreground bg-background'
+                      ? 'text-foreground bg-background/50'
                       : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40'
                   }`}
                   title="Code modus"
@@ -850,20 +850,20 @@ const Index = () => {
               </div>
 
               {/* Quick action buttons */}
-              <div className="flex items-center border-r border-border shrink-0 gap-0.5 px-1">
-                <button onClick={toggleZenMode} className={`p-1.5 rounded text-[10px] transition-colors ${zenMode ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`} title="Zen mode (Esc)">
+              <div className="flex items-center border-r border-border/50 shrink-0 gap-0.5 px-1">
+                <button onClick={toggleZenMode} className={`p-1.5 rounded-lg text-[10px] transition-colors ${zenMode ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`} title="Zen mode (Esc)">
                   <Eye className="h-3 w-3" />
                 </button>
-                <button onClick={toggleFullscreen} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors" title="Volledig scherm">
+                <button onClick={toggleFullscreen} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition-colors" title="Volledig scherm">
                   {isFullscreen ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
                 </button>
-                <button onClick={handleCopyCode} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors" title="Kopieer code">
+                <button onClick={handleCopyCode} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition-colors" title="Kopieer code">
                   <Copy className="h-3 w-3" />
                 </button>
-                <button onClick={handleUndo} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30" title="Ongedaan maken (Ctrl+Z)" disabled={undoStack.length < 2}>
+                <button onClick={handleUndo} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30" title="Ongedaan maken (Ctrl+Z)" disabled={undoStack.length < 2}>
                   <Undo2 className="h-3 w-3" />
                 </button>
-                <button onClick={() => setCommandPaletteOpen(true)} className="p-1.5 rounded text-muted-foreground hover:text-foreground transition-colors" title="Commandopalet (Ctrl+K)">
+                <button onClick={() => setCommandPaletteOpen(true)} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition-colors" title="Commandopalet (Ctrl+K)">
                   <span className="text-[10px] font-mono">⌘K</span>
                 </button>
               </div>
@@ -874,9 +874,9 @@ const Index = () => {
                     <button
                       key={section.id}
                       onClick={() => setActiveTab(section.id)}
-                      className={`px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium transition-colors border-b-2 whitespace-nowrap shrink-0 ${
+                      className={`px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-medium transition-colors border-b-2 whitespace-nowrap shrink-0 rounded-t-lg ${
                         activeTab === section.id
-                          ? 'border-primary text-foreground bg-background'
+                          ? 'border-primary text-foreground bg-background/50'
                           : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/40'
                       }`}
                     >
@@ -885,7 +885,7 @@ const Index = () => {
                   ))}
                   <button
                     onClick={handleAddPage}
-                    className="px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                    className="px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0 rounded-lg"
                     title="Nieuwe pagina toevoegen"
                   >
                     ➕
@@ -913,7 +913,7 @@ const Index = () => {
                 </div>
                 {/* Error bar */}
                 {errors.length > 0 && (
-                  <div className="border-t border-border p-2 space-y-1" style={{ background: 'hsla(0, 65%, 50%, 0.08)' }}>
+                  <div className="border-t border-border/50 p-2 space-y-1 rounded-b-xl" style={{ background: 'hsla(0, 65%, 50%, 0.08)' }}>
                     {errors.map((err, i) => (
                       <div key={i} className="text-xs text-destructive flex items-center gap-1">
                         <span className="font-mono">Line {err.line}:</span>
@@ -943,7 +943,7 @@ const Index = () => {
         {/* Toggle right */}
         <button
           onClick={() => setRightOpen(p => !p)}
-          className="shrink-0 items-center justify-center w-5 hover:bg-secondary/60 transition-colors border-l border-border flex"
+          className="shrink-0 items-center justify-center w-5 hover:bg-secondary/60 transition-colors rounded-md flex"
           title={rightOpen ? 'Paneel inklappen' : 'Paneel uitklappen'}
           style={{ flexGrow: 0, flexShrink: 0, flexBasis: '20px' }}
         >
@@ -955,21 +955,21 @@ const Index = () => {
           <>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={20} minSize={5} maxSize={70} order={3}>
-              <div className="h-full flex flex-col" {...rightPanelSwipe}>
+              <div className="h-full flex flex-col rounded-xl overflow-hidden border border-border/50" {...rightPanelSwipe}>
                 {/* Right panel tab switcher */}
-                <div className="flex border-b border-border shrink-0">
+                <div className="flex border-b border-border/50 shrink-0">
                   <button
                     onClick={() => setRightTab('components')}
-                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
-                      rightTab === 'components' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 rounded-tl-xl ${
+                      rightTab === 'components' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <Blocks className="h-3 w-3" /> Componenten
                   </button>
                   <button
                     onClick={() => setRightTab('ai')}
-                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
-                      rightTab === 'ai' ? 'text-foreground bg-background border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 rounded-tr-xl ${
+                      rightTab === 'ai' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <Sparkles className="h-3 w-3" /> AI
