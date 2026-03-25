@@ -799,15 +799,37 @@ const Index = () => {
           </>
         )}
 
-        {/* Toggle left */}
-        <button
-          onClick={() => setLeftOpen(p => !p)}
-          className="shrink-0 items-center justify-center w-5 hover:bg-secondary/60 transition-colors rounded-md flex"
-          title={leftOpen ? 'Paneel inklappen' : 'Paneel uitklappen'}
-          style={{ flexGrow: 0, flexShrink: 0, flexBasis: '20px' }}
+        {/* Toggle left — vertical tab strip when collapsed */}
+        <div
+          className="shrink-0 flex flex-col items-center gap-1 py-2 rounded-lg transition-colors"
+          style={{ flexGrow: 0, flexShrink: 0, flexBasis: leftOpen ? '20px' : '24px' }}
         >
-          {leftOpen ? <PanelLeftClose className="h-3.5 w-3.5 text-muted-foreground" /> : <PanelLeftOpen className="h-3.5 w-3.5 text-muted-foreground" />}
-        </button>
+          <button
+            onClick={() => setLeftOpen(p => !p)}
+            className="p-1 hover:bg-secondary/60 rounded-md transition-colors"
+            title={leftOpen ? 'Paneel inklappen' : 'Paneel uitklappen'}
+          >
+            {leftOpen ? <PanelLeftClose className="h-3.5 w-3.5 text-muted-foreground" /> : <PanelLeftOpen className="h-3.5 w-3.5 text-muted-foreground" />}
+          </button>
+          {!leftOpen && (
+            <>
+              <button
+                onClick={() => { setLeftOpen(true); setLeftTab('explorer'); }}
+                className="flex items-center justify-center w-6 py-3 hover:bg-secondary/60 rounded-md transition-colors group"
+                title="Explorer"
+              >
+                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Explorer</span>
+              </button>
+              <button
+                onClick={() => { setLeftOpen(true); setLeftTab('versions'); }}
+                className="flex items-center justify-center w-6 py-3 hover:bg-secondary/60 rounded-md transition-colors group"
+                title="Versies"
+              >
+                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Versies</span>
+              </button>
+            </>
+          )}
+        </div>
 
         {/* Code Editor / Designer (center) */}
         <ResizablePanel defaultSize={leftOpen && rightOpen ? 55 : leftOpen || rightOpen ? 70 : 90} minSize={15} order={2}>
