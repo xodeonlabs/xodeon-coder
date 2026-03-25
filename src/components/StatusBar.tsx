@@ -41,7 +41,7 @@ export function StatusBar({ code, saveStatus, lastSaved, typingUsers = [] }: Sta
 
   return (
     <div
-      className="flex items-center justify-between px-3 h-6 border-t border-border text-[10px] font-mono shrink-0 select-none"
+      className="flex items-center justify-between px-3 h-7 text-[10px] font-mono shrink-0 select-none mx-1.5 mb-1.5 rounded-lg border border-border/50"
       style={{ background: 'hsl(var(--ide-toolbar) / 0.6)' }}
     >
       <div className="flex items-center gap-3 text-muted-foreground">
