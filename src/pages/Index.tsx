@@ -966,15 +966,37 @@ const Index = () => {
           </div>
         </ResizablePanel>
 
-        {/* Toggle right */}
-        <button
-          onClick={() => setRightOpen(p => !p)}
-          className="shrink-0 items-center justify-center w-5 hover:bg-secondary/60 transition-colors rounded-md flex"
-          title={rightOpen ? 'Paneel inklappen' : 'Paneel uitklappen'}
-          style={{ flexGrow: 0, flexShrink: 0, flexBasis: '20px' }}
+        {/* Toggle right — vertical tab strip when collapsed */}
+        <div
+          className="shrink-0 flex flex-col items-center gap-1 py-2 rounded-lg transition-colors"
+          style={{ flexGrow: 0, flexShrink: 0, flexBasis: rightOpen ? '20px' : '24px' }}
         >
-          {rightOpen ? <PanelRightClose className="h-3.5 w-3.5 text-muted-foreground" /> : <PanelRightOpen className="h-3.5 w-3.5 text-muted-foreground" />}
-        </button>
+          <button
+            onClick={() => setRightOpen(p => !p)}
+            className="p-1 hover:bg-secondary/60 rounded-md transition-colors"
+            title={rightOpen ? 'Paneel inklappen' : 'Paneel uitklappen'}
+          >
+            {rightOpen ? <PanelRightClose className="h-3.5 w-3.5 text-muted-foreground" /> : <PanelRightOpen className="h-3.5 w-3.5 text-muted-foreground" />}
+          </button>
+          {!rightOpen && (
+            <>
+              <button
+                onClick={() => { setRightOpen(true); setRightTab('components'); }}
+                className="flex items-center justify-center w-6 py-3 hover:bg-secondary/60 rounded-md transition-colors group"
+                title="Componenten"
+              >
+                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Componenten</span>
+              </button>
+              <button
+                onClick={() => { setRightOpen(true); setRightTab('ai'); }}
+                className="flex items-center justify-center w-6 py-3 hover:bg-secondary/60 rounded-md transition-colors group"
+                title="AI"
+              >
+                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>AI</span>
+              </button>
+            </>
+          )}
+        </div>
 
         {/* Right Panel */}
         {rightOpen && (
