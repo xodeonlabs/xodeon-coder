@@ -214,6 +214,7 @@ const Index = () => {
           if (p.user_id !== session?.user?.id) {
             const name = p.display_name || p.email?.split('@')[0] || 'Iemand';
             toast({ title: `${name} heeft de editor verlaten`, duration: 3000 });
+            playNotificationSound();
           }
         });
       })
