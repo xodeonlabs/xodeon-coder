@@ -66,6 +66,7 @@ export default function Settings() {
   const [soundEnabled, setSoundEnabled] = useState(() => getNotificationSoundEnabled());
   const [toastEnabled, setToastEnabled] = useState(() => getNotificationToastEnabled());
   const { dndEnabled, toggleDnd } = useDoNotDisturb();
+  const { theme, setTheme } = useTheme();
 
   const isScrollingRef = useRef(false);
 
