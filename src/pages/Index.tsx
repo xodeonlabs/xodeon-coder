@@ -104,7 +104,7 @@ const Index = () => {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const isMobileInit = typeof window !== 'undefined' && window.innerWidth < 768;
-  const [activeLeftWidget, setActiveLeftWidget] = useState<'explorer' | 'versions' | null>(!isMobileInit ? 'explorer' : null);
+  const [activeLeftWidget, setActiveLeftWidget] = useState<'explorer' | 'versions' | 'data' | 'chat' | null>(!isMobileInit ? 'explorer' : null);
   const [activeRightWidget, setActiveRightWidget] = useState<'components' | 'ai' | null>(!isMobileInit ? 'components' : null);
   const [activeTab, setActiveTab] = useState<string>('global');
   const [editorMode, setEditorMode] = useState<'code' | 'design'>('code');
@@ -735,52 +735,42 @@ const Index = () => {
                   </button>
                   <button
                     onClick={() => setActiveLeftWidget('versions')}
-                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 rounded-tr-xl ${
+                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
                       activeLeftWidget === 'versions' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <History className="h-3 w-3" /> Versies
                   </button>
+                  <button
+                    onClick={() => setActiveLeftWidget('data')}
+                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors ${
+                      activeLeftWidget === 'data' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    💾 Data
+                  </button>
+                  <button
+                    onClick={() => setActiveLeftWidget('chat')}
+                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors rounded-tr-xl ${
+                      activeLeftWidget === 'chat' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    🗣️ Chat
+                  </button>
                 </div>
 
                 {activeLeftWidget === 'explorer' ? (
-                  <ResizablePanelGroup direction="vertical" className="flex-1 min-h-0" autoSaveId="ngc-explorer-panels">
-                    <ResizablePanel defaultSize={33} minSize={15}>
-                      <div className="h-full overflow-y-auto">
-                        <NGCExplorer
-                          ast={ast}
-                          selectedId={selectedId}
-                          onSelect={setSelectedId}
-                          onContextMenu={handleContextMenu}
-                          onRename={handleRename}
-                          onDelete={handleDelete}
-                        />
-                      </div>
-                    </ResizablePanel>
-                    <ResizableHandle />
-                    <ResizablePanel defaultSize={33} minSize={10}>
-                      <div className="h-full flex flex-col">
-                        <div className="ide-panel-header shrink-0">
-                          <span>💾 Data</span>
-                        </div>
-                        <div className="flex-1 overflow-y-auto min-h-0">
-                          <NGCDataPanel ast={ast} appId={appId} />
-                        </div>
-                      </div>
-                    </ResizablePanel>
-                    <ResizableHandle />
-                    <ResizablePanel defaultSize={34} minSize={10}>
-                      <div className="h-full flex flex-col">
-                        <div className="ide-panel-header shrink-0">
-                          <span>🗣️ Chat</span>
-                        </div>
-                        <div className="flex-1 overflow-hidden min-h-0">
-                          {appId && <NGCChat appId={appId} />}
-                        </div>
-                      </div>
-                    </ResizablePanel>
-                  </ResizablePanelGroup>
-                ) : (
+                  <div className="flex-1 overflow-y-auto min-h-0">
+                    <NGCExplorer
+                      ast={ast}
+                      selectedId={selectedId}
+                      onSelect={setSelectedId}
+                      onContextMenu={handleContextMenu}
+                      onRename={handleRename}
+                      onDelete={handleDelete}
+                    />
+                  </div>
+                ) : activeLeftWidget === 'versions' ? (
                   <div className="flex-1 overflow-hidden min-h-0">
                     {appId && (
                       <NGCVersionPanel
@@ -790,33 +780,15 @@ const Index = () => {
                       />
                     )}
                   </div>
-                )}
-              </div>
-            </ResizablePanel>
-            <ResizableHandle withHandle />
-          </>
-        )}
-
-        {/* Toggle left — vertical tab strip (always visible) */}
-        <div
-          className="shrink-0 flex flex-col items-center gap-1 py-2 rounded-lg transition-colors"
-          style={{ flexGrow: 0, flexShrink: 0, flexBasis: '24px' }}
-        >
-          <button
-            onClick={() => setActiveLeftWidget(w => w === 'explorer' ? null : 'explorer')}
-            className={`flex items-center justify-center w-6 py-3 rounded-md transition-colors group ${activeLeftWidget === 'explorer' ? 'bg-primary/10' : 'hover:bg-secondary/60'}`}
-            title="Explorer"
-          >
-            <span className={`text-[10px] font-medium transition-colors ${activeLeftWidget === 'explorer' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Explorer</span>
-          </button>
-          <button
-            onClick={() => setActiveLeftWidget(w => w === 'versions' ? null : 'versions')}
-            className={`flex items-center justify-center w-6 py-3 rounded-md transition-colors group ${activeLeftWidget === 'versions' ? 'bg-primary/10' : 'hover:bg-secondary/60'}`}
-            title="Versies"
-          >
-            <span className={`text-[10px] font-medium transition-colors ${activeLeftWidget === 'versions' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Versies</span>
-          </button>
-        </div>
+                ) : activeLeftWidget === 'data' ? (
+                  <div className="flex-1 overflow-y-auto min-h-0">
+                    <NGCDataPanel ast={ast} appId={appId} />
+                  </div>
+                ) : activeLeftWidget === 'chat' ? (
+                  <div className="flex-1 overflow-hidden min-h-0">
+                    {appId && <NGCChat appId={appId} />}
+                  </div>
+                ) : null}
 
         {/* Code Editor / Designer (center) */}
         <ResizablePanel defaultSize={activeLeftWidget && activeRightWidget ? 55 : activeLeftWidget || activeRightWidget ? 70 : 90} minSize={15} order={2}>
