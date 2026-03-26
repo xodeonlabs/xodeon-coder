@@ -117,8 +117,7 @@ export function AdBanner({ className = '', page, organizationId }: AdBannerProps
 
   return (
     <div
-      className={`relative rounded-xl border border-border/50 overflow-hidden group ${className}`}
-      style={{ background: ad.gradient }}
+      className={`relative rounded-xl border border-border/40 overflow-hidden group bg-card/80 backdrop-blur-sm ${className}`}
     >
       <button
         onClick={() => setDismissed(true)}
