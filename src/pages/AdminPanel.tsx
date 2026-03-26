@@ -2009,6 +2009,19 @@ export default function AdminPanel() {
                     />
                   ))}
                 </div>
+                <div className="mt-2 flex items-center gap-2">
+                  <input
+                    value={adForm.gradient}
+                    onChange={e => setAdForm({ ...adForm, gradient: e.target.value })}
+                    placeholder="Custom gradient CSS..."
+                    className="flex-1 px-3 py-1.5 text-xs rounded-lg bg-secondary/50 border border-border/50 text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  />
+                  <div
+                    className="w-8 h-8 rounded-lg border border-border/50 shrink-0"
+                    style={{ background: adForm.gradient }}
+                    title="Preview"
+                  />
+                </div>
               </div>
             </div>
 
