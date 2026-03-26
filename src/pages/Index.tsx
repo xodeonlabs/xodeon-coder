@@ -789,8 +789,34 @@ const Index = () => {
                     {appId && <NGCChat appId={appId} />}
                   </div>
                 ) : null}
+              </div>
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+          </>
+        )}
 
-        {/* Code Editor / Designer (center) */}
+        {/* Toggle left — vertical tab strip (always visible) */}
+        <div
+          className="shrink-0 flex flex-col items-center gap-1 py-2 rounded-lg transition-colors"
+          style={{ flexGrow: 0, flexShrink: 0, flexBasis: '24px' }}
+        >
+          {[
+            { key: 'explorer' as const, label: 'Explorer' },
+            { key: 'versions' as const, label: 'Versies' },
+            { key: 'data' as const, label: 'Data' },
+            { key: 'chat' as const, label: 'Chat' },
+          ].map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setActiveLeftWidget(w => w === key ? null : key)}
+              className={`flex items-center justify-center w-6 py-3 rounded-md transition-colors group ${activeLeftWidget === key ? 'bg-primary/10' : 'hover:bg-secondary/60'}`}
+              title={label}
+            >
+              <span className={`text-[10px] font-medium transition-colors ${activeLeftWidget === key ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>{label}</span>
+            </button>
+          ))}
+        </div>
+
         <ResizablePanel defaultSize={activeLeftWidget && activeRightWidget ? 55 : activeLeftWidget || activeRightWidget ? 70 : 90} minSize={15} order={2}>
           <div
             ref={editorContainerRef}
