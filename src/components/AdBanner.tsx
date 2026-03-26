@@ -145,9 +145,9 @@ export function AdBanner({ className = '', page, organizationId }: AdBannerProps
         target={isExternal ? '_blank' : undefined}
         rel={isExternal ? 'noopener noreferrer' : undefined}
         onClick={handleClick}
-        className={`flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-all duration-300 ${isAnimating ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'}`}
+        className={`flex items-center gap-3 px-4 py-3 hover:bg-accent/30 transition-all duration-300 ${isAnimating ? 'opacity-0 translate-y-1' : 'opacity-100 translate-y-0'}`}
       >
-        <div className="w-9 h-9 rounded-lg bg-foreground/10 flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 rounded-lg bg-accent/20 flex items-center justify-center shrink-0">
           <span className="text-lg">{ad.emoji}</span>
         </div>
         <div className="min-w-0 flex-1">
