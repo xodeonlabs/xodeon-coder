@@ -96,6 +96,7 @@ const Index = () => {
   const { session, signOut } = useAuth();
   const { toast } = useToast();
   const { play: playNotificationSound } = useNotificationSound();
+  const { theme, setTheme } = useTheme();
   const { appId } = useParams<{ appId: string }>();
   const navigate = useNavigate();
   const [code, setCode] = useState(FALLBACK_CODE);
