@@ -33,6 +33,7 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
   {
     title: '🖥️ Weergave',
     shortcuts: [
+      { keys: ['Ctrl', 'Shift', 'L'], description: 'Light/Dark mode wisselen' },
       { keys: ['Ctrl', '?'], description: 'Sneltoetsen tonen' },
       { keys: ['Esc'], description: 'Zen mode sluiten' },
     ],
