@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef, useDeferredValue, useTransition } from 'react';
 import { useSwipe } from '@/hooks/useSwipe';
-import { PanelLeftClose, PanelRightClose, Plus, Code, MousePointer, History, Maximize, Minimize, Eye, Copy, Undo2, FileCode, Search, Replace, Sparkles, Blocks } from 'lucide-react';
+import { PanelLeftClose, PanelRightClose, Plus, Code, MousePointer, History, Maximize, Minimize, Eye, Copy, Undo2, FileCode, Search, Replace, Sparkles, Blocks, FolderOpen, GitBranch, Database, MessageCircle } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -808,18 +808,19 @@ const Index = () => {
           style={{ flexGrow: 0, flexShrink: 0, flexBasis: '24px' }}
         >
           {[
-            { key: 'explorer' as const, label: 'Explorer' },
-            { key: 'versions' as const, label: 'Versies' },
-            { key: 'data' as const, label: 'Data' },
-            { key: 'chat' as const, label: 'Chat' },
-          ].map(({ key, label }) => (
+            { key: 'explorer' as const, label: 'Explorer', icon: FolderOpen },
+            { key: 'versions' as const, label: 'Versies', icon: GitBranch },
+            { key: 'data' as const, label: 'Data', icon: Database },
+            { key: 'chat' as const, label: 'Chat', icon: MessageCircle },
+          ].map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => setActiveLeftWidget(w => w === key ? null : key)}
-              className={`flex items-center justify-center w-6 py-3 rounded-md transition-all duration-300 group ${activeLeftWidget === key ? 'bg-primary/10 scale-105 shadow-sm shadow-primary/10' : 'hover:bg-secondary/60 hover:scale-105'}`}
+              className={`flex flex-col items-center justify-center w-6 py-2 gap-1 rounded-md transition-all duration-300 group ${activeLeftWidget === key ? 'bg-primary/10 scale-105 shadow-sm shadow-primary/10' : 'hover:bg-secondary/60 hover:scale-105'}`}
               title={label}
             >
-              <span className={`text-[10px] font-medium transition-all duration-300 ${activeLeftWidget === key ? 'text-primary opacity-100' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>{label}</span>
+              <Icon className={`h-3 w-3 transition-all duration-300 ${activeLeftWidget === key ? 'text-primary' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} />
+              <span className={`text-[9px] font-medium transition-all duration-300 ${activeLeftWidget === key ? 'text-primary opacity-100' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>{label}</span>
             </button>
           ))}
         </div>
@@ -965,17 +966,19 @@ const Index = () => {
         >
           <button
             onClick={() => setActiveRightWidget(w => w === 'components' ? null : 'components')}
-            className={`flex items-center justify-center w-6 py-3 rounded-md transition-all duration-300 group ${activeRightWidget === 'components' ? 'bg-primary/10 scale-105 shadow-sm shadow-primary/10' : 'hover:bg-secondary/60 hover:scale-105'}`}
+            className={`flex flex-col items-center justify-center w-6 py-2 gap-1 rounded-md transition-all duration-300 group ${activeRightWidget === 'components' ? 'bg-primary/10 scale-105 shadow-sm shadow-primary/10' : 'hover:bg-secondary/60 hover:scale-105'}`}
             title="Componenten"
           >
-            <span className={`text-[10px] font-medium transition-all duration-300 ${activeRightWidget === 'components' ? 'text-primary opacity-100' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Componenten</span>
+            <Blocks className={`h-3 w-3 transition-all duration-300 ${activeRightWidget === 'components' ? 'text-primary' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} />
+            <span className={`text-[9px] font-medium transition-all duration-300 ${activeRightWidget === 'components' ? 'text-primary opacity-100' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Componenten</span>
           </button>
           <button
             onClick={() => setActiveRightWidget(w => w === 'ai' ? null : 'ai')}
-            className={`flex items-center justify-center w-6 py-3 rounded-md transition-all duration-300 group ${activeRightWidget === 'ai' ? 'bg-primary/10 scale-105 shadow-sm shadow-primary/10' : 'hover:bg-secondary/60 hover:scale-105'}`}
+            className={`flex flex-col items-center justify-center w-6 py-2 gap-1 rounded-md transition-all duration-300 group ${activeRightWidget === 'ai' ? 'bg-primary/10 scale-105 shadow-sm shadow-primary/10' : 'hover:bg-secondary/60 hover:scale-105'}`}
             title="AI"
           >
-            <span className={`text-[10px] font-medium transition-all duration-300 ${activeRightWidget === 'ai' ? 'text-primary opacity-100' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>AI</span>
+            <Sparkles className={`h-3 w-3 transition-all duration-300 ${activeRightWidget === 'ai' ? 'text-primary' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} />
+            <span className={`text-[9px] font-medium transition-all duration-300 ${activeRightWidget === 'ai' ? 'text-primary opacity-100' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>AI</span>
           </button>
         </div>
 
