@@ -445,6 +445,19 @@ const Index = () => {
         e.preventDefault();
         setTheme(theme === 'dark' ? 'light' : 'dark');
       }
+      // Ctrl+1/2/3/4 — toggle left panel widgets
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && ['1','2','3','4'].includes(e.key)) {
+        e.preventDefault();
+        const widgetKeys = ['explorer', 'versions', 'data', 'chat'] as const;
+        const idx = parseInt(e.key) - 1;
+        setActiveLeftWidget(w => w === widgetKeys[idx] ? null : widgetKeys[idx]);
+      }
+      // Ctrl+5/6 — toggle right panel widgets
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && ['5','6'].includes(e.key)) {
+        e.preventDefault();
+        const rightKey = e.key === '5' ? 'components' : 'ai';
+        setActiveRightWidget(w => w === rightKey ? null : rightKey);
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);

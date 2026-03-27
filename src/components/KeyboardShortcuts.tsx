@@ -38,6 +38,17 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
       { keys: ['Esc'], description: 'Zen mode sluiten' },
     ],
   },
+  {
+    title: '📌 Panelen',
+    shortcuts: [
+      { keys: ['Ctrl', '1'], description: 'Explorer toggle' },
+      { keys: ['Ctrl', '2'], description: 'Versies toggle' },
+      { keys: ['Ctrl', '3'], description: 'Data toggle' },
+      { keys: ['Ctrl', '4'], description: 'Chat toggle' },
+      { keys: ['Ctrl', '5'], description: 'Componenten toggle' },
+      { keys: ['Ctrl', '6'], description: 'AI toggle' },
+    ],
+  },
 ];
 
 export function KeyboardShortcuts({ open, onClose }: { open: boolean; onClose: () => void }) {
