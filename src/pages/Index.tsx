@@ -28,6 +28,7 @@ import { useLiveCursors } from '@/hooks/useLiveCursors';
 import { LiveCursors } from '@/components/LiveCursors';
 import { EditorTypingIndicator } from '@/components/EditorTypingIndicator';
 import { ActiveCollaboratorsBar, ActiveCollaborator } from '@/components/ActiveCollaboratorsBar';
+import { useTheme } from 'next-themes';
 const FALLBACK_CODE = 'App:\n    Page Home:\n        Text Hello:\n            Tekst="Hallo!"\n            Positie="50,50"\n            Grootte="200,30"\n            Kleur="#ffffff"\n';
 function findNodeById(node: NGCNode, id: string): NGCNode | null {
   if (node.id === id) return node;
@@ -95,6 +96,7 @@ const Index = () => {
   const { session, signOut } = useAuth();
   const { toast } = useToast();
   const { play: playNotificationSound } = useNotificationSound();
+  const { theme, setTheme } = useTheme();
   const { appId } = useParams<{ appId: string }>();
   const navigate = useNavigate();
   const [code, setCode] = useState(FALLBACK_CODE);
@@ -438,10 +440,15 @@ const Index = () => {
         e.preventDefault();
         setShortcutsOpen(o => !o);
       }
+      // Ctrl+Shift+L — toggle light/dark mode
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'L') {
+        e.preventDefault();
+        setTheme(theme === 'dark' ? 'light' : 'dark');
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [saveNow, handleUndo, zenMode, toggleZenMode]);
+  }, [saveNow, handleUndo, zenMode, toggleZenMode, theme, setTheme]);
 
 
   // Use deferred code for AST parsing — keeps typing smooth even with complex apps
