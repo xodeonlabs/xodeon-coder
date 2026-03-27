@@ -816,10 +816,10 @@ const Index = () => {
             <button
               key={key}
               onClick={() => setActiveLeftWidget(w => w === key ? null : key)}
-              className={`flex items-center justify-center w-6 py-3 rounded-md transition-colors group ${activeLeftWidget === key ? 'bg-primary/10' : 'hover:bg-secondary/60'}`}
+              className={`flex items-center justify-center w-6 py-3 rounded-md transition-all duration-300 group ${activeLeftWidget === key ? 'bg-primary/10 scale-105 shadow-sm shadow-primary/10' : 'hover:bg-secondary/60 hover:scale-105'}`}
               title={label}
             >
-              <span className={`text-[10px] font-medium transition-colors ${activeLeftWidget === key ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>{label}</span>
+              <span className={`text-[10px] font-medium transition-all duration-300 ${activeLeftWidget === key ? 'text-primary opacity-100' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>{label}</span>
             </button>
           ))}
         </div>
@@ -965,17 +965,17 @@ const Index = () => {
         >
           <button
             onClick={() => setActiveRightWidget(w => w === 'components' ? null : 'components')}
-            className={`flex items-center justify-center w-6 py-3 rounded-md transition-colors group ${activeRightWidget === 'components' ? 'bg-primary/10' : 'hover:bg-secondary/60'}`}
+            className={`flex items-center justify-center w-6 py-3 rounded-md transition-all duration-300 group ${activeRightWidget === 'components' ? 'bg-primary/10 scale-105 shadow-sm shadow-primary/10' : 'hover:bg-secondary/60 hover:scale-105'}`}
             title="Componenten"
           >
-            <span className={`text-[10px] font-medium transition-colors ${activeRightWidget === 'components' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Componenten</span>
+            <span className={`text-[10px] font-medium transition-all duration-300 ${activeRightWidget === 'components' ? 'text-primary opacity-100' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Componenten</span>
           </button>
           <button
             onClick={() => setActiveRightWidget(w => w === 'ai' ? null : 'ai')}
-            className={`flex items-center justify-center w-6 py-3 rounded-md transition-colors group ${activeRightWidget === 'ai' ? 'bg-primary/10' : 'hover:bg-secondary/60'}`}
+            className={`flex items-center justify-center w-6 py-3 rounded-md transition-all duration-300 group ${activeRightWidget === 'ai' ? 'bg-primary/10 scale-105 shadow-sm shadow-primary/10' : 'hover:bg-secondary/60 hover:scale-105'}`}
             title="AI"
           >
-            <span className={`text-[10px] font-medium transition-colors ${activeRightWidget === 'ai' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>AI</span>
+            <span className={`text-[10px] font-medium transition-all duration-300 ${activeRightWidget === 'ai' ? 'text-primary opacity-100' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>AI</span>
           </button>
         </div>
 
