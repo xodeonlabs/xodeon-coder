@@ -1054,7 +1054,7 @@ const Index = () => {
                   </div>
                 ) : activeRightWidget === 'preview' ? (
                   <div className="flex-1 overflow-hidden min-h-0">
-                    <NGCPreview ast={ast} appId={appId} />
+                    <NGCPreview ast={ast} />
                   </div>
                 ) : null}
               </div>
