@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { NGCNode, NODE_ICONS, VALID_CHILDREN, NGCNodeType } from '@/lib/ngc-ast';
-import { ChevronRight, ChevronDown } from 'lucide-react';
+import { ChevronRight, ChevronDown, Search, X } from 'lucide-react';
 
 interface ExplorerProps {
   ast: NGCNode | null;
