@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef, useDeferredValue, useTransition } from 'react';
 import { useSwipe } from '@/hooks/useSwipe';
-import { PanelLeftClose, PanelRightClose, Plus, Code, MousePointer, History, Maximize, Minimize, Eye, Copy, Undo2, FileCode, Search, Replace, Sparkles, Blocks, FolderOpen, GitBranch, Database, MessageCircle } from 'lucide-react';
+import { PanelLeftClose, PanelRightClose, Plus, Code, MousePointer, History, Maximize, Minimize, Eye, Copy, Undo2, FileCode, Search, Replace, Sparkles, Blocks, FolderOpen, GitBranch, Database, MessageCircle, Settings2, MonitorPlay } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
