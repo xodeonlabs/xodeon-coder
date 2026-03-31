@@ -107,7 +107,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const isMobileInit = typeof window !== 'undefined' && window.innerWidth < 768;
   const [activeLeftWidget, setActiveLeftWidget] = useState<'explorer' | 'versions' | 'data' | 'chat' | null>(!isMobileInit ? 'explorer' : null);
-  const [activeRightWidget, setActiveRightWidget] = useState<'components' | 'ai' | null>(!isMobileInit ? 'components' : null);
+  const [activeRightWidget, setActiveRightWidget] = useState<'components' | 'ai' | 'properties' | 'preview' | null>(!isMobileInit ? 'components' : null);
   const [activeTab, setActiveTab] = useState<string>('global');
   const [editorMode, setEditorMode] = useState<'code' | 'design'>('code');
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
