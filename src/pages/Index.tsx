@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef, useDeferredValue, useTransition } from 'react';
 import { useSwipe } from '@/hooks/useSwipe';
-import { PanelLeftClose, PanelRightClose, Plus, Code, MousePointer, History, Maximize, Minimize, Eye, Copy, Undo2, FileCode, Search, Replace, Sparkles, Blocks, FolderOpen, GitBranch, Database, MessageCircle } from 'lucide-react';
+import { PanelLeftClose, PanelRightClose, Plus, Code, MousePointer, History, Maximize, Minimize, Eye, Copy, Undo2, FileCode, Search, Replace, Sparkles, Blocks, FolderOpen, GitBranch, Database, MessageCircle, Settings2, MonitorPlay } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +10,8 @@ import { NGCComponentLibrary } from '@/components/NGCComponentLibrary';
 import { NGCDataPanel } from '@/components/NGCDataPanel';
 import { NGCChat } from '@/components/NGCChat';
 import { NGCAIAssistant } from '@/components/NGCAIAssistant';
+import { NGCProperties } from '@/components/NGCProperties';
+import { NGCPreview } from '@/components/NGCPreview';
 import { NGCContextMenu } from '@/components/NGCContextMenu';
 import { NGCToolbar } from '@/components/NGCToolbar';
 import { NGCDesigner } from '@/components/NGCDesigner';
@@ -107,7 +109,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const isMobileInit = typeof window !== 'undefined' && window.innerWidth < 768;
   const [activeLeftWidget, setActiveLeftWidget] = useState<'explorer' | 'versions' | 'data' | 'chat' | null>(!isMobileInit ? 'explorer' : null);
-  const [activeRightWidget, setActiveRightWidget] = useState<'components' | 'ai' | null>(!isMobileInit ? 'components' : null);
+  const [activeRightWidget, setActiveRightWidget] = useState<'components' | 'ai' | 'properties' | 'preview' | null>(!isMobileInit ? 'components' : null);
   const [activeTab, setActiveTab] = useState<string>('global');
   const [editorMode, setEditorMode] = useState<'code' | 'design'>('code');
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -452,11 +454,12 @@ const Index = () => {
         const idx = parseInt(e.key) - 1;
         setActiveLeftWidget(w => w === widgetKeys[idx] ? null : widgetKeys[idx]);
       }
-      // Ctrl+5/6 — toggle right panel widgets
-      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && ['5','6'].includes(e.key)) {
+      // Ctrl+5/6/7/8 — toggle right panel widgets
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && ['5','6','7','8'].includes(e.key)) {
         e.preventDefault();
-        const rightKey = e.key === '5' ? 'components' : 'ai';
-        setActiveRightWidget(w => w === rightKey ? null : rightKey);
+        const rightKeys = ['components', 'ai', 'properties', 'preview'] as const;
+        const idx = parseInt(e.key) - 5;
+        setActiveRightWidget(w => w === rightKeys[idx] ? null : rightKeys[idx]);
       }
     };
     window.addEventListener('keydown', handler);
@@ -977,22 +980,22 @@ const Index = () => {
           className="shrink-0 flex flex-col items-center gap-1 py-2 rounded-lg transition-colors"
           style={{ flexGrow: 0, flexShrink: 0, flexBasis: '24px' }}
         >
-          <button
-            onClick={() => setActiveRightWidget(w => w === 'components' ? null : 'components')}
-            className={`flex flex-col items-center justify-center w-6 py-2 gap-1 rounded-md transition-all duration-300 group ${activeRightWidget === 'components' ? 'bg-primary/10 scale-105 shadow-sm shadow-primary/10' : 'hover:bg-secondary/60 hover:scale-105'}`}
-            title="Componenten"
-          >
-            <Blocks className={`h-3 w-3 transition-all duration-300 ${activeRightWidget === 'components' ? 'text-primary' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} />
-            <span className={`text-[9px] font-medium transition-all duration-300 ${activeRightWidget === 'components' ? 'text-primary opacity-100' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>Componenten</span>
-          </button>
-          <button
-            onClick={() => setActiveRightWidget(w => w === 'ai' ? null : 'ai')}
-            className={`flex flex-col items-center justify-center w-6 py-2 gap-1 rounded-md transition-all duration-300 group ${activeRightWidget === 'ai' ? 'bg-primary/10 scale-105 shadow-sm shadow-primary/10' : 'hover:bg-secondary/60 hover:scale-105'}`}
-            title="AI"
-          >
-            <Sparkles className={`h-3 w-3 transition-all duration-300 ${activeRightWidget === 'ai' ? 'text-primary' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} />
-            <span className={`text-[9px] font-medium transition-all duration-300 ${activeRightWidget === 'ai' ? 'text-primary opacity-100' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>AI</span>
-          </button>
+          {[
+            { key: 'components' as const, label: 'Componenten', icon: Blocks },
+            { key: 'ai' as const, label: 'AI', icon: Sparkles },
+            { key: 'properties' as const, label: 'Props', icon: Settings2 },
+            { key: 'preview' as const, label: 'Preview', icon: MonitorPlay },
+          ].map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => setActiveRightWidget(w => w === key ? null : key)}
+              className={`flex flex-col items-center justify-center w-6 py-2 gap-1 rounded-md transition-all duration-300 group ${activeRightWidget === key ? 'bg-primary/10 scale-105 shadow-sm shadow-primary/10' : 'hover:bg-secondary/60 hover:scale-105'}`}
+              title={label}
+            >
+              <Icon className={`h-3 w-3 transition-all duration-300 ${activeRightWidget === key ? 'text-primary' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} />
+              <span className={`text-[9px] font-medium transition-all duration-300 ${activeRightWidget === key ? 'text-primary opacity-100' : 'text-muted-foreground opacity-70 group-hover:text-foreground group-hover:opacity-100'}`} style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>{label}</span>
+            </button>
+          ))}
         </div>
 
         {/* Right Panel */}
@@ -1013,11 +1016,27 @@ const Index = () => {
                   </button>
                   <button
                     onClick={() => setActiveRightWidget('ai')}
-                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 rounded-tr-xl ${
+                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
                       activeRightWidget === 'ai' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <Sparkles className="h-3 w-3" /> AI
+                  </button>
+                  <button
+                    onClick={() => setActiveRightWidget('properties')}
+                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
+                      activeRightWidget === 'properties' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Settings2 className="h-3 w-3" /> Props
+                  </button>
+                  <button
+                    onClick={() => setActiveRightWidget('preview')}
+                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 rounded-tr-xl ${
+                      activeRightWidget === 'preview' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <MonitorPlay className="h-3 w-3" /> Preview
                   </button>
                 </div>
 
@@ -1025,11 +1044,19 @@ const Index = () => {
                   <div className="flex-1 overflow-auto">
                     <NGCComponentLibrary onInsert={handleInsertCode} />
                   </div>
-                ) : (
+                ) : activeRightWidget === 'ai' ? (
                   <div className="flex-1 overflow-hidden min-h-0">
                     <NGCAIAssistant appId={appId!} currentCode={code} onApplyCode={(newCode) => setCode(newCode)} />
                   </div>
-                )}
+                ) : activeRightWidget === 'properties' ? (
+                  <div className="flex-1 overflow-auto min-h-0">
+                    <NGCProperties node={selectedNode} onPropertyChange={handlePropertyChange} />
+                  </div>
+                ) : activeRightWidget === 'preview' ? (
+                  <div className="flex-1 overflow-hidden min-h-0">
+                    <NGCPreview ast={ast} />
+                  </div>
+                ) : null}
               </div>
             </ResizablePanel>
           </>
