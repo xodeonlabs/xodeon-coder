@@ -11,6 +11,13 @@ interface ExplorerProps {
   onDelete: (nodeId: string) => void;
 }
 
+// Check if a node or any descendant matches the search query
+function nodeMatchesSearch(node: NGCNode, query: string): boolean {
+  const q = query.toLowerCase();
+  if (node.name.toLowerCase().includes(q) || node.type.toLowerCase().includes(q)) return true;
+  return node.children.some(c => nodeMatchesSearch(c, q));
+}
+
 function ExplorerNode({
   node,
   depth,
@@ -19,6 +26,7 @@ function ExplorerNode({
   onContextMenu,
   onRename,
   onDelete,
+  searchQuery,
 }: {
   node: NGCNode;
   depth: number;
@@ -27,6 +35,7 @@ function ExplorerNode({
   onContextMenu: (e: React.MouseEvent, nodeId: string) => void;
   onRename: (nodeId: string, newName: string) => void;
   onDelete: (nodeId: string) => void;
+  searchQuery: string;
 }) {
   const [expanded, setExpanded] = useState(true);
   const [editing, setEditing] = useState(false);
