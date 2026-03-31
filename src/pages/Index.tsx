@@ -1014,11 +1014,27 @@ const Index = () => {
                   </button>
                   <button
                     onClick={() => setActiveRightWidget('ai')}
-                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 rounded-tr-xl ${
+                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
                       activeRightWidget === 'ai' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <Sparkles className="h-3 w-3" /> AI
+                  </button>
+                  <button
+                    onClick={() => setActiveRightWidget('properties')}
+                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 ${
+                      activeRightWidget === 'properties' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Settings2 className="h-3 w-3" /> Props
+                  </button>
+                  <button
+                    onClick={() => setActiveRightWidget('preview')}
+                    className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors flex items-center justify-center gap-1 rounded-tr-xl ${
+                      activeRightWidget === 'preview' ? 'text-foreground bg-background/50 border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <MonitorPlay className="h-3 w-3" /> Preview
                   </button>
                 </div>
 
@@ -1026,11 +1042,19 @@ const Index = () => {
                   <div className="flex-1 overflow-auto">
                     <NGCComponentLibrary onInsert={handleInsertCode} />
                   </div>
-                ) : (
+                ) : activeRightWidget === 'ai' ? (
                   <div className="flex-1 overflow-hidden min-h-0">
                     <NGCAIAssistant appId={appId!} currentCode={code} onApplyCode={(newCode) => setCode(newCode)} />
                   </div>
-                )}
+                ) : activeRightWidget === 'properties' ? (
+                  <div className="flex-1 overflow-auto min-h-0">
+                    <NGCProperties node={selectedNode} onPropertyChange={handlePropertyChange} />
+                  </div>
+                ) : activeRightWidget === 'preview' ? (
+                  <div className="flex-1 overflow-hidden min-h-0">
+                    <NGCPreview ast={ast} appId={appId} />
+                  </div>
+                ) : null}
               </div>
             </ResizablePanel>
           </>
