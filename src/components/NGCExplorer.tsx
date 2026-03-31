@@ -41,8 +41,14 @@ function ExplorerNode({
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(node.name);
   const inputRef = useRef<HTMLInputElement>(null);
-  const hasChildren = node.children.length > 0;
+  const hasSearch = searchQuery.length > 0;
+  const filteredChildren = hasSearch
+    ? node.children.filter(c => nodeMatchesSearch(c, searchQuery))
+    : node.children;
+  const hasChildren = filteredChildren.length > 0;
+  const isExpanded = hasSearch ? true : expanded;
   const isSelected = selectedId === node.id;
+  const isMatch = hasSearch && (node.name.toLowerCase().includes(searchQuery.toLowerCase()) || node.type.toLowerCase().includes(searchQuery.toLowerCase()));
 
   useEffect(() => {
     if (editing && inputRef.current) {
@@ -71,7 +77,7 @@ function ExplorerNode({
   return (
     <div onKeyDown={handleKeyDown}>
       <div
-        className={`explorer-node ${isSelected ? 'active' : ''}`}
+        className={`explorer-node ${isSelected ? 'active' : ''} ${isMatch ? 'bg-primary/10' : ''}`}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
         tabIndex={0}
         onClick={() => {
@@ -92,7 +98,7 @@ function ExplorerNode({
         }}
       >
         {hasChildren ? (
-          expanded ? (
+          isExpanded ? (
             <ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" />
           ) : (
             <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground" />
@@ -125,9 +131,9 @@ function ExplorerNode({
           <span className="ml-auto text-xs text-muted-foreground opacity-60">{node.type}</span>
         )}
       </div>
-      {expanded && hasChildren && (
+      {isExpanded && hasChildren && (
         <div>
-          {node.children.map((child) => (
+          {filteredChildren.map((child) => (
             <ExplorerNode
               key={child.id}
               node={child}
@@ -137,6 +143,7 @@ function ExplorerNode({
               onContextMenu={onContextMenu}
               onRename={onRename}
               onDelete={onDelete}
+              searchQuery={searchQuery}
             />
           ))}
         </div>
@@ -146,6 +153,9 @@ function ExplorerNode({
 }
 
 export function NGCExplorer({ ast, selectedId, onSelect, onContextMenu, onRename, onDelete }: ExplorerProps) {
+  const [search, setSearch] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
+
   if (!ast) {
     return (
       <div className="flex h-full items-center justify-center p-4">
@@ -155,16 +165,43 @@ export function NGCExplorer({ ast, selectedId, onSelect, onContextMenu, onRename
   }
 
   return (
-    <div className="overflow-auto h-full py-1">
-      <ExplorerNode
-        node={ast}
-        depth={0}
-        selectedId={selectedId}
-        onSelect={onSelect}
-        onContextMenu={onContextMenu}
-        onRename={onRename}
-        onDelete={onDelete}
-      />
+    <div className="flex flex-col h-full">
+      {/* Search bar */}
+      <div className="px-2 pt-2 pb-1 shrink-0">
+        <div className="relative">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+          <input
+            ref={searchRef}
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Zoek element..."
+            className="w-full pl-7 pr-7 py-1.5 text-xs rounded-lg bg-secondary/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-colors"
+          />
+          {search && (
+            <button
+              onClick={() => { setSearch(''); searchRef.current?.focus(); }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Tree */}
+      <div className="overflow-auto flex-1 py-1">
+        <ExplorerNode
+          node={ast}
+          depth={0}
+          selectedId={selectedId}
+          onSelect={onSelect}
+          onContextMenu={onContextMenu}
+          onRename={onRename}
+          onDelete={onDelete}
+          searchQuery={search}
+        />
+      </div>
     </div>
   );
 }
