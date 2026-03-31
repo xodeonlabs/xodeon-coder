@@ -452,11 +452,12 @@ const Index = () => {
         const idx = parseInt(e.key) - 1;
         setActiveLeftWidget(w => w === widgetKeys[idx] ? null : widgetKeys[idx]);
       }
-      // Ctrl+5/6 — toggle right panel widgets
-      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && ['5','6'].includes(e.key)) {
+      // Ctrl+5/6/7/8 — toggle right panel widgets
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && ['5','6','7','8'].includes(e.key)) {
         e.preventDefault();
-        const rightKey = e.key === '5' ? 'components' : 'ai';
-        setActiveRightWidget(w => w === rightKey ? null : rightKey);
+        const rightKeys = ['components', 'ai', 'properties', 'preview'] as const;
+        const idx = parseInt(e.key) - 5;
+        setActiveRightWidget(w => w === rightKeys[idx] ? null : rightKeys[idx]);
       }
     };
     window.addEventListener('keydown', handler);
