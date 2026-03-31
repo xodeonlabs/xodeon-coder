@@ -47,6 +47,8 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
       { keys: ['Ctrl', '4'], description: 'Chat toggle' },
       { keys: ['Ctrl', '5'], description: 'Componenten toggle' },
       { keys: ['Ctrl', '6'], description: 'AI toggle' },
+      { keys: ['Ctrl', '7'], description: 'Properties toggle' },
+      { keys: ['Ctrl', '8'], description: 'Preview toggle' },
     ],
   },
 ];
