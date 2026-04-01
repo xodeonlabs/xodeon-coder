@@ -27,6 +27,7 @@ import FriendChat from "./pages/FriendChat";
 import GroupChats from "./pages/GroupChats";
 import Upgrades from "./pages/Upgrades";
 import XodeonData from "./pages/XodeonData";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
