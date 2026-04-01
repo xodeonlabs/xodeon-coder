@@ -25,6 +25,7 @@ const Auth = () => {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [acceptedPolicy, setAcceptedPolicy] = useState(false);
   const navigate = useNavigate();
 
   const switchMode = (newMode: 'login' | 'register' | 'forgot' | 'magic-link') => {
