@@ -1,8 +1,19 @@
 User-agent: Googlebot
 Allow: /
+Allow: /auth
+Allow: /privacy
+Allow: /guest
+Disallow: /admin
+Disallow: /settings
+Disallow: /editor/
+Disallow: /preview/
 
 User-agent: Bingbot
 Allow: /
+Disallow: /admin
+Disallow: /settings
+Disallow: /editor/
+Disallow: /preview/
 
 User-agent: Twitterbot
 Allow: /
@@ -12,3 +23,9 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /settings
+Disallow: /editor/
+Disallow: /preview/
+
+Sitemap: https://xodeon-coder.lovable.app/sitemap.xml
