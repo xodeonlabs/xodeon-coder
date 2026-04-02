@@ -863,8 +863,21 @@ export default function AdminPanel() {
                           <p className="text-sm font-semibold text-foreground truncate"><UserLink userId={profile.id} /></p>
                           {email && profile.display_name && <p className="text-[11px] text-muted-foreground truncate">{email}</p>}
                           {profile.bio && <p className="text-[11px] text-muted-foreground truncate">{profile.bio}</p>}
-                          <p className="text-[10px] text-muted-foreground">
-                            {authUser?.last_sign_in_at ? `Laatst actief: ${new Date(authUser.last_sign_in_at).toLocaleDateString('nl-NL', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}` : 'Nog niet ingelogd'}
+                          <p className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                            {profile.country && (
+                              <span className="inline-flex items-center gap-0.5" title={profile.country}>
+                                <img
+                                  src={`https://flagcdn.com/16x12/${profile.country.toLowerCase()}.png`}
+                                  alt={profile.country}
+                                  className="h-3 w-4 object-cover rounded-[2px]"
+                                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                />
+                                <span className="text-[10px]">{profile.country}</span>
+                              </span>
+                            )}
+                            <span>
+                              {authUser?.last_sign_in_at ? `Laatst actief: ${new Date(authUser.last_sign_in_at).toLocaleDateString('nl-NL', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}` : 'Nog niet ingelogd'}
+                            </span>
                           </p>
                         </div>
                       </div>
