@@ -124,6 +124,8 @@ export default function AdminPanel() {
   const [editCatLabel, setEditCatLabel] = useState('');
   const [editCatIcon, setEditCatIcon] = useState('');
 
+  // Country filter
+  const [countryFilter, setCountryFilter] = useState<string>('all');
 
   const [adminAlliances, setAdminAlliances] = useState<any[]>([]);
   const [adminAllianceMembers, setAdminAllianceMembers] = useState<Record<string, any[]>>({});
