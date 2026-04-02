@@ -28,6 +28,7 @@ const PrivacyPolicy = () => {
               <h2 className="text-base font-semibold text-foreground mb-2">2. Gegevens die we verzamelen</h2>
               <ul className="list-disc pl-5 space-y-1">
                 <li><strong className="text-foreground">Accountgegevens:</strong> E-mailadres, gebruikersnaam, profielfoto en weergavenaam.</li>
+                <li><strong className="text-foreground">Locatiegegevens:</strong> Bij het inloggen wordt je land automatisch gedetecteerd op basis van je IP-adres. Dit wordt opgeslagen in je profiel en is alleen zichtbaar voor beheerders.</li>
                 <li><strong className="text-foreground">Gebruiksgegevens:</strong> Hoe je de app gebruikt, welke functies je bezoekt en wanneer je online bent.</li>
                 <li><strong className="text-foreground">Projectgegevens:</strong> Apps, code en bestanden die je aanmaakt binnen het platform.</li>
                 <li><strong className="text-foreground">Communicatie:</strong> Berichten in chats, groepsgesprekken en organisatiecommunicatie.</li>

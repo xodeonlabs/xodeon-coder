@@ -998,6 +998,7 @@ export type Database = {
           avatar_url: string | null
           banner_url: string | null
           bio: string | null
+          country: string | null
           created_at: string
           display_name: string | null
           friend_chat_retention_hours: number
@@ -1014,6 +1015,7 @@ export type Database = {
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
+          country?: string | null
           created_at?: string
           display_name?: string | null
           friend_chat_retention_hours?: number
@@ -1030,6 +1032,7 @@ export type Database = {
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
+          country?: string | null
           created_at?: string
           display_name?: string | null
           friend_chat_retention_hours?: number
