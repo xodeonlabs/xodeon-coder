@@ -124,6 +124,8 @@ export default function AdminPanel() {
   const [editCatLabel, setEditCatLabel] = useState('');
   const [editCatIcon, setEditCatIcon] = useState('');
 
+  // Country filter
+  const [countryFilter, setCountryFilter] = useState<string>('all');
 
   const [adminAlliances, setAdminAlliances] = useState<any[]>([]);
   const [adminAllianceMembers, setAdminAllianceMembers] = useState<Record<string, any[]>>({});
@@ -840,11 +842,32 @@ export default function AdminPanel() {
             </div>
 
             <div className="rounded-xl border border-border/50 p-5" style={{ background: 'hsl(var(--card))' }}>
-              <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
-                <Users className="h-4 w-4 text-primary" /> Alle gebruikers ({profiles.length})
-              </h3>
-              <div className="space-y-2">
-                {profiles.map(profile => {
+              {(() => {
+                const uniqueCountries = [...new Set(profiles.map(p => p.country).filter(Boolean))].sort() as string[];
+                const filteredProfiles = countryFilter === 'all' ? profiles : profiles.filter(p => countryFilter === 'unknown' ? !p.country : p.country === countryFilter);
+                return (
+                  <>
+                    <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                      <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                        <Users className="h-4 w-4 text-primary" /> Alle gebruikers ({filteredProfiles.length}{countryFilter !== 'all' ? ` / ${profiles.length}` : ''})
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+                        <select
+                          value={countryFilter}
+                          onChange={e => setCountryFilter(e.target.value)}
+                          className="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                        >
+                          <option value="all">Alle landen</option>
+                          {uniqueCountries.map(c => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                          <option value="unknown">Onbekend</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                {filteredProfiles.map(profile => {
                   const userRoles = roles.filter(r => r.user_id === profile.id);
                   const email = getUserEmail(profile.id);
                   const authUser = authUsers.find(u => u.id === profile.id);
@@ -932,7 +955,10 @@ export default function AdminPanel() {
                     </div>
                   );
                 })}
-              </div>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
         )}
