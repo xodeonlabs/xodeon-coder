@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { useAuth } from "@/hooks/useAuth";
+import { UsernameGate } from "@/components/UsernameGate";
 import { usePresence } from "@/hooks/usePresence";
 import { AppLayout } from "@/components/AppLayout";
 import Dashboard from "./pages/Dashboard";
@@ -36,7 +37,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   usePresence();
   if (loading) return <div className="flex h-screen items-center justify-center" style={{ background: '#0a0e1a' }}><span className="text-sm text-muted-foreground">Laden...</span></div>;
   if (!session) return <Navigate to="/auth" replace />;
-  return <AppLayout>{children}</AppLayout>;
+  return (
+    <UsernameGate userId={session.user.id}>
+      <AppLayout>{children}</AppLayout>
+    </UsernameGate>
+  );
 }
 
 function ProtectedPreview() {
@@ -44,7 +49,11 @@ function ProtectedPreview() {
   usePresence();
   if (loading) return <div className="flex h-screen items-center justify-center" style={{ background: '#0a0e1a' }}><span className="text-sm text-muted-foreground">Laden...</span></div>;
   if (!session) return <Navigate to="/auth" replace />;
-  return <Preview />;
+  return (
+    <UsernameGate userId={session.user.id}>
+      <Preview />
+    </UsernameGate>
+  );
 }
 
 const App = () => (

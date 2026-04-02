@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
-import { ArrowLeft, Mail, Lock, Sparkles } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, Sparkles, User } from 'lucide-react';
 
 const auth = supabase.auth as any;
 
@@ -20,6 +20,7 @@ const getErrorText = (err: unknown, fallback: string) => {
 
 const Auth = () => {
   const [mode, setMode] = useState<'login' | 'register' | 'forgot' | 'magic-link'>('login');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -60,12 +61,50 @@ const Auth = () => {
         setMessage('Check je e-mail voor een link om je wachtwoord te resetten.');
         return;
       }
+
       if (mode === 'login') {
-        const { error } = await auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        // Lookup email by username via edge function
+        const cleanUsername = username.trim().toLowerCase();
+        if (!cleanUsername) {
+          setError('Vul je gebruikersnaam in.');
+          return;
+        }
+        const { data: lookupData, error: lookupError } = await supabase.functions.invoke('lookup-username', {
+          body: { username: cleanUsername },
+        });
+        if (lookupError || !lookupData?.email) {
+          setError('Gebruikersnaam niet gevonden.');
+          return;
+        }
+        const { error: signInError } = await auth.signInWithPassword({ email: lookupData.email, password });
+        if (signInError) throw signInError;
         navigate('/');
         return;
       }
+
+      // Register mode
+      const cleanUsername = username.trim().toLowerCase();
+      if (!cleanUsername || cleanUsername.length < 3) {
+        setError('Gebruikersnaam moet minimaal 3 tekens zijn.');
+        return;
+      }
+      if (!/^[a-z0-9_-]+$/.test(cleanUsername)) {
+        setError('Gebruikersnaam mag alleen kleine letters, cijfers, - en _ bevatten.');
+        return;
+      }
+
+      // Check if username is already taken
+      const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('username', cleanUsername)
+        .maybeSingle();
+
+      if (existingUser) {
+        setError('Deze gebruikersnaam is al in gebruik.');
+        return;
+      }
+
       const { data, error } = await auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
       if (error) {
         if (error.message?.includes('User already registered')) {
@@ -74,6 +113,12 @@ const Auth = () => {
         return;
       }
       if (data.user?.id) {
+        // Save username to profile
+        await supabase
+          .from('profiles')
+          .update({ username: cleanUsername } as any)
+          .eq('id', data.user.id);
+
         setMessage('✅ Account aangemaakt! Je wordt ingelogd...');
         try {
           const { error: signInError } = await auth.signInWithPassword({ email, password });
@@ -120,8 +165,8 @@ const Auth = () => {
   };
 
   const modeSubtitle = {
-    login: 'Log in om verder te gaan met bouwen',
-    register: 'Begin je avontuur met NGC',
+    login: 'Log in met je gebruikersnaam',
+    register: 'Kies een gebruikersnaam en begin',
     forgot: 'We sturen je een resetlink',
     'magic-link': 'We sturen je een magische link',
   };
@@ -151,21 +196,44 @@ const Auth = () => {
         {/* Card */}
         <div className="glass-card-highlight rounded-2xl p-5 sm:p-8 shadow-2xl shadow-black/20">
           <form onSubmit={mode === 'magic-link' ? handleMagicLink : handleSubmit} className="space-y-4">
-            {/* Email */}
-            <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">E-mail</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  required
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm text-foreground bg-background/80 border border-border/60 outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-muted-foreground/40"
-                  placeholder="jouw@email.nl"
-                />
+            {/* Username - for login and register */}
+            {(mode === 'login' || mode === 'register') && (
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">Gebruikersnaam</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
+                    required
+                    minLength={3}
+                    maxLength={30}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm text-foreground bg-background/80 border border-border/60 outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-muted-foreground/40"
+                    placeholder="jouw_username"
+                    autoComplete="username"
+                  />
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Email - only for register, forgot, magic-link */}
+            {(mode === 'register' || mode === 'forgot' || mode === 'magic-link') && (
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">E-mail</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm text-foreground bg-background/80 border border-border/60 outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-muted-foreground/40"
+                    placeholder="jouw@email.nl"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Password */}
             {(mode === 'login' || mode === 'register') && (
