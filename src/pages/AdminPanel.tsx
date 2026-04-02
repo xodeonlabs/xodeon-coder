@@ -35,6 +35,7 @@ interface UserProfile {
   display_name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  country: string | null;
 }
 
 interface AuthUser {
