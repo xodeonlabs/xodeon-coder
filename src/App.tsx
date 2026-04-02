@@ -37,7 +37,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   usePresence();
   if (loading) return <div className="flex h-screen items-center justify-center" style={{ background: '#0a0e1a' }}><span className="text-sm text-muted-foreground">Laden...</span></div>;
   if (!session) return <Navigate to="/auth" replace />;
-  return <AppLayout>{children}</AppLayout>;
+  return (
+    <UsernameGate userId={session.user.id}>
+      <AppLayout>{children}</AppLayout>
+    </UsernameGate>
+  );
 }
 
 function ProtectedPreview() {
