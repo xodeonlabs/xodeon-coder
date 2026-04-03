@@ -176,7 +176,7 @@ const Auth = () => {
   };
 
   const modeSubtitle = {
-    login: 'Log in met je gebruikersnaam',
+    login: loginMethod === 'username' ? 'Log in met je gebruikersnaam' : 'Log in met je e-mailadres',
     register: 'Kies een gebruikersnaam en begin',
     forgot: 'We sturen je een resetlink',
     'magic-link': 'We sturen je een magische link',
