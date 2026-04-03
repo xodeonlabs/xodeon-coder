@@ -115,7 +115,7 @@ export default function Settings() {
     if (cached) {
       if (cached.display_name) setDisplayName(cached.display_name);
       if (cached.bio) setBio(cached.bio);
-      if (cached.username) setUsername(cached.username);
+      if (cached.username) { setUsername(cached.username); setOriginalUsername(cached.username); }
     } else {
       supabase
         .from('profiles')
