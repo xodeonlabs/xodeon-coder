@@ -59,6 +59,8 @@ export default function Settings() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [saving, setSaving] = useState(false);
+  const [usernameError, setUsernameError] = useState('');
+  const [originalUsername, setOriginalUsername] = useState('');
   const [savingEmail, setSavingEmail] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [retentionItems, setRetentionItems] = useState<RetentionItem[]>([]);
