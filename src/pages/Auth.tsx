@@ -21,6 +21,7 @@ const getErrorText = (err: unknown, fallback: string) => {
 const Auth = () => {
   const [mode, setMode] = useState<'login' | 'register' | 'forgot' | 'magic-link'>('login');
   const [username, setUsername] = useState('');
+  const [loginMethod, setLoginMethod] = useState<'username' | 'email'>('username');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
