@@ -21,6 +21,7 @@ const getErrorText = (err: unknown, fallback: string) => {
 const Auth = () => {
   const [mode, setMode] = useState<'login' | 'register' | 'forgot' | 'magic-link'>('login');
   const [username, setUsername] = useState('');
+  const [loginMethod, setLoginMethod] = useState<'username' | 'email'>('username');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -63,21 +64,31 @@ const Auth = () => {
       }
 
       if (mode === 'login') {
-        // Lookup email by username via edge function
-        const cleanUsername = username.trim().toLowerCase();
-        if (!cleanUsername) {
-          setError('Vul je gebruikersnaam in.');
-          return;
+        if (loginMethod === 'username') {
+          // Lookup email by username via edge function
+          const cleanUsername = username.trim().toLowerCase();
+          if (!cleanUsername) {
+            setError('Vul je gebruikersnaam in.');
+            return;
+          }
+          const { data: lookupData, error: lookupError } = await supabase.functions.invoke('lookup-username', {
+            body: { username: cleanUsername },
+          });
+          if (lookupError || !lookupData?.email) {
+            setError('Gebruikersnaam niet gevonden.');
+            return;
+          }
+          const { error: signInError } = await auth.signInWithPassword({ email: lookupData.email, password });
+          if (signInError) throw signInError;
+        } else {
+          // Login with email directly
+          if (!email.trim()) {
+            setError('Vul je e-mailadres in.');
+            return;
+          }
+          const { error: signInError } = await auth.signInWithPassword({ email: email.trim(), password });
+          if (signInError) throw signInError;
         }
-        const { data: lookupData, error: lookupError } = await supabase.functions.invoke('lookup-username', {
-          body: { username: cleanUsername },
-        });
-        if (lookupError || !lookupData?.email) {
-          setError('Gebruikersnaam niet gevonden.');
-          return;
-        }
-        const { error: signInError } = await auth.signInWithPassword({ email: lookupData.email, password });
-        if (signInError) throw signInError;
         navigate('/');
         return;
       }
@@ -165,7 +176,7 @@ const Auth = () => {
   };
 
   const modeSubtitle = {
-    login: 'Log in met je gebruikersnaam',
+    login: loginMethod === 'username' ? 'Log in met je gebruikersnaam' : 'Log in met je e-mailadres',
     register: 'Kies een gebruikersnaam en begin',
     forgot: 'We sturen je een resetlink',
     'magic-link': 'We sturen je een magische link',
@@ -196,8 +207,28 @@ const Auth = () => {
         {/* Card */}
         <div className="glass-card-highlight rounded-2xl p-5 sm:p-8 shadow-2xl shadow-black/20">
           <form onSubmit={mode === 'magic-link' ? handleMagicLink : handleSubmit} className="space-y-4">
-            {/* Username - for login and register */}
-            {(mode === 'login' || mode === 'register') && (
+            {/* Login method toggle */}
+            {mode === 'login' && (
+              <div className="flex rounded-xl border border-border/60 overflow-hidden mb-1">
+                <button
+                  type="button"
+                  onClick={() => setLoginMethod('username')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all ${loginMethod === 'username' ? 'bg-primary text-primary-foreground' : 'bg-background/50 text-muted-foreground hover:text-foreground'}`}
+                >
+                  <User className="h-3.5 w-3.5" /> Gebruikersnaam
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLoginMethod('email')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all ${loginMethod === 'email' ? 'bg-primary text-primary-foreground' : 'bg-background/50 text-muted-foreground hover:text-foreground'}`}
+                >
+                  <Mail className="h-3.5 w-3.5" /> E-mail
+                </button>
+              </div>
+            )}
+
+            {/* Username - for login (username mode) and register */}
+            {((mode === 'login' && loginMethod === 'username') || mode === 'register') && (
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">Gebruikersnaam</label>
                 <div className="relative">
@@ -217,8 +248,8 @@ const Auth = () => {
               </div>
             )}
 
-            {/* Email - only for register, forgot, magic-link */}
-            {(mode === 'register' || mode === 'forgot' || mode === 'magic-link') && (
+            {/* Email - for login (email mode), register, forgot, magic-link */}
+            {((mode === 'login' && loginMethod === 'email') || mode === 'register' || mode === 'forgot' || mode === 'magic-link') && (
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">E-mail</label>
                 <div className="relative">
