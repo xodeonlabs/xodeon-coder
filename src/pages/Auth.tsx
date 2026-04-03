@@ -207,8 +207,28 @@ const Auth = () => {
         {/* Card */}
         <div className="glass-card-highlight rounded-2xl p-5 sm:p-8 shadow-2xl shadow-black/20">
           <form onSubmit={mode === 'magic-link' ? handleMagicLink : handleSubmit} className="space-y-4">
-            {/* Username - for login and register */}
-            {(mode === 'login' || mode === 'register') && (
+            {/* Login method toggle */}
+            {mode === 'login' && (
+              <div className="flex rounded-xl border border-border/60 overflow-hidden mb-1">
+                <button
+                  type="button"
+                  onClick={() => setLoginMethod('username')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all ${loginMethod === 'username' ? 'bg-primary text-primary-foreground' : 'bg-background/50 text-muted-foreground hover:text-foreground'}`}
+                >
+                  <User className="h-3.5 w-3.5" /> Gebruikersnaam
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLoginMethod('email')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all ${loginMethod === 'email' ? 'bg-primary text-primary-foreground' : 'bg-background/50 text-muted-foreground hover:text-foreground'}`}
+                >
+                  <Mail className="h-3.5 w-3.5" /> E-mail
+                </button>
+              </div>
+            )}
+
+            {/* Username - for login (username mode) and register */}
+            {((mode === 'login' && loginMethod === 'username') || mode === 'register') && (
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">Gebruikersnaam</label>
                 <div className="relative">
@@ -228,8 +248,8 @@ const Auth = () => {
               </div>
             )}
 
-            {/* Email - only for register, forgot, magic-link */}
-            {(mode === 'register' || mode === 'forgot' || mode === 'magic-link') && (
+            {/* Email - for login (email mode), register, forgot, magic-link */}
+            {((mode === 'login' && loginMethod === 'email') || mode === 'register' || mode === 'forgot' || mode === 'magic-link') && (
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">E-mail</label>
                 <div className="relative">
