@@ -314,13 +314,20 @@ export default function Settings() {
                   <span className="text-sm text-muted-foreground">@</span>
                   <input
                     value={username}
-                    onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, ''))}
-                    placeholder="jouw.username"
+                    onChange={e => { setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '')); setUsernameError(''); }}
+                    placeholder="jouw-username"
                     maxLength={30}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className={`w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 ${usernameError ? 'border-destructive' : 'border-border'}`}
                   />
                 </div>
-                <span className="text-[10px] text-muted-foreground">Dit wordt je profiel-URL: /profiel/{username || '...'}</span>
+                {usernameError ? (
+                  <span className="text-[10px] text-destructive">{usernameError}</span>
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">
+                    Dit is je login-naam en profiel-URL: /profiel/{username || '...'}
+                    {username !== originalUsername && username.length >= 3 && <span className="text-amber-500 ml-1">⚠ Let op: je login verandert mee!</span>}
+                  </span>
+                )}
               </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1 block">Weergavenaam</label>
