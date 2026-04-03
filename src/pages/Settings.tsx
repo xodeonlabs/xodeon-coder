@@ -59,6 +59,8 @@ export default function Settings() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [saving, setSaving] = useState(false);
+  const [usernameError, setUsernameError] = useState('');
+  const [originalUsername, setOriginalUsername] = useState('');
   const [savingEmail, setSavingEmail] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [retentionItems, setRetentionItems] = useState<RetentionItem[]>([]);
@@ -113,7 +115,7 @@ export default function Settings() {
     if (cached) {
       if (cached.display_name) setDisplayName(cached.display_name);
       if (cached.bio) setBio(cached.bio);
-      if (cached.username) setUsername(cached.username);
+      if (cached.username) { setUsername(cached.username); setOriginalUsername(cached.username); }
     } else {
       supabase
         .from('profiles')
@@ -123,7 +125,7 @@ export default function Settings() {
         .then(({ data }) => {
           if (data?.display_name) setDisplayName(data.display_name);
           if ((data as any)?.bio) setBio((data as any).bio);
-          if ((data as any)?.username) setUsername((data as any).username);
+          if ((data as any)?.username) { setUsername((data as any).username); setOriginalUsername((data as any).username); }
           if ((data as any)?.show_email) setShowEmail((data as any).show_email);
           if ((data as any)?.social_links && typeof (data as any).social_links === 'object') {
             setSocialLinks(prev => ({ ...prev, ...(data as any).social_links }));
@@ -178,8 +180,30 @@ export default function Settings() {
   async function saveProfile() {
     if (!session?.user?.id) return;
     setSaving(true);
-    const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
-    // Filter out empty social links
+    setUsernameError('');
+    const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    
+    if (cleanUsername.length < 3) {
+      setUsernameError('Gebruikersnaam moet minimaal 3 tekens zijn');
+      setSaving(false);
+      return;
+    }
+
+    // Check uniqueness if username changed
+    if (cleanUsername !== originalUsername) {
+      const { data: existing } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('username', cleanUsername)
+        .neq('id', session.user.id)
+        .maybeSingle();
+      if (existing) {
+        setUsernameError('Deze gebruikersnaam is al in gebruik');
+        setSaving(false);
+        return;
+      }
+    }
+
     const filteredSocials: Record<string, string> = {};
     Object.entries(socialLinks).forEach(([k, v]) => { if (v.trim()) filteredSocials[k] = v.trim(); });
     const { error } = await supabase
@@ -198,6 +222,7 @@ export default function Settings() {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
       toast({ title: '✅ Profiel opgeslagen!' });
+      setOriginalUsername(cleanUsername);
       clearCache(`profile:${session.user.id}`);
     }
     setSaving(false);
@@ -289,13 +314,20 @@ export default function Settings() {
                   <span className="text-sm text-muted-foreground">@</span>
                   <input
                     value={username}
-                    onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, ''))}
-                    placeholder="jouw.username"
+                    onChange={e => { setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '')); setUsernameError(''); }}
+                    placeholder="jouw-username"
                     maxLength={30}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    className={`w-full rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 ${usernameError ? 'border-destructive' : 'border-border'}`}
                   />
                 </div>
-                <span className="text-[10px] text-muted-foreground">Dit wordt je profiel-URL: /profiel/{username || '...'}</span>
+                {usernameError ? (
+                  <span className="text-[10px] text-destructive">{usernameError}</span>
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">
+                    Dit is je login-naam en profiel-URL: /profiel/{username || '...'}
+                    {username !== originalUsername && username.length >= 3 && <span className="text-amber-500 ml-1">⚠ Let op: je login verandert mee!</span>}
+                  </span>
+                )}
               </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1 block">Weergavenaam</label>
