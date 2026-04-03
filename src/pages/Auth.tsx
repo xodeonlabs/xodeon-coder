@@ -64,21 +64,31 @@ const Auth = () => {
       }
 
       if (mode === 'login') {
-        // Lookup email by username via edge function
-        const cleanUsername = username.trim().toLowerCase();
-        if (!cleanUsername) {
-          setError('Vul je gebruikersnaam in.');
-          return;
+        if (loginMethod === 'username') {
+          // Lookup email by username via edge function
+          const cleanUsername = username.trim().toLowerCase();
+          if (!cleanUsername) {
+            setError('Vul je gebruikersnaam in.');
+            return;
+          }
+          const { data: lookupData, error: lookupError } = await supabase.functions.invoke('lookup-username', {
+            body: { username: cleanUsername },
+          });
+          if (lookupError || !lookupData?.email) {
+            setError('Gebruikersnaam niet gevonden.');
+            return;
+          }
+          const { error: signInError } = await auth.signInWithPassword({ email: lookupData.email, password });
+          if (signInError) throw signInError;
+        } else {
+          // Login with email directly
+          if (!email.trim()) {
+            setError('Vul je e-mailadres in.');
+            return;
+          }
+          const { error: signInError } = await auth.signInWithPassword({ email: email.trim(), password });
+          if (signInError) throw signInError;
         }
-        const { data: lookupData, error: lookupError } = await supabase.functions.invoke('lookup-username', {
-          body: { username: cleanUsername },
-        });
-        if (lookupError || !lookupData?.email) {
-          setError('Gebruikersnaam niet gevonden.');
-          return;
-        }
-        const { error: signInError } = await auth.signInWithPassword({ email: lookupData.email, password });
-        if (signInError) throw signInError;
         navigate('/');
         return;
       }
