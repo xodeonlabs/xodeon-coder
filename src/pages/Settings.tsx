@@ -125,7 +125,7 @@ export default function Settings() {
         .then(({ data }) => {
           if (data?.display_name) setDisplayName(data.display_name);
           if ((data as any)?.bio) setBio((data as any).bio);
-          if ((data as any)?.username) setUsername((data as any).username);
+          if ((data as any)?.username) { setUsername((data as any).username); setOriginalUsername((data as any).username); }
           if ((data as any)?.show_email) setShowEmail((data as any).show_email);
           if ((data as any)?.social_links && typeof (data as any).social_links === 'object') {
             setSocialLinks(prev => ({ ...prev, ...(data as any).social_links }));
