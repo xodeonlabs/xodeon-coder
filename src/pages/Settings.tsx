@@ -180,8 +180,30 @@ export default function Settings() {
   async function saveProfile() {
     if (!session?.user?.id) return;
     setSaving(true);
-    const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '');
-    // Filter out empty social links
+    setUsernameError('');
+    const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    
+    if (cleanUsername.length < 3) {
+      setUsernameError('Gebruikersnaam moet minimaal 3 tekens zijn');
+      setSaving(false);
+      return;
+    }
+
+    // Check uniqueness if username changed
+    if (cleanUsername !== originalUsername) {
+      const { data: existing } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('username', cleanUsername)
+        .neq('id', session.user.id)
+        .maybeSingle();
+      if (existing) {
+        setUsernameError('Deze gebruikersnaam is al in gebruik');
+        setSaving(false);
+        return;
+      }
+    }
+
     const filteredSocials: Record<string, string> = {};
     Object.entries(socialLinks).forEach(([k, v]) => { if (v.trim()) filteredSocials[k] = v.trim(); });
     const { error } = await supabase
