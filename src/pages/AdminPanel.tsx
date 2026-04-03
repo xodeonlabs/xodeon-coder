@@ -843,7 +843,7 @@ export default function AdminPanel() {
               </div>
             </div>
 
-            {/* Country distribution chart */}
+            {/* Country distribution */}
             {(() => {
               const countryCounts: Record<string, number> = {};
               let unknownCount = 0;
@@ -855,17 +855,25 @@ export default function AdminPanel() {
               if (unknownCount > 0) chartData.push({ country: '??', count: unknownCount });
               const COLORS = ['hsl(var(--primary))','hsl(var(--accent))','hsl(210 60% 50%)','hsl(150 50% 45%)','hsl(30 70% 50%)','hsl(280 50% 55%)','hsl(0 60% 50%)','hsl(180 50% 45%)','hsl(60 60% 45%)'];
               return chartData.length > 0 ? (
-                <div className="rounded-xl border border-border/50 p-5" style={{ background: 'hsl(var(--card))' }}>
-                  <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2"><Globe className="h-4 w-4 text-primary" /> Gebruikers per land</h3>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartData} layout="vertical" margin={{ left: 40, right: 20, top: 5, bottom: 5 }}>
-                        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
-                        <YAxis type="category" dataKey="country" tick={{ fontSize: 11, fill: 'hsl(var(--foreground))' }} width={50} tickFormatter={(v: string) => v === '??' ? 'Onbekend' : v} />
-                        <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12, color: 'hsl(var(--foreground))' }} formatter={(value: number) => [`${value} gebruiker${value !== 1 ? 's' : ''}`, 'Aantal']} labelFormatter={(l: string) => l === '??' ? 'Onbekend' : `Land: ${l}`} />
-                        <Bar dataKey="count" radius={[0, 6, 6, 0]}>{chartData.map((_, i) => (<Cell key={i} fill={COLORS[i % COLORS.length]} />))}</Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
+                <div className="space-y-4">
+                  {/* World map */}
+                  <div className="rounded-xl border border-border/50 p-5" style={{ background: 'hsl(var(--card))' }}>
+                    <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2"><Globe className="h-4 w-4 text-primary" /> Wereldkaart</h3>
+                    <WorldMapChart countryCounts={countryCounts} />
+                  </div>
+                  {/* Bar chart */}
+                  <div className="rounded-xl border border-border/50 p-5" style={{ background: 'hsl(var(--card))' }}>
+                    <h3 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" /> Gebruikers per land</h3>
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={chartData} layout="vertical" margin={{ left: 40, right: 20, top: 5, bottom: 5 }}>
+                          <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                          <YAxis type="category" dataKey="country" tick={{ fontSize: 11, fill: 'hsl(var(--foreground))' }} width={50} tickFormatter={(v: string) => v === '??' ? 'Onbekend' : v} />
+                          <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12, color: 'hsl(var(--foreground))' }} formatter={(value: number) => [`${value} gebruiker${value !== 1 ? 's' : ''}`, 'Aantal']} labelFormatter={(l: string) => l === '??' ? 'Onbekend' : `Land: ${l}`} />
+                          <Bar dataKey="count" radius={[0, 6, 6, 0]}>{chartData.map((_, i) => (<Cell key={i} fill={COLORS[i % COLORS.length]} />))}</Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
                   </div>
                 </div>
               ) : null;
