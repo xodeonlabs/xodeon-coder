@@ -25,9 +25,11 @@ const COUNTRY_COORDS: Record<string, [number, number]> = {
 
 interface WorldMapChartProps {
   countryCounts: Record<string, number>;
+  selectedCountry?: string;
+  onCountryClick?: (code: string) => void;
 }
 
-export function WorldMapChart({ countryCounts }: WorldMapChartProps) {
+export function WorldMapChart({ countryCounts, selectedCountry, onCountryClick }: WorldMapChartProps) {
   const [hovered, setHovered] = useState<string | null>(null);
 
   const maxCount = Math.max(...Object.values(countryCounts), 1);
