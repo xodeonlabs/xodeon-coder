@@ -2087,17 +2087,80 @@ export default function AdminPanel() {
                     />
                   ))}
                 </div>
+
+                {/* Visual gradient builder */}
+                <div className="mt-3 p-3 rounded-lg bg-secondary/30 border border-border/50 space-y-3">
+                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Custom Gradient Builder</p>
+                  {(() => {
+                    const angleMatch = adForm.gradient.match(/(\d+)deg/);
+                    const currentAngle = angleMatch ? parseInt(angleMatch[1]) : 135;
+                    const hexColors = adForm.gradient.match(/#[0-9a-fA-F]{6}/g);
+                    const hslColors = adForm.gradient.match(/hsl\([^)]+\)/g);
+
+                    const color1Hex = hexColors?.[0] || '#1a2a1a';
+                    const color2Hex = hexColors?.[1] || '#1e2736';
+
+                    const updateGradient = (c1: string, c2: string, angle: number) => {
+                      setAdForm({ ...adForm, gradient: `linear-gradient(${angle}deg, ${c1}, ${c2})` });
+                    };
+
+                    return (
+                      <>
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 space-y-1">
+                            <span className="text-[10px] text-muted-foreground">Kleur 1</span>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="color"
+                                value={color1Hex}
+                                onChange={e => updateGradient(e.target.value, color2Hex, currentAngle)}
+                                className="w-8 h-8 rounded-md border border-border/50 cursor-pointer bg-transparent p-0"
+                              />
+                              <span className="text-[10px] font-mono text-muted-foreground">{color1Hex}</span>
+                            </div>
+                          </div>
+                          <div className="flex-1 space-y-1">
+                            <span className="text-[10px] text-muted-foreground">Kleur 2</span>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="color"
+                                value={color2Hex}
+                                onChange={e => updateGradient(color1Hex, e.target.value, currentAngle)}
+                                className="w-8 h-8 rounded-md border border-border/50 cursor-pointer bg-transparent p-0"
+                              />
+                              <span className="text-[10px] font-mono text-muted-foreground">{color2Hex}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] text-muted-foreground">Hoek</span>
+                            <span className="text-[10px] font-mono text-muted-foreground">{currentAngle}°</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0"
+                            max="360"
+                            value={currentAngle}
+                            onChange={e => updateGradient(color1Hex, color2Hex, parseInt(e.target.value))}
+                            className="w-full h-2 accent-primary cursor-pointer"
+                          />
+                        </div>
+                        <div
+                          className="w-full h-10 rounded-lg border border-border/50"
+                          style={{ background: adForm.gradient }}
+                        />
+                      </>
+                    );
+                  })()}
+                </div>
+
                 <div className="mt-2 flex items-center gap-2">
                   <input
                     value={adForm.gradient}
                     onChange={e => setAdForm({ ...adForm, gradient: e.target.value })}
                     placeholder="Custom gradient CSS..."
                     className="flex-1 px-3 py-1.5 text-xs rounded-lg bg-secondary/50 border border-border/50 text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary/50"
-                  />
-                  <div
-                    className="w-8 h-8 rounded-lg border border-border/50 shrink-0"
-                    style={{ background: adForm.gradient }}
-                    title="Preview"
                   />
                 </div>
               </div>
