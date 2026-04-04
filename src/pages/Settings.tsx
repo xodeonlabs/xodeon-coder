@@ -221,6 +221,8 @@ export default function Settings() {
 
     const filteredSocials: Record<string, string> = {};
     Object.entries(socialLinks).forEach(([k, v]) => { if (v.trim()) filteredSocials[k] = v.trim(); });
+    const isUsernameChanged = cleanUsername !== originalUsername;
+    const now = new Date().toISOString();
     const { error } = await supabase
       .from('profiles')
       .upsert({
@@ -231,7 +233,8 @@ export default function Settings() {
         social_links: filteredSocials,
         show_email: showEmail,
         public_email: showEmail ? (session.user.email || null) : null,
-        updated_at: new Date().toISOString(),
+        updated_at: now,
+        ...(isUsernameChanged ? { username_changed_at: now } : {}),
       } as any);
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
