@@ -61,6 +61,7 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [usernameError, setUsernameError] = useState('');
   const [originalUsername, setOriginalUsername] = useState('');
+  const [showUsernameConfirm, setShowUsernameConfirm] = useState(false);
   const [savingEmail, setSavingEmail] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [retentionItems, setRetentionItems] = useState<RetentionItem[]>([]);
@@ -364,13 +365,47 @@ export default function Settings() {
                 </button>
               </div>
               <button
-                onClick={saveProfile}
+                onClick={() => {
+                  const clean = username.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+                  if (clean !== originalUsername && clean.length >= 3) {
+                    setShowUsernameConfirm(true);
+                  } else {
+                    saveProfile();
+                  }
+                }}
                 disabled={saving}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-50"
               >
                 <Save className="h-3.5 w-3.5" />
                 {saving ? 'Opslaan...' : 'Profiel opslaan'}
               </button>
+
+              {/* Username change confirmation dialog */}
+              {showUsernameConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm" onClick={() => setShowUsernameConfirm(false)}>
+                  <div className="w-full max-w-sm mx-4 rounded-xl border border-border bg-card p-6 shadow-lg space-y-4" onClick={e => e.stopPropagation()}>
+                    <h3 className="text-base font-semibold text-foreground">Gebruikersnaam wijzigen?</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Je wijzigt je gebruikersnaam van <span className="font-mono font-medium text-foreground">@{originalUsername}</span> naar <span className="font-mono font-medium text-foreground">@{username.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '')}</span>.
+                    </p>
+                    <p className="text-xs text-amber-500">⚠ Dit verandert je login-naam en profiel-URL. Weet je het zeker?</p>
+                    <div className="flex justify-end gap-2 pt-2">
+                      <button
+                        onClick={() => setShowUsernameConfirm(false)}
+                        className="px-4 py-2 text-sm rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                      >
+                        Annuleren
+                      </button>
+                      <button
+                        onClick={() => { setShowUsernameConfirm(false); saveProfile(); }}
+                        className="px-4 py-2 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                      >
+                        Ja, wijzigen
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
