@@ -240,6 +240,7 @@ export default function Settings() {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
       toast({ title: '✅ Profiel opgeslagen!' });
+      if (isUsernameChanged) setUsernameChangedAt(now);
       setOriginalUsername(cleanUsername);
       clearCache(`profile:${session.user.id}`);
     }
