@@ -121,7 +121,7 @@ export default function Settings() {
     } else {
       supabase
         .from('profiles')
-        .select('display_name, bio, username, social_links, show_email, friend_chat_retention_hours')
+        .select('display_name, bio, username, social_links, show_email, friend_chat_retention_hours, username_changed_at')
         .eq('id', session.user.id)
         .single()
         .then(({ data }) => {
@@ -132,6 +132,7 @@ export default function Settings() {
           if ((data as any)?.social_links && typeof (data as any).social_links === 'object') {
             setSocialLinks(prev => ({ ...prev, ...(data as any).social_links }));
           }
+          if ((data as any)?.username_changed_at) setUsernameChangedAt((data as any).username_changed_at);
           if (data) setCache(cacheKey, { display_name: data.display_name, bio: (data as any)?.bio, username: (data as any)?.username });
         });
     }
