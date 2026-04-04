@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-// Approximate lat/lng → Mercator projection coordinates for country codes
+// Approximate lat/lng for country codes
 const COUNTRY_COORDS: Record<string, [number, number]> = {
   AF:[65,33],AL:[20,41],DZ:[3,28],AD:[1.5,42.5],AO:[18.5,-12.5],AR:[-64,-34],AM:[45,40],AU:[134,-25],AT:[14,47.3],AZ:[50,40.5],
   BS:[-77,24],BH:[50.5,26],BD:[90,24],BB:[-59.5,13],BY:[28,53],BE:[4.5,50.8],BZ:[-88.5,17],BJ:[2.3,9.3],BT:[90.5,27.5],BO:[-65,-17],
@@ -23,6 +23,54 @@ const COUNTRY_COORDS: Record<string, [number, number]> = {
   XK:[21,42.6],CW:[-69,12.2],SX:[-63,18],BQ:[-68.3,12.2],AW:[-70,12.5],
 };
 
+// Simplified but recognizable continent SVG paths (Equirectangular projection, viewBox 0 0 1000 500)
+const CONTINENT_PATHS = [
+  // North America
+  "M65,45 L80,38 L95,32 L115,28 L140,30 L160,28 L175,32 L195,38 L210,38 L225,42 L240,48 L250,55 L258,62 L268,72 L275,80 L278,90 L275,98 L268,105 L262,112 L255,118 L248,125 L240,130 L232,136 L225,142 L218,148 L210,155 L202,162 L195,168 L188,172 L180,178 L172,182 L165,188 L158,192 L150,195 L142,198 L135,195 L128,188 L120,182 L112,178 L105,172 L98,168 L92,162 L85,155 L80,148 L75,140 L70,132 L65,122 L62,112 L60,102 L58,92 L55,82 L55,72 L58,62 L62,52 Z",
+  // Greenland
+  "M265,22 L280,18 L295,20 L305,25 L310,32 L308,40 L300,48 L290,52 L278,50 L268,45 L262,38 L260,30 Z",
+  // South America
+  "M195,210 L208,205 L218,208 L228,215 L235,225 L240,238 L242,252 L240,268 L235,282 L228,295 L222,308 L215,320 L208,332 L200,342 L192,352 L185,362 L180,370 L175,375 L172,368 L170,358 L168,345 L165,332 L162,318 L160,305 L158,292 L158,278 L160,265 L162,252 L165,240 L170,228 L178,218 Z",
+  // Europe
+  "M418,48 L425,42 L435,38 L448,35 L460,38 L470,42 L478,48 L485,55 L490,62 L492,70 L488,78 L482,85 L475,90 L468,95 L460,98 L452,102 L445,105 L438,108 L432,112 L425,108 L420,102 L415,95 L412,88 L410,80 L412,72 L415,62 L418,55 Z",
+  // Scandinavia
+  "M440,22 L448,18 L455,22 L460,28 L462,35 L458,42 L452,48 L445,52 L438,48 L435,42 L432,35 L435,28 Z",
+  // UK/Ireland
+  "M402,52 L408,48 L415,50 L418,55 L415,60 L408,62 L402,60 L400,55 Z",
+  // Africa
+  "M420,120 L432,115 L445,112 L458,115 L468,120 L478,128 L485,138 L490,148 L492,160 L490,172 L488,185 L485,198 L480,210 L475,222 L468,232 L462,242 L455,252 L448,262 L440,272 L432,280 L425,288 L418,295 L412,300 L408,295 L405,285 L402,275 L400,262 L398,248 L398,235 L400,222 L402,208 L405,195 L408,182 L410,168 L412,155 L415,142 L418,130 Z",
+  // Madagascar
+  "M500,262 L505,258 L508,265 L505,275 L500,280 L498,272 Z",
+  // Asia (mainland)
+  "M492,30 L510,25 L530,22 L550,20 L572,22 L595,25 L618,30 L638,35 L655,42 L670,50 L682,58 L690,68 L695,78 L698,88 L695,98 L690,108 L682,118 L672,125 L660,132 L648,138 L635,142 L622,145 L608,148 L595,150 L580,152 L565,150 L552,148 L540,145 L528,140 L518,135 L508,128 L500,120 L495,110 L492,100 L490,88 L490,75 L490,62 L490,48 L492,38 Z",
+  // Middle East / Arabian Peninsula
+  "M495,110 L508,105 L518,108 L525,115 L528,125 L525,135 L518,142 L510,148 L502,145 L495,138 L492,128 L492,118 Z",
+  // India
+  "M560,115 L572,108 L582,112 L590,120 L595,130 L592,142 L585,152 L578,162 L572,170 L565,175 L558,170 L552,162 L548,152 L545,140 L548,130 L552,122 Z",
+  // Southeast Asia
+  "M618,130 L630,125 L640,130 L648,138 L650,148 L645,158 L638,165 L628,168 L620,165 L612,158 L610,148 L612,138 Z",
+  // Japan
+  "M690,58 L698,52 L705,55 L708,62 L705,70 L698,75 L690,72 L688,65 Z",
+  // Indonesia / Maritime SE Asia
+  "M628,178 L640,175 L655,178 L668,182 L678,185 L685,190 L680,195 L670,198 L658,200 L645,198 L635,195 L628,190 L625,185 Z",
+  // Australia
+  "M668,242 L688,235 L708,232 L728,235 L742,242 L750,252 L752,265 L748,278 L740,288 L728,295 L715,298 L702,295 L690,290 L680,282 L672,272 L668,260 L665,250 Z",
+  // New Zealand
+  "M768,292 L772,285 L778,288 L780,295 L778,305 L772,310 L768,305 L766,298 Z",
+  // Philippines
+  "M660,148 L665,142 L670,145 L672,152 L668,158 L662,155 Z",
+  // Sri Lanka
+  "M575,175 L580,172 L582,178 L578,182 L575,180 Z",
+  // Taiwan
+  "M668,115 L672,112 L675,118 L672,122 L668,120 Z",
+  // Papua New Guinea
+  "M710,202 L722,198 L730,202 L728,210 L720,215 L712,212 L708,208 Z",
+  // Central America
+  "M148,172 L158,168 L168,172 L175,178 L180,185 L178,192 L172,198 L165,202 L158,200 L152,195 L148,188 L145,180 Z",
+  // Caribbean
+  "M198,168 L208,165 L218,168 L222,175 L218,180 L208,178 L200,175 Z",
+];
+
 interface WorldMapChartProps {
   countryCounts: Record<string, number>;
   selectedCountry?: string;
@@ -34,10 +82,9 @@ export function WorldMapChart({ countryCounts, selectedCountry, onCountryClick }
 
   const maxCount = Math.max(...Object.values(countryCounts), 1);
 
-  // Convert lat/lng to SVG x/y using simple equirectangular projection
   const toSvg = (lng: number, lat: number): [number, number] => {
-    const x = ((lng + 180) / 360) * 800;
-    const y = ((90 - lat) / 180) * 400;
+    const x = ((lng + 180) / 360) * 1000;
+    const y = ((90 - lat) / 180) * 500;
     return [x, y];
   };
 
@@ -46,59 +93,76 @@ export function WorldMapChart({ countryCounts, selectedCountry, onCountryClick }
     .map(([code, count]) => {
       const [lng, lat] = COUNTRY_COORDS[code];
       const [x, y] = toSvg(lng, lat);
-      const intensity = Math.max(0.3, count / maxCount);
-      const radius = Math.max(4, Math.min(14, 4 + (count / maxCount) * 10));
+      const intensity = Math.max(0.4, count / maxCount);
+      const radius = Math.max(5, Math.min(16, 5 + (count / maxCount) * 11));
       return { code, count, x, y, intensity, radius };
     });
 
   return (
     <div className="relative w-full">
-      <svg viewBox="0 0 800 400" className="w-full h-auto" style={{ minHeight: 200 }}>
-        {/* Background grid lines for reference */}
-        {[0, 100, 200, 300, 400].map(y => (
-          <line key={`h${y}`} x1={0} y1={y} x2={800} y2={y} stroke="hsl(var(--border))" strokeWidth={0.5} opacity={0.3} />
-        ))}
-        {[0, 200, 400, 600, 800].map(x => (
-          <line key={`v${x}`} x1={x} y1={0} x2={x} y2={400} stroke="hsl(var(--border))" strokeWidth={0.5} opacity={0.3} />
-        ))}
+      <svg viewBox="0 0 1000 500" className="w-full h-auto" style={{ minHeight: 200 }}>
+        <defs>
+          <radialGradient id="dotGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
+          </radialGradient>
+        </defs>
 
-        {/* Simplified continent outlines */}
-        {/* These are rough polylines to give geographic context */}
-        <g opacity={0.15} fill="none" stroke="hsl(var(--muted-foreground))" strokeWidth={1}>
-          {/* North America */}
-          <path d="M80,80 L130,60 L180,55 L220,70 L250,90 L230,120 L210,150 L190,170 L160,180 L140,200 L120,190 L100,170 L80,150 L70,120 Z" fill="hsl(var(--muted-foreground))" />
-          {/* South America */}
-          <path d="M170,210 L200,200 L220,220 L230,250 L225,280 L210,310 L190,340 L170,360 L160,330 L155,290 L160,250 Z" fill="hsl(var(--muted-foreground))" />
-          {/* Europe */}
-          <path d="M370,60 L420,55 L450,65 L460,80 L440,100 L410,110 L390,100 L380,85 Z" fill="hsl(var(--muted-foreground))" />
-          {/* Africa */}
-          <path d="M380,140 L420,130 L450,150 L460,190 L450,240 L440,280 L420,310 L400,300 L390,270 L385,230 L380,190 Z" fill="hsl(var(--muted-foreground))" />
-          {/* Asia */}
-          <path d="M460,50 L550,40 L630,55 L680,80 L700,100 L690,130 L660,150 L620,160 L580,150 L540,130 L500,110 L470,90 Z" fill="hsl(var(--muted-foreground))" />
-          {/* Australia */}
-          <path d="M640,260 L700,250 L730,270 L720,300 L690,310 L660,300 L640,280 Z" fill="hsl(var(--muted-foreground))" />
-        </g>
+        {/* Continent silhouettes */}
+        {CONTINENT_PATHS.map((path, i) => (
+          <path
+            key={i}
+            d={path}
+            fill="hsl(var(--muted-foreground))"
+            opacity={0.15}
+            stroke="hsl(var(--muted-foreground))"
+            strokeWidth={0.5}
+            strokeOpacity={0.25}
+          />
+        ))}
 
         {/* Country dots */}
         {dots.map(d => (
-          <g key={d.code} onMouseEnter={() => setHovered(d.code)} onMouseLeave={() => setHovered(null)} className="cursor-pointer" onClick={() => onCountryClick?.(d.code)}>
+          <g
+            key={d.code}
+            onMouseEnter={() => setHovered(d.code)}
+            onMouseLeave={() => setHovered(null)}
+            onClick={() => onCountryClick?.(d.code)}
+            className="cursor-pointer"
+          >
             {/* Selection ring */}
             {selectedCountry === d.code && (
-              <circle cx={d.x} cy={d.y} r={d.radius + 6} fill="none" stroke="hsl(var(--primary))" strokeWidth={2.5} opacity={0.8} />
+              <circle cx={d.x} cy={d.y} r={d.radius + 7} fill="none" stroke="hsl(var(--primary))" strokeWidth={2.5} opacity={0.8} />
             )}
-            {/* Glow effect */}
-            <circle cx={d.x} cy={d.y} r={d.radius + 4} fill="hsl(var(--primary))" opacity={d.intensity * 0.15} />
-            {/* Pulse animation for hovered */}
+            {/* Outer glow */}
+            <circle cx={d.x} cy={d.y} r={d.radius + 5} fill="url(#dotGlow)" opacity={d.intensity * 0.5} />
+            {/* Pulse on hover */}
             {hovered === d.code && (
-              <circle cx={d.x} cy={d.y} r={d.radius + 8} fill="none" stroke="hsl(var(--primary))" strokeWidth={1.5} opacity={0.5}>
-                <animate attributeName="r" from={String(d.radius + 4)} to={String(d.radius + 16)} dur="1s" repeatCount="indefinite" />
+              <circle cx={d.x} cy={d.y} r={d.radius + 10} fill="none" stroke="hsl(var(--primary))" strokeWidth={1.5} opacity={0.5}>
+                <animate attributeName="r" from={String(d.radius + 5)} to={String(d.radius + 20)} dur="1s" repeatCount="indefinite" />
                 <animate attributeName="opacity" from="0.5" to="0" dur="1s" repeatCount="indefinite" />
               </circle>
             )}
             {/* Main dot */}
-            <circle cx={d.x} cy={d.y} r={d.radius} fill="hsl(var(--primary))" opacity={selectedCountry === d.code ? 1 : d.intensity} stroke="hsl(var(--primary-foreground))" strokeWidth={1.5} />
-            {/* Label */}
-            <text x={d.x} y={d.y + 1} textAnchor="middle" dominantBaseline="middle" fill="hsl(var(--primary-foreground))" fontSize={d.radius > 6 ? 8 : 6} fontWeight="bold">
+            <circle
+              cx={d.x}
+              cy={d.y}
+              r={d.radius}
+              fill="hsl(var(--primary))"
+              opacity={selectedCountry === d.code ? 1 : d.intensity}
+              stroke="hsl(var(--primary-foreground))"
+              strokeWidth={1.5}
+            />
+            {/* Count label */}
+            <text
+              x={d.x}
+              y={d.y + 1}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="hsl(var(--primary-foreground))"
+              fontSize={d.radius > 7 ? 9 : 7}
+              fontWeight="bold"
+            >
               {d.count}
             </text>
           </g>
@@ -106,14 +170,14 @@ export function WorldMapChart({ countryCounts, selectedCountry, onCountryClick }
 
         {/* Tooltip */}
         {hovered && (() => {
-          const d = dots.find(d => d.code === hovered);
+          const d = dots.find(dot => dot.code === hovered);
           if (!d) return null;
-          const tooltipX = Math.min(Math.max(d.x, 60), 740);
-          const tooltipY = d.y - d.radius - 14;
+          const tooltipX = Math.min(Math.max(d.x, 70), 930);
+          const tooltipY = d.y - d.radius - 16;
           return (
             <g>
-              <rect x={tooltipX - 50} y={tooltipY - 16} width={100} height={22} rx={6} fill="hsl(var(--popover))" stroke="hsl(var(--border))" strokeWidth={1} />
-              <text x={tooltipX} y={tooltipY - 3} textAnchor="middle" fill="hsl(var(--popover-foreground))" fontSize={10} fontWeight="600">
+              <rect x={tooltipX - 55} y={tooltipY - 18} width={110} height={24} rx={6} fill="hsl(var(--popover))" stroke="hsl(var(--border))" strokeWidth={1} />
+              <text x={tooltipX} y={tooltipY - 4} textAnchor="middle" fill="hsl(var(--popover-foreground))" fontSize={11} fontWeight="600">
                 {d.code} — {d.count} gebruiker{d.count !== 1 ? 's' : ''}
               </text>
             </g>
