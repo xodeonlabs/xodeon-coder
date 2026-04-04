@@ -194,6 +194,18 @@ export default function Settings() {
 
     // Check uniqueness if username changed
     if (cleanUsername !== originalUsername) {
+      // Check 30-day cooldown
+      if (usernameChangedAt) {
+        const lastChanged = new Date(usernameChangedAt);
+        const daysSince = (Date.now() - lastChanged.getTime()) / (1000 * 60 * 60 * 24);
+        if (daysSince < 30) {
+          const daysLeft = Math.ceil(30 - daysSince);
+          setUsernameError(`Je kunt je gebruikersnaam pas over ${daysLeft} dag${daysLeft !== 1 ? 'en' : ''} wijzigen`);
+          setSaving(false);
+          return;
+        }
+      }
+
       const { data: existing } = await supabase
         .from('profiles')
         .select('id')
