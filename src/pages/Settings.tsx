@@ -62,6 +62,7 @@ export default function Settings() {
   const [usernameError, setUsernameError] = useState('');
   const [originalUsername, setOriginalUsername] = useState('');
   const [showUsernameConfirm, setShowUsernameConfirm] = useState(false);
+  const [usernameChangedAt, setUsernameChangedAt] = useState<string | null>(null);
   const [savingEmail, setSavingEmail] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [retentionItems, setRetentionItems] = useState<RetentionItem[]>([]);
@@ -120,7 +121,7 @@ export default function Settings() {
     } else {
       supabase
         .from('profiles')
-        .select('display_name, bio, username, social_links, show_email, friend_chat_retention_hours')
+        .select('display_name, bio, username, social_links, show_email, friend_chat_retention_hours, username_changed_at')
         .eq('id', session.user.id)
         .single()
         .then(({ data }) => {
@@ -131,6 +132,7 @@ export default function Settings() {
           if ((data as any)?.social_links && typeof (data as any).social_links === 'object') {
             setSocialLinks(prev => ({ ...prev, ...(data as any).social_links }));
           }
+          if ((data as any)?.username_changed_at) setUsernameChangedAt((data as any).username_changed_at);
           if (data) setCache(cacheKey, { display_name: data.display_name, bio: (data as any)?.bio, username: (data as any)?.username });
         });
     }
@@ -192,6 +194,18 @@ export default function Settings() {
 
     // Check uniqueness if username changed
     if (cleanUsername !== originalUsername) {
+      // Check 30-day cooldown
+      if (usernameChangedAt) {
+        const lastChanged = new Date(usernameChangedAt);
+        const daysSince = (Date.now() - lastChanged.getTime()) / (1000 * 60 * 60 * 24);
+        if (daysSince < 30) {
+          const daysLeft = Math.ceil(30 - daysSince);
+          setUsernameError(`Je kunt je gebruikersnaam pas over ${daysLeft} dag${daysLeft !== 1 ? 'en' : ''} wijzigen`);
+          setSaving(false);
+          return;
+        }
+      }
+
       const { data: existing } = await supabase
         .from('profiles')
         .select('id')
@@ -207,6 +221,8 @@ export default function Settings() {
 
     const filteredSocials: Record<string, string> = {};
     Object.entries(socialLinks).forEach(([k, v]) => { if (v.trim()) filteredSocials[k] = v.trim(); });
+    const isUsernameChanged = cleanUsername !== originalUsername;
+    const now = new Date().toISOString();
     const { error } = await supabase
       .from('profiles')
       .upsert({
@@ -217,12 +233,14 @@ export default function Settings() {
         social_links: filteredSocials,
         show_email: showEmail,
         public_email: showEmail ? (session.user.email || null) : null,
-        updated_at: new Date().toISOString(),
+        updated_at: now,
+        ...(isUsernameChanged ? { username_changed_at: now } : {}),
       } as any);
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
       toast({ title: '✅ Profiel opgeslagen!' });
+      if (isUsernameChanged) setUsernameChangedAt(now);
       setOriginalUsername(cleanUsername);
       clearCache(`profile:${session.user.id}`);
     }
@@ -327,6 +345,14 @@ export default function Settings() {
                   <span className="text-[10px] text-muted-foreground">
                     Dit is je login-naam en profiel-URL: /profiel/{username || '...'}
                     {username !== originalUsername && username.length >= 3 && <span className="text-amber-500 ml-1">⚠ Let op: je login verandert mee!</span>}
+                    {usernameChangedAt && (() => {
+                      const daysSince = (Date.now() - new Date(usernameChangedAt).getTime()) / (1000 * 60 * 60 * 24);
+                      if (daysSince < 30) {
+                        const daysLeft = Math.ceil(30 - daysSince);
+                        return <span className="block text-amber-500 mt-0.5">🔒 Volgende wijziging mogelijk over {daysLeft} dag{daysLeft !== 1 ? 'en' : ''}</span>;
+                      }
+                      return null;
+                    })()}
                   </span>
                 )}
               </div>
