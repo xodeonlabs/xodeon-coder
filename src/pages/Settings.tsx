@@ -345,6 +345,14 @@ export default function Settings() {
                   <span className="text-[10px] text-muted-foreground">
                     Dit is je login-naam en profiel-URL: /profiel/{username || '...'}
                     {username !== originalUsername && username.length >= 3 && <span className="text-amber-500 ml-1">⚠ Let op: je login verandert mee!</span>}
+                    {usernameChangedAt && (() => {
+                      const daysSince = (Date.now() - new Date(usernameChangedAt).getTime()) / (1000 * 60 * 60 * 24);
+                      if (daysSince < 30) {
+                        const daysLeft = Math.ceil(30 - daysSince);
+                        return <span className="block text-amber-500 mt-0.5">🔒 Volgende wijziging mogelijk over {daysLeft} dag{daysLeft !== 1 ? 'en' : ''}</span>;
+                      }
+                      return null;
+                    })()}
                   </span>
                 )}
               </div>
