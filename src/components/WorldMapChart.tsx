@@ -81,7 +81,11 @@ export function WorldMapChart({ countryCounts, selectedCountry, onCountryClick }
 
         {/* Country dots */}
         {dots.map(d => (
-          <g key={d.code} onMouseEnter={() => setHovered(d.code)} onMouseLeave={() => setHovered(null)} className="cursor-pointer">
+          <g key={d.code} onMouseEnter={() => setHovered(d.code)} onMouseLeave={() => setHovered(null)} className="cursor-pointer" onClick={() => onCountryClick?.(d.code)}>
+            {/* Selection ring */}
+            {selectedCountry === d.code && (
+              <circle cx={d.x} cy={d.y} r={d.radius + 6} fill="none" stroke="hsl(var(--primary))" strokeWidth={2.5} opacity={0.8} />
+            )}
             {/* Glow effect */}
             <circle cx={d.x} cy={d.y} r={d.radius + 4} fill="hsl(var(--primary))" opacity={d.intensity * 0.15} />
             {/* Pulse animation for hovered */}
@@ -92,7 +96,7 @@ export function WorldMapChart({ countryCounts, selectedCountry, onCountryClick }
               </circle>
             )}
             {/* Main dot */}
-            <circle cx={d.x} cy={d.y} r={d.radius} fill="hsl(var(--primary))" opacity={d.intensity} stroke="hsl(var(--primary-foreground))" strokeWidth={1.5} />
+            <circle cx={d.x} cy={d.y} r={d.radius} fill="hsl(var(--primary))" opacity={selectedCountry === d.code ? 1 : d.intensity} stroke="hsl(var(--primary-foreground))" strokeWidth={1.5} />
             {/* Label */}
             <text x={d.x} y={d.y + 1} textAnchor="middle" dominantBaseline="middle" fill="hsl(var(--primary-foreground))" fontSize={d.radius > 6 ? 8 : 6} fontWeight="bold">
               {d.count}

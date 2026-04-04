@@ -859,7 +859,11 @@ export default function AdminPanel() {
                   {/* World map */}
                   <div className="rounded-xl border border-border/50 p-5" style={{ background: 'hsl(var(--card))' }}>
                     <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2"><Globe className="h-4 w-4 text-primary" /> Wereldkaart</h3>
-                    <WorldMapChart countryCounts={countryCounts} />
+                    <WorldMapChart
+                      countryCounts={countryCounts}
+                      selectedCountry={countryFilter !== 'all' && countryFilter !== 'unknown' ? countryFilter : undefined}
+                      onCountryClick={(code) => setCountryFilter(countryFilter === code ? 'all' : code)}
+                    />
                   </div>
                   {/* Bar chart */}
                   <div className="rounded-xl border border-border/50 p-5" style={{ background: 'hsl(var(--card))' }}>
