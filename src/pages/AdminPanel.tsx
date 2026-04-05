@@ -722,28 +722,6 @@ export default function AdminPanel() {
         <div className="flex items-center gap-2">
           <button
             onClick={async () => {
-              try {
-                const { data: allProfiles } = await supabase.from('profiles').select('id, username, display_name');
-                if (!allProfiles || allProfiles.length === 0) { toast({ title: 'Geen gebruikers gevonden', variant: 'destructive' }); return; }
-                const randomUser = allProfiles[Math.floor(Math.random() * allProfiles.length)];
-                const randomAmount = Math.floor(Math.random() * 451) + 50; // 50-500
-                const { data: existing } = await supabase.from('user_coins').select('balance').eq('user_id', randomUser.id).maybeSingle();
-                if (existing) {
-                  await supabase.from('user_coins').update({ balance: existing.balance + randomAmount, updated_at: new Date().toISOString() }).eq('user_id', randomUser.id);
-                } else {
-                  await supabase.from('user_coins').insert({ user_id: randomUser.id, balance: 100 + randomAmount });
-                }
-                const name = randomUser.display_name || randomUser.username || randomUser.id.slice(0, 8);
-                toast({ title: `🎲 ${randomAmount} coins gegeven!`, description: `Aan ${name}` });
-              } catch { toast({ title: 'Fout bij random coins', variant: 'destructive' }); }
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-          >
-            <Dice5 className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Random Coins</span>
-          </button>
-          <button
-            onClick={async () => {
               await supabase.channel('admin-force-refresh').send({ type: 'broadcast', event: 'force-refresh', payload: {} });
               toast({ title: 'Force refresh verstuurd', description: 'Alle gebruikers worden nu herladen.' });
             }}
