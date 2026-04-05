@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, Megaphone, Plus, Eye, EyeOff, Pencil, Ban, ShieldOff, Activity, MessageCircle, Send, Coins, Handshake, BarChart3, Globe, Lock, BookTemplate, Save, Tags, RotateCcw, Dice5 } from 'lucide-react';
+import { ArrowLeft, Shield, Users, Trash2, UserPlus, Crown, ShieldCheck, User, Building2, AppWindow, Megaphone, Plus, Eye, EyeOff, Pencil, Ban, ShieldOff, Activity, MessageCircle, Send, Coins, Handshake, BarChart3, Globe, Lock, BookTemplate, Save, Tags, RotateCcw, Dice5, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { WorldMapChart } from '@/components/WorldMapChart';
@@ -882,7 +883,14 @@ export default function AdminPanel() {
                 <div className="space-y-4">
                   {/* World map */}
                   <div className="rounded-xl border border-border/50 p-5" style={{ background: 'hsl(var(--card))' }}>
-                    <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2"><Globe className="h-4 w-4 text-primary" /> Wereldkaart</h3>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-bold text-foreground flex items-center gap-2"><Globe className="h-4 w-4 text-primary" /> Wereldkaart</h3>
+                      {countryFilter !== 'all' && (
+                        <Button size="sm" variant="outline" onClick={() => setCountryFilter('all')} className="h-7 text-xs gap-1">
+                          <X className="h-3 w-3" /> Reset filter
+                        </Button>
+                      )}
+                    </div>
                     <WorldMapChart
                       countryCounts={countryCounts}
                       selectedCountry={countryFilter !== 'all' && countryFilter !== 'unknown' ? countryFilter : undefined}
