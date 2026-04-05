@@ -1031,7 +1031,7 @@ export default function AdminPanel() {
                                     if (error) throw error;
                                     await logAction('Username cooldown gereset', 'user', profile.id);
                                     toast({ title: 'Cooldown gereset', description: `Gebruikersnaam cooldown van ${displayLabel} is gereset.` });
-                                    loadProfiles();
+                                    fetchAll();
                                   } catch { toast({ title: 'Fout bij resetten cooldown', variant: 'destructive' }); }
                                 }}
                                 className="p-1 rounded-lg text-muted-foreground hover:text-accent-foreground hover:bg-accent transition-colors"
