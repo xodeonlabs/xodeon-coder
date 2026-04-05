@@ -1651,6 +1651,56 @@ export default function AdminPanel() {
               </button>
             </div>
 
+            {/* Random coins per land */}
+            <div className="flex flex-wrap items-end gap-3 mb-6 p-4 rounded-lg border border-border/40" style={{ background: 'hsl(var(--background))' }}>
+              <div className="flex-1 min-w-[180px]">
+                <label className="block text-xs font-medium text-muted-foreground mb-1">🎲 Random coins per land</label>
+                <select
+                  id="random-country-select"
+                  defaultValue=""
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                >
+                  <option value="">Alle landen (willekeurig)</option>
+                  {Array.from(new Set(profiles.map(p => p.country).filter(Boolean))).sort().map(c => (
+                    <option key={c} value={c!}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="w-28">
+                <label className="block text-xs font-medium text-muted-foreground mb-1">Min</label>
+                <input type="number" id="random-min" defaultValue={50} min={1} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+              </div>
+              <div className="w-28">
+                <label className="block text-xs font-medium text-muted-foreground mb-1">Max</label>
+                <input type="number" id="random-max" defaultValue={500} min={1} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+              </div>
+              <button
+                onClick={async () => {
+                  try {
+                    const country = (document.getElementById('random-country-select') as HTMLSelectElement).value;
+                    const min = parseInt((document.getElementById('random-min') as HTMLInputElement).value) || 50;
+                    const max = parseInt((document.getElementById('random-max') as HTMLInputElement).value) || 500;
+                    const eligible = profiles.filter(p => !country || p.country === country);
+                    if (eligible.length === 0) { toast({ title: 'Geen gebruikers gevonden voor dit land', variant: 'destructive' }); return; }
+                    const randomUser = eligible[Math.floor(Math.random() * eligible.length)];
+                    const randomAmount = Math.floor(Math.random() * (max - min + 1)) + min;
+                    const { data: existing } = await supabase.from('user_coins').select('balance').eq('user_id', randomUser.id).maybeSingle();
+                    if (existing) {
+                      await supabase.from('user_coins').update({ balance: existing.balance + randomAmount }).eq('user_id', randomUser.id);
+                    } else {
+                      await supabase.from('user_coins').insert({ user_id: randomUser.id, balance: 100 + randomAmount });
+                    }
+                    const name = randomUser.display_name || randomUser.username || randomUser.id.slice(0, 8);
+                    await logAction(`Random ${randomAmount} coins gegeven aan ${name}${country ? ` (${country})` : ''}`, 'user', randomUser.id);
+                    toast({ title: `🎲 ${randomAmount} coins gegeven!`, description: `Aan ${name}${country ? ` uit ${country}` : ''}` });
+                    loadAllCoins();
+                  } catch { toast({ title: 'Fout bij random coins', variant: 'destructive' }); }
+                }}
+                className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center gap-1.5"
+              >
+                <Dice5 className="h-4 w-4" /> Random coins
+              </button>
+
             {/* Coins overview */}
             {userCoins.length === 0 ? (
               <p className="text-sm text-muted-foreground">Geen coins data gevonden.</p>
