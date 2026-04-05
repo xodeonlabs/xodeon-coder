@@ -1023,6 +1023,23 @@ export default function AdminPanel() {
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
+                            {(profile as any).username_changed_at && (
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    const { error } = await supabase.from('profiles').update({ username_changed_at: null }).eq('id', profile.id);
+                                    if (error) throw error;
+                                    await logAction('Username cooldown gereset', 'user', profile.id);
+                                    toast({ title: 'Cooldown gereset', description: `Gebruikersnaam cooldown van ${displayLabel} is gereset.` });
+                                    loadProfiles();
+                                  } catch { toast({ title: 'Fout bij resetten cooldown', variant: 'destructive' }); }
+                                }}
+                                className="p-1 rounded-lg text-muted-foreground hover:text-accent-foreground hover:bg-accent transition-colors"
+                                title="Username cooldown resetten"
+                              >
+                                <RotateCcw className="h-3.5 w-3.5" />
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
