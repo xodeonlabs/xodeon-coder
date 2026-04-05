@@ -1,4 +1,5 @@
-import { WorldMap } from 'react-svg-worldmap';
+import WorldMap from 'react-svg-worldmap';
+import type { CountryContext } from 'react-svg-worldmap';
 
 interface WorldMapChartProps {
   countryCounts: Record<string, number>;
