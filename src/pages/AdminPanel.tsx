@@ -1700,6 +1700,7 @@ export default function AdminPanel() {
               >
                 <Dice5 className="h-4 w-4" /> Random coins
               </button>
+            </div>
 
             {/* Coins overview */}
             {userCoins.length === 0 ? (
