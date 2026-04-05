@@ -9,7 +9,7 @@ interface WorldMapChartProps {
 
 export function WorldMapChart({ countryCounts, selectedCountry, onCountryClick }: WorldMapChartProps) {
   const data = Object.entries(countryCounts).map(([country, value]) => ({
-    country: country.toLowerCase(),
+    country: country.toLowerCase() as any,
     value,
   }));
 
