@@ -54,6 +54,17 @@ export function WorldMapChart({ countryCounts, selectedCountry, onCountryClick }
           return `${countryName}: ${countryValue ?? 0} gebruiker${countryValue !== 1 ? 's' : ''}`;
         }}
       />
+      {/* Legend */}
+      <div className="flex items-center gap-2 mt-3 px-1">
+        <span className="text-[10px] text-muted-foreground">Minder</span>
+        <div className="flex-1 h-2 rounded-full overflow-hidden flex max-w-[180px]">
+          {[0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1].map((opacity, i) => (
+            <div key={i} className="flex-1 h-full" style={{ background: `hsl(var(--primary) / ${opacity})` }} />
+          ))}
+        </div>
+        <span className="text-[10px] text-muted-foreground">Meer</span>
+        <span className="text-[10px] text-muted-foreground ml-1">(max: {maxCount})</span>
+      </div>
     </div>
   );
 }
