@@ -24,6 +24,7 @@ const Auth = () => {
   const [loginMethod, setLoginMethod] = useState<'username' | 'email'>('username');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
