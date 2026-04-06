@@ -90,6 +90,7 @@ const Auth = () => {
           }
           const { error: signInError } = await auth.signInWithPassword({ email: email.trim(), password });
           if (signInError) throw signInError;
+          localStorage.setItem('rememberMe', rememberMe ? 'true' : 'false');
         }
         navigate('/');
         return;
