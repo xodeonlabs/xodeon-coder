@@ -81,6 +81,7 @@ const Auth = () => {
           }
           const { error: signInError } = await auth.signInWithPassword({ email: lookupData.email, password });
           if (signInError) throw signInError;
+          localStorage.setItem('rememberMe', rememberMe ? 'true' : 'false');
         } else {
           // Login with email directly
           if (!email.trim()) {
