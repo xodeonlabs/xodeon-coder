@@ -864,11 +864,17 @@ export default function AdminPanel() {
                   <div className="rounded-xl border border-border/50 p-5" style={{ background: 'hsl(var(--card))' }}>
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-sm font-bold text-foreground flex items-center gap-2"><Globe className="h-4 w-4 text-primary" /> Wereldkaart</h3>
-                      {countryFilter !== 'all' && (
-                        <Button size="sm" variant="outline" onClick={() => setCountryFilter('all')} className="h-7 text-xs gap-1">
-                          <X className="h-3 w-3" /> Reset filter
-                        </Button>
-                      )}
+                      {countryFilter !== 'all' && (() => {
+                        const count = profiles.filter(p => countryFilter === 'unknown' ? !p.country : p.country === countryFilter).length;
+                        return (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-md">{count} gebruiker{count !== 1 ? 's' : ''}</span>
+                            <Button size="sm" variant="outline" onClick={() => setCountryFilter('all')} className="h-7 text-xs gap-1">
+                              <X className="h-3 w-3" /> Reset filter
+                            </Button>
+                          </div>
+                        );
+                      })()}
                     </div>
                     <WorldMapChart
                       countryCounts={countryCounts}
