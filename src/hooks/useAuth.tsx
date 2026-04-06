@@ -55,7 +55,22 @@ export function useAuth() {
       }
     });
 
-    return () => subscription.unsubscribe();
+    // "Remember me" logic: sign out when browser/tab closes if not remembered
+    const handleBeforeUnload = () => {
+      const rememberMe = localStorage.getItem('rememberMe');
+      if (rememberMe === 'false') {
+        // Clear session storage so user must log in again
+        localStorage.removeItem('sb-xgnewppkivznltxugzcu-auth-token');
+        localStorage.removeItem('rememberMe');
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, []);
 
   const signOut = async () => {
