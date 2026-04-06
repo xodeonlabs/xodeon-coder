@@ -861,7 +861,7 @@ export default function AdminPanel() {
               return chartData.length > 0 ? (
                 <div className="space-y-4">
                   {/* World map */}
-                  <div className="rounded-xl border border-border/50 p-5" style={{ background: 'hsl(var(--card))' }}>
+                  <div className="rounded-xl border border-border/50 p-5 min-h-[500px]" style={{ background: 'hsl(var(--card))' }}>
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-sm font-bold text-foreground flex items-center gap-2"><Globe className="h-4 w-4 text-primary" /> Wereldkaart</h3>
                       {countryFilter !== 'all' && (() => {
