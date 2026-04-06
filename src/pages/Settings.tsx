@@ -349,9 +349,22 @@ export default function Settings() {
                       const daysSince = (Date.now() - new Date(usernameChangedAt).getTime()) / (1000 * 60 * 60 * 24);
                       if (daysSince < 30) {
                         const daysLeft = Math.ceil(30 - daysSince);
-                        return <span className="block text-amber-500 mt-0.5">🔒 Volgende wijziging mogelijk over {daysLeft} dag{daysLeft !== 1 ? 'en' : ''}</span>;
+                        const progress = Math.min(100, (daysSince / 30) * 100);
+                        return (
+                          <span className="block mt-1.5">
+                            <span className="flex items-center gap-1.5 text-amber-500 text-[10px] mb-1">
+                              🔒 Volgende wijziging over {daysLeft} dag{daysLeft !== 1 ? 'en' : ''}
+                            </span>
+                            <span className="flex items-center gap-2">
+                              <span className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                                <span className="block h-full rounded-full bg-gradient-to-r from-amber-500 to-primary transition-all" style={{ width: `${progress}%` }} />
+                              </span>
+                              <span className="text-[9px] text-muted-foreground whitespace-nowrap">{Math.floor(daysSince)}/30 dagen</span>
+                            </span>
+                          </span>
+                        );
                       }
-                      return null;
+                      return <span className="block text-emerald-500 text-[10px] mt-0.5">✅ Je kunt je gebruikersnaam wijzigen</span>;
                     })()}
                   </span>
                 )}
