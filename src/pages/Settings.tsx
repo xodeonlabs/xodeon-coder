@@ -357,7 +357,7 @@ export default function Settings() {
                             </span>
                             <span className="flex items-center gap-2">
                               <span className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
-                                <span className="block h-full rounded-full bg-gradient-to-r from-amber-500 to-primary transition-all" style={{ width: `${progress}%` }} />
+                                <span className="block h-full rounded-full bg-gradient-to-r from-amber-500 to-primary transition-all duration-1000 ease-out" style={{ width: `${progress}%`, animation: 'grow-width 1s ease-out forwards' }} />
                               </span>
                               <span className="text-[9px] text-muted-foreground whitespace-nowrap">{Math.floor(daysSince)}/30 dagen</span>
                             </span>
