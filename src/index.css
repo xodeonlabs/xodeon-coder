@@ -313,6 +313,10 @@
   100% { background-position: 0% 50%; }
 }
 
+@keyframes grow-width {
+  from { width: 0%; }
+}
+
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
