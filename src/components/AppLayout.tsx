@@ -1,6 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { AdBanner } from '@/components/AdBanner';
+import { InstallPWAButton } from '@/components/InstallPWAButton';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, MessageCircle, Users, Building2, BarChart3, Shield, Settings, Menu, X, Package, Cloud, ExternalLink, Database,
@@ -185,6 +186,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           )}
         </main>
       </div>
+
+      {/* Floating PWA install button — verbergt zichzelf wanneer al geïnstalleerd of niet beschikbaar */}
+      {!HIDE_AD_ROUTES.some(r => location.pathname.startsWith(r)) && (
+        <div className="fixed bottom-20 right-3 z-[85] lg:bottom-4 lg:right-4">
+          <InstallPWAButton
+            variant="default"
+            size="sm"
+            className="shadow-lg shadow-primary/30 backdrop-blur-md"
+          />
+        </div>
+      )}
 
       {/* Mobile bottom nav */}
       <MobileBottomNav />
