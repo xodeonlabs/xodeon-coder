@@ -1,6 +1,6 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import WorldMap from 'react-svg-worldmap';
-import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, Expand, Shrink } from 'lucide-react';
 
 interface WorldMapChartProps {
   countryCounts: Record<string, number>;
@@ -20,7 +20,20 @@ export function WorldMapChart({ countryCounts, selectedCountry, onCountryClick }
   const [scale, setScale] = useState(1);
   const [translate, setTranslate] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const panStart = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
+
+  useEffect(() => {
+    if (!isFullscreen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsFullscreen(false); };
+    window.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isFullscreen]);
 
   const clampTranslate = useCallback((x: number, y: number, s: number) => {
     const maxOffset = (s - 1) * 200;
@@ -66,9 +79,12 @@ export function WorldMapChart({ countryCounts, selectedCountry, onCountryClick }
   const resetZoom = () => { setScale(1); setTranslate({ x: 0, y: 0 }); };
 
   return (
-    <div className="relative w-full">
+    <div className={isFullscreen ? "fixed inset-0 z-[100] bg-background p-4 flex flex-col" : "relative w-full"}>
       {/* Zoom controls */}
       <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
+        <button onClick={() => setIsFullscreen(f => !f)} className="h-7 w-7 flex items-center justify-center rounded-md bg-background/80 border border-border/50 text-muted-foreground hover:text-foreground hover:bg-background transition-colors backdrop-blur-sm" title={isFullscreen ? "Sluit fullscreen" : "Fullscreen"}>
+          {isFullscreen ? <Shrink className="h-3.5 w-3.5" /> : <Expand className="h-3.5 w-3.5" />}
+        </button>
         <button onClick={zoomIn} className="h-7 w-7 flex items-center justify-center rounded-md bg-background/80 border border-border/50 text-muted-foreground hover:text-foreground hover:bg-background transition-colors backdrop-blur-sm" title="Inzoomen">
           <ZoomIn className="h-3.5 w-3.5" />
         </button>
