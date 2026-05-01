@@ -187,6 +187,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
+      {/* Floating PWA install button — verbergt zichzelf wanneer al geïnstalleerd of niet beschikbaar */}
+      {!HIDE_AD_ROUTES.some(r => location.pathname.startsWith(r)) && (
+        <div className="fixed bottom-20 right-3 z-[85] lg:bottom-4 lg:right-4">
+          <InstallPWAButton
+            variant="default"
+            size="sm"
+            className="shadow-lg shadow-primary/30 backdrop-blur-md"
+          />
+        </div>
+      )}
+
       {/* Mobile bottom nav */}
       <MobileBottomNav />
     </SidebarProvider>
