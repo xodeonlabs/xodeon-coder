@@ -1,6 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { AdBanner } from '@/components/AdBanner';
+import { InstallPWAButton } from '@/components/InstallPWAButton';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, MessageCircle, Users, Building2, BarChart3, Shield, Settings, Menu, X, Package, Cloud, ExternalLink, Database,
