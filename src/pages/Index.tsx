@@ -319,30 +319,66 @@ const Index = () => {
     };
   }, [code, appId, loading, appName, session?.user?.id]);
 
+  // Always-fresh code reference so the debounced save persists the latest value
+  const codeRef = useRef(code);
+  useEffect(() => { codeRef.current = code; }, [code]);
+
   // Save to database
   const saveNow = useCallback(async () => {
     if (!appId) return;
-    if (saveTimer.current) clearTimeout(saveTimer.current);
+    if (saveTimer.current) { clearTimeout(saveTimer.current); saveTimer.current = null; }
     setSaveStatus('saving');
-    await supabase.from('apps').update({ ngc_code: code }).eq('id', appId);
-    setSaveStatus('saved');
+    const snapshot = codeRef.current;
+    const { error } = await supabase.from('apps').update({ ngc_code: snapshot }).eq('id', appId);
+    if (error) {
+      setSaveStatus('unsaved');
+      toast({ title: 'Opslaan mislukt', description: error.message, variant: 'destructive' });
+      return;
+    }
+    if (codeRef.current === snapshot) setSaveStatus('saved');
     setLastSaved(new Date());
     toast({ title: '✓ Opgeslagen', description: 'Je code is opgeslagen', duration: 1500 });
-  }, [code, appId, toast]);
+  }, [appId, toast]);
 
-  // Auto-save with reduced debounce (800ms for snappier feel)
+  // Auto-save with debounce. Note: NO cleanup that clears the timer on every
+  // re-render — that caused saves to be dropped if a remote-update window
+  // (isRemoteUpdate=true) coincided with the user typing.
   useEffect(() => {
-    if (loading || !appId || isRemoteUpdate.current) return;
+    if (loading || !appId) return;
+    if (isRemoteUpdate.current) return;
     setSaveStatus('unsaved');
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
+      saveTimer.current = null;
+      if (isRemoteUpdate.current) return;
+      const snapshot = codeRef.current;
       setSaveStatus('saving');
-      await supabase.from('apps').update({ ngc_code: code }).eq('id', appId);
-      setSaveStatus('saved');
+      const { error } = await supabase.from('apps').update({ ngc_code: snapshot }).eq('id', appId);
+      if (error) {
+        setSaveStatus('unsaved');
+        return;
+      }
+      // Only mark as 'saved' if no newer edits arrived during the await
+      if (codeRef.current === snapshot) setSaveStatus('saved');
       setLastSaved(new Date());
     }, 800);
-    return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
   }, [code, appId, loading]);
+
+  // Flush pending save on unmount / before unload so nothing is lost
+  useEffect(() => {
+    const flush = () => {
+      if (!appId || !saveTimer.current) return;
+      clearTimeout(saveTimer.current);
+      saveTimer.current = null;
+      // Fire-and-forget; browser may not await, but request is queued
+      supabase.from('apps').update({ ngc_code: codeRef.current }).eq('id', appId);
+    };
+    window.addEventListener('beforeunload', flush);
+    return () => {
+      window.removeEventListener('beforeunload', flush);
+      flush();
+    };
+  }, [appId]);
 
   // Undo tracking — push to stack on code changes (debounced)
   useEffect(() => {
