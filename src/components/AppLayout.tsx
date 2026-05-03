@@ -4,7 +4,7 @@ import { AdBanner } from '@/components/AdBanner';
 import { InstallPWAButton } from '@/components/InstallPWAButton';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, MessageCircle, Users, Building2, BarChart3, Shield, Settings, Menu, X, Package, Cloud, ExternalLink, Database,
+  LayoutDashboard, MessageCircle, Users, Building2, BarChart3, Shield, Settings, Menu, X, Package, Cloud, ExternalLink, Database, LogOut,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -49,7 +49,7 @@ const MORE_ITEMS = [
 function MobileBottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { session } = useAuth();
+  const { session, signOut } = useAuth();
   const [showMore, setShowMore] = useState(false);
   const [showProducts, setShowProducts] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -98,6 +98,15 @@ function MobileBottomNav() {
                   Admin
                 </button>
               )}
+            </div>
+            <div className="mt-1 pt-1 border-t border-border/40">
+              <button
+                onClick={() => { setShowMore(false); signOut(); }}
+                className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-destructive hover:bg-destructive/10"
+              >
+                <LogOut className="h-4 w-4" />
+                Uitloggen
+              </button>
             </div>
           </div>
         </div>
