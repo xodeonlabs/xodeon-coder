@@ -29,6 +29,7 @@ import GroupChats from "./pages/GroupChats";
 import Upgrades from "./pages/Upgrades";
 import XodeonData from "./pages/XodeonData";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Welcome from "./pages/Welcome";
 
 const queryClient = new QueryClient();
 
