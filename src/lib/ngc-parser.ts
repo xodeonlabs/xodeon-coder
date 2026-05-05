@@ -79,6 +79,11 @@ function parseNodeHeader(content: string): { type: string; name: string } | null
     return { type: 'Var', name: `GaNaar ${gaNaarMatch[1]}` };
   }
 
+  // Slash commands: /nav "Home", /login, /set x=1, /add score 1, /coin+ wallet 5, etc.
+  if (content.startsWith('/')) {
+    return { type: 'Var', name: content };
+  }
+
   // Standard node: Type Name:
   const nodeMatch = content.match(/^(\w+)\s+(\w+)\s*:$/);
   if (nodeMatch) {
