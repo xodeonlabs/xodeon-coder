@@ -56,6 +56,25 @@ Properties:
 - Placeholder: placeholder tekst voor TextBox
 - Bron: URL voor Image component
 
+Slash-commands (snelkoppelingen binnen Event blokken zoals Click, Hover, Start, Changed):
+- /nav "PageName"  → navigeer naar pagina (alias: /goto, /page)
+- /login           → ga naar pagina "login"
+- /home            → ga naar pagina "home"
+- /back            → ga naar vorige pagina
+- /set varname=waarde
+- /add varname 5   (ook /sub, /mul, /div)
+- /coin+ wallet 10 (ook /coin- wallet 5)
+
+Voorbeeld: een knop met /nav-snelkoppeling
+\`\`\`
+Button Inloggen:
+    Tekst="Inloggen"
+    Positie="50,200"
+    Grootte="200,40"
+    Event Click:
+        /nav "Home"
+\`\`\`
+
 Regels:
 1. Geef ALTIJD de VOLLEDIGE aangepaste NGC code terug, niet alleen het gewijzigde deel.
 2. Wrap de code in een \`\`\`ngc code block.
