@@ -243,6 +243,7 @@ const KIND_COLORS: Record<string, string> = {
   event: '#fb923c',
   value: '#4ade80',
   command: '#f472b6',
+  template: '#facc15',
 };
 
 // Shared style constants — must be identical on textarea and highlight layer
