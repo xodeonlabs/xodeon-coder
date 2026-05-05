@@ -671,8 +671,11 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
   }, []);
 
   const handleNavigate = useCallback((pageName: string) => {
-    setCurrentPage(pageName);
-  }, []);
+    setCurrentPage(prev => {
+      if (prev) runtime.setVar('_prev_page', prev);
+      return pageName;
+    });
+  }, [runtime]);
 
   const handleReset = useCallback(() => {
     clearPersistedState();
