@@ -37,7 +37,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();
   usePresence();
   if (loading) return <div className="flex h-screen items-center justify-center" style={{ background: '#0a0e1a' }}><span className="text-sm text-muted-foreground">Laden...</span></div>;
-  if (!session) return <Navigate to="/auth" replace />;
+  if (!session) return <Navigate to="/welcome" replace />;
   return (
     <UsernameGate userId={session.user.id}>
       <AppLayout>{children}</AppLayout>
