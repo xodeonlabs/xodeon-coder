@@ -10,8 +10,194 @@ interface CodeEditorProps {
 interface Suggestion {
   label: string;
   insert: string;
-  kind: 'keyword' | 'property' | 'event' | 'value' | 'command';
+  kind: 'keyword' | 'property' | 'event' | 'value' | 'command' | 'template';
+  description?: string;
 }
+
+// Pre-programmed slash templates — insert ready-made code blocks
+const SLASH_TEMPLATES: Suggestion[] = [
+  {
+    label: '/login',
+    kind: 'template',
+    description: 'Login frame met velden en knop',
+    insert: `Frame LoginFrame:
+    Positie="0,0"
+    Grootte="320,260"
+    Kleur="rgb(30,30,40)"
+    Hoekradius="12"
+    Text Titel:
+        Tekst="Inloggen"
+        Positie="20,20"
+    TextBox Email:
+        Placeholder="E-mail"
+        Positie="20,60"
+        Grootte="280,36"
+        Variabele="email"
+    TextBox Wachtwoord:
+        Placeholder="Wachtwoord"
+        Positie="20,110"
+        Grootte="280,36"
+        Variabele="wachtwoord"
+    Button Inloggen:
+        Tekst="Inloggen"
+        Positie="20,170"
+        Grootte="280,40"
+        Kleur="rgb(59,130,246)"
+        Hoekradius="8"
+        Event Click:
+            /nav "Home"`,
+  },
+  {
+    label: '/signup',
+    kind: 'template',
+    description: 'Registratie frame',
+    insert: `Frame SignupFrame:
+    Positie="0,0"
+    Grootte="320,320"
+    Kleur="rgb(30,30,40)"
+    Hoekradius="12"
+    Text Titel:
+        Tekst="Account aanmaken"
+        Positie="20,20"
+    TextBox Naam:
+        Placeholder="Naam"
+        Positie="20,60"
+        Grootte="280,36"
+        Variabele="naam"
+    TextBox Email:
+        Placeholder="E-mail"
+        Positie="20,110"
+        Grootte="280,36"
+        Variabele="email"
+    TextBox Wachtwoord:
+        Placeholder="Wachtwoord"
+        Positie="20,160"
+        Grootte="280,36"
+        Variabele="wachtwoord"
+    Button Registreer:
+        Tekst="Registreer"
+        Positie="20,220"
+        Grootte="280,40"
+        Kleur="rgb(34,197,94)"
+        Hoekradius="8"
+        Event Click:
+            /nav "Home"`,
+  },
+  {
+    label: '/navbar',
+    kind: 'template',
+    description: 'Navigatiebalk met knoppen',
+    insert: `Frame NavBar:
+    Positie="0,0"
+    Grootte="800,56"
+    Kleur="rgb(20,20,30)"
+    Button HomeKnop:
+        Tekst="Home"
+        Positie="16,12"
+        Grootte="80,32"
+        Event Click:
+            /nav "Home"
+    Button OverKnop:
+        Tekst="Over"
+        Positie="104,12"
+        Grootte="80,32"
+        Event Click:
+            /nav "Over"`,
+  },
+  {
+    label: '/card',
+    kind: 'template',
+    description: 'Kaart met titel en tekst',
+    insert: `Frame Kaart:
+    Positie="0,0"
+    Grootte="240,160"
+    Kleur="rgb(40,40,55)"
+    Hoekradius="12"
+    Text Titel:
+        Tekst="Titel"
+        Positie="16,16"
+    Text Beschrijving:
+        Tekst="Beschrijving hier"
+        Positie="16,48"`,
+  },
+  {
+    label: '/counter',
+    kind: 'template',
+    description: 'Teller met +/- knoppen',
+    insert: `Var(teller="0")
+Frame Counter:
+    Positie="0,0"
+    Grootte="200,100"
+    Kleur="rgb(30,30,40)"
+    Hoekradius="12"
+    Text Waarde:
+        Tekst="{teller}"
+        Positie="90,30"
+    Button Min:
+        Tekst="-"
+        Positie="16,50"
+        Grootte="40,32"
+        Event Click:
+            /sub teller 1
+    Button Plus:
+        Tekst="+"
+        Positie="144,50"
+        Grootte="40,32"
+        Event Click:
+            /add teller 1`,
+  },
+  {
+    label: '/page',
+    kind: 'template',
+    description: 'Lege pagina',
+    insert: `Page NieuwePagina:
+    Text Welkom:
+        Tekst="Welkom"
+        Positie="20,20"`,
+  },
+  {
+    label: '/nav',
+    kind: 'template',
+    description: 'Navigeer naar pagina',
+    insert: '/nav "PaginaNaam"',
+  },
+  {
+    label: '/back',
+    kind: 'template',
+    description: 'Ga terug naar vorige pagina',
+    insert: '/back',
+  },
+  {
+    label: '/set',
+    kind: 'template',
+    description: 'Zet variabele waarde',
+    insert: '/set naam=waarde',
+  },
+  {
+    label: '/add',
+    kind: 'template',
+    description: 'Tel op bij variabele',
+    insert: '/add naam 1',
+  },
+  {
+    label: '/sub',
+    kind: 'template',
+    description: 'Trek af van variabele',
+    insert: '/sub naam 1',
+  },
+  {
+    label: '/coin+',
+    kind: 'template',
+    description: 'Voeg munten toe',
+    insert: '/coin+ wallet 10',
+  },
+  {
+    label: '/coin-',
+    kind: 'template',
+    description: 'Verwijder munten',
+    insert: '/coin- wallet 5',
+  },
+];
 
 const ALL_SUGGESTIONS: Suggestion[] = [
   { label: 'App', insert: 'App:', kind: 'keyword' },
