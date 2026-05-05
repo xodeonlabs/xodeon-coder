@@ -332,10 +332,21 @@ export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
     if (!ta) return;
     const before = code.substring(0, wordStart);
     const after = code.substring(ta.selectionStart);
-    const newCode = before + suggestion.insert + after;
+
+    // For multiline templates, re-indent each new line to match the indent of the line where it's inserted
+    let insertText = suggestion.insert;
+    if (suggestion.kind === 'template' && insertText.includes('\n')) {
+      const lineStart = before.lastIndexOf('\n') + 1;
+      const indent = before.substring(lineStart).match(/^[ \t]*/)?.[0] ?? '';
+      if (indent) {
+        insertText = insertText.split('\n').map((l, i) => (i === 0 ? l : indent + l)).join('\n');
+      }
+    }
+
+    const newCode = before + insertText + after;
     onChange(newCode);
     closeSuggestions();
-    const newPos = wordStart + suggestion.insert.length;
+    const newPos = wordStart + insertText.length;
     requestAnimationFrame(() => {
       ta.focus();
       ta.selectionStart = ta.selectionEnd = newPos;
@@ -348,6 +359,32 @@ export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
 
     const cursor = ta.selectionStart;
     const textBefore = code.substring(0, cursor);
+
+    // Slash template trigger: match /word at cursor
+    const slashMatch = textBefore.match(/\/(\w*)$/);
+    if (slashMatch) {
+      const query = '/' + slashMatch[1];
+      const wStart = cursor - query.length;
+      const filtered = SLASH_TEMPLATES.filter(s =>
+        s.label.toLowerCase().startsWith(query.toLowerCase())
+      );
+      if (filtered.length === 0) {
+        closeSuggestions();
+        return;
+      }
+      setCurrentWord(query);
+      setWordStart(wStart);
+      setSuggestions(filtered.slice(0, 10));
+      setSelectedIdx(0);
+      const linesBefore = textBefore.split('\n');
+      const lineNum = linesBefore.length - 1;
+      const colNum = linesBefore[linesBefore.length - 1].length;
+      const charWidth = 8.4;
+      const top = PAD_TOP + (lineNum + 1) * LINE_HEIGHT - ta.scrollTop;
+      const left = GUTTER_WIDTH + PAD_LEFT + colNum * charWidth - ta.scrollLeft;
+      setMenuPos({ top, left });
+      return;
+    }
 
     const wordMatch = textBefore.match(/(\w+)$/);
     if (!wordMatch || wordMatch[1].length < 2) {
