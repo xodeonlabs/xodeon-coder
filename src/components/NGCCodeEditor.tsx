@@ -10,8 +10,194 @@ interface CodeEditorProps {
 interface Suggestion {
   label: string;
   insert: string;
-  kind: 'keyword' | 'property' | 'event' | 'value' | 'command';
+  kind: 'keyword' | 'property' | 'event' | 'value' | 'command' | 'template';
+  description?: string;
 }
+
+// Pre-programmed slash templates — insert ready-made code blocks
+const SLASH_TEMPLATES: Suggestion[] = [
+  {
+    label: '/login',
+    kind: 'template',
+    description: 'Login frame met velden en knop',
+    insert: `Frame LoginFrame:
+    Positie="0,0"
+    Grootte="320,260"
+    Kleur="rgb(30,30,40)"
+    Hoekradius="12"
+    Text Titel:
+        Tekst="Inloggen"
+        Positie="20,20"
+    TextBox Email:
+        Placeholder="E-mail"
+        Positie="20,60"
+        Grootte="280,36"
+        Variabele="email"
+    TextBox Wachtwoord:
+        Placeholder="Wachtwoord"
+        Positie="20,110"
+        Grootte="280,36"
+        Variabele="wachtwoord"
+    Button Inloggen:
+        Tekst="Inloggen"
+        Positie="20,170"
+        Grootte="280,40"
+        Kleur="rgb(59,130,246)"
+        Hoekradius="8"
+        Event Click:
+            /nav "Home"`,
+  },
+  {
+    label: '/signup',
+    kind: 'template',
+    description: 'Registratie frame',
+    insert: `Frame SignupFrame:
+    Positie="0,0"
+    Grootte="320,320"
+    Kleur="rgb(30,30,40)"
+    Hoekradius="12"
+    Text Titel:
+        Tekst="Account aanmaken"
+        Positie="20,20"
+    TextBox Naam:
+        Placeholder="Naam"
+        Positie="20,60"
+        Grootte="280,36"
+        Variabele="naam"
+    TextBox Email:
+        Placeholder="E-mail"
+        Positie="20,110"
+        Grootte="280,36"
+        Variabele="email"
+    TextBox Wachtwoord:
+        Placeholder="Wachtwoord"
+        Positie="20,160"
+        Grootte="280,36"
+        Variabele="wachtwoord"
+    Button Registreer:
+        Tekst="Registreer"
+        Positie="20,220"
+        Grootte="280,40"
+        Kleur="rgb(34,197,94)"
+        Hoekradius="8"
+        Event Click:
+            /nav "Home"`,
+  },
+  {
+    label: '/navbar',
+    kind: 'template',
+    description: 'Navigatiebalk met knoppen',
+    insert: `Frame NavBar:
+    Positie="0,0"
+    Grootte="800,56"
+    Kleur="rgb(20,20,30)"
+    Button HomeKnop:
+        Tekst="Home"
+        Positie="16,12"
+        Grootte="80,32"
+        Event Click:
+            /nav "Home"
+    Button OverKnop:
+        Tekst="Over"
+        Positie="104,12"
+        Grootte="80,32"
+        Event Click:
+            /nav "Over"`,
+  },
+  {
+    label: '/card',
+    kind: 'template',
+    description: 'Kaart met titel en tekst',
+    insert: `Frame Kaart:
+    Positie="0,0"
+    Grootte="240,160"
+    Kleur="rgb(40,40,55)"
+    Hoekradius="12"
+    Text Titel:
+        Tekst="Titel"
+        Positie="16,16"
+    Text Beschrijving:
+        Tekst="Beschrijving hier"
+        Positie="16,48"`,
+  },
+  {
+    label: '/counter',
+    kind: 'template',
+    description: 'Teller met +/- knoppen',
+    insert: `Var(teller="0")
+Frame Counter:
+    Positie="0,0"
+    Grootte="200,100"
+    Kleur="rgb(30,30,40)"
+    Hoekradius="12"
+    Text Waarde:
+        Tekst="{teller}"
+        Positie="90,30"
+    Button Min:
+        Tekst="-"
+        Positie="16,50"
+        Grootte="40,32"
+        Event Click:
+            /sub teller 1
+    Button Plus:
+        Tekst="+"
+        Positie="144,50"
+        Grootte="40,32"
+        Event Click:
+            /add teller 1`,
+  },
+  {
+    label: '/page',
+    kind: 'template',
+    description: 'Lege pagina',
+    insert: `Page NieuwePagina:
+    Text Welkom:
+        Tekst="Welkom"
+        Positie="20,20"`,
+  },
+  {
+    label: '/nav',
+    kind: 'template',
+    description: 'Navigeer naar pagina',
+    insert: '/nav "PaginaNaam"',
+  },
+  {
+    label: '/back',
+    kind: 'template',
+    description: 'Ga terug naar vorige pagina',
+    insert: '/back',
+  },
+  {
+    label: '/set',
+    kind: 'template',
+    description: 'Zet variabele waarde',
+    insert: '/set naam=waarde',
+  },
+  {
+    label: '/add',
+    kind: 'template',
+    description: 'Tel op bij variabele',
+    insert: '/add naam 1',
+  },
+  {
+    label: '/sub',
+    kind: 'template',
+    description: 'Trek af van variabele',
+    insert: '/sub naam 1',
+  },
+  {
+    label: '/coin+',
+    kind: 'template',
+    description: 'Voeg munten toe',
+    insert: '/coin+ wallet 10',
+  },
+  {
+    label: '/coin-',
+    kind: 'template',
+    description: 'Verwijder munten',
+    insert: '/coin- wallet 5',
+  },
+];
 
 const ALL_SUGGESTIONS: Suggestion[] = [
   { label: 'App', insert: 'App:', kind: 'keyword' },
@@ -57,6 +243,7 @@ const KIND_COLORS: Record<string, string> = {
   event: '#fb923c',
   value: '#4ade80',
   command: '#f472b6',
+  template: '#facc15',
 };
 
 // Shared style constants — must be identical on textarea and highlight layer
@@ -145,10 +332,21 @@ export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
     if (!ta) return;
     const before = code.substring(0, wordStart);
     const after = code.substring(ta.selectionStart);
-    const newCode = before + suggestion.insert + after;
+
+    // For multiline templates, re-indent each new line to match the indent of the line where it's inserted
+    let insertText = suggestion.insert;
+    if (suggestion.kind === 'template' && insertText.includes('\n')) {
+      const lineStart = before.lastIndexOf('\n') + 1;
+      const indent = before.substring(lineStart).match(/^[ \t]*/)?.[0] ?? '';
+      if (indent) {
+        insertText = insertText.split('\n').map((l, i) => (i === 0 ? l : indent + l)).join('\n');
+      }
+    }
+
+    const newCode = before + insertText + after;
     onChange(newCode);
     closeSuggestions();
-    const newPos = wordStart + suggestion.insert.length;
+    const newPos = wordStart + insertText.length;
     requestAnimationFrame(() => {
       ta.focus();
       ta.selectionStart = ta.selectionEnd = newPos;
@@ -161,6 +359,32 @@ export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
 
     const cursor = ta.selectionStart;
     const textBefore = code.substring(0, cursor);
+
+    // Slash template trigger: match /word at cursor
+    const slashMatch = textBefore.match(/\/(\w*)$/);
+    if (slashMatch) {
+      const query = '/' + slashMatch[1];
+      const wStart = cursor - query.length;
+      const filtered = SLASH_TEMPLATES.filter(s =>
+        s.label.toLowerCase().startsWith(query.toLowerCase())
+      );
+      if (filtered.length === 0) {
+        closeSuggestions();
+        return;
+      }
+      setCurrentWord(query);
+      setWordStart(wStart);
+      setSuggestions(filtered.slice(0, 10));
+      setSelectedIdx(0);
+      const linesBefore = textBefore.split('\n');
+      const lineNum = linesBefore.length - 1;
+      const colNum = linesBefore[linesBefore.length - 1].length;
+      const charWidth = 8.4;
+      const top = PAD_TOP + (lineNum + 1) * LINE_HEIGHT - ta.scrollTop;
+      const left = GUTTER_WIDTH + PAD_LEFT + colNum * charWidth - ta.scrollLeft;
+      setMenuPos({ top, left });
+      return;
+    }
 
     const wordMatch = textBefore.match(/(\w+)$/);
     if (!wordMatch || wordMatch[1].length < 2) {
@@ -351,7 +575,7 @@ export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
             >
               <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: KIND_COLORS[s.kind] }} />
               <span className="font-mono text-foreground">{s.label}</span>
-              <span className="ml-auto text-muted-foreground/50 text-[10px] truncate">{s.kind}</span>
+              <span className="ml-auto text-muted-foreground/50 text-[10px] truncate">{s.description ?? s.kind}</span>
             </button>
           ))}
         </div>
