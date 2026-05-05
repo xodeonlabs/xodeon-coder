@@ -202,6 +202,11 @@ export function astToNGC(node: NGCNode, indent: number = 0): string {
   let result = '';
 
   if (node.type === 'Var') {
+    // Slash command: store as-is
+    if (node.name.startsWith('/')) {
+      result += `${prefix}${node.name}\n`;
+      return result;
+    }
     // GaNaar command
     if (node.name.startsWith('GaNaar ')) {
       result += `${prefix}${node.name}\n`;
