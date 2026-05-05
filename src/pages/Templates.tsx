@@ -151,7 +151,7 @@ export default function Templates() {
     }
 
     // Increment downloads
-    await supabase.from('templates' as any).update({ downloads: template.downloads + 1 } as any).eq('id', template.id);
+    await (supabase as any).rpc('increment_template_downloads', { template_id: template.id });
     toast({ title: 'Template geladen!', description: `"${template.name}" is aangemaakt als nieuwe app.` });
     navigate(`/editor/${data.id}`);
   }
