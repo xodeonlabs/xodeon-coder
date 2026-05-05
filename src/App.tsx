@@ -29,6 +29,7 @@ import GroupChats from "./pages/GroupChats";
 import Upgrades from "./pages/Upgrades";
 import XodeonData from "./pages/XodeonData";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Welcome from "./pages/Welcome";
 
 const queryClient = new QueryClient();
 
@@ -36,7 +37,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();
   usePresence();
   if (loading) return <div className="flex h-screen items-center justify-center" style={{ background: '#0a0e1a' }}><span className="text-sm text-muted-foreground">Laden...</span></div>;
-  if (!session) return <Navigate to="/auth" replace />;
+  if (!session) return <Navigate to="/welcome" replace />;
   return (
     <UsernameGate userId={session.user.id}>
       <AppLayout>{children}</AppLayout>
@@ -48,7 +49,7 @@ function ProtectedPreview() {
   const { session, loading } = useAuth();
   usePresence();
   if (loading) return <div className="flex h-screen items-center justify-center" style={{ background: '#0a0e1a' }}><span className="text-sm text-muted-foreground">Laden...</span></div>;
-  if (!session) return <Navigate to="/auth" replace />;
+  if (!session) return <Navigate to="/welcome" replace />;
   return (
     <UsernameGate userId={session.user.id}>
       <Preview />
@@ -65,6 +66,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<Auth />} />
+          <Route path="/welcome" element={<Welcome />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/guest" element={<Guest />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
