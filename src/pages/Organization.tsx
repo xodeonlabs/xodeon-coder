@@ -192,13 +192,19 @@ export default function OrganizationPage() {
     if (cached) { setOrgs(cached); setLoading(false); return; }
     const { data, error } = await supabase
       .from('organizations')
-      .select('*')
+      .select('id, name, owner_id, created_at, updated_at, icon, bio, chat_retention_hours, level, level_paid_until, auto_pay')
       .order('created_at', { ascending: false });
     if (error) {
       toast({ title: 'Fout', description: error.message, variant: 'destructive' });
     } else {
-      setOrgs((data as unknown as Organization[]) || []);
-      setCache(cacheKey, (data as unknown as Organization[]) || []);
+      const list = (data as unknown as Organization[]) || [];
+      // Fetch join_code only for orgs where the user is owner/admin via RPC
+      const enriched = await Promise.all(list.map(async (o) => {
+        const { data: code } = await (supabase as any).rpc('get_org_join_code', { org_id: o.id });
+        return { ...o, join_code: (code as string) || '' };
+      }));
+      setOrgs(enriched);
+      setCache(cacheKey, enriched);
     }
     setLoading(false);
   }
