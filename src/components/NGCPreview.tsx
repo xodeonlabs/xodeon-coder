@@ -149,11 +149,85 @@ interface CoinHandlers {
   remove: (name: string, amount: number) => Promise<boolean> | boolean;
 }
 
+/** Parse a slash command into a normalized action. Returns null if not a slash command. */
+function parseSlashCommand(input: string): { kind: 'nav' | 'set' | 'math' | 'coin'; payload: any } | null {
+  const trimmed = input.trim();
+  if (!trimmed.startsWith('/')) return null;
+  const stripQuotes = (s: string) => s.trim().replace(/^"|"$/g, '');
+
+  // /login (shorthand voor naar pagina "login")
+  if (/^\/login\s*$/i.test(trimmed)) return { kind: 'nav', payload: 'login' };
+  // /home
+  if (/^\/home\s*$/i.test(trimmed)) return { kind: 'nav', payload: 'home' };
+  // /back -> previous page (uses _prev_page var)
+  if (/^\/back\s*$/i.test(trimmed)) return { kind: 'nav', payload: '__back__' };
+
+  // /nav "PageName" or /nav PageName  (also /goto, /page)
+  const navMatch = trimmed.match(/^\/(?:nav|goto|page)\s+(.+)$/i);
+  if (navMatch) return { kind: 'nav', payload: stripQuotes(navMatch[1]) };
+
+  // /set varname=value
+  const setMatch = trimmed.match(/^\/set\s+(\w+)\s*=\s*(.+)$/i);
+  if (setMatch) return { kind: 'set', payload: { name: setMatch[1], value: stripQuotes(setMatch[2]) } };
+
+  // /add /sub /mul /div  varname  amount
+  const mathMatch = trimmed.match(/^\/(add|sub|mul|div)\s+(\w+)\s+(.+)$/i);
+  if (mathMatch) {
+    const opMap: Record<string, '+' | '-' | '*' | '/'> = { add: '+', sub: '-', mul: '*', div: '/' };
+    return { kind: 'math', payload: { op: opMap[mathMatch[1].toLowerCase()], name: mathMatch[2], operand: stripQuotes(mathMatch[3]) } };
+  }
+
+  // /coin+ name amount  /coin- name amount
+  const coinMatch = trimmed.match(/^\/coin([+\-])\s+(\w+)\s+(\d+)\s*$/);
+  if (coinMatch) return { kind: 'coin', payload: { op: coinMatch[1], name: coinMatch[2], amount: parseInt(coinMatch[3]) } };
+
+  return null;
+}
+
 /** Execute actions; returns a page name if GaNaar is encountered */
 function executeActions(eventNode: NGCNode, runtime: NGCRuntime, coinHandlers?: CoinHandlers): string | null {
   let navigateTo: string | null = null;
 
   for (const child of eventNode.children) {
+    // Slash command shortcut
+    const slash = parseSlashCommand(child.name);
+    if (slash) {
+      switch (slash.kind) {
+        case 'nav':
+          if (slash.payload === '__back__') {
+            const prev = runtime.getVar('_prev_page');
+            if (prev) navigateTo = prev;
+          } else {
+            navigateTo = slash.payload;
+          }
+          continue;
+        case 'set':
+          runtime.setVar(slash.payload.name, resolveVarRefs(slash.payload.value, runtime));
+          continue;
+        case 'math': {
+          const { op, name, operand } = slash.payload;
+          const current = parseFloat(runtime.getVar(name)) || 0;
+          const val = parseFloat(resolveVarRefs(operand, runtime)) || 0;
+          let result = current;
+          if (op === '+') result = current + val;
+          else if (op === '-') result = current - val;
+          else if (op === '*') result = current * val;
+          else if (op === '/') result = val !== 0 ? current / val : 0;
+          runtime.setVar(name, String(result));
+          continue;
+        }
+        case 'coin': {
+          const { op, name, amount } = slash.payload;
+          if (op === '+') {
+            if (coinHandlers) coinHandlers.add(name, amount); else runtime.coinsAdd(name, amount);
+          } else {
+            if (coinHandlers) coinHandlers.remove(name, amount); else runtime.coinsRemove(name, amount);
+          }
+          continue;
+        }
+      }
+    }
+
     // Check for GaNaar navigation command (parsed as Var node with name "GaNaar PageName")
     if (child.name.startsWith('GaNaar ')) {
       const target = child.name.replace(/^GaNaar\s+/, '').replace(/"/g, '').trim();
@@ -597,8 +671,11 @@ export function NGCPreview({ ast, organizationId }: PreviewProps) {
   }, []);
 
   const handleNavigate = useCallback((pageName: string) => {
-    setCurrentPage(pageName);
-  }, []);
+    setCurrentPage(prev => {
+      if (prev) runtime.setVar('_prev_page', prev);
+      return pageName;
+    });
+  }, [runtime]);
 
   const handleReset = useCallback(() => {
     clearPersistedState();

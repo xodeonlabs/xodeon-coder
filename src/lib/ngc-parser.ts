@@ -79,6 +79,11 @@ function parseNodeHeader(content: string): { type: string; name: string } | null
     return { type: 'Var', name: `GaNaar ${gaNaarMatch[1]}` };
   }
 
+  // Slash commands: /nav "Home", /login, /set x=1, /add score 1, /coin+ wallet 5, etc.
+  if (content.startsWith('/')) {
+    return { type: 'Var', name: content };
+  }
+
   // Standard node: Type Name:
   const nodeMatch = content.match(/^(\w+)\s+(\w+)\s*:$/);
   if (nodeMatch) {
@@ -197,6 +202,11 @@ export function astToNGC(node: NGCNode, indent: number = 0): string {
   let result = '';
 
   if (node.type === 'Var') {
+    // Slash command: store as-is
+    if (node.name.startsWith('/')) {
+      result += `${prefix}${node.name}\n`;
+      return result;
+    }
     // GaNaar command
     if (node.name.startsWith('GaNaar ')) {
       result += `${prefix}${node.name}\n`;
