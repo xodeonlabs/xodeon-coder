@@ -1175,6 +1175,7 @@ export type Database = {
         Args: { _user1: string; _user2: string }
         Returns: boolean
       }
+      get_org_join_code: { Args: { org_id: string }; Returns: string }
       has_org_role: {
         Args: {
           _org_id: string
@@ -1188,6 +1189,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_template_downloads: {
+        Args: { template_id: string }
+        Returns: undefined
       }
       is_alliance_admin: { Args: { _alliance_id: string }; Returns: boolean }
       is_alliance_member: { Args: { _alliance_id: string }; Returns: boolean }
