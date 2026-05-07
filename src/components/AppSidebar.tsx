@@ -225,14 +225,16 @@ export function AppSidebar() {
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel>{collapsed ? '' : 'Navigatie'}</SidebarGroupLabel>
+          <SidebarGroupLabel>{collapsed ? '' : t('nav.home')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {NAV_ITEMS.map((item) => {
+                const title = t(item.tKey);
+                return (
+                <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton
                     isActive={isActive(item.url)}
-                    tooltip={collapsed ? item.title : undefined}
+                    tooltip={collapsed ? title : undefined}
                     onClick={() => navigate(item.url)}
                     className={`flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-sm font-medium transition-all ${
                       isActive(item.url)
@@ -241,7 +243,7 @@ export function AppSidebar() {
                     }`}
                   >
                     <item.icon className="h-4 w-4 shrink-0" />
-                    <span className="flex-1">{item.title}</span>
+                    <span className="flex-1">{title}</span>
                     {item.url === '/groepen' && unreadGroups > 0 && (
                       <span className="ml-auto min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1">
                         {unreadGroups > 9 ? '9+' : unreadGroups}
