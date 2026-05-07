@@ -21,6 +21,7 @@ const getErrorText = (err: unknown, fallback: string) => {
 };
 
 const Auth = () => {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<'login' | 'register' | 'forgot' | 'magic-link'>('login');
   const [username, setUsername] = useState('');
   const [loginMethod, setLoginMethod] = useState<'username' | 'email'>('username');
