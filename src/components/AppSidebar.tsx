@@ -18,16 +18,16 @@ import { AppIcon } from '@/components/IconPicker';
 import { StatusDot } from '@/components/StatusDot';
 
 const NAV_ITEMS = [
-  { title: 'Dashboard', url: '/', icon: LayoutDashboard },
-  { title: 'Berichten', url: '/berichten', icon: MessageCircle },
-  { title: 'Groepen', url: '/groepen', icon: Users },
-  { title: 'Bedrijven', url: '/organization', icon: Building2 },
-  { title: 'Upgrades', url: '/upgrades', icon: ArrowUp },
-  { title: 'Allianties', url: '/alliances', icon: Handshake },
-  { title: 'Analytics', url: '/analytics', icon: BarChart3 },
-  { title: 'Templates', url: '/templates', icon: LayoutGrid },
-  { title: 'API Data', url: '/xodeon-data', icon: Database },
-];
+  { tKey: 'nav.dashboard', url: '/', icon: LayoutDashboard },
+  { tKey: 'nav.messages', url: '/berichten', icon: MessageCircle },
+  { tKey: 'nav.groups', url: '/groepen', icon: Users },
+  { tKey: 'nav.organization', url: '/organization', icon: Building2 },
+  { tKey: 'nav.upgrades', url: '/upgrades', icon: ArrowUp },
+  { tKey: 'nav.alliances', url: '/alliances', icon: Handshake },
+  { tKey: 'nav.analytics', url: '/analytics', icon: BarChart3 },
+  { tKey: 'nav.templates', url: '/templates', icon: LayoutGrid },
+  { tKey: 'nav.apiData', url: '/xodeon-data', icon: Database },
+] as const;
 
 export function AppSidebar() {
   const navigate = useNavigate();
