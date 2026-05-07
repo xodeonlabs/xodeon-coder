@@ -423,20 +423,20 @@ const Auth = () => {
         <p className="text-xs text-center mt-6 text-muted-foreground">
           {mode === 'forgot' || mode === 'magic-link' ? (
             <button onClick={() => switchMode('login')} className="text-primary hover:text-primary/80 transition-colors inline-flex items-center gap-1">
-              <ArrowLeft className="h-3 w-3" /> Terug naar inloggen
+              <ArrowLeft className="h-3 w-3" /> {t('auth.backToLogin')}
             </button>
           ) : mode === 'login' ? (
             <>
-              Nog geen account?{' '}
+              {t('auth.noAccount')}{' '}
               <button onClick={() => switchMode('register')} className="text-primary hover:text-primary/80 transition-colors font-medium">
-                Registreer
+                {t('auth.register')}
               </button>
             </>
           ) : (
             <>
-              Al een account?{' '}
+              {t('auth.haveAccount')}{' '}
               <button onClick={() => switchMode('login')} className="text-primary hover:text-primary/80 transition-colors font-medium">
-                Log in
+                {t('auth.signIn')}
               </button>
             </>
           )}
