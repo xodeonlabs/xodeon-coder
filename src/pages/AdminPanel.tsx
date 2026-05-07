@@ -948,14 +948,14 @@ export default function AdminPanel() {
                           {profile.bio && <p className="text-[11px] text-muted-foreground truncate">{profile.bio}</p>}
                           <p className="text-[10px] text-muted-foreground flex items-center gap-1.5">
                             {profile.country && (
-                              <span className="inline-flex items-center gap-0.5" title={profile.country}>
+                              <span className="inline-flex items-center gap-0.5" title={countryName(profile.country)}>
                                 <img
                                   src={`https://flagcdn.com/16x12/${profile.country.toLowerCase()}.png`}
-                                  alt={profile.country}
+                                  alt={countryName(profile.country)}
                                   className="h-3 w-4 object-cover rounded-[2px]"
                                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                 />
-                                <span className="text-[10px]">{profile.country}</span>
+                                <span className="text-[10px]">{countryName(profile.country)}</span>
                               </span>
                             )}
                             <span>
