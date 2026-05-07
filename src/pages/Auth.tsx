@@ -242,7 +242,7 @@ const Auth = () => {
             {/* Username - for login (username mode) and register */}
             {((mode === 'login' && loginMethod === 'username') || mode === 'register') && (
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">Gebruikersnaam</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">{t('auth.username')}</label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                   <input
@@ -253,7 +253,7 @@ const Auth = () => {
                     minLength={3}
                     maxLength={30}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm text-foreground bg-background/80 border border-border/60 outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-muted-foreground/40"
-                    placeholder="jouw_username"
+                    placeholder={t('auth.usernamePlaceholder')}
                     autoComplete="username"
                   />
                 </div>
