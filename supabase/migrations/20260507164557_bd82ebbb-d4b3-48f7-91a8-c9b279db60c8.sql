@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS language TEXT CHECK (language IN ('nl','en','fr'));
