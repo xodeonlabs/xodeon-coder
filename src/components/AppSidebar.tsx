@@ -16,6 +16,7 @@ import {
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { AppIcon } from '@/components/IconPicker';
 import { StatusDot } from '@/components/StatusDot';
+import { useTranslation } from 'react-i18next';
 
 const NAV_ITEMS = [
   { tKey: 'nav.dashboard', url: '/', icon: LayoutDashboard },
