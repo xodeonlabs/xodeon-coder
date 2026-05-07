@@ -51,6 +51,7 @@ function MobileBottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const { session, signOut } = useAuth();
+  const { t } = useTranslation();
   const [showMore, setShowMore] = useState(false);
   const [showProducts, setShowProducts] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
