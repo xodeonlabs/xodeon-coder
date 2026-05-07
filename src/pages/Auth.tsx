@@ -175,17 +175,17 @@ const Auth = () => {
   };
 
   const modeTitle = {
-    login: 'Welkom terug',
-    register: 'Account aanmaken',
-    forgot: 'Wachtwoord herstellen',
-    'magic-link': 'Inloggen met link',
+    login: t('auth.titleLogin'),
+    register: t('auth.titleRegister'),
+    forgot: t('auth.titleForgot'),
+    'magic-link': t('auth.titleMagic'),
   };
 
   const modeSubtitle = {
-    login: loginMethod === 'username' ? 'Log in met je gebruikersnaam' : 'Log in met je e-mailadres',
-    register: 'Kies een gebruikersnaam en begin',
-    forgot: 'We sturen je een resetlink',
-    'magic-link': 'We sturen je een magische link',
+    login: loginMethod === 'username' ? t('auth.subtitleLoginUsername') : t('auth.subtitleLoginEmail'),
+    register: t('auth.subtitleRegister'),
+    forgot: t('auth.subtitleForgot'),
+    'magic-link': t('auth.subtitleMagic'),
   };
 
   return (
