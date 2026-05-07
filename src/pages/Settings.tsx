@@ -73,6 +73,7 @@ export default function Settings() {
   const [toastEnabled, setToastEnabled] = useState(() => getNotificationToastEnabled());
   const { dndEnabled, toggleDnd } = useDoNotDisturb();
   const { theme, setTheme } = useTheme();
+  const { i18n } = useTranslation();
 
   const isScrollingRef = useRef(false);
 
