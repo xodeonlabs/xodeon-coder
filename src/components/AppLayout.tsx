@@ -87,7 +87,7 @@ function MobileBottomNav() {
                   }`}
                 >
                   <item.icon className="h-4 w-4" />
-                  {item.title}
+                  {t(item.tKey)}
                 </button>
               ))}
               {isAdmin && (
@@ -164,7 +164,7 @@ function MobileBottomNav() {
                 }`}
               >
                 <item.icon className="h-5 w-5" />
-                <span className="text-[10px] font-medium">{item.title}</span>
+                <span className="text-[10px] font-medium">{t(item.tKey)}</span>
               </button>
             );
           })}
