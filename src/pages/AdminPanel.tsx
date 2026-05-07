@@ -890,8 +890,8 @@ export default function AdminPanel() {
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={chartData} layout="vertical" margin={{ left: 40, right: 20, top: 5, bottom: 5 }}>
                           <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
-                          <YAxis type="category" dataKey="country" tick={{ fontSize: 11, fill: 'hsl(var(--foreground))' }} width={50} tickFormatter={(v: string) => v === '??' ? 'Onbekend' : v} />
-                          <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12, color: 'hsl(var(--foreground))' }} formatter={(value: number) => [`${value} gebruiker${value !== 1 ? 's' : ''}`, 'Aantal']} labelFormatter={(l: string) => l === '??' ? 'Onbekend' : `Land: ${l}`} />
+                          <YAxis type="category" dataKey="country" tick={{ fontSize: 11, fill: 'hsl(var(--foreground))' }} width={110} tickFormatter={(v: string) => v === '??' ? 'Onbekend' : countryName(v)} />
+                          <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12, color: 'hsl(var(--foreground))' }} formatter={(value: number) => [`${value} gebruiker${value !== 1 ? 's' : ''}`, 'Aantal']} labelFormatter={(l: string) => l === '??' ? 'Onbekend' : `Land: ${countryName(l)}`} />
                           <Bar dataKey="count" radius={[0, 6, 6, 0]}>{chartData.map((_, i) => (<Cell key={i} fill={COLORS[i % COLORS.length]} />))}</Bar>
                         </BarChart>
                       </ResponsiveContainer>
