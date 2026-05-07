@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { WorldMapChart } from '@/components/WorldMapChart';
+import { countryName } from '@/lib/country-names';
 
 const EMOJI_LIST = [
   { emoji: '🚀', label: 'rocket' }, { emoji: '🎮', label: 'game' }, { emoji: '🐍', label: 'snake' },
@@ -868,7 +869,7 @@ export default function AdminPanel() {
                         const count = profiles.filter(p => countryFilter === 'unknown' ? !p.country : p.country === countryFilter).length;
                         return (
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-md cursor-default" title={countryFilter === 'unknown' ? 'Onbekend land' : `Land: ${countryFilter}`}>{count} gebruiker{count !== 1 ? 's' : ''} ({countryFilter === 'unknown' ? 'Onbekend' : countryFilter})</span>
+                            <span className="text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-md cursor-default" title={countryFilter === 'unknown' ? 'Onbekend land' : `Land: ${countryName(countryFilter)}`}>{count} gebruiker{count !== 1 ? 's' : ''} ({countryFilter === 'unknown' ? 'Onbekend' : countryName(countryFilter)})</span>
                             <Button size="sm" variant="outline" onClick={() => setCountryFilter('all')} className="h-7 text-xs gap-1">
                               <X className="h-3 w-3" /> Reset filter
                             </Button>
@@ -889,8 +890,8 @@ export default function AdminPanel() {
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={chartData} layout="vertical" margin={{ left: 40, right: 20, top: 5, bottom: 5 }}>
                           <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
-                          <YAxis type="category" dataKey="country" tick={{ fontSize: 11, fill: 'hsl(var(--foreground))' }} width={50} tickFormatter={(v: string) => v === '??' ? 'Onbekend' : v} />
-                          <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12, color: 'hsl(var(--foreground))' }} formatter={(value: number) => [`${value} gebruiker${value !== 1 ? 's' : ''}`, 'Aantal']} labelFormatter={(l: string) => l === '??' ? 'Onbekend' : `Land: ${l}`} />
+                          <YAxis type="category" dataKey="country" tick={{ fontSize: 11, fill: 'hsl(var(--foreground))' }} width={110} tickFormatter={(v: string) => v === '??' ? 'Onbekend' : countryName(v)} />
+                          <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12, color: 'hsl(var(--foreground))' }} formatter={(value: number) => [`${value} gebruiker${value !== 1 ? 's' : ''}`, 'Aantal']} labelFormatter={(l: string) => l === '??' ? 'Onbekend' : `Land: ${countryName(l)}`} />
                           <Bar dataKey="count" radius={[0, 6, 6, 0]}>{chartData.map((_, i) => (<Cell key={i} fill={COLORS[i % COLORS.length]} />))}</Bar>
                         </BarChart>
                       </ResponsiveContainer>
@@ -947,14 +948,14 @@ export default function AdminPanel() {
                           {profile.bio && <p className="text-[11px] text-muted-foreground truncate">{profile.bio}</p>}
                           <p className="text-[10px] text-muted-foreground flex items-center gap-1.5">
                             {profile.country && (
-                              <span className="inline-flex items-center gap-0.5" title={profile.country}>
+                              <span className="inline-flex items-center gap-0.5" title={countryName(profile.country)}>
                                 <img
                                   src={`https://flagcdn.com/16x12/${profile.country.toLowerCase()}.png`}
-                                  alt={profile.country}
+                                  alt={countryName(profile.country)}
                                   className="h-3 w-4 object-cover rounded-[2px]"
                                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                 />
-                                <span className="text-[10px]">{profile.country}</span>
+                                <span className="text-[10px]">{countryName(profile.country)}</span>
                               </span>
                             )}
                             <span>
