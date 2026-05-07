@@ -9,6 +9,7 @@ import {
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 const HIDE_AD_ROUTES = ['/editor', '/preview'];
 
