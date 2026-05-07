@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
+import { useLanguageSync } from '@/hooks/useLanguageSync';
 
 const HIDE_AD_ROUTES = ['/editor', '/preview'];
 
@@ -178,6 +179,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const showAd = !HIDE_AD_ROUTES.some(r => location.pathname.startsWith(r));
   useAdminForceRefresh();
+  useLanguageSync();
 
   return (
     <SidebarProvider>
