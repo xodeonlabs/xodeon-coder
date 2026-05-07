@@ -353,9 +353,9 @@ const Auth = () => {
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                  Bezig...
+                  {t('auth.busy')}
                 </span>
-              ) : mode === 'forgot' ? 'Reset link versturen' : mode === 'magic-link' ? 'Magic link versturen' : mode === 'login' ? 'Inloggen' : 'Registreren'}
+              ) : mode === 'forgot' ? t('auth.submitForgot') : mode === 'magic-link' ? t('auth.submitMagic') : mode === 'login' ? t('auth.submitLogin') : t('auth.submitRegister')}
             </button>
 
             {/* Social login */}
