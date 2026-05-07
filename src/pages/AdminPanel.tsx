@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { WorldMapChart } from '@/components/WorldMapChart';
+import { countryName } from '@/lib/country-names';
 
 const EMOJI_LIST = [
   { emoji: '🚀', label: 'rocket' }, { emoji: '🎮', label: 'game' }, { emoji: '🐍', label: 'snake' },
