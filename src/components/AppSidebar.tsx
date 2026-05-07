@@ -40,6 +40,7 @@ export function AppSidebar() {
 
   const { dndEnabled, toggleDnd } = useDoNotDisturb();
   const { theme, setTheme } = useTheme();
+  const { t } = useTranslation();
   const [isAdmin, setIsAdmin] = useState(false);
   const [coins, setCoins] = useState(0);
   const [displayName, setDisplayName] = useState<string | null>(null);
