@@ -576,6 +576,35 @@ export default function Settings() {
           </div>
         </div>
 
+        {/* Taal / Language */}
+        <div id="settings-language" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+          <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
+            <Languages className="h-5 w-5 text-primary" />
+            Taal · Language · Langue
+          </h2>
+          <p className="text-xs text-muted-foreground mb-4">Kies de taal van de interface.</p>
+          <div className="grid grid-cols-3 gap-3">
+            {(['nl','en','fr'] as const).map((lng) => {
+              const meta = LANGUAGE_LABELS[lng];
+              const active = (i18n.resolvedLanguage || 'nl') === lng;
+              return (
+                <button
+                  key={lng}
+                  onClick={() => { i18n.changeLanguage(lng); try { localStorage.setItem('lang', lng); } catch {} }}
+                  className={`flex flex-col items-center gap-2 py-4 px-3 rounded-xl border transition-all ${
+                    active
+                      ? 'border-primary bg-primary/10 text-foreground shadow-md shadow-primary/10'
+                      : 'border-border/50 bg-secondary/30 text-muted-foreground hover:border-border hover:bg-secondary/50'
+                  }`}
+                >
+                  <span className="text-2xl leading-none">{meta.flag}</span>
+                  <span className="text-sm font-medium">{meta.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Notificaties */}
         <div id="settings-notifications" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
           <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
