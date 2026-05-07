@@ -31,21 +31,21 @@ const XODEON_PRODUCTS = [
 ];
 
 const MOBILE_NAV = [
-  { title: 'Home', url: '/', icon: LayoutDashboard },
-  { title: 'Berichten', url: '/berichten', icon: MessageCircle },
-  { title: 'Groepen', url: '/groepen', icon: Users },
-  { title: 'Producten', url: '__products__', icon: Package },
-  { title: 'Meer', url: '__more__', icon: Menu },
-];
+  { tKey: 'nav.home', url: '/', icon: LayoutDashboard },
+  { tKey: 'nav.messages', url: '/berichten', icon: MessageCircle },
+  { tKey: 'nav.groups', url: '/groepen', icon: Users },
+  { tKey: 'nav.products', url: '__products__', icon: Package },
+  { tKey: 'nav.more', url: '__more__', icon: Menu },
+] as const;
 
 const MORE_ITEMS = [
-  { title: 'Bedrijven', url: '/organization', icon: Building2 },
-  { title: 'Allianties', url: '/alliances', icon: Building2 },
-  { title: 'Analytics', url: '/analytics', icon: BarChart3 },
-  { title: 'Templates', url: '/templates', icon: LayoutDashboard },
-  { title: 'API Data', url: '/xodeon-data', icon: Database },
-  { title: 'Instellingen', url: '/settings', icon: Settings },
-];
+  { tKey: 'nav.organization', url: '/organization', icon: Building2 },
+  { tKey: 'nav.alliances', url: '/alliances', icon: Building2 },
+  { tKey: 'nav.analytics', url: '/analytics', icon: BarChart3 },
+  { tKey: 'nav.templates', url: '/templates', icon: LayoutDashboard },
+  { tKey: 'nav.apiData', url: '/xodeon-data', icon: Database },
+  { tKey: 'nav.settings', url: '/settings', icon: Settings },
+] as const;
 
 function MobileBottomNav() {
   const location = useLocation();
