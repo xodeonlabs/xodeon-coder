@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { ArrowLeft, Mail, Lock, Sparkles, User } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 const auth = supabase.auth as any;
 
