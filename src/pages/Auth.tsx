@@ -227,14 +227,14 @@ const Auth = () => {
                   onClick={() => setLoginMethod('username')}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all ${loginMethod === 'username' ? 'bg-primary text-primary-foreground' : 'bg-background/50 text-muted-foreground hover:text-foreground'}`}
                 >
-                  <User className="h-3.5 w-3.5" /> Gebruikersnaam
+                  <User className="h-3.5 w-3.5" /> {t('auth.username')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setLoginMethod('email')}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all ${loginMethod === 'email' ? 'bg-primary text-primary-foreground' : 'bg-background/50 text-muted-foreground hover:text-foreground'}`}
                 >
-                  <Mail className="h-3.5 w-3.5" /> E-mail
+                  <Mail className="h-3.5 w-3.5" /> {t('auth.email')}
                 </button>
               </div>
             )}
