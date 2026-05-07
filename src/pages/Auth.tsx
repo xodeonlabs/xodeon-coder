@@ -363,7 +363,7 @@ const Auth = () => {
               <>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground/60">
                   <div className="h-px flex-1 bg-border/40" />
-                  <span className="uppercase tracking-wider text-[10px]">of</span>
+                  <span className="uppercase tracking-wider text-[10px]">{t('auth.or')}</span>
                   <div className="h-px flex-1 bg-border/40" />
                 </div>
 
