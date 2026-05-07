@@ -336,9 +336,9 @@ const Auth = () => {
                   className="mt-0.5 h-4 w-4 rounded border-border/60 bg-background/80 accent-primary cursor-pointer"
                 />
                 <span className="text-xs text-muted-foreground leading-relaxed">
-                  Ik ga akkoord met het{' '}
+                  {t('auth.acceptPolicy')}{' '}
                   <Link to="/privacy" className="text-primary hover:text-primary/80 underline transition-colors" target="_blank">
-                    privacybeleid & vertrouwelijkheidsbeleid
+                    {t('auth.privacyLink')}
                   </Link>
                 </span>
               </label>
