@@ -403,7 +403,7 @@ const Auth = () => {
                     className="w-full py-2.5 rounded-xl text-sm font-medium text-muted-foreground bg-transparent border border-border/30 hover:border-border/50 hover:text-foreground transition-all flex items-center justify-center gap-2"
                   >
                     <Sparkles className="h-3.5 w-3.5" />
-                    Magic link
+                    {t('auth.magicLink')}
                   </button>
                 )}
 
@@ -412,7 +412,7 @@ const Auth = () => {
                   onClick={() => navigate('/guest')}
                   className="w-full py-2.5 rounded-xl text-sm font-medium text-muted-foreground/70 hover:text-muted-foreground transition-colors"
                 >
-                  Probeer als gast →
+                  {t('auth.tryGuest')}
                 </button>
               </>
             )}
