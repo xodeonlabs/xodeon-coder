@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { ArrowLeft, Mail, Lock, Sparkles, User } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 const auth = supabase.auth as any;
 
@@ -19,6 +21,7 @@ const getErrorText = (err: unknown, fallback: string) => {
 };
 
 const Auth = () => {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<'login' | 'register' | 'forgot' | 'magic-link'>('login');
   const [username, setUsername] = useState('');
   const [loginMethod, setLoginMethod] = useState<'username' | 'email'>('username');
@@ -172,17 +175,17 @@ const Auth = () => {
   };
 
   const modeTitle = {
-    login: 'Welkom terug',
-    register: 'Account aanmaken',
-    forgot: 'Wachtwoord herstellen',
-    'magic-link': 'Inloggen met link',
+    login: t('auth.titleLogin'),
+    register: t('auth.titleRegister'),
+    forgot: t('auth.titleForgot'),
+    'magic-link': t('auth.titleMagic'),
   };
 
   const modeSubtitle = {
-    login: loginMethod === 'username' ? 'Log in met je gebruikersnaam' : 'Log in met je e-mailadres',
-    register: 'Kies een gebruikersnaam en begin',
-    forgot: 'We sturen je een resetlink',
-    'magic-link': 'We sturen je een magische link',
+    login: loginMethod === 'username' ? t('auth.subtitleLoginUsername') : t('auth.subtitleLoginEmail'),
+    register: t('auth.subtitleRegister'),
+    forgot: t('auth.subtitleForgot'),
+    'magic-link': t('auth.subtitleMagic'),
   };
 
   return (
@@ -193,6 +196,12 @@ const Auth = () => {
         <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] rounded-full blur-[100px] animate-glow-pulse delay-300" style={{ background: 'hsl(270 65% 60% / 0.08)' }} />
         <div className="absolute top-[30%] right-[10%] w-[300px] h-[300px] rounded-full blur-[100px] animate-glow-pulse delay-200" style={{ background: 'hsl(195 100% 50% / 0.04)' }} />
         <div className="absolute bottom-[20%] left-[5%] w-[350px] h-[350px] rounded-full blur-[120px] animate-glow-pulse delay-500" style={{ background: 'hsl(270 65% 60% / 0.05)' }} />
+      </div>
+
+      <div className="absolute top-3 right-3 z-20">
+        <div className="rounded-full border border-border/40 bg-background/40 backdrop-blur-md">
+          <LanguageSwitcher variant="compact" />
+        </div>
       </div>
 
       <div className="w-full max-w-[420px] relative z-10 animate-scale-in">
@@ -218,14 +227,14 @@ const Auth = () => {
                   onClick={() => setLoginMethod('username')}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all ${loginMethod === 'username' ? 'bg-primary text-primary-foreground' : 'bg-background/50 text-muted-foreground hover:text-foreground'}`}
                 >
-                  <User className="h-3.5 w-3.5" /> Gebruikersnaam
+                  <User className="h-3.5 w-3.5" /> {t('auth.username')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setLoginMethod('email')}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all ${loginMethod === 'email' ? 'bg-primary text-primary-foreground' : 'bg-background/50 text-muted-foreground hover:text-foreground'}`}
                 >
-                  <Mail className="h-3.5 w-3.5" /> E-mail
+                  <Mail className="h-3.5 w-3.5" /> {t('auth.email')}
                 </button>
               </div>
             )}
@@ -233,7 +242,7 @@ const Auth = () => {
             {/* Username - for login (username mode) and register */}
             {((mode === 'login' && loginMethod === 'username') || mode === 'register') && (
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">Gebruikersnaam</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">{t('auth.username')}</label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                   <input
@@ -244,7 +253,7 @@ const Auth = () => {
                     minLength={3}
                     maxLength={30}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm text-foreground bg-background/80 border border-border/60 outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-muted-foreground/40"
-                    placeholder="jouw_username"
+                    placeholder={t('auth.usernamePlaceholder')}
                     autoComplete="username"
                   />
                 </div>
@@ -254,7 +263,7 @@ const Auth = () => {
             {/* Email - for login (email mode), register, forgot, magic-link */}
             {((mode === 'login' && loginMethod === 'email') || mode === 'register' || mode === 'forgot' || mode === 'magic-link') && (
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">E-mail</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">{t('auth.email')}</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                   <input
@@ -263,7 +272,7 @@ const Auth = () => {
                     onChange={e => setEmail(e.target.value)}
                     required
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm text-foreground bg-background/80 border border-border/60 outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-muted-foreground/40"
-                    placeholder="jouw@email.nl"
+                    placeholder={t('auth.emailPlaceholder')}
                   />
                 </div>
               </div>
@@ -272,7 +281,7 @@ const Auth = () => {
             {/* Password */}
             {(mode === 'login' || mode === 'register') && (
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">Wachtwoord</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">{t('auth.password')}</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                   <input
@@ -297,10 +306,10 @@ const Auth = () => {
                     onChange={e => setRememberMe(e.target.checked)}
                     className="h-3.5 w-3.5 rounded border-border/60 bg-background/80 accent-primary cursor-pointer"
                   />
-                  <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">Onthoud mij</span>
+                  <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">{t('auth.rememberMe')}</span>
                 </label>
                 <button type="button" onClick={() => switchMode('forgot')} className="text-xs text-primary hover:text-primary/80 transition-colors">
-                  Wachtwoord vergeten?
+                  {t('auth.forgotPassword')}
                 </button>
               </div>
             )}
@@ -327,9 +336,9 @@ const Auth = () => {
                   className="mt-0.5 h-4 w-4 rounded border-border/60 bg-background/80 accent-primary cursor-pointer"
                 />
                 <span className="text-xs text-muted-foreground leading-relaxed">
-                  Ik ga akkoord met het{' '}
+                  {t('auth.acceptPolicy')}{' '}
                   <Link to="/privacy" className="text-primary hover:text-primary/80 underline transition-colors" target="_blank">
-                    privacybeleid & vertrouwelijkheidsbeleid
+                    {t('auth.privacyLink')}
                   </Link>
                 </span>
               </label>
@@ -344,9 +353,9 @@ const Auth = () => {
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                  Bezig...
+                  {t('auth.busy')}
                 </span>
-              ) : mode === 'forgot' ? 'Reset link versturen' : mode === 'magic-link' ? 'Magic link versturen' : mode === 'login' ? 'Inloggen' : 'Registreren'}
+              ) : mode === 'forgot' ? t('auth.submitForgot') : mode === 'magic-link' ? t('auth.submitMagic') : mode === 'login' ? t('auth.submitLogin') : t('auth.submitRegister')}
             </button>
 
             {/* Social login */}
@@ -354,7 +363,7 @@ const Auth = () => {
               <>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground/60">
                   <div className="h-px flex-1 bg-border/40" />
-                  <span className="uppercase tracking-wider text-[10px]">of</span>
+                  <span className="uppercase tracking-wider text-[10px]">{t('auth.or')}</span>
                   <div className="h-px flex-1 bg-border/40" />
                 </div>
 
@@ -394,7 +403,7 @@ const Auth = () => {
                     className="w-full py-2.5 rounded-xl text-sm font-medium text-muted-foreground bg-transparent border border-border/30 hover:border-border/50 hover:text-foreground transition-all flex items-center justify-center gap-2"
                   >
                     <Sparkles className="h-3.5 w-3.5" />
-                    Magic link
+                    {t('auth.magicLink')}
                   </button>
                 )}
 
@@ -403,7 +412,7 @@ const Auth = () => {
                   onClick={() => navigate('/guest')}
                   className="w-full py-2.5 rounded-xl text-sm font-medium text-muted-foreground/70 hover:text-muted-foreground transition-colors"
                 >
-                  Probeer als gast →
+                  {t('auth.tryGuest')}
                 </button>
               </>
             )}
@@ -414,20 +423,20 @@ const Auth = () => {
         <p className="text-xs text-center mt-6 text-muted-foreground">
           {mode === 'forgot' || mode === 'magic-link' ? (
             <button onClick={() => switchMode('login')} className="text-primary hover:text-primary/80 transition-colors inline-flex items-center gap-1">
-              <ArrowLeft className="h-3 w-3" /> Terug naar inloggen
+              <ArrowLeft className="h-3 w-3" /> {t('auth.backToLogin')}
             </button>
           ) : mode === 'login' ? (
             <>
-              Nog geen account?{' '}
+              {t('auth.noAccount')}{' '}
               <button onClick={() => switchMode('register')} className="text-primary hover:text-primary/80 transition-colors font-medium">
-                Registreer
+                {t('auth.register')}
               </button>
             </>
           ) : (
             <>
-              Al een account?{' '}
+              {t('auth.haveAccount')}{' '}
               <button onClick={() => switchMode('login')} className="text-primary hover:text-primary/80 transition-colors font-medium">
-                Log in
+                {t('auth.signIn')}
               </button>
             </>
           )}

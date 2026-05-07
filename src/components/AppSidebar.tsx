@@ -16,18 +16,19 @@ import {
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { AppIcon } from '@/components/IconPicker';
 import { StatusDot } from '@/components/StatusDot';
+import { useTranslation } from 'react-i18next';
 
 const NAV_ITEMS = [
-  { title: 'Dashboard', url: '/', icon: LayoutDashboard },
-  { title: 'Berichten', url: '/berichten', icon: MessageCircle },
-  { title: 'Groepen', url: '/groepen', icon: Users },
-  { title: 'Bedrijven', url: '/organization', icon: Building2 },
-  { title: 'Upgrades', url: '/upgrades', icon: ArrowUp },
-  { title: 'Allianties', url: '/alliances', icon: Handshake },
-  { title: 'Analytics', url: '/analytics', icon: BarChart3 },
-  { title: 'Templates', url: '/templates', icon: LayoutGrid },
-  { title: 'API Data', url: '/xodeon-data', icon: Database },
-];
+  { tKey: 'nav.dashboard', url: '/', icon: LayoutDashboard },
+  { tKey: 'nav.messages', url: '/berichten', icon: MessageCircle },
+  { tKey: 'nav.groups', url: '/groepen', icon: Users },
+  { tKey: 'nav.organization', url: '/organization', icon: Building2 },
+  { tKey: 'nav.upgrades', url: '/upgrades', icon: ArrowUp },
+  { tKey: 'nav.alliances', url: '/alliances', icon: Handshake },
+  { tKey: 'nav.analytics', url: '/analytics', icon: BarChart3 },
+  { tKey: 'nav.templates', url: '/templates', icon: LayoutGrid },
+  { tKey: 'nav.apiData', url: '/xodeon-data', icon: Database },
+] as const;
 
 export function AppSidebar() {
   const navigate = useNavigate();
@@ -39,6 +40,7 @@ export function AppSidebar() {
 
   const { dndEnabled, toggleDnd } = useDoNotDisturb();
   const { theme, setTheme } = useTheme();
+  const { t } = useTranslation();
   const [isAdmin, setIsAdmin] = useState(false);
   const [coins, setCoins] = useState(0);
   const [displayName, setDisplayName] = useState<string | null>(null);
@@ -225,14 +227,16 @@ export function AppSidebar() {
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel>{collapsed ? '' : 'Navigatie'}</SidebarGroupLabel>
+          <SidebarGroupLabel>{collapsed ? '' : t('nav.home')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {NAV_ITEMS.map((item) => {
+                const title = t(item.tKey);
+                return (
+                <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton
                     isActive={isActive(item.url)}
-                    tooltip={collapsed ? item.title : undefined}
+                    tooltip={collapsed ? title : undefined}
                     onClick={() => navigate(item.url)}
                     className={`flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-sm font-medium transition-all ${
                       isActive(item.url)
@@ -241,7 +245,7 @@ export function AppSidebar() {
                     }`}
                   >
                     <item.icon className="h-4 w-4 shrink-0" />
-                    <span className="flex-1">{item.title}</span>
+                    <span className="flex-1">{title}</span>
                     {item.url === '/groepen' && unreadGroups > 0 && (
                       <span className="ml-auto min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1">
                         {unreadGroups > 9 ? '9+' : unreadGroups}
@@ -254,12 +258,13 @@ export function AppSidebar() {
                     )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+                );
+              })}
               {isAdmin && (
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     isActive={isActive('/admin')}
-                    tooltip={collapsed ? 'Admin' : undefined}
+                    tooltip={collapsed ? t('nav.admin') : undefined}
                     onClick={() => navigate('/admin')}
                     className={`flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-sm font-medium transition-all ${
                       isActive('/admin')
@@ -268,7 +273,7 @@ export function AppSidebar() {
                     }`}
                   >
                     <Shield className="h-4 w-4 shrink-0" />
-                    <span>Admin</span>
+                    <span>{t('nav.admin')}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
