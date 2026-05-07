@@ -198,6 +198,12 @@ const Auth = () => {
         <div className="absolute bottom-[20%] left-[5%] w-[350px] h-[350px] rounded-full blur-[120px] animate-glow-pulse delay-500" style={{ background: 'hsl(270 65% 60% / 0.05)' }} />
       </div>
 
+      <div className="absolute top-3 right-3 z-20">
+        <div className="rounded-full border border-border/40 bg-background/40 backdrop-blur-md">
+          <LanguageSwitcher variant="compact" />
+        </div>
+      </div>
+
       <div className="w-full max-w-[420px] relative z-10 animate-scale-in">
         {/* Logo & Header */}
         <div className="text-center mb-5 sm:mb-8">
