@@ -869,7 +869,7 @@ export default function AdminPanel() {
                         const count = profiles.filter(p => countryFilter === 'unknown' ? !p.country : p.country === countryFilter).length;
                         return (
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-md cursor-default" title={countryFilter === 'unknown' ? 'Onbekend land' : `Land: ${countryFilter}`}>{count} gebruiker{count !== 1 ? 's' : ''} ({countryFilter === 'unknown' ? 'Onbekend' : countryFilter})</span>
+                            <span className="text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-md cursor-default" title={countryFilter === 'unknown' ? 'Onbekend land' : `Land: ${countryName(countryFilter)}`}>{count} gebruiker{count !== 1 ? 's' : ''} ({countryFilter === 'unknown' ? 'Onbekend' : countryName(countryFilter)})</span>
                             <Button size="sm" variant="outline" onClick={() => setCountryFilter('all')} className="h-7 text-xs gap-1">
                               <X className="h-3 w-3" /> Reset filter
                             </Button>
