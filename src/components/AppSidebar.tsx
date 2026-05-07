@@ -256,7 +256,8 @@ export function AppSidebar() {
                     )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+                );
+              })}
               {isAdmin && (
                 <SidebarMenuItem>
                   <SidebarMenuButton
