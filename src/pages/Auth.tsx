@@ -306,10 +306,10 @@ const Auth = () => {
                     onChange={e => setRememberMe(e.target.checked)}
                     className="h-3.5 w-3.5 rounded border-border/60 bg-background/80 accent-primary cursor-pointer"
                   />
-                  <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">Onthoud mij</span>
+                  <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">{t('auth.rememberMe')}</span>
                 </label>
                 <button type="button" onClick={() => switchMode('forgot')} className="text-xs text-primary hover:text-primary/80 transition-colors">
-                  Wachtwoord vergeten?
+                  {t('auth.forgotPassword')}
                 </button>
               </div>
             )}
