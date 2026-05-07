@@ -264,7 +264,7 @@ export function AppSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     isActive={isActive('/admin')}
-                    tooltip={collapsed ? 'Admin' : undefined}
+                    tooltip={collapsed ? t('nav.admin') : undefined}
                     onClick={() => navigate('/admin')}
                     className={`flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-sm font-medium transition-all ${
                       isActive('/admin')
@@ -273,7 +273,7 @@ export function AppSidebar() {
                     }`}
                   >
                     <Shield className="h-4 w-4 shrink-0" />
-                    <span>Admin</span>
+                    <span>{t('nav.admin')}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
