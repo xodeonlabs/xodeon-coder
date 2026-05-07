@@ -98,7 +98,7 @@ function MobileBottomNav() {
                   }`}
                 >
                   <Shield className="h-4 w-4" />
-                  Admin
+                  {t('nav.admin')}
                 </button>
               )}
             </div>
@@ -108,7 +108,7 @@ function MobileBottomNav() {
                 className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-destructive hover:bg-destructive/10"
               >
                 <LogOut className="h-4 w-4" />
-                Uitloggen
+                {t('common.logout')}
               </button>
             </div>
           </div>
@@ -122,7 +122,7 @@ function MobileBottomNav() {
             className="absolute bottom-16 left-2 right-2 rounded-xl border border-border/40 bg-background p-2 shadow-xl"
             onClick={e => e.stopPropagation()}
           >
-            <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Xodeon Producten</p>
+            <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('nav.xodeonProducts')}</p>
             {XODEON_PRODUCTS.map(product => (
               <button
                 key={product.title}
