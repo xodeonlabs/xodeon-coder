@@ -6,6 +6,7 @@ import { exportToHtml } from '@/lib/ngc-to-html';
 import { ParseError } from '@/lib/ngc-ast';
 import { AppIcon, IconPicker } from '@/components/IconPicker';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface ToolbarProps {
   errors: ParseError[];
@@ -21,6 +22,7 @@ interface ToolbarProps {
 
 export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSave, onRename, onChangeIcon, onShareTemplate }: ToolbarProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [nameValue, setNameValue] = useState('');
   const [showShareDialog, setShowShareDialog] = useState(false);
@@ -80,14 +82,14 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
       style={{ background: 'hsl(var(--ide-toolbar) / 0.6)' }}
     >
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-        <button onClick={() => handleNavigate('/')} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors shrink-0" title="Terug naar dashboard">
+        <button onClick={() => handleNavigate('/')} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors shrink-0" title={t('editor.backToDashboard')}>
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="hidden sm:flex items-center gap-2.5">
           <button
             onClick={() => onChangeIcon && setShowIconPicker(true)}
             className={`w-6 h-6 rounded-md bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white ${onChangeIcon ? 'cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all' : ''}`}
-            title={onChangeIcon ? 'Icoon wijzigen' : undefined}
+            title={onChangeIcon ? t('editor.changeIcon') : undefined}
             disabled={!onChangeIcon}
           >
             <AppIcon iconName={appIcon || 'file-code'} size={14} />
@@ -106,7 +108,7 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
           />
         ) : (
           appName && (
-            <button onClick={startEditing} className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors group truncate min-w-0" title="Naam wijzigen">
+            <button onClick={startEditing} className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors group truncate min-w-0" title={t('editor.renameApp')}>
               <span className="truncate">{appName}</span>
               <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
             </button>
@@ -119,44 +121,44 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
         {errors.length > 0 ? (
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-destructive/10 text-destructive">
             <AlertCircle className="h-3.5 w-3.5" />
-            <span className="text-xs font-medium">{errors.length} error{errors.length > 1 ? 's' : ''}</span>
+            <span className="text-xs font-medium">{t('editor.errors', { count: errors.length })}</span>
           </div>
         ) : (
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[hsl(var(--ide-success))]/10 text-[hsl(var(--ide-success))]">
             <CheckCircle className="h-3.5 w-3.5" />
-            <span className="text-xs font-medium">Ready</span>
+            <span className="text-xs font-medium">{t('editor.ready')}</span>
           </div>
         )}
         {onShareTemplate && (
           <button
             onClick={() => setShowShareDialog(true)}
             className="px-3 py-1.5 text-xs font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center gap-1.5"
-            title="Deel als template"
+            title={t('editor.shareAsTemplate')}
           >
             <Share2 className="h-3.5 w-3.5" />
-            Template
+            {t('editor.template')}
           </button>
         )}
         <button
           onClick={handleExportHtml}
           className="px-3 py-1.5 text-xs font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center gap-1.5"
-          title="Exporteer als HTML"
+          title={t('editor.exportHtml')}
         >
           <Download className="h-3.5 w-3.5" />
-          Export
+          {t('editor.export')}
         </button>
         <button
           onClick={() => handleNavigate(window.location.pathname.replace('/editor/', '/preview/'))}
           className="px-3 py-1.5 text-xs font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center gap-1.5"
         >
           <ExternalLink className="h-3.5 w-3.5" />
-          Preview
+          {t('editor.preview')}
         </button>
         {onSignOut && (
           <button
             onClick={onSignOut}
             className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-            title="Uitloggen"
+            title={t('editor.signOut')}
           >
             <LogOut className="h-4 w-4" />
           </button>
@@ -178,33 +180,33 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
         </button>
       </div>
 
-      {/* Mobile dropdown menu — rendered via portal to escape overflow/stacking context */}
+      {/* Mobile dropdown menu */}
       {mobileMenuOpen && createPortal(
         <>
           <div className="fixed inset-0 z-[9998]" onClick={() => setMobileMenuOpen(false)} />
           <div className="fixed top-11 right-2 z-[9999] rounded-lg border border-border shadow-xl py-1 min-w-[160px]" style={{ background: 'hsl(var(--card))' }}>
             <button
-              onClick={() => { 
+              onClick={() => {
                 const appIdMatch = window.location.pathname.match(/\/editor\/([^/]+)/);
                 if (appIdMatch) navigate(`/preview/${appIdMatch[1]}`);
-                setMobileMenuOpen(false); 
+                setMobileMenuOpen(false);
               }}
               className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-secondary/50 transition-colors"
             >
-              <ExternalLink className="h-4 w-4" /> Preview
+              <ExternalLink className="h-4 w-4" /> {t('editor.preview')}
             </button>
             <button
               onClick={() => { handleExportHtml(); setMobileMenuOpen(false); }}
               className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-secondary/50 transition-colors"
             >
-              <Download className="h-4 w-4" /> Export HTML
+              <Download className="h-4 w-4" /> {t('editor.exportHtml')}
             </button>
             {onShareTemplate && (
               <button
                 onClick={() => { setShowShareDialog(true); setMobileMenuOpen(false); }}
                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-secondary/50 transition-colors"
               >
-                <Share2 className="h-4 w-4" /> Template
+                <Share2 className="h-4 w-4" /> {t('editor.template')}
               </button>
             )}
             {onSignOut && (
@@ -212,7 +214,7 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
                 onClick={() => { onSignOut(); setMobileMenuOpen(false); }}
                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-destructive hover:bg-secondary/50 transition-colors"
               >
-                <LogOut className="h-4 w-4" /> Uitloggen
+                <LogOut className="h-4 w-4" /> {t('editor.signOut')}
               </button>
             )}
           </div>
@@ -227,19 +229,19 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10"><Share2 className="h-5 w-5 text-primary" /></div>
-                Deel als template
+                {t('editor.shareAsTemplate')}
               </h3>
               <button onClick={() => setShowShareDialog(false)} className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg p-1.5 transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <p className="text-sm text-muted-foreground mb-4">Deel je app zodat anderen het als template kunnen gebruiken.</p>
+            <p className="text-sm text-muted-foreground mb-4">{t('editor.shareDesc')}</p>
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-medium text-foreground uppercase tracking-wide">Template naam</label>
+                <label className="text-xs font-medium text-foreground uppercase tracking-wide">{t('editor.templateName')}</label>
                 <input
                   type="text"
-                  placeholder="Bv. Todo App Pro"
+                  placeholder={t('editor.templateNamePlaceholder')}
                   value={templateName}
                   onChange={e => setTemplateName(e.target.value)}
                   autoFocus
@@ -247,9 +249,9 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-foreground uppercase tracking-wide">Beschrijving (optioneel)</label>
+                <label className="text-xs font-medium text-foreground uppercase tracking-wide">{t('editor.description')}</label>
                 <textarea
-                  placeholder="Wat doet deze template?"
+                  placeholder={t('editor.descriptionPlaceholder')}
                   value={templateDescription}
                   onChange={e => setTemplateDescription(e.target.value)}
                   rows={2}
@@ -259,14 +261,14 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
             </div>
             <div className="flex justify-end gap-2 mt-6">
               <button onClick={() => setShowShareDialog(false)} className="px-4 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
-                Annuleren
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleShareTemplate}
                 disabled={sharing || !templateName.trim()}
                 className="px-5 py-2 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all active:scale-95"
               >
-                {sharing ? 'Delen...' : 'Delen'}
+                {sharing ? t('editor.sharing') : t('editor.share')}
               </button>
             </div>
           </div>

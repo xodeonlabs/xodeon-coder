@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Search, FileCode, MousePointer, Code, Zap } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface CommandItem {
   id: string;
@@ -19,6 +20,7 @@ export function CommandPalette({ open, onClose, items }: CommandPaletteProps) {
   const [query, setQuery] = useState('');
   const [selectedIdx, setSelectedIdx] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
 
   const filtered = items.filter(item =>
     item.label.toLowerCase().includes(query.toLowerCase()) ||
@@ -68,7 +70,7 @@ export function CommandPalette({ open, onClose, items }: CommandPaletteProps) {
           <input
             ref={inputRef}
             type="text"
-            placeholder="Zoek commando's, pagina's..."
+            placeholder={t('editor.searchCommands')}
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -78,7 +80,7 @@ export function CommandPalette({ open, onClose, items }: CommandPaletteProps) {
         </div>
         <div className="max-h-64 overflow-y-auto py-1">
           {filtered.length === 0 && (
-            <div className="px-4 py-6 text-center text-sm text-muted-foreground">Geen resultaten</div>
+            <div className="px-4 py-6 text-center text-sm text-muted-foreground">{t('editor.noResults')}</div>
           )}
           {filtered.map((item, i) => (
             <button

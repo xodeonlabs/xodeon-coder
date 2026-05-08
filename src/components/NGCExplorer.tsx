@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { NGCNode, NODE_ICONS, VALID_CHILDREN, NGCNodeType } from '@/lib/ngc-ast';
 import { ChevronRight, ChevronDown, Search, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ExplorerProps {
   ast: NGCNode | null;
@@ -155,11 +156,12 @@ function ExplorerNode({
 export function NGCExplorer({ ast, selectedId, onSelect, onContextMenu, onRename, onDelete }: ExplorerProps) {
   const [search, setSearch] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
 
   if (!ast) {
     return (
       <div className="flex h-full items-center justify-center p-4">
-        <p className="text-xs text-muted-foreground">No valid AST</p>
+        <p className="text-xs text-muted-foreground">{t('editor.noAst')}</p>
       </div>
     );
   }
@@ -175,7 +177,7 @@ export function NGCExplorer({ ast, selectedId, onSelect, onContextMenu, onRename
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Zoek element..."
+            placeholder={t('editor.searchElement')}
             className="w-full pl-7 pr-7 py-1.5 text-xs rounded-lg bg-secondary/50 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-colors"
           />
           {search && (

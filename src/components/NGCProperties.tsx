@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { NGCNode } from '@/lib/ngc-ast';
+import { useTranslation } from 'react-i18next';
 
 interface PropertiesProps {
   node: NGCNode | null;
@@ -28,6 +29,7 @@ function getAlpha(value: string): number {
 function ColorInput({ value, onChange }: { value: string; onChange: (val: string) => void }) {
   const clean = value.replace(/^"|"$/g, '');
   const inputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
   const hexValue = clean.startsWith('rgb') ? rgbToHex(clean) : clean.startsWith('#') ? clean : '#000000';
   const alpha = getAlpha(clean);
 
@@ -48,7 +50,7 @@ function ColorInput({ value, onChange }: { value: string; onChange: (val: string
         className="w-6 h-6 rounded-md border border-border/50 shrink-0 cursor-pointer hover:ring-2 hover:ring-primary/40 transition-all"
         style={{ background: clean }}
         onClick={() => inputRef.current?.click()}
-        title="Kies kleur"
+        title={t('editor.pickColor')}
       />
       <input
         ref={inputRef}
@@ -65,17 +67,18 @@ function ColorInput({ value, onChange }: { value: string; onChange: (val: string
         value={alpha}
         onChange={e => handleColorChange(hexValue, parseFloat(e.target.value))}
         className="w-14 h-3 accent-primary cursor-pointer"
-        title={`Transparantie: ${Math.round(alpha * 100)}%`}
+        title={`${t('editor.transparency')}: ${Math.round(alpha * 100)}%`}
       />
     </div>
   );
 }
 
 export function NGCProperties({ node, onPropertyChange }: PropertiesProps) {
+  const { t } = useTranslation();
   if (!node) {
     return (
       <div className="flex h-full items-center justify-center p-4">
-        <p className="text-xs text-muted-foreground">Select an element</p>
+        <p className="text-xs text-muted-foreground">{t('editor.selectElement')}</p>
       </div>
     );
   }
@@ -84,11 +87,11 @@ export function NGCProperties({ node, onPropertyChange }: PropertiesProps) {
     <div className="overflow-auto h-full p-2 space-y-1">
       <div className="mb-3 space-y-1">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Type</span>
+          <span className="text-xs text-muted-foreground">{t('editor.type')}</span>
           <span className="text-xs font-medium text-foreground">{node.type}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Name</span>
+          <span className="text-xs text-muted-foreground">{t('editor.name')}</span>
           <span className="text-xs font-medium text-foreground">{node.name}</span>
         </div>
       </div>
@@ -114,7 +117,7 @@ export function NGCProperties({ node, onPropertyChange }: PropertiesProps) {
       )}
 
       {Object.keys(node.properties).length === 0 && node.type !== 'App' && (
-        <p className="text-xs text-muted-foreground italic">No properties</p>
+        <p className="text-xs text-muted-foreground italic">{t('editor.noProperties')}</p>
       )}
     </div>
   );
