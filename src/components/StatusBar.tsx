@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Clock, FileCode, Hash, Type, Lightbulb } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const TIPS = [
   '💡 Tip: Gebruik Ctrl+K om het commandopalet te openen',
@@ -20,6 +20,7 @@ interface StatusBarProps {
 }
 
 export function StatusBar({ code, saveStatus, lastSaved, typingUsers = [] }: StatusBarProps) {
+  const { t, i18n } = useTranslation();
   const lines = code.split('\n').length;
   const chars = code.length;
 
@@ -35,9 +36,12 @@ export function StatusBar({ code, saveStatus, lastSaved, typingUsers = [] }: Sta
 
   const tip = useMemo(() => TIPS[Math.floor(Math.random() * TIPS.length)], []);
 
+  const localeMap: Record<string, string> = { nl: 'nl-NL', en: 'en-GB', fr: 'fr-FR' };
+  const locale = localeMap[i18n.resolvedLanguage || 'nl'] || 'nl-NL';
+
   const saveLabel = saveStatus === 'saved'
-    ? `✓ Opgeslagen${lastSaved ? ` ${lastSaved.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}` : ''}`
-    : saveStatus === 'saving' ? '⏳ Opslaan...' : '● Niet opgeslagen';
+    ? `✓ ${t('editor.saved')}${lastSaved ? ` ${lastSaved.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}` : ''}`
+    : saveStatus === 'saving' ? `⏳ ${t('editor.saving')}` : `● ${t('editor.unsaved')}`;
 
   return (
     <div
@@ -45,10 +49,10 @@ export function StatusBar({ code, saveStatus, lastSaved, typingUsers = [] }: Sta
       style={{ background: 'hsl(var(--ide-toolbar) / 0.4)' }}
     >
       <div className="flex items-center gap-3 text-muted-foreground">
-        <span>{lines} regels</span>
-        <span>{chars} tekens</span>
-        <span>{pageCount} pagina's</span>
-        <span>{componentCount} componenten</span>
+        <span>{lines} {t('editor.statusLines')}</span>
+        <span>{chars} {t('editor.statusChars')}</span>
+        <span>{pageCount} {t('editor.statusPages')}</span>
+        <span>{componentCount} {t('editor.statusComponents')}</span>
       </div>
       <div className="flex items-center gap-3 text-muted-foreground">
         {typingUsers.length > 0 && (
@@ -59,8 +63,8 @@ export function StatusBar({ code, saveStatus, lastSaved, typingUsers = [] }: Sta
               <span className="w-1 h-1 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
             </span>
             {typingUsers.length === 1
-              ? `${typingUsers[0].email.split('@')[0]} typt...`
-              : `${typingUsers.length} gebruikers typen...`}
+              ? t('editor.typingOne', { name: typingUsers[0].email.split('@')[0] })
+              : t('editor.typingMany', { count: typingUsers.length })}
           </span>
         )}
         <span className="hidden md:inline truncate max-w-[200px]">{tip}</span>

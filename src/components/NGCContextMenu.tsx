@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { NGCNode, VALID_CHILDREN, NGCNodeType, NODE_ICONS } from '@/lib/ngc-ast';
+import { useTranslation } from 'react-i18next';
 
 interface ContextMenuProps {
   x: number;
@@ -21,6 +22,7 @@ export function NGCContextMenu({
   onDuplicate,
 }: ContextMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -47,7 +49,7 @@ export function NGCContextMenu({
       {validChildren.length > 0 && (
         <>
           <div className="px-3 py-1.5 text-xs text-muted-foreground font-semibold">
-            Add Object
+            {t('editor.addObject')}
           </div>
           {validChildren.map((type) => (
             <button
@@ -74,7 +76,7 @@ export function NGCContextMenu({
               onClose();
             }}
           >
-            Duplicate
+            {t('editor.duplicate')}
           </button>
           <button
             className="w-full px-3 py-1.5 text-left text-sm text-destructive hover:bg-secondary transition-colors"
@@ -83,7 +85,7 @@ export function NGCContextMenu({
               onClose();
             }}
           >
-            Delete
+            {t('editor.delete')}
           </button>
         </>
       )}
