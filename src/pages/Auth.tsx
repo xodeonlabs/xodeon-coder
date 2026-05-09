@@ -130,11 +130,10 @@ const Auth = () => {
         return;
       }
       if (data.user?.id) {
-        // Save username to profile
+        // Save username to profile (upsert in case trigger hasn't created the row yet)
         await supabase
           .from('profiles')
-          .update({ username: cleanUsername } as any)
-          .eq('id', data.user.id);
+          .upsert({ id: data.user.id, username: cleanUsername } as any, { onConflict: 'id' });
 
         setMessage('✅ Account aangemaakt! Je wordt ingelogd...');
         try {
