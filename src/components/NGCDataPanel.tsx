@@ -1,4 +1,5 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NGCNode } from '@/lib/ngc-ast';
 import { Database, Table, Trash2, Upload, Image as ImageIcon, Copy, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -106,6 +107,7 @@ function extractDataFromAST(node: NGCNode, vars: ExtractedVar[], lists: Extracte
 }
 
 function ImageUploadSection({ appId }: { appId: string }) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
