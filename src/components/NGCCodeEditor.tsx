@@ -1,4 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ParseError } from '@/lib/ngc-ast';
 
 interface CodeEditorProps {
@@ -12,6 +13,7 @@ interface Suggestion {
   insert: string;
   kind: 'keyword' | 'property' | 'event' | 'value' | 'command' | 'template';
   description?: string;
+  descKey?: string;
 }
 
 // Pre-programmed slash templates — insert ready-made code blocks
@@ -19,7 +21,7 @@ const SLASH_TEMPLATES: Suggestion[] = [
   {
     label: '/login',
     kind: 'template',
-    description: 'Login frame met velden en knop',
+    descKey: 'editor.slash.login',
     insert: `Frame LoginFrame:
     Positie="0,0"
     Grootte="320,260"
@@ -50,7 +52,7 @@ const SLASH_TEMPLATES: Suggestion[] = [
   {
     label: '/signup',
     kind: 'template',
-    description: 'Registratie frame',
+    descKey: 'editor.slash.signup',
     insert: `Frame SignupFrame:
     Positie="0,0"
     Grootte="320,320"
@@ -86,7 +88,7 @@ const SLASH_TEMPLATES: Suggestion[] = [
   {
     label: '/navbar',
     kind: 'template',
-    description: 'Navigatiebalk met knoppen',
+    descKey: 'editor.slash.navbar',
     insert: `Frame NavBar:
     Positie="0,0"
     Grootte="800,56"
@@ -107,7 +109,7 @@ const SLASH_TEMPLATES: Suggestion[] = [
   {
     label: '/card',
     kind: 'template',
-    description: 'Kaart met titel en tekst',
+    descKey: 'editor.slash.card',
     insert: `Frame Kaart:
     Positie="0,0"
     Grootte="240,160"
@@ -123,7 +125,7 @@ const SLASH_TEMPLATES: Suggestion[] = [
   {
     label: '/counter',
     kind: 'template',
-    description: 'Teller met +/- knoppen',
+    descKey: 'editor.slash.counter',
     insert: `Var(teller="0")
 Frame Counter:
     Positie="0,0"
@@ -149,7 +151,7 @@ Frame Counter:
   {
     label: '/page',
     kind: 'template',
-    description: 'Lege pagina',
+    descKey: 'editor.slash.page',
     insert: `Page NieuwePagina:
     Text Welkom:
         Tekst="Welkom"
@@ -158,43 +160,43 @@ Frame Counter:
   {
     label: '/nav',
     kind: 'template',
-    description: 'Navigeer naar pagina',
+    descKey: 'editor.slash.nav',
     insert: '/nav "PaginaNaam"',
   },
   {
     label: '/back',
     kind: 'template',
-    description: 'Ga terug naar vorige pagina',
+    descKey: 'editor.slash.back',
     insert: '/back',
   },
   {
     label: '/set',
     kind: 'template',
-    description: 'Zet variabele waarde',
+    descKey: 'editor.slash.set',
     insert: '/set naam=waarde',
   },
   {
     label: '/add',
     kind: 'template',
-    description: 'Tel op bij variabele',
+    descKey: 'editor.slash.add',
     insert: '/add naam 1',
   },
   {
     label: '/sub',
     kind: 'template',
-    description: 'Trek af van variabele',
+    descKey: 'editor.slash.sub',
     insert: '/sub naam 1',
   },
   {
     label: '/coin+',
     kind: 'template',
-    description: 'Voeg munten toe',
+    descKey: 'editor.slash.coinAdd',
     insert: '/coin+ wallet 10',
   },
   {
     label: '/coin-',
     kind: 'template',
-    description: 'Verwijder munten',
+    descKey: 'editor.slash.coinRemove',
     insert: '/coin- wallet 5',
   },
 ];
@@ -279,6 +281,7 @@ function highlightLine(line: string): JSX.Element[] {
 }
 
 export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
+  const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
@@ -575,7 +578,7 @@ export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
             >
               <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: KIND_COLORS[s.kind] }} />
               <span className="font-mono text-foreground">{s.label}</span>
-              <span className="ml-auto text-muted-foreground/50 text-[10px] truncate">{s.description ?? s.kind}</span>
+              <span className="ml-auto text-muted-foreground/50 text-[10px] truncate">{s.descKey ? t(s.descKey) : (s.description ?? t(`editor.kind.${s.kind}`))}</span>
             </button>
           ))}
         </div>
