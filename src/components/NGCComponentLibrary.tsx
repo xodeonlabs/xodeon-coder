@@ -1,7 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronRight, ChevronDown, Copy, Share2, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+
+const FOLDER_KEY_MAP: Record<string, string> = {
+  Pagina: 'page',
+  Knoppen: 'buttons',
+  Tekst: 'text',
+  Invoer: 'input',
+  Afbeelding: 'image',
+  Frames: 'frames',
+  Data: 'data',
+  Coins: 'coins',
+  Besturing: 'control',
+  Sjablonen: 'templates',
+};
 
 
 interface Snippet {
@@ -686,6 +700,7 @@ const LIBRARY: Folder[] = [
 ];
 
 export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => void }) {
+  const { t } = useTranslation();
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
   const [communityTemplates, setCommunityTemplates] = useState<Template[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
