@@ -13,6 +13,7 @@ interface Suggestion {
   insert: string;
   kind: 'keyword' | 'property' | 'event' | 'value' | 'command' | 'template';
   description?: string;
+  descKey?: string;
 }
 
 // Pre-programmed slash templates — insert ready-made code blocks
