@@ -100,7 +100,7 @@ export function NGCProperties({ node, onPropertyChange }: PropertiesProps) {
         <div className="border-t border-border pt-2 space-y-1.5">
           {Object.entries(node.properties).map(([key, value]) => (
             <div key={key} className="space-y-0.5">
-              <label className="text-xs text-muted-foreground">{key}</label>
+              <label className="text-xs text-muted-foreground">{t(`editor.props.${key}`, { defaultValue: key })}</label>
               <div className="flex items-center gap-1.5">
                 <input
                   className="flex-1 rounded-sm border border-border bg-secondary px-2 py-1 text-xs text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono"
