@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -19,6 +20,7 @@ interface NGCVersionPanelProps {
 }
 
 export function NGCVersionPanel({ appId, currentCode, onRestore }: NGCVersionPanelProps) {
+  const { t, i18n } = useTranslation();
   const { session } = useAuth();
   const { toast } = useToast();
   const [versions, setVersions] = useState<Version[]>([]);
@@ -46,14 +48,14 @@ export function NGCVersionPanel({ appId, currentCode, onRestore }: NGCVersionPan
     setSaving(true);
     const { error } = await supabase.from('app_versions').insert({
       app_id: appId,
-      label: label.trim() || `Versie ${new Date().toLocaleString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`,
+      label: label.trim() || `${t('editor.versions.defaultLabel')} ${new Date().toLocaleString(i18n.language, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`,
       ngc_code: currentCode,
       created_by: session.user.id,
     });
     if (error) {
-      toast({ title: 'Fout', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: 'Versie opgeslagen' });
+      toast({ title: t('editor.versions.saved') });
       setLabel('');
       setShowSaveForm(false);
       fetchVersions();
@@ -63,7 +65,7 @@ export function NGCVersionPanel({ appId, currentCode, onRestore }: NGCVersionPan
 
   const restoreVersion = (version: Version) => {
     onRestore(version.ngc_code);
-    toast({ title: 'Versie hersteld', description: `"${version.label}" is geladen.` });
+    toast({ title: t('editor.versions.restored'), description: t('editor.versions.restoredDesc', { label: version.label }) });
   };
 
   const deleteVersion = async (id: string, e: React.MouseEvent) => {
@@ -77,8 +79,8 @@ export function NGCVersionPanel({ appId, currentCode, onRestore }: NGCVersionPan
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
-    return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }) +
-      ' ' + d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' }) +
+      ' ' + d.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' });
   };
 
   const previewVersion = versions.find(v => v.id === previewId);
@@ -88,14 +90,14 @@ export function NGCVersionPanel({ appId, currentCode, onRestore }: NGCVersionPan
       <div className="ide-panel-header justify-between">
         <span className="flex items-center gap-1.5">
           <History className="h-3.5 w-3.5" />
-          Versies
+          {t('editor.versions.title')}
         </span>
         <button
           onClick={() => setShowSaveForm(!showSaveForm)}
           className="flex items-center gap-1 text-[10px] font-medium text-primary hover:text-primary/80 transition-colors"
         >
           <Save className="h-3 w-3" />
-          Opslaan
+          {t('editor.versions.save')}
         </button>
       </div>
 
@@ -103,7 +105,7 @@ export function NGCVersionPanel({ appId, currentCode, onRestore }: NGCVersionPan
         <div className="p-2.5 border-b border-border space-y-2" style={{ background: 'hsl(var(--ide-explorer-bg))' }}>
           <input
             type="text"
-            placeholder="Versienaam (optioneel)"
+            placeholder={t('editor.versions.labelPlaceholder')}
             value={label}
             onChange={e => setLabel(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && saveVersion()}
@@ -114,7 +116,7 @@ export function NGCVersionPanel({ appId, currentCode, onRestore }: NGCVersionPan
             <button onClick={saveVersion} disabled={saving}
               className="flex-1 rounded-md bg-primary text-primary-foreground text-[11px] font-medium py-1.5 hover:bg-primary/90 disabled:opacity-50 transition-colors active:scale-[0.98]"
             >
-              {saving ? 'Opslaan...' : 'Snapshot opslaan'}
+              {saving ? t('editor.versions.saving') : t('editor.versions.saveSnapshot')}
             </button>
             <button onClick={() => { setShowSaveForm(false); setLabel(''); }}
               className="rounded-md px-2 py-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
@@ -132,8 +134,8 @@ export function NGCVersionPanel({ appId, currentCode, onRestore }: NGCVersionPan
           </div>
         ) : versions.length === 0 ? (
           <div className="p-4 text-center">
-            <p className="text-[11px] text-muted-foreground">Nog geen versies opgeslagen.</p>
-            <p className="text-[10px] text-muted-foreground/60 mt-1">Klik op "Opslaan" om een snapshot te maken.</p>
+            <p className="text-[11px] text-muted-foreground">{t('editor.versions.empty')}</p>
+            <p className="text-[10px] text-muted-foreground/60 mt-1">{t('editor.versions.emptyHint')}</p>
           </div>
         ) : (
           <div className="divide-y divide-border/40">
@@ -154,14 +156,14 @@ export function NGCVersionPanel({ appId, currentCode, onRestore }: NGCVersionPan
                     <button
                       onClick={(e) => { e.stopPropagation(); restoreVersion(version); }}
                       className="p-1 rounded text-primary hover:bg-primary/10 transition-colors"
-                      title="Herstel deze versie"
+                      title={t('editor.versions.restore')}
                     >
                       <RotateCcw className="h-3 w-3" />
                     </button>
                     <button
                       onClick={(e) => deleteVersion(version.id, e)}
                       className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                      title="Verwijder"
+                      title={t('editor.versions.remove')}
                     >
                       <Trash2 className="h-3 w-3" />
                     </button>
@@ -176,13 +178,13 @@ export function NGCVersionPanel({ appId, currentCode, onRestore }: NGCVersionPan
       {previewVersion && (
         <div className="border-t border-border" style={{ background: 'hsl(var(--ide-editor-bg))' }}>
           <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/50">
-            <span className="text-[10px] text-muted-foreground font-medium truncate">Preview: {previewVersion.label}</span>
+            <span className="text-[10px] text-muted-foreground font-medium truncate">{t('editor.versions.preview')}: {previewVersion.label}</span>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => restoreVersion(previewVersion)}
                 className="text-[10px] px-2 py-0.5 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
               >
-                Herstel
+                {t('editor.versions.restoreShort')}
               </button>
               <button onClick={() => setPreviewId(null)}
                 className="p-0.5 rounded text-muted-foreground hover:text-foreground transition-colors"
