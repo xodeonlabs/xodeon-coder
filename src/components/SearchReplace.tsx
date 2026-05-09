@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, Replace, X, ChevronDown, ChevronUp, CaseSensitive, Regex } from 'lucide-react';
 
 interface SearchReplaceProps {
@@ -11,6 +12,7 @@ interface SearchReplaceProps {
 }
 
 export function SearchReplace({ open, onClose, code, onCodeChange, showReplace: initialShowReplace }: SearchReplaceProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [replacement, setReplacement] = useState('');
   const [showReplace, setShowReplace] = useState(initialShowReplace ?? false);
@@ -115,7 +117,7 @@ export function SearchReplace({ open, onClose, code, onCodeChange, showReplace: 
         <button
           onClick={() => setShowReplace(!showReplace)}
           className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          title={showReplace ? 'Verberg vervangen' : 'Toon vervangen'}
+          title={showReplace ? t('editor.search.hideReplace') : t('editor.search.showReplace')}
         >
           {showReplace ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
         </button>
@@ -127,34 +129,34 @@ export function SearchReplace({ open, onClose, code, onCodeChange, showReplace: 
             value={query}
             onChange={e => { setQuery(e.target.value); setMatchIdx(0); }}
             onKeyDown={handleKeyDown}
-            placeholder="Zoeken..."
+            placeholder={t('editor.search.placeholder')}
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none min-w-0"
           />
           <button
             onClick={() => setCaseSensitive(!caseSensitive)}
             className={`p-0.5 rounded transition-colors ${caseSensitive ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
-            title="Hoofdlettergevoelig"
+            title={t('editor.search.caseSensitive')}
           >
             <CaseSensitive className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={() => setUseRegex(!useRegex)}
             className={`p-0.5 rounded transition-colors ${useRegex ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
-            title="Reguliere expressie"
+            title={t('editor.search.regex')}
           >
             <Regex className="h-3.5 w-3.5" />
           </button>
         </div>
         <span className="text-[10px] text-muted-foreground font-mono w-14 text-center shrink-0">
-          {total > 0 ? `${matchIdx + 1}/${total}` : 'Geen'}
+          {total > 0 ? `${matchIdx + 1}/${total}` : t('editor.search.none')}
         </span>
-        <button onClick={goPrev} disabled={total === 0} className="p-1 rounded text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors" title="Vorige (Shift+Enter)">
+        <button onClick={goPrev} disabled={total === 0} className="p-1 rounded text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors" title={t('editor.search.previous')}>
           <ChevronUp className="h-3.5 w-3.5" />
         </button>
-        <button onClick={goNext} disabled={total === 0} className="p-1 rounded text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors" title="Volgende (Enter)">
+        <button onClick={goNext} disabled={total === 0} className="p-1 rounded text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors" title={t('editor.search.next')}>
           <ChevronDown className="h-3.5 w-3.5" />
         </button>
-        <button onClick={onClose} className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors" title="Sluiten (Esc)">
+        <button onClick={onClose} className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors" title={t('editor.search.close')}>
           <X className="h-3.5 w-3.5" />
         </button>
       </div>
@@ -170,7 +172,7 @@ export function SearchReplace({ open, onClose, code, onCodeChange, showReplace: 
               value={replacement}
               onChange={e => setReplacement(e.target.value)}
               onKeyDown={e => { if (e.key === 'Escape') onClose(); }}
-              placeholder="Vervangen door..."
+              placeholder={t('editor.search.replacePlaceholder')}
               className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none min-w-0"
             />
           </div>
@@ -178,17 +180,17 @@ export function SearchReplace({ open, onClose, code, onCodeChange, showReplace: 
             onClick={replaceOne}
             disabled={total === 0}
             className="px-2 py-1 text-[10px] font-medium rounded text-muted-foreground hover:text-foreground hover:bg-secondary/50 disabled:opacity-30 transition-colors shrink-0"
-            title="Vervang huidige"
+            title={t('editor.search.replaceCurrent')}
           >
-            Vervang
+            {t('editor.search.replace')}
           </button>
           <button
             onClick={replaceAll}
             disabled={total === 0}
             className="px-2 py-1 text-[10px] font-medium rounded text-muted-foreground hover:text-foreground hover:bg-secondary/50 disabled:opacity-30 transition-colors shrink-0"
-            title="Vervang alles"
+            title={t('editor.search.replaceAllTitle')}
           >
-            Alles
+            {t('editor.search.replaceAll')}
           </button>
         </div>
       )}
