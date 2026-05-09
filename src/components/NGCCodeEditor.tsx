@@ -1,4 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ParseError } from '@/lib/ngc-ast';
 
 interface CodeEditorProps {
