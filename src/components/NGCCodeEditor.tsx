@@ -281,6 +281,7 @@ function highlightLine(line: string): JSX.Element[] {
 }
 
 export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
+  const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
@@ -577,7 +578,7 @@ export function NGCCodeEditor({ code, onChange, errors }: CodeEditorProps) {
             >
               <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: KIND_COLORS[s.kind] }} />
               <span className="font-mono text-foreground">{s.label}</span>
-              <span className="ml-auto text-muted-foreground/50 text-[10px] truncate">{s.description ?? s.kind}</span>
+              <span className="ml-auto text-muted-foreground/50 text-[10px] truncate">{s.descKey ? t(s.descKey) : (s.description ?? t(`editor.kind.${s.kind}`))}</span>
             </button>
           ))}
         </div>
