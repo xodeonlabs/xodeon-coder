@@ -136,7 +136,7 @@ function ImageUploadSection({ appId }: { appId: string }) {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      toast({ title: 'Te groot', description: 'Maximaal 5MB', variant: 'destructive' });
+      toast({ title: t('editor.data.tooLarge'), description: t('editor.data.tooLargeDesc'), variant: 'destructive' });
       return;
     }
 
@@ -152,11 +152,11 @@ function ImageUploadSection({ appId }: { appId: string }) {
       });
       if (error) throw error;
 
-      toast({ title: '✅ Afbeelding geüpload!' });
+      toast({ title: t('editor.data.uploaded') });
       await loadImages();
     } catch (err: any) {
       console.error('Upload error:', err);
-      toast({ title: 'Upload mislukt', description: err?.message || 'Onbekende fout', variant: 'destructive' });
+      toast({ title: t('editor.data.uploadFailed'), description: err?.message || t('common.unknown'), variant: 'destructive' });
     }
     setUploading(false);
     if (fileRef.current) fileRef.current.value = '';
@@ -165,17 +165,17 @@ function ImageUploadSection({ appId }: { appId: string }) {
   function copyUrl(url: string) {
     navigator.clipboard.writeText(url);
     setCopiedUrl(url);
-    toast({ title: '📋 URL gekopieerd!', description: 'Plak in de Bron eigenschap van een Image component', duration: 2000 });
+    toast({ title: t('editor.data.urlCopied'), description: t('editor.data.urlCopiedDesc'), duration: 2000 });
     setTimeout(() => setCopiedUrl(null), 2000);
   }
 
   async function deleteImage(name: string) {
     const { error } = await supabase.storage.from('app-images').remove([`${appId}/${name}`]);
     if (error) {
-      toast({ title: 'Verwijderen mislukt', description: error.message, variant: 'destructive' });
+      toast({ title: t('editor.data.removeFailed'), description: error.message, variant: 'destructive' });
       return;
     }
-    toast({ title: '🗑️ Verwijderd' });
+    toast({ title: t('editor.data.removed') });
     setImages(prev => prev.filter(img => img.name !== name));
   }
 
