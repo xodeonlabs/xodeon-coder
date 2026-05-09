@@ -182,7 +182,7 @@ function ImageUploadSection({ appId }: { appId: string }) {
   return (
     <div>
       <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-        🖼️ Afbeeldingen
+        🖼️ {t('editor.data.images')}
       </h3>
 
       {/* Upload button */}
@@ -196,7 +196,7 @@ function ImageUploadSection({ appId }: { appId: string }) {
         ) : (
           <Upload className="h-3 w-3 text-muted-foreground" />
         )}
-        <span className="text-muted-foreground">{uploading ? 'Uploaden...' : 'Afbeelding uploaden'}</span>
+        <span className="text-muted-foreground">{uploading ? t('editor.data.uploading') : t('editor.data.uploadImage')}</span>
       </button>
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
 
@@ -216,14 +216,14 @@ function ImageUploadSection({ appId }: { appId: string }) {
                 <button
                   onClick={() => copyUrl(img.url)}
                   className="p-1 rounded bg-primary/80 hover:bg-primary transition-colors"
-                  title="Kopieer URL"
+                  title={t('editor.data.copyUrl')}
                 >
                   {copiedUrl === img.url ? <Check className="h-3 w-3 text-primary-foreground" /> : <Copy className="h-3 w-3 text-primary-foreground" />}
                 </button>
                 <button
                   onClick={() => deleteImage(img.name)}
                   className="p-1 rounded bg-destructive/80 hover:bg-destructive transition-colors"
-                  title="Verwijderen"
+                  title={t('editor.data.remove')}
                 >
                   <Trash2 className="h-3 w-3 text-destructive-foreground" />
                 </button>
@@ -233,17 +233,18 @@ function ImageUploadSection({ appId }: { appId: string }) {
           ))}
         </div>
       ) : (
-        <p className="text-[10px] text-muted-foreground/60 italic text-center">Geen afbeeldingen geüpload</p>
+        <p className="text-[10px] text-muted-foreground/60 italic text-center">{t('editor.data.noImages')}</p>
       )}
 
       <p className="text-[9px] text-muted-foreground/50 mt-2 text-center">
-        💡 Sleep een afbeelding naar een Image component in Ontwerp modus
+        {t('editor.data.dragHint')}
       </p>
     </div>
   );
 }
 
 export function NGCDataPanel({ ast, appId }: DataPanelProps) {
+  const { t } = useTranslation();
   const { vars, lists, operations } = useMemo(() => {
     const vars: ExtractedVar[] = [];
     const lists: ExtractedList[] = [];
