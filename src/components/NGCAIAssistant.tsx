@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Bot, Send, Check, X, Loader2, Sparkles, Plus, MessageSquare, Trash2, ArrowLeft, Pencil, Coins } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -32,6 +33,7 @@ function extractNGCCode(text: string): string | null {
 }
 
 export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssistantProps) {
+  const { t, i18n } = useTranslation();
   const { session } = useAuth();
   const { toast } = useToast();
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -85,7 +87,7 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
     if (!session?.user?.id) return;
     const { data, error } = await supabase
       .from('ai_conversations')
-      .insert({ app_id: appId, user_id: session.user.id, title: 'Nieuw gesprek' })
+      .insert({ app_id: appId, user_id: session.user.id, title: t('editor.ai.newConversation') })
       .select()
       .single();
     if (data && !error) {
@@ -174,10 +176,10 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
 
       if (!resp.ok) {
         const errData = await resp.json().catch(() => ({}));
-        throw new Error(errData.error || `Fout ${resp.status}`);
+        throw new Error(errData.error || `${t('common.error')} ${resp.status}`);
       }
 
-      if (!resp.body) throw new Error('Geen response stream');
+      if (!resp.body) throw new Error(t('editor.ai.noResponse'));
 
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
@@ -237,7 +239,7 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
       const extracted = extractNGCCode(assistantContent);
       if (extracted) setPendingCode(extracted);
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Onbekende fout';
+      const errorMsg = err instanceof Error ? err.message : t('editor.ai.unknownError');
       setMessages(prev => [...prev, { role: 'assistant', content: `❌ ${errorMsg}` }]);
     } finally {
       setIsLoading(false);
@@ -272,7 +274,7 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
         const balance = (coinRow as any)?.balance ?? 0;
 
         if (balance < cost) {
-          toast({ title: 'Niet genoeg coins', description: `Je hebt ${cost} coins nodig maar je hebt er ${balance}.`, variant: 'destructive' });
+          toast({ title: t('editor.ai.notEnoughCoins'), description: t('editor.ai.notEnoughCoinsDesc', { cost, balance }), variant: 'destructive' });
           return;
         }
 
@@ -292,13 +294,13 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
         <div className="flex items-center justify-between px-2 py-1.5 border-b border-border shrink-0">
           <div className="flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
-            <span className="text-[11px] font-semibold text-foreground">AI Gesprekken</span>
+            <span className="text-[11px] font-semibold text-foreground">{t('editor.ai.defaultTitle')}</span>
           </div>
           <button
             onClick={createConversation}
             className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           >
-            <Plus className="h-3 w-3" /> Nieuw
+            <Plus className="h-3 w-3" /> {t('common.add')}
           </button>
         </div>
 
@@ -311,7 +313,7 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
             <div className="text-center py-8 space-y-2">
               <Bot className="h-8 w-8 text-muted-foreground mx-auto opacity-40" />
               <p className="text-[10px] text-muted-foreground">
-                Nog geen gesprekken.<br />Start een nieuw gesprek met de AI.
+                {t('editor.ai.empty')}<br />{t('editor.ai.emptyExample')}
               </p>
             </div>
           ) : (
@@ -341,7 +343,7 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
                       <p className="text-xs text-foreground truncate">{convo.title}</p>
                     )}
                     <p className="text-[9px] text-muted-foreground">
-                      {new Date(convo.updated_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      {new Date(convo.updated_at).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
                   {editingConvoId !== convo.id && (
@@ -395,9 +397,9 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
           <span
             onClick={() => activeConvoId && startRename(activeConvoId, conversations.find(c => c.id === activeConvoId)?.title || '')}
             className="text-[11px] font-semibold text-foreground truncate flex-1 cursor-pointer hover:text-primary transition-colors"
-            title="Klik om te hernoemen"
+            title={t('editor.ai.clickToRename')}
           >
-            {conversations.find(c => c.id === activeConvoId)?.title || 'AI Assistent'}
+            {conversations.find(c => c.id === activeConvoId)?.title || t('editor.ai.defaultTitle')}
           </span>
         )}
       </div>
@@ -408,8 +410,8 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
           <div className="text-center py-4 space-y-2">
             <Bot className="h-8 w-8 text-muted-foreground mx-auto opacity-40" />
             <p className="text-[10px] text-muted-foreground">
-              Vraag de AI om je code aan te passen.<br />
-              Bijv. "Voeg een rode knop toe" of "Maak de achtergrond donkerder"
+              {t('editor.ai.empty')}<br />
+              {t('editor.ai.emptyExample')}
             </p>
           </div>
         )}
@@ -423,7 +425,7 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
               }`}
             >
               {msg.role === 'assistant'
-                ? msg.content.replace(/```(?:ngc)?\s*\n[\s\S]*?```/g, '📄 [NGC code - zie hieronder]')
+                ? msg.content.replace(/```(?:ngc)?\s*\n[\s\S]*?```/g, t('editor.ai.ngcCodeBelow'))
                 : msg.content
               }
             </div>
@@ -433,7 +435,7 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
         {isLoading && (
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <Loader2 className="h-3 w-3 animate-spin" />
-            <span className="text-[10px]">AI denkt na...</span>
+            <span className="text-[10px]">{t('editor.ai.thinking')}</span>
           </div>
         )}
 
@@ -442,14 +444,14 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
           const cost = addedLines;
           return (
             <div className="rounded-lg border border-primary/30 bg-primary/5 p-2 space-y-2">
-              <p className="text-[10px] text-foreground font-medium">AI heeft nieuwe code voorgesteld:</p>
+              <p className="text-[10px] text-foreground font-medium">{t('editor.ai.proposed')}</p>
               <pre className="text-[9px] text-muted-foreground bg-background rounded p-1.5 max-h-24 overflow-y-auto font-mono">
                 {pendingCode.slice(0, 300)}{pendingCode.length > 300 ? '...' : ''}
               </pre>
               {cost > 0 && (
                 <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
                   <Coins className="h-3 w-3 text-accent" />
-                  <span>+{addedLines} regels = <strong className="text-accent">{cost} coins</strong></span>
+                  <span>{t('editor.ai.addedLines', { count: addedLines })}<strong className="text-accent">{t('editor.ai.coinsCost', { count: cost })}</strong></span>
                 </div>
               )}
               <div className="flex gap-1.5">
@@ -457,13 +459,13 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
                   onClick={handleApply}
                   className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium bg-accent text-accent-foreground hover:bg-accent/80 transition-colors"
                 >
-                  <Check className="h-3 w-3" /> {cost > 0 ? `Toepassen (${cost} 🪙)` : 'Toepassen'}
+                  <Check className="h-3 w-3" /> {cost > 0 ? t('editor.ai.applyCost', { count: cost }) : t('editor.ai.apply')}
                 </button>
                 <button
                   onClick={() => setPendingCode(null)}
                   className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
                 >
-                  <X className="h-3 w-3" /> Afwijzen
+                  <X className="h-3 w-3" /> {t('editor.ai.reject')}
                 </button>
               </div>
             </div>
@@ -477,7 +479,7 @@ export function NGCAIAssistant({ appId, currentCode, onApplyCode }: NGCAIAssista
       <div className="border-t border-border p-2 flex gap-1.5 shrink-0">
         <input
           className="flex-1 rounded bg-background border border-border px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
-          placeholder="Vraag de AI iets..."
+          placeholder={t('editor.ai.placeholder')}
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}

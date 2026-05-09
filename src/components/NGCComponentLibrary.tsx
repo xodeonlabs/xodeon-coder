@@ -1,7 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronRight, ChevronDown, Copy, Share2, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+
+const FOLDER_KEY_MAP: Record<string, string> = {
+  Pagina: 'page',
+  Knoppen: 'buttons',
+  Tekst: 'text',
+  Invoer: 'input',
+  Afbeelding: 'image',
+  Frames: 'frames',
+  Data: 'data',
+  Coins: 'coins',
+  Besturing: 'control',
+  Sjablonen: 'templates',
+};
 
 
 interface Snippet {
@@ -686,6 +700,7 @@ const LIBRARY: Folder[] = [
 ];
 
 export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => void }) {
+  const { t } = useTranslation();
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
   const [communityTemplates, setCommunityTemplates] = useState<Template[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
@@ -764,7 +779,7 @@ export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => 
           console.log('New template detected:', payload);
           setActiveTab('community');
           await refreshTemplates();
-          toast({ title: 'Nieuwe template!', description: 'Een nieuwe template is gedeeld.' });
+          toast({ title: t('editor.library.newTemplate'), description: t('editor.library.newTemplateDesc') });
         }
       )
       .subscribe();
@@ -781,12 +796,12 @@ export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => 
 
   const handleCopy = (snippet: Snippet) => {
     onInsert(snippet.code);
-    toast({ title: 'Code ingevoegd', description: snippet.label });
+    toast({ title: t('editor.library.inserted'), description: snippet.label });
   };
 
   const handleUseTemplate = (template: Template) => {
     onInsert(template.ngc_code);
-    toast({ title: 'Template ingevoegd', description: template.name });
+    toast({ title: t('editor.library.templateInserted'), description: template.name });
   };
 
   return (
@@ -801,7 +816,7 @@ export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => 
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          📂 Bibliotheek
+          {t('editor.library.tabLibrary')}
         </button>
         <button
           onClick={() => setActiveTab('community')}
@@ -811,7 +826,7 @@ export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => 
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          🌟 Gemeenschap
+          {t('editor.library.tabCommunity')}
           {communityTemplates.length > 0 && (
             <span className="absolute top-0.5 right-1 h-2 w-2 rounded-full bg-accent animate-pulse"></span>
           )}
@@ -838,7 +853,7 @@ export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => 
                       <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
                     )}
                     <span>{folder.icon}</span>
-                    <span className="font-medium text-foreground">{folder.name}</span>
+                    <span className="font-medium text-foreground">{t(`editor.library.folders.${FOLDER_KEY_MAP[folder.name] || 'page'}`)}</span>
                     <span className="ml-auto text-muted-foreground/60 text-[10px]">{folder.snippets.length}</span>
                   </button>
                   {isOpen && (
@@ -870,14 +885,14 @@ export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => 
             {loadingTemplates ? (
               <div className="flex items-center justify-center py-12 text-muted-foreground">
                 <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary/20 border-t-primary mr-2"></div>
-                <span className="text-sm">Templates laden...</span>
+                <span className="text-sm">{t('editor.library.loading')}</span>
               </div>
             ) : communityTemplates.length === 0 ? (
               <div className="flex items-center justify-center py-12 text-muted-foreground">
                 <div className="text-center">
                   <div className="text-2xl mb-2"></div>
-                  <p className="text-sm">Geen community templates beschikbaar</p>
-                  <p className="text-xs text-muted-foreground/60 mt-1">Deel je eerste template!</p>
+                  <p className="text-sm">{t('editor.library.empty')}</p>
+                  <p className="text-xs text-muted-foreground/60 mt-1">{t('editor.library.emptyHint')}</p>
                 </div>
               </div>
             ) : (
@@ -889,7 +904,7 @@ export function NGCComponentLibrary({ onInsert }: { onInsert: (code: string) => 
                 >
                   <div className="flex-1 min-w-0">
                     <div className="text-foreground font-medium truncate">{(template as any).name}</div>
-                    <div className="text-muted-foreground/70 text-[10px] truncate mt-0.5">{(template as any).description || 'Geen beschrijving'}</div>
+                    <div className="text-muted-foreground/70 text-[10px] truncate mt-0.5">{(template as any).description || t('editor.library.noDescription')}</div>
                     <div className="flex items-center gap-2 text-muted-foreground/50 text-[9px] mt-1">
                       <div className="flex items-center gap-1">
                         <Star className="h-2.5 w-2.5" fill="currentColor" />

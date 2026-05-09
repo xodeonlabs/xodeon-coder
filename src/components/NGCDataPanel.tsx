@@ -1,4 +1,5 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NGCNode } from '@/lib/ngc-ast';
 import { Database, Table, Trash2, Upload, Image as ImageIcon, Copy, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -106,6 +107,7 @@ function extractDataFromAST(node: NGCNode, vars: ExtractedVar[], lists: Extracte
 }
 
 function ImageUploadSection({ appId }: { appId: string }) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -134,7 +136,7 @@ function ImageUploadSection({ appId }: { appId: string }) {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      toast({ title: 'Te groot', description: 'Maximaal 5MB', variant: 'destructive' });
+      toast({ title: t('editor.data.tooLarge'), description: t('editor.data.tooLargeDesc'), variant: 'destructive' });
       return;
     }
 
@@ -150,11 +152,11 @@ function ImageUploadSection({ appId }: { appId: string }) {
       });
       if (error) throw error;
 
-      toast({ title: '✅ Afbeelding geüpload!' });
+      toast({ title: t('editor.data.uploaded') });
       await loadImages();
     } catch (err: any) {
       console.error('Upload error:', err);
-      toast({ title: 'Upload mislukt', description: err?.message || 'Onbekende fout', variant: 'destructive' });
+      toast({ title: t('editor.data.uploadFailed'), description: err?.message || t('common.unknown'), variant: 'destructive' });
     }
     setUploading(false);
     if (fileRef.current) fileRef.current.value = '';
@@ -163,24 +165,24 @@ function ImageUploadSection({ appId }: { appId: string }) {
   function copyUrl(url: string) {
     navigator.clipboard.writeText(url);
     setCopiedUrl(url);
-    toast({ title: '📋 URL gekopieerd!', description: 'Plak in de Bron eigenschap van een Image component', duration: 2000 });
+    toast({ title: t('editor.data.urlCopied'), description: t('editor.data.urlCopiedDesc'), duration: 2000 });
     setTimeout(() => setCopiedUrl(null), 2000);
   }
 
   async function deleteImage(name: string) {
     const { error } = await supabase.storage.from('app-images').remove([`${appId}/${name}`]);
     if (error) {
-      toast({ title: 'Verwijderen mislukt', description: error.message, variant: 'destructive' });
+      toast({ title: t('editor.data.removeFailed'), description: error.message, variant: 'destructive' });
       return;
     }
-    toast({ title: '🗑️ Verwijderd' });
+    toast({ title: t('editor.data.removed') });
     setImages(prev => prev.filter(img => img.name !== name));
   }
 
   return (
     <div>
       <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-        🖼️ Afbeeldingen
+        🖼️ {t('editor.data.images')}
       </h3>
 
       {/* Upload button */}
@@ -194,7 +196,7 @@ function ImageUploadSection({ appId }: { appId: string }) {
         ) : (
           <Upload className="h-3 w-3 text-muted-foreground" />
         )}
-        <span className="text-muted-foreground">{uploading ? 'Uploaden...' : 'Afbeelding uploaden'}</span>
+        <span className="text-muted-foreground">{uploading ? t('editor.data.uploading') : t('editor.data.uploadImage')}</span>
       </button>
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
 
@@ -214,14 +216,14 @@ function ImageUploadSection({ appId }: { appId: string }) {
                 <button
                   onClick={() => copyUrl(img.url)}
                   className="p-1 rounded bg-primary/80 hover:bg-primary transition-colors"
-                  title="Kopieer URL"
+                  title={t('editor.data.copyUrl')}
                 >
                   {copiedUrl === img.url ? <Check className="h-3 w-3 text-primary-foreground" /> : <Copy className="h-3 w-3 text-primary-foreground" />}
                 </button>
                 <button
                   onClick={() => deleteImage(img.name)}
                   className="p-1 rounded bg-destructive/80 hover:bg-destructive transition-colors"
-                  title="Verwijderen"
+                  title={t('editor.data.remove')}
                 >
                   <Trash2 className="h-3 w-3 text-destructive-foreground" />
                 </button>
@@ -231,17 +233,18 @@ function ImageUploadSection({ appId }: { appId: string }) {
           ))}
         </div>
       ) : (
-        <p className="text-[10px] text-muted-foreground/60 italic text-center">Geen afbeeldingen geüpload</p>
+        <p className="text-[10px] text-muted-foreground/60 italic text-center">{t('editor.data.noImages')}</p>
       )}
 
       <p className="text-[9px] text-muted-foreground/50 mt-2 text-center">
-        💡 Sleep een afbeelding naar een Image component in Ontwerp modus
+        {t('editor.data.dragHint')}
       </p>
     </div>
   );
 }
 
 export function NGCDataPanel({ ast, appId }: DataPanelProps) {
+  const { t } = useTranslation();
   const { vars, lists, operations } = useMemo(() => {
     const vars: ExtractedVar[] = [];
     const lists: ExtractedList[] = [];
@@ -261,21 +264,21 @@ export function NGCDataPanel({ ast, appId }: DataPanelProps) {
       {vars.length > 0 && (
         <div>
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            💾 Variabelen
+            💾 {t('editor.data.variables')}
           </h3>
           <div className="rounded-md border border-border overflow-hidden">
             <table className="w-full text-xs">
               <thead>
                 <tr style={{ background: 'hsl(var(--ide-panel-header))' }}>
-                  <th className="text-left px-2 py-1.5 text-muted-foreground font-medium">Naam</th>
-                  <th className="text-left px-2 py-1.5 text-muted-foreground font-medium">Waarde</th>
+                  <th className="text-left px-2 py-1.5 text-muted-foreground font-medium">{t('editor.data.colName')}</th>
+                  <th className="text-left px-2 py-1.5 text-muted-foreground font-medium">{t('editor.data.colValue')}</th>
                 </tr>
               </thead>
               <tbody>
                 {vars.map((v, i) => (
                   <tr key={i} className="border-t border-border hover:bg-secondary/50 transition-colors">
                     <td className="px-2 py-1.5 font-mono text-primary">{v.name}</td>
-                    <td className="px-2 py-1.5 font-mono text-foreground">{v.value || <span className="text-muted-foreground italic">leeg</span>}</td>
+                    <td className="px-2 py-1.5 font-mono text-foreground">{v.value || <span className="text-muted-foreground italic">{t('editor.data.empty')}</span>}</td>
                   </tr>
                 ))}
               </tbody>
@@ -288,7 +291,7 @@ export function NGCDataPanel({ ast, appId }: DataPanelProps) {
       {lists.length > 0 && (
         <div>
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            📋 Lijsten
+            📋 {t('editor.data.lists')}
           </h3>
           {lists.map((list, i) => (
             <div key={i} className="mb-3">
@@ -299,7 +302,7 @@ export function NGCDataPanel({ ast, appId }: DataPanelProps) {
                     <thead>
                       <tr style={{ background: 'hsl(var(--ide-panel-header))' }}>
                         <th className="text-left px-2 py-1 text-muted-foreground font-medium w-8">#</th>
-                        <th className="text-left px-2 py-1 text-muted-foreground font-medium">Waarde</th>
+                        <th className="text-left px-2 py-1 text-muted-foreground font-medium">{t('editor.data.colValue')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -313,7 +316,7 @@ export function NGCDataPanel({ ast, appId }: DataPanelProps) {
                   </table>
                 </div>
               ) : (
-                <p className="text-xs text-muted-foreground/60 italic pl-1">Lege lijst</p>
+                <p className="text-xs text-muted-foreground/60 italic pl-1">{t('editor.data.emptyList')}</p>
               )}
             </div>
           ))}
@@ -324,24 +327,24 @@ export function NGCDataPanel({ ast, appId }: DataPanelProps) {
       {operations.length > 0 && (
         <div>
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            ⚡ Data Operaties
+            ⚡ {t('editor.data.operations')}
           </h3>
           <div className="rounded-md border border-border overflow-hidden">
             <table className="w-full text-xs">
               <thead>
                 <tr style={{ background: 'hsl(var(--ide-panel-header))' }}>
-                  <th className="text-left px-2 py-1.5 text-muted-foreground font-medium">Type</th>
-                  <th className="text-left px-2 py-1.5 text-muted-foreground font-medium">Tabel</th>
+                  <th className="text-left px-2 py-1.5 text-muted-foreground font-medium">{t('editor.data.colType')}</th>
+                  <th className="text-left px-2 py-1.5 text-muted-foreground font-medium">{t('editor.data.colTable')}</th>
                 </tr>
               </thead>
               <tbody>
                 {operations.map((op, i) => (
                   <tr key={i} className="border-t border-border hover:bg-secondary/50 transition-colors">
                     <td className="px-2 py-1.5 font-mono text-primary">
-                      {op.type === 'Get' && 'Ophalen'}
-                      {op.type === 'Add' && 'Toevoegen'}
-                      {op.type === 'Delete' && 'Verwijderen'}
-                      {op.type === 'Clear' && 'Wissen'}
+                      {op.type === 'Get' && t('editor.data.opGet')}
+                      {op.type === 'Add' && t('editor.data.opAdd')}
+                      {op.type === 'Delete' && t('editor.data.opDelete')}
+                      {op.type === 'Clear' && t('editor.data.opClear')}
                     </td>
                     <td className="px-2 py-1.5 font-mono text-foreground">{op.table}</td>
                   </tr>
@@ -356,8 +359,8 @@ export function NGCDataPanel({ ast, appId }: DataPanelProps) {
         <div className="flex h-full items-center justify-center p-4">
           <div className="text-center">
             <Database className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
-            <p className="text-xs text-muted-foreground">Geen data gevonden</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">Voeg Var() of List() toe aan je code</p>
+            <p className="text-xs text-muted-foreground">{t('editor.data.noData')}</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">{t('editor.data.noDataHint')}</p>
           </div>
         </div>
       )}

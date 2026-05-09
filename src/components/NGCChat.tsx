@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Send } from 'lucide-react';
@@ -18,6 +19,7 @@ interface NGCChatProps {
 }
 
 export function NGCChat({ appId }: NGCChatProps) {
+  const { t, i18n } = useTranslation();
   const { session } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -88,7 +90,7 @@ export function NGCChat({ appId }: NGCChatProps) {
     await supabase.from('chat_messages').insert({
       app_id: appId,
       user_id: session.user.id,
-      user_email: session.user.email || 'Onbekend',
+      user_email: session.user.email || t('common.unknown'),
       content: input.trim(),
     });
     setInput('');
@@ -102,13 +104,14 @@ export function NGCChat({ appId }: NGCChatProps) {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-2 space-y-2 min-h-0">
         {messages.length === 0 && (
-          <p className="text-xs text-muted-foreground text-center py-4">Nog geen berichten</p>
+          <p className="text-xs text-muted-foreground text-center py-4">{t('editor.chat.empty')}</p>
         )}
         {messages.map(msg => {
           const isMe = msg.user_id === currentUserId;
           const isAdminUser = adminIds.has(msg.user_id);
-          const shortName = isAdminUser ? 'Admin' : (profiles[msg.user_id] || msg.user_email.split('@')[0]);
-          const displayName = isAdminUser ? 'Admin' : (profiles[msg.user_id] || msg.user_email.split('@')[0]);
+          const adminLabel = t('editor.chat.admin');
+          const shortName = isAdminUser ? adminLabel : (profiles[msg.user_id] || msg.user_email.split('@')[0]);
+          const displayName = isAdminUser ? adminLabel : (profiles[msg.user_id] || msg.user_email.split('@')[0]);
           return (
             <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
               <span className={`text-[10px] mb-0.5 px-1 font-semibold ${isAdminUser ? 'text-destructive' : 'text-muted-foreground'}`}>{displayName}</span>
@@ -122,7 +125,7 @@ export function NGCChat({ appId }: NGCChatProps) {
                 {censorText(msg.content)}
               </div>
               <span className="text-[9px] text-muted-foreground mt-0.5 px-1">
-                {new Date(msg.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
+                {new Date(msg.created_at).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
           );
@@ -134,7 +137,7 @@ export function NGCChat({ appId }: NGCChatProps) {
       <div className="border-t border-border p-2 flex gap-1.5">
         <input
           className="flex-1 rounded bg-background border border-border px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
-          placeholder="Typ een bericht..."
+          placeholder={t('editor.chat.placeholder')}
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
