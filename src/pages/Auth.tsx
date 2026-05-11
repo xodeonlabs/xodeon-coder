@@ -8,17 +8,30 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 const auth = supabase.auth as any;
 
-const getErrorText = (err: unknown, fallback: string) => {
+const getRawError = (err: unknown): string => {
   if (err instanceof Error && err.message) return err.message;
   if (err && typeof err === 'object') {
-    const errorPayload = err as { message?: unknown; msg?: unknown; error_description?: unknown; details?: unknown; error?: unknown };
-    const candidates = [errorPayload.message, errorPayload.msg, errorPayload.error_description, errorPayload.details, errorPayload.error];
-    for (const candidate of candidates) {
-      if (typeof candidate === 'string' && candidate.length > 0) return candidate;
+    const p = err as { message?: unknown; msg?: unknown; error_description?: unknown; details?: unknown; error?: unknown };
+    for (const c of [p.message, p.msg, p.error_description, p.details, p.error]) {
+      if (typeof c === 'string' && c.length > 0) return c;
     }
   }
-  return fallback;
+  return '';
 };
+
+/** Map Supabase/edge errors to a translation key under auth.errors.* */
+const mapAuthError = (err: unknown): string => {
+  const raw = getRawError(err).toLowerCase();
+  if (!raw) return 'auth.errors.unknown';
+  if (raw.includes('invalid login') || raw.includes('invalid credentials') || raw.includes('invalid_grant')) return 'auth.errors.invalidCredentials';
+  if (raw.includes('email not confirmed') || raw.includes('not confirmed')) return 'auth.errors.emailNotConfirmed';
+  if (raw.includes('already registered') || raw.includes('user already')) return 'auth.errors.emailAlreadyRegistered';
+  if (raw.includes('password') && (raw.includes('weak') || raw.includes('short') || raw.includes('6 characters'))) return 'auth.errors.weakPassword';
+  if (raw.includes('rate limit') || raw.includes('too many')) return 'auth.errors.rateLimited';
+  if (raw.includes('failed to fetch') || raw.includes('network')) return 'auth.errors.networkError';
+  return 'auth.errors.unknown';
+};
+
 
 const Auth = () => {
   const { t } = useTranslation();
