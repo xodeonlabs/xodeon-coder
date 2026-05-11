@@ -57,15 +57,13 @@ const Auth = () => {
     e.preventDefault();
     setError(''); setMessage(''); setLoading(true);
     try {
-      const { data, error } = await auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } });
+      if (!email.trim()) { setError(t('auth.errors.emailEmpty')); return; }
+      const { error } = await auth.signInWithOtp({ email: email.trim(), options: { emailRedirectTo: window.location.origin } });
       if (error) throw error;
-      if (data?.user?.id) {
-        setMessage('Magic link verzonden! Check je e-mail (ook spam-folder).');
-      } else {
-        setMessage('Aanvraag verzonden! Je ontvangt een inlog-link via e-mail.');
-      }
+      setMessage(t('auth.messages.magicSent'));
     } catch (err: unknown) {
-      setError(getErrorText(err, 'Magic link verzenden mislukt.'));
+      const key = mapAuthError(err);
+      setError(key === 'auth.errors.unknown' ? t('auth.errors.magicLinkFailed') : t(key));
     } finally { setLoading(false); }
   };
 
@@ -74,36 +72,42 @@ const Auth = () => {
     setError(''); setMessage(''); setLoading(true);
     try {
       if (mode === 'forgot') {
-        const { error } = await auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
+        if (!email.trim()) { setError(t('auth.errors.emailEmpty')); return; }
+        const { error } = await auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reset-password` });
         if (error) throw error;
-        setMessage('Check je e-mail voor een link om je wachtwoord te resetten.');
+        setMessage(t('auth.messages.resetSent'));
         return;
       }
 
       if (mode === 'login') {
+        if (!password) { setError(t('auth.errors.passwordEmpty')); return; }
         if (loginMethod === 'username') {
-          // Lookup email by username via edge function
           const cleanUsername = username.trim().toLowerCase();
-          if (!cleanUsername) {
-            setError('Vul je gebruikersnaam in.');
-            return;
-          }
+          if (!cleanUsername) { setError(t('auth.errors.usernameEmpty')); return; }
           const { data: lookupData, error: lookupError } = await supabase.functions.invoke('lookup-username', {
             body: { username: cleanUsername },
           });
-          if (lookupError || !lookupData?.email) {
-            setError('Gebruikersnaam niet gevonden.');
+          if (lookupError) {
+            // Distinguish a "not found" (404) from a real lookup failure
+            const raw = getRawError(lookupError).toLowerCase();
+            const status = (lookupError as { status?: number; context?: { status?: number } })?.status
+              ?? (lookupError as { context?: { status?: number } })?.context?.status;
+            if (status === 404 || raw.includes('user not found') || raw.includes('not found')) {
+              setError(t('auth.errors.usernameNotFound'));
+            } else {
+              setError(t('auth.errors.usernameLookupFailed'));
+            }
+            return;
+          }
+          if (!lookupData?.email) {
+            setError(t('auth.errors.usernameNotFound'));
             return;
           }
           const { error: signInError } = await auth.signInWithPassword({ email: lookupData.email, password });
           if (signInError) throw signInError;
           localStorage.setItem('rememberMe', rememberMe ? 'true' : 'false');
         } else {
-          // Login with email directly
-          if (!email.trim()) {
-            setError('Vul je e-mailadres in.');
-            return;
-          }
+          if (!email.trim()) { setError(t('auth.errors.emailEmpty')); return; }
           const { error: signInError } = await auth.signInWithPassword({ email: email.trim(), password });
           if (signInError) throw signInError;
           localStorage.setItem('rememberMe', rememberMe ? 'true' : 'false');
@@ -115,13 +119,15 @@ const Auth = () => {
       // Register mode
       const cleanUsername = username.trim().toLowerCase();
       if (!cleanUsername || cleanUsername.length < 3) {
-        setError('Gebruikersnaam moet minimaal 3 tekens zijn.');
+        setError(t('auth.errors.usernameTooShort'));
         return;
       }
       if (!/^[a-z0-9_-]+$/.test(cleanUsername)) {
-        setError('Gebruikersnaam mag alleen kleine letters, cijfers, - en _ bevatten.');
+        setError(t('auth.errors.usernameInvalidChars'));
         return;
       }
+      if (!email.trim()) { setError(t('auth.errors.emailEmpty')); return; }
+      if (!password) { setError(t('auth.errors.passwordEmpty')); return; }
 
       // Check if username is already taken
       const { data: existingUser } = await supabase
@@ -131,38 +137,39 @@ const Auth = () => {
         .maybeSingle();
 
       if (existingUser) {
-        setError('Deze gebruikersnaam is al in gebruik.');
+        setError(t('auth.errors.usernameTaken'));
         return;
       }
 
-      const { data, error } = await auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
-      if (error) {
-        if (error.message?.includes('User already registered')) {
-          setError('Dit e-mailadres is al geregistreerd. Gebruik inloggen of wachtwoord herstellen.');
-        } else throw error;
-        return;
-      }
+      const { data, error } = await auth.signUp({ email: email.trim(), password, options: { emailRedirectTo: window.location.origin } });
+      if (error) throw error;
+
       if (data.user?.id) {
         // Save username to profile (upsert in case trigger hasn't created the row yet)
-        await supabase
+        const { error: upsertError } = await supabase
           .from('profiles')
           .upsert({ id: data.user.id, username: cleanUsername } as any, { onConflict: 'id' });
 
-        setMessage('✅ Account aangemaakt! Je wordt ingelogd...');
+        if (upsertError) {
+          setError(t('auth.errors.profileNotCreated'));
+          return;
+        }
+
+        setMessage(t('auth.messages.accountCreated'));
         try {
-          const { error: signInError } = await auth.signInWithPassword({ email, password });
+          const { error: signInError } = await auth.signInWithPassword({ email: email.trim(), password });
           if (signInError) {
-            setMessage('Account aangemaakt! Je kunt nu inloggen.');
+            setMessage(t('auth.messages.accountCreatedManualLogin'));
             setTimeout(() => navigate('/'), 1500);
           } else {
             setTimeout(() => navigate('/'), 500);
           }
         } catch { setTimeout(() => navigate('/'), 1500); }
       } else {
-        setMessage('Account aangemaakt! Je kunt nu inloggen.');
+        setMessage(t('auth.messages.accountCreatedManualLogin'));
       }
     } catch (err: unknown) {
-      setError(getErrorText(err, 'Er is een onbekende fout opgetreden.'));
+      setError(t(mapAuthError(err)));
     } finally { setLoading(false); }
   };
 
@@ -172,7 +179,8 @@ const Auth = () => {
       const result = await lovable.auth.signInWithOAuth('google', { redirect_uri: window.location.origin });
       if (result?.error) throw result.error;
     } catch (err: unknown) {
-      setError(getErrorText(err, 'Google inloggen is mislukt.'));
+      const key = mapAuthError(err);
+      setError(key === 'auth.errors.unknown' ? t('auth.errors.googleFailed') : t(key));
     } finally { setLoading(false); }
   };
 
@@ -182,11 +190,11 @@ const Auth = () => {
       const result = await lovable.auth.signInWithOAuth('apple', { redirect_uri: window.location.origin });
       if (result?.error) throw result.error;
     } catch (err: unknown) {
-      setError(getErrorText(err, 'Apple inloggen is mislukt.'));
+      const key = mapAuthError(err);
+      setError(key === 'auth.errors.unknown' ? t('auth.errors.appleFailed') : t(key));
     } finally { setLoading(false); }
   };
 
-  const modeTitle = {
     login: t('auth.titleLogin'),
     register: t('auth.titleRegister'),
     forgot: t('auth.titleForgot'),
