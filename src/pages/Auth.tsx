@@ -195,6 +195,7 @@ const Auth = () => {
     } finally { setLoading(false); }
   };
 
+  const modeTitle = {
     login: t('auth.titleLogin'),
     register: t('auth.titleRegister'),
     forgot: t('auth.titleForgot'),
