@@ -62,6 +62,7 @@ const nl = {
     messages: 'Berichten',
     groups: 'Groepen',
     apiData: 'API Data',
+    developers: 'Developers',
     products: 'Producten',
     more: 'Meer',
     xodeonProducts: 'Xodeon Producten',

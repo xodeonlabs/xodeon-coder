@@ -62,6 +62,7 @@ const en = {
     messages: 'Messages',
     groups: 'Groups',
     apiData: 'API Data',
+    developers: 'Developers',
     products: 'Products',
     more: 'More',
     xodeonProducts: 'Xodeon Products',

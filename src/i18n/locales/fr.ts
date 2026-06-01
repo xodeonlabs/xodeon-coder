@@ -62,6 +62,7 @@ const fr = {
     messages: 'Messages',
     groups: 'Groupes',
     apiData: 'Données API',
+    developers: 'Développeurs',
     products: 'Produits',
     more: 'Plus',
     xodeonProducts: 'Produits Xodeon',

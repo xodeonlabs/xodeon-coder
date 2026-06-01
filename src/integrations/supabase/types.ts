@@ -661,6 +661,78 @@ export type Database = {
           },
         ]
       }
+      external_app_usage: {
+        Row: {
+          created_at: string
+          endpoint: string
+          external_app_id: string
+          id: string
+          method: string
+          status_code: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          external_app_id: string
+          id?: string
+          method?: string
+          status_code?: number
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          external_app_id?: string
+          id?: string
+          method?: string
+          status_code?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      external_apps: {
+        Row: {
+          api_key_hash: string
+          api_key_prefix: string
+          created_at: string
+          description: string
+          domain: string
+          id: string
+          is_active: boolean
+          name: string
+          owner_id: string
+          redirect_uris: string[]
+          updated_at: string
+        }
+        Insert: {
+          api_key_hash: string
+          api_key_prefix: string
+          created_at?: string
+          description?: string
+          domain?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          owner_id: string
+          redirect_uris?: string[]
+          updated_at?: string
+        }
+        Update: {
+          api_key_hash?: string
+          api_key_prefix?: string
+          created_at?: string
+          description?: string
+          domain?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          owner_id?: string
+          redirect_uris?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       friend_messages: {
         Row: {
           content: string
@@ -712,6 +784,105 @@ export type Database = {
           sender_id?: string
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      oauth_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          external_app_id: string
+          redirect_uri: string
+          scopes: string[]
+          used: boolean
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at: string
+          external_app_id: string
+          redirect_uri: string
+          scopes?: string[]
+          used?: boolean
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          external_app_id?: string
+          redirect_uri?: string
+          scopes?: string[]
+          used?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
+      oauth_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          external_app_id: string
+          id: string
+          last_used_at: string | null
+          revoked: boolean
+          scopes: string[]
+          token_hash: string
+          token_prefix: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          external_app_id: string
+          id?: string
+          last_used_at?: string | null
+          revoked?: boolean
+          scopes?: string[]
+          token_hash: string
+          token_prefix: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          external_app_id?: string
+          id?: string
+          last_used_at?: string | null
+          revoked?: boolean
+          scopes?: string[]
+          token_hash?: string
+          token_prefix?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      oauth_user_grants: {
+        Row: {
+          external_app_id: string
+          granted_at: string
+          id: string
+          revoked_at: string | null
+          scopes: string[]
+          user_id: string
+        }
+        Insert: {
+          external_app_id: string
+          granted_at?: string
+          id?: string
+          revoked_at?: string | null
+          scopes?: string[]
+          user_id: string
+        }
+        Update: {
+          external_app_id?: string
+          granted_at?: string
+          id?: string
+          revoked_at?: string | null
+          scopes?: string[]
+          user_id?: string
         }
         Relationships: []
       }
