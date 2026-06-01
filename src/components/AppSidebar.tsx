@@ -262,6 +262,7 @@ export function AppSidebar() {
                 );
               })}
               {isAdmin && (
+                <>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     isActive={isActive('/admin')}
@@ -277,6 +278,22 @@ export function AppSidebar() {
                     <span>{t('nav.admin')}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    isActive={isActive('/admin/connections')}
+                    tooltip={collapsed ? 'Connecties' : undefined}
+                    onClick={() => navigate('/admin/connections')}
+                    className={`flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                      isActive('/admin/connections')
+                        ? 'bg-destructive/10 text-destructive'
+                        : 'text-destructive/60 hover:text-destructive hover:bg-destructive/10'
+                    }`}
+                  >
+                    <ExternalLink className="h-4 w-4 shrink-0" />
+                    <span>Connecties</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                </>
               )}
             </SidebarMenu>
           </SidebarGroupContent>
