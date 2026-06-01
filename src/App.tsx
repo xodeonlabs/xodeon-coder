@@ -30,6 +30,10 @@ import Upgrades from "./pages/Upgrades";
 import XodeonData from "./pages/XodeonData";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Welcome from "./pages/Welcome";
+import Developers from "./pages/Developers";
+import OAuthAuthorize from "./pages/OAuthAuthorize";
+import AdminConnections from "./components/AdminConnections";
+import { AppLayout as _AppLayout } from "@/components/AppLayout";
 
 const queryClient = new QueryClient();
 
@@ -70,7 +74,10 @@ const App = () => (
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/guest" element={<Guest />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/oauth/authorize" element={<OAuthAuthorize />} />
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/developers" element={<ProtectedRoute><Developers /></ProtectedRoute>} />
+          <Route path="/admin/connections" element={<ProtectedRoute><div className="p-6 max-w-5xl mx-auto"><AdminConnections /></div></ProtectedRoute>} />
           <Route path="/organization" element={<ProtectedRoute><Organization /></ProtectedRoute>} />
           <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
