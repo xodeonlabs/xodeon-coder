@@ -4,7 +4,7 @@ import { AdBanner } from '@/components/AdBanner';
 import { InstallPWAButton } from '@/components/InstallPWAButton';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, MessageCircle, Users, Building2, BarChart3, Shield, Settings, Menu, X, Package, Cloud, ExternalLink, Database, LogOut,
+  LayoutDashboard, MessageCircle, Users, Building2, BarChart3, Shield, Settings, Menu, X, Package, Cloud, ExternalLink, Database, LogOut, Code2,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -46,6 +46,7 @@ const MORE_ITEMS = [
   { tKey: 'nav.analytics', url: '/analytics', icon: BarChart3 },
   { tKey: 'nav.templates', url: '/templates', icon: LayoutDashboard },
   { tKey: 'nav.apiData', url: '/xodeon-data', icon: Database },
+  { tKey: 'nav.developers', url: '/developers', icon: Code2 },
   { tKey: 'nav.settings', url: '/settings', icon: Settings },
 ] as const;
 
