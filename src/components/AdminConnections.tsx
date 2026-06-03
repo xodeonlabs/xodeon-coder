@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ interface UsageStat { external_app_id: string; endpoint: string; count: number; 
 interface GrantRow { id: string; user_id: string; external_app_id: string; scopes: string[]; granted_at: string; revoked_at: string | null; }
 
 export default function AdminConnections() {
+  const { t } = useTranslation();
   const [apps, setApps] = useState<AppRow[]>([]);
   const [stats, setStats] = useState<UsageStat[]>([]);
   const [grants, setGrants] = useState<GrantRow[]>([]);
@@ -48,14 +50,14 @@ export default function AdminConnections() {
 
   const toggleActive = async (id: string, current: boolean) => {
     await supabase.from('external_apps' as any).update({ is_active: !current }).eq('id', id);
-    toast.success(current ? 'App uitgeschakeld' : 'App ingeschakeld');
+    toast.success(current ? t('adminConnections.appDisabled') : t('adminConnections.appEnabled'));
     load();
   };
 
   const deleteApp = async (id: string) => {
-    if (!confirm('App verwijderen?')) return;
+    if (!confirm(t('adminConnections.confirmDelete'))) return;
     await supabase.from('external_apps' as any).delete().eq('id', id);
-    toast.success('Verwijderd');
+    toast.success(t('adminConnections.deleted'));
     load();
   };
 
@@ -64,8 +66,8 @@ export default function AdminConnections() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold flex items-center gap-2"><Shield className="h-5 w-5" /> Externe app-connecties</h2>
-      {apps.length === 0 && <Card className="p-6 text-center text-muted-foreground">Nog geen externe apps geregistreerd.</Card>}
+      <h2 className="text-xl font-bold flex items-center gap-2"><Shield className="h-5 w-5" /> {t('adminConnections.title')}</h2>
+      {apps.length === 0 && <Card className="p-6 text-center text-muted-foreground">{t('adminConnections.noApps')}</Card>}
       {apps.map((app) => {
         const owner = profiles[app.owner_id];
         const usage = usageFor(app.id);
@@ -78,27 +80,27 @@ export default function AdminConnections() {
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold flex items-center gap-2">
                   {app.name}
-                  <span className={`px-2 py-0.5 rounded text-[10px] ${app.is_active ? 'bg-emerald-500/10 text-emerald-500' : 'bg-muted text-muted-foreground'}`}>{app.is_active ? 'Actief' : 'Uit'}</span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] ${app.is_active ? 'bg-emerald-500/10 text-emerald-500' : 'bg-muted text-muted-foreground'}`}>{app.is_active ? t('adminConnections.active') : t('adminConnections.inactive')}</span>
                 </h3>
-                <p className="text-xs text-muted-foreground truncate">{app.domain || '—'} • eigenaar: @{owner?.username ?? app.owner_id.slice(0, 8)} • key: {app.api_key_prefix}…</p>
+                <p className="text-xs text-muted-foreground truncate">{app.domain || '—'} • {t('adminConnections.owner')}: @{owner?.username ?? app.owner_id.slice(0, 8)} • {t('adminConnections.key')}: {app.api_key_prefix}…</p>
                 <div className="flex gap-4 mt-2 text-xs">
-                  <span className="flex items-center gap-1"><Activity className="h-3 w-3" /> {total} API calls</span>
-                  <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {users.length} gebruikers</span>
+                  <span className="flex items-center gap-1"><Activity className="h-3 w-3" /> {t('adminConnections.calls', { count: total })}</span>
+                  <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {t('adminConnections.users', { count: users.length })}</span>
                 </div>
               </div>
               <div className="flex gap-1">
-                <Button size="sm" variant="ghost" onClick={() => toggleActive(app.id, app.is_active)}>{app.is_active ? 'Pauzeer' : 'Activeer'}</Button>
+                <Button size="sm" variant="ghost" onClick={() => toggleActive(app.id, app.is_active)}>{app.is_active ? t('adminConnections.pause') : t('adminConnections.activate')}</Button>
                 <Button size="sm" variant="ghost" onClick={() => deleteApp(app.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
               </div>
             </div>
             <Button size="sm" variant="outline" className="mt-2" onClick={() => setSelectedApp(open ? null : app.id)}>
-              {open ? 'Verberg details' : 'Toon endpoints + gebruikers'}
+              {open ? t('adminConnections.hideDetails') : t('adminConnections.showDetails')}
             </Button>
             {open && (
               <div className="mt-3 grid md:grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs font-semibold mb-1">Endpoints gebruikt</p>
-                  {usage.length === 0 ? <p className="text-xs text-muted-foreground">Nog geen aanroepen</p> :
+                  <p className="text-xs font-semibold mb-1">{t('adminConnections.endpointsUsed')}</p>
+                  {usage.length === 0 ? <p className="text-xs text-muted-foreground">{t('adminConnections.noCalls')}</p> :
                     <ul className="text-xs space-y-1">
                       {usage.sort((a, b) => b.count - a.count).map((u) => (
                         <li key={u.endpoint} className="flex justify-between p-1.5 rounded bg-muted/30"><code>/{u.endpoint}</code><span>{u.count}×</span></li>
@@ -106,13 +108,13 @@ export default function AdminConnections() {
                     </ul>}
                 </div>
                 <div>
-                  <p className="text-xs font-semibold mb-1">Ingelogde gebruikers</p>
-                  {users.length === 0 ? <p className="text-xs text-muted-foreground">Nog geen autorisaties</p> :
+                  <p className="text-xs font-semibold mb-1">{t('adminConnections.loggedUsers')}</p>
+                  {users.length === 0 ? <p className="text-xs text-muted-foreground">{t('adminConnections.noAuth')}</p> :
                     <ul className="text-xs space-y-1">
                       {users.map((g) => {
                         const u = profiles[g.user_id];
                         return <li key={g.id} className="p-1.5 rounded bg-muted/30">
-                          @{u?.username ?? g.user_id.slice(0, 8)} <span className="text-muted-foreground">— scopes: {g.scopes.join(', ')}</span>
+                          @{u?.username ?? g.user_id.slice(0, 8)} <span className="text-muted-foreground">— {t('adminConnections.scopesLabel')}: {g.scopes.join(', ')}</span>
                         </li>;
                       })}
                     </ul>}

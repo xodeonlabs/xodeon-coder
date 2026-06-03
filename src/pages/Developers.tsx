@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ interface ExternalApp {
 }
 
 export default function Developers() {
+  const { t } = useTranslation();
   const { session } = useAuth();
   const [apps, setApps] = useState<ExternalApp[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +41,7 @@ export default function Developers() {
 
   const create = async () => {
     if (!newApp.name || !newApp.redirect_uris) {
-      toast.error('Naam en minstens één redirect URI verplicht');
+      toast.error(t('developers.nameRedirectRequired'));
       return;
     }
     setCreating(true);
@@ -53,7 +55,7 @@ export default function Developers() {
     });
     setCreating(false);
     if (error || (data as any)?.error) {
-      toast.error('Aanmaken mislukt');
+      toast.error(t('developers.createFailed'));
       return;
     }
     setRevealedKey({ id: (data as any).app.id, key: (data as any).api_key });
@@ -63,15 +65,15 @@ export default function Developers() {
   };
 
   const del = async (id: string) => {
-    if (!confirm('App verwijderen? Alle tokens worden ongeldig.')) return;
+    if (!confirm(t('developers.confirmDelete'))) return;
     await supabase.from('external_apps' as any).delete().eq('id', id);
-    toast.success('Verwijderd');
+    toast.success(t('developers.deleted'));
     load();
   };
 
   const copy = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success('Gekopieerd');
+    toast.success(t('developers.copied'));
   };
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -80,39 +82,39 @@ export default function Developers() {
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2"><Code2 className="h-6 w-6" /> Xodeon Developers</h1>
-          <p className="text-sm text-muted-foreground mt-1">Bouw apps die inloggen met Xodeon en profielen, vrienden, berichten en projecten lezen.</p>
+          <h1 className="text-2xl font-bold flex items-center gap-2"><Code2 className="h-6 w-6" /> {t('developers.title')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('developers.subtitle')}</p>
         </div>
-        <Button onClick={() => setShowNew(true)}><Plus className="h-4 w-4 mr-1" /> Nieuwe app</Button>
+        <Button onClick={() => setShowNew(true)}><Plus className="h-4 w-4 mr-1" /> {t('developers.newApp')}</Button>
       </div>
 
       {revealedKey && (
         <Card className="p-4 border-primary/40 bg-primary/5">
-          <p className="text-sm font-semibold mb-2">⚠️ Bewaar deze API-sleutel nu — hij wordt nooit opnieuw getoond</p>
+          <p className="text-sm font-semibold mb-2">{t('developers.saveKeyNow')}</p>
           <div className="flex items-center gap-2">
             <code className="flex-1 px-3 py-2 rounded bg-background text-xs font-mono break-all">{revealedKey.key}</code>
             <Button size="sm" variant="outline" onClick={() => copy(revealedKey.key)}><Copy className="h-3 w-3" /></Button>
           </div>
-          <Button size="sm" variant="ghost" className="mt-2" onClick={() => setRevealedKey(null)}>Sluit</Button>
+          <Button size="sm" variant="ghost" className="mt-2" onClick={() => setRevealedKey(null)}>{t('developers.close')}</Button>
         </Card>
       )}
 
       {showNew && (
         <Card className="p-4 space-y-3">
-          <h3 className="font-semibold">Nieuwe app registreren</h3>
-          <Input placeholder="Naam (vereist)" value={newApp.name} onChange={(e) => setNewApp({ ...newApp, name: e.target.value })} />
-          <Input placeholder="Domein (bv. mijnapp.lovable.app)" value={newApp.domain} onChange={(e) => setNewApp({ ...newApp, domain: e.target.value })} />
-          <Textarea placeholder="Korte beschrijving" value={newApp.description} onChange={(e) => setNewApp({ ...newApp, description: e.target.value })} rows={2} />
-          <Textarea placeholder={'Redirect URIs (één per regel)\nhttps://mijnapp.lovable.app/oauth/callback'} value={newApp.redirect_uris} onChange={(e) => setNewApp({ ...newApp, redirect_uris: e.target.value })} rows={3} />
+          <h3 className="font-semibold">{t('developers.newAppTitle')}</h3>
+          <Input placeholder={t('developers.nameRequired')} value={newApp.name} onChange={(e) => setNewApp({ ...newApp, name: e.target.value })} />
+          <Input placeholder={t('developers.domainPlaceholder')} value={newApp.domain} onChange={(e) => setNewApp({ ...newApp, domain: e.target.value })} />
+          <Textarea placeholder={t('developers.descPlaceholder')} value={newApp.description} onChange={(e) => setNewApp({ ...newApp, description: e.target.value })} rows={2} />
+          <Textarea placeholder={t('developers.redirectPlaceholder')} value={newApp.redirect_uris} onChange={(e) => setNewApp({ ...newApp, redirect_uris: e.target.value })} rows={3} />
           <div className="flex gap-2">
-            <Button onClick={create} disabled={creating}>{creating ? 'Bezig...' : 'Aanmaken'}</Button>
-            <Button variant="ghost" onClick={() => setShowNew(false)}>Annuleren</Button>
+            <Button onClick={create} disabled={creating}>{creating ? t('developers.creating') : t('developers.create')}</Button>
+            <Button variant="ghost" onClick={() => setShowNew(false)}>{t('developers.cancel')}</Button>
           </div>
         </Card>
       )}
 
-      {loading ? <p className="text-sm text-muted-foreground">Laden...</p> : apps.length === 0 ? (
-        <Card className="p-8 text-center text-muted-foreground">Nog geen apps. Klik op "Nieuwe app" om te beginnen.</Card>
+      {loading ? <p className="text-sm text-muted-foreground">{t('developers.loading')}</p> : apps.length === 0 ? (
+        <Card className="p-8 text-center text-muted-foreground">{t('developers.noApps')}</Card>
       ) : (
         <div className="space-y-3">
           {apps.map((app) => (
@@ -128,18 +130,18 @@ export default function Developers() {
               <div className="flex items-center gap-2 text-xs">
                 <KeyRound className="h-3 w-3 text-muted-foreground" />
                 <code className="font-mono">{app.api_key_prefix}…</code>
-                <span className="text-muted-foreground">• {app.redirect_uris.length} redirect URI's</span>
-                <span className={`ml-auto px-2 py-0.5 rounded text-[10px] ${app.is_active ? 'bg-emerald-500/10 text-emerald-500' : 'bg-muted text-muted-foreground'}`}>{app.is_active ? 'Actief' : 'Inactief'}</span>
+                <span className="text-muted-foreground">• {t('developers.redirects', { count: app.redirect_uris.length })}</span>
+                <span className={`ml-auto px-2 py-0.5 rounded text-[10px] ${app.is_active ? 'bg-emerald-500/10 text-emerald-500' : 'bg-muted text-muted-foreground'}`}>{app.is_active ? t('developers.active') : t('developers.inactive')}</span>
               </div>
               <details className="text-xs">
-                <summary className="cursor-pointer text-muted-foreground hover:text-foreground">Integratiegids</summary>
+                <summary className="cursor-pointer text-muted-foreground hover:text-foreground">{t('developers.integrationGuide')}</summary>
                 <div className="mt-2 space-y-2 p-3 rounded bg-muted/30">
-                  <p><strong>1. Login URL</strong> (stuur gebruiker hierheen):</p>
+                  <p><strong>{t('developers.step1')}</strong></p>
                   <code className="block p-2 bg-background rounded break-all">{window.location.origin}/oauth/authorize?client_id={app.id}&redirect_uri={encodeURIComponent(app.redirect_uris[0] || '')}&scopes=profile,friends,messages,apps&state=XYZ</code>
-                  <p><strong>2. Wissel code voor token</strong>:</p>
-                  <code className="block p-2 bg-background rounded break-all">POST {supabaseUrl}/functions/v1/xodeon-oauth-token{'\n'}{`{ "api_key": "<jouw key>", "code": "<code uit redirect>", "redirect_uri": "..." }`}</code>
-                  <p><strong>3. API data ophalen</strong>:</p>
-                  <code className="block p-2 bg-background rounded break-all">GET {supabaseUrl}/functions/v1/xodeon-api?path=me{'\n'}Headers: x-api-key: &lt;jouw key&gt;, Authorization: Bearer &lt;access_token&gt;{'\n'}Endpoints: /me, /friends, /messages, /apps</code>
+                  <p><strong>{t('developers.step2')}</strong></p>
+                  <code className="block p-2 bg-background rounded break-all">POST {supabaseUrl}/functions/v1/xodeon-oauth-token{'\n'}{`{ "api_key": "<key>", "code": "<code>", "redirect_uri": "..." }`}</code>
+                  <p><strong>{t('developers.step3')}</strong></p>
+                  <code className="block p-2 bg-background rounded break-all">GET {supabaseUrl}/functions/v1/xodeon-api?path=me{'\n'}Headers: x-api-key: &lt;key&gt;, Authorization: Bearer &lt;access_token&gt;{'\n'}Endpoints: /me, /friends, /messages, /apps</code>
                 </div>
               </details>
             </Card>
