@@ -211,7 +211,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden px-4 py-6" style={{ background: 'linear-gradient(135deg, hsl(230 28% 7%) 0%, hsl(250 35% 12%) 40%, hsl(270 40% 14%) 60%, hsl(230 28% 7%) 100%)' }}>
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden px-4 py-6 bg-background">
       {/* Background effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] animate-glow-pulse" style={{ background: 'hsl(195 100% 50% / 0.08)' }} />
