@@ -1,3 +1,4 @@
+import { XodeonLogo } from "@/components/XodeonLogo";
 import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';

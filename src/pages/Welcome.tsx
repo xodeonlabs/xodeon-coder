@@ -1,3 +1,4 @@
+import { XodeonLogo } from "@/components/XodeonLogo";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";

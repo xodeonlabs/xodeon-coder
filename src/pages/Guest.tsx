@@ -1,3 +1,4 @@
+import { XodeonLogo } from "@/components/XodeonLogo";
 import { useState, useCallback, useMemo } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';

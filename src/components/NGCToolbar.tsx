@@ -1,3 +1,4 @@
+import { XodeonLogo } from "@/components/XodeonLogo";
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ExternalLink, LogOut, AlertCircle, CheckCircle, ArrowLeft, Pencil, Share2, X, Menu, Download } from 'lucide-react';
