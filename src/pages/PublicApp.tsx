@@ -1,3 +1,4 @@
+import { XodeonLogo } from "@/components/XodeonLogo";
 import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -130,7 +131,7 @@ const PublicApp = () => {
             </button>
           )}
           <div className="flex items-center gap-1.5">
-            <div className="h-4 w-4 rounded-sm overflow-hidden shrink-0"><img src="/xodeon-logo.png" alt="Xodeon Labs" className="h-full w-full object-cover" /></div>
+            <div className="h-4 w-4 shrink-0"><XodeonLogo className="h-full w-full object-contain" /></div>
             <span className="text-[10px] text-muted-foreground">Xodeon Labs</span>
           </div>
         </div>

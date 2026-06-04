@@ -1,3 +1,4 @@
+import { XodeonLogo } from "@/components/XodeonLogo";
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ExternalLink, LogOut, AlertCircle, CheckCircle, ArrowLeft, Pencil, Share2, X, Menu, Download } from 'lucide-react';
@@ -94,7 +95,7 @@ export function NGCToolbar({ errors, appName, appIcon, appCode, onSignOut, onSav
           >
             <AppIcon iconName={appIcon || 'file-code'} size={14} />
           </button>
-          <div className="h-5 w-5 rounded overflow-hidden shrink-0"><img src="/xodeon-logo.png" alt="Xodeon Labs" className="h-full w-full object-cover" /></div>
+          <div className="h-5 w-5 shrink-0"><XodeonLogo className="h-full w-full object-contain" /></div>
         </div>
         <div className="hidden sm:block h-4 w-px bg-border/30"></div>
         {editing ? (

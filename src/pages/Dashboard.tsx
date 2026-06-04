@@ -1,3 +1,4 @@
+import { XodeonLogo, XodeonLoader } from "@/components/XodeonLogo";
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -1002,8 +1003,8 @@ export default function Dashboard() {
       <header className="sticky top-0 z-40 border-b border-border/30 px-4 sm:px-6 py-3 glass-card">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 shrink-0">
-            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center border border-primary/10 shrink-0 overflow-hidden">
-              <img src="/xodeon-logo.png" alt="Xodeon Labs" className="h-full w-full object-cover rounded-xl" />
+            <div className="h-8 w-8 flex items-center justify-center shrink-0">
+              <XodeonLogo className="h-full w-full object-contain" />
             </div>
             <h1 className="hidden sm:block text-lg font-bold text-foreground font-display tracking-tight">Xodeon Labs</h1>
           </div>
@@ -1112,10 +1113,8 @@ export default function Dashboard() {
 
         {/* Content */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-12 gap-4">
-            <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
-            <p className="text-xs text-muted-foreground">Even geduld... speel ondertussen een spelletje!</p>
-            <TetrisGame />
+          <div className="flex flex-col items-center justify-center py-16">
+            <XodeonLoader label="Even geduld..." />
           </div>
         ) : myApps.length === 0 ? (
           <div className="glass-card-highlight rounded-2xl p-12 sm:p-16 text-center relative overflow-hidden animate-scale-in">
