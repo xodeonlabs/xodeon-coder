@@ -228,8 +228,8 @@ const Auth = () => {
       <div className="w-full max-w-[420px] relative z-10 animate-scale-in">
         {/* Logo & Header */}
         <div className="text-center mb-5 sm:mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-2xl border border-primary/20 mb-4 sm:mb-5 shadow-lg shadow-primary/10 overflow-hidden">
-            <img src="/xodeon-logo.png" alt="Xodeon Labs" className="h-full w-full object-cover rounded-2xl" />
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 mb-4 sm:mb-5">
+            <XodeonLogo className="h-full w-full object-contain drop-shadow-[0_0_20px_hsl(var(--primary)/0.4)]" />
           </div>
           <h1 className="text-xl sm:text-3xl font-bold text-foreground font-display tracking-tight">
             {modeTitle[mode]}

@@ -199,8 +199,8 @@ export function AppSidebar() {
       <SidebarContent className="pt-3">
         {/* Logo + Toggle */}
         <div className={`flex items-center gap-2.5 px-4 py-3 mb-2 ${collapsed ? 'flex-col justify-center px-2' : ''}`}>
-          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center border border-primary/10 shrink-0 overflow-hidden">
-            <img src="/xodeon-logo.png" alt="Xodeon Labs" className="h-full w-full object-cover rounded-xl" />
+          <div className="h-8 w-8 flex items-center justify-center shrink-0">
+            <XodeonLogo className="h-full w-full object-contain" />
           </div>
           {!collapsed && <span className="text-base font-bold text-foreground font-display tracking-tight flex-1">Xodeon Labs</span>}
           <SidebarTrigger className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all shrink-0">
