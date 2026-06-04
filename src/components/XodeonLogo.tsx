@@ -1,7 +1,4 @@
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
-import lightLogo from "@/assets/xodeon-light.png.asset.json";
-import darkLogo from "@/assets/xodeon-dark.png.asset.json";
+import logo from "@/assets/xodeon-light.png.asset.json";
 
 interface XodeonLogoProps {
   className?: string;
@@ -9,17 +6,10 @@ interface XodeonLogoProps {
 }
 
 /**
- * Xodeon "X" logo that swaps between light/dark variants based on theme.
- * - Dark mode → vibrant light variant
- * - Light mode → muted dark variant
+ * Xodeon "X" logo — same vibrant variant in both light and dark mode.
  */
 export function XodeonLogo({ className = "h-full w-full object-contain", alt = "Xodeon Labs" }: XodeonLogoProps) {
-  const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  const src = mounted && resolvedTheme === "light" ? darkLogo.url : lightLogo.url;
-  return <img src={src} alt={alt} className={className} draggable={false} />;
+  return <img src={logo.url} alt={alt} className={className} draggable={false} />;
 }
 
 /**
