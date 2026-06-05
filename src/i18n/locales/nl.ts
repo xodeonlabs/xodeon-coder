@@ -81,7 +81,11 @@ const nl = {
     createAccount: 'Account aanmaken',
     privacy: 'Privacybeleid',
     features: {
-      editor: { title: 'Visuele NGC editor', description: 'Schrijf eenvoudige NGC code en zie meteen het resultaat in de live preview.' },
+      editor: { title: 'Visuele Xodeon editor', description: 'Schrijf eenvoudige Xodeon code en zie meteen het resultaat in de live preview.' },
+      preview: { title: 'Live preview', description: 'Bekijk je app direct terwijl je werkt.' },
+      collab: { title: 'Samenwerken', description: 'Werk realtime samen met je team.' },
+      cloud: { title: 'Xodeon Cloud', description: 'Sla data op en deel je apps.' },
+      ai: { title: 'AI assistent', description: 'Vraag de ingebouwde AI om je Xodeon code aan te passen of uit te leggen.' },
       collab: { title: 'Realtime samenwerken', description: 'Werk samen aan dezelfde app met aanwezigheid, cursors en chat.' },
       slash: { title: 'Slash commands', description: 'Snelkoppelingen zoals /nav, /login en /coin+ maken bouwen razendsnel.' },
       orgs: { title: 'Bedrijven & allianties', description: 'Bouw teams op, run upgrades, en deel coins met je organisatie.' },
