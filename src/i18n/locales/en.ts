@@ -70,7 +70,7 @@ const en = {
   welcome: {
     badge: 'Powered by Xodeon Labs',
     titlePart1: 'Build apps with',
-    titleHighlight: 'NGC code',
+    titleHighlight: 'Xodeon code',
     subtitle: 'A visual programming language and collaborative editor to design apps quickly, with your team or friends — right in your browser.',
     ctaStart: 'Get started — free',
     ctaGuest: 'Look around first',
@@ -81,12 +81,12 @@ const en = {
     createAccount: 'Create account',
     privacy: 'Privacy policy',
     features: {
-      editor: { title: 'Visual NGC editor', description: 'Write simple NGC code and instantly see the result in the live preview.' },
+      editor: { title: 'Visual Xodeon editor', description: 'Write simple Xodeon code and instantly see the result in the live preview.' },
       collab: { title: 'Realtime collaboration', description: 'Work together on the same app with presence, cursors and chat.' },
       slash: { title: 'Slash commands', description: 'Shortcuts like /nav, /login and /coin+ make building lightning fast.' },
       orgs: { title: 'Organizations & alliances', description: 'Build teams, run upgrades and share coins with your organization.' },
       safe: { title: 'Safe storage', description: 'Your apps and data are stored safely with fine-grained access rules.' },
-      ai: { title: 'AI assistant', description: 'Ask the built-in AI to update or explain your NGC code.' },
+      ai: { title: 'AI assistant', description: 'Ask the built-in AI to update or explain your Xodeon code.' },
     },
   },
   auth: {
@@ -339,7 +339,7 @@ const en = {
       unknownError: 'Unknown error',
       notEnoughCoins: 'Not enough coins',
       notEnoughCoinsDesc: 'You need {{cost}} coins but you have {{balance}}.',
-      ngcCodeBelow: '📄 [NGC code - see below]',
+      ngcCodeBelow: '📄 [Xodeon code - see below]',
     },
     library: {
       tabLibrary: '📂 Library',
@@ -425,7 +425,7 @@ const en = {
       profile: 'Your profile (name, avatar, bio)',
       friends: 'Your friends list',
       messages: 'Your private messages with friends',
-      apps: 'Your apps and NGC/Xodeon code',
+      apps: 'Your apps and Xodeon code',
     },
   },
   adminConnections: {

@@ -70,7 +70,7 @@ const nl = {
   welcome: {
     badge: 'Powered by Xodeon Labs',
     titlePart1: 'Bouw apps met',
-    titleHighlight: 'NGC code',
+    titleHighlight: 'Xodeon code',
     subtitle: 'Een visuele programmeertaal en collaboratieve editor om snel apps te ontwerpen, samen met je bedrijf of vrienden — direct in je browser.',
     ctaStart: 'Aan de slag — gratis',
     ctaGuest: 'Eerst rondkijken',
@@ -81,12 +81,12 @@ const nl = {
     createAccount: 'Account aanmaken',
     privacy: 'Privacybeleid',
     features: {
-      editor: { title: 'Visuele NGC editor', description: 'Schrijf eenvoudige NGC code en zie meteen het resultaat in de live preview.' },
+      editor: { title: 'Visuele Xodeon editor', description: 'Schrijf eenvoudige Xodeon code en zie meteen het resultaat in de live preview.' },
       collab: { title: 'Realtime samenwerken', description: 'Werk samen aan dezelfde app met aanwezigheid, cursors en chat.' },
       slash: { title: 'Slash commands', description: 'Snelkoppelingen zoals /nav, /login en /coin+ maken bouwen razendsnel.' },
       orgs: { title: 'Bedrijven & allianties', description: 'Bouw teams op, run upgrades, en deel coins met je organisatie.' },
       safe: { title: 'Veilig opslag', description: 'Je apps en data worden veilig bewaard met fijnmazige toegangsregels.' },
-      ai: { title: 'AI assistent', description: 'Vraag de ingebouwde AI om je NGC code aan te passen of uit te leggen.' },
+      ai: { title: 'AI assistent', description: 'Vraag de ingebouwde AI om je Xodeon code aan te passen of uit te leggen.' },
     },
   },
   auth: {
@@ -339,7 +339,7 @@ const nl = {
       unknownError: 'Onbekende fout',
       notEnoughCoins: 'Niet genoeg coins',
       notEnoughCoinsDesc: 'Je hebt {{cost}} coins nodig maar je hebt er {{balance}}.',
-      ngcCodeBelow: '📄 [NGC code - zie hieronder]',
+      ngcCodeBelow: '📄 [Xodeon code - zie hieronder]',
     },
     library: {
       tabLibrary: '📂 Bibliotheek',
@@ -425,7 +425,7 @@ const nl = {
       profile: 'Je profiel (naam, avatar, bio)',
       friends: 'Je vriendenlijst',
       messages: 'Je privéberichten met vrienden',
-      apps: 'Je apps en NGC/Xodeon code',
+      apps: 'Je apps en Xodeon code',
     },
   },
   adminConnections: {
