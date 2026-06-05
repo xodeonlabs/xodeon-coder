@@ -69,7 +69,7 @@ const Preview = () => {
     <div className="flex flex-col h-screen w-screen bg-background">
       {/* Toolbar */}
       <div className="flex items-center justify-between px-4 h-11 shrink-0 border-b border-border" style={{ background: 'hsl(var(--ide-toolbar))' }}>
-        <span className="text-xs font-medium text-foreground">NGC Preview</span>
+        <span className="text-xs font-medium text-foreground">Xodeon Preview</span>
 
         {/* Device switcher */}
         <div className="flex items-center gap-0.5 rounded-lg bg-secondary/50 p-0.5">
