@@ -211,7 +211,7 @@ const TEST_NGC_CODE = `App:
             Grootte="500,50"
             Kleur="rgb(30,41,59)"
             Text Titel:
-                Tekst="🧪 NGC Test App"
+                Tekst="🧪 Xodeon Test App"
                 Positie="15,10"
                 Grootte="300,30"
                 Kleur="rgb(255,255,255)"
@@ -221,7 +221,7 @@ const TEST_NGC_CODE = `App:
                 Grootte="140,30"
                 Kleur="rgb(250,204,21)"
         Text SubTitel:
-            Tekst="Test alle NGC features"
+            Tekst="Test alle Xodeon features"
             Positie="15,60"
             Grootte="300,25"
             Kleur="rgb(148,163,184)"

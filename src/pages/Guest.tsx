@@ -10,7 +10,7 @@ import { parseNGC } from '@/lib/ngc-parser';
 const GUEST_CODE = `App:
     Page Home:
         Text Welkom:
-            Tekst="Welkom bij NGC!"
+            Tekst="Welkom bij Xodeon!"
             Positie="50,50"
             Grootte="300,40"
             Kleur="#ffffff"
