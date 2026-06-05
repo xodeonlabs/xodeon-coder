@@ -70,7 +70,7 @@ const nl = {
   welcome: {
     badge: 'Powered by Xodeon Labs',
     titlePart1: 'Bouw apps met',
-    titleHighlight: 'NGC code',
+    titleHighlight: 'Xodeon code',
     subtitle: 'Een visuele programmeertaal en collaboratieve editor om snel apps te ontwerpen, samen met je bedrijf of vrienden — direct in je browser.',
     ctaStart: 'Aan de slag — gratis',
     ctaGuest: 'Eerst rondkijken',
