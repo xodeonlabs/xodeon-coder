@@ -239,8 +239,8 @@ export default function Templates() {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">NGC Code</label>
-                <textarea value={createCode} onChange={e => setCreateCode(e.target.value)} placeholder="Plak hier je NGC code..." rows={4} className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Xodeon Code</label>
+                <textarea value={createCode} onChange={e => setCreateCode(e.target.value)} placeholder="Plak hier je Xodeon code..." rows={4} className="w-full px-3 py-2 rounded-lg border border-border/40 bg-background text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
               </div>
               <button onClick={createTemplate} disabled={creating} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
                 {creating ? <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground/20 border-t-primary-foreground" /> : <Plus className="h-4 w-4" />}
@@ -262,7 +262,7 @@ export default function Templates() {
           </div>
           <div className="min-w-0">
             <h1 className="text-base sm:text-lg font-bold text-foreground">Template Marketplace</h1>
-            <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Ontdek en deel NGC templates</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Ontdek en deel Xodeon templates</p>
           </div>
         </div>
       </header>

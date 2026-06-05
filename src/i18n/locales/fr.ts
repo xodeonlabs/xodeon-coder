@@ -70,7 +70,7 @@ const fr = {
   welcome: {
     badge: 'Propulsé par Xodeon Labs',
     titlePart1: 'Créez des apps avec',
-    titleHighlight: 'le code NGC',
+    titleHighlight: 'le code Xodeon',
     subtitle: 'Un langage de programmation visuel et un éditeur collaboratif pour concevoir des apps rapidement, avec votre équipe ou vos amis — directement dans votre navigateur.',
     ctaStart: 'Commencer — gratuit',
     ctaGuest: 'Découvrir d\'abord',
@@ -81,12 +81,12 @@ const fr = {
     createAccount: 'Créer un compte',
     privacy: 'Politique de confidentialité',
     features: {
-      editor: { title: 'Éditeur NGC visuel', description: 'Écrivez du code NGC simple et voyez le résultat en direct dans l\'aperçu.' },
+      editor: { title: 'Éditeur Xodeon visuel', description: 'Écrivez du code Xodeon simple et voyez le résultat en direct dans l\'aperçu.' },
       collab: { title: 'Collaboration en temps réel', description: 'Travaillez à plusieurs sur la même app avec présence, curseurs et chat.' },
       slash: { title: 'Commandes slash', description: 'Des raccourcis comme /nav, /login et /coin+ rendent la création ultra rapide.' },
       orgs: { title: 'Entreprises & alliances', description: 'Bâtissez des équipes, lancez des améliorations et partagez des coins.' },
       safe: { title: 'Stockage sécurisé', description: 'Vos apps et données sont stockées en sécurité avec des règles d\'accès fines.' },
-      ai: { title: 'Assistant IA', description: 'Demandez à l\'IA intégrée de modifier ou d\'expliquer votre code NGC.' },
+      ai: { title: 'Assistant IA', description: 'Demandez à l\'IA intégrée de modifier ou d\'expliquer votre code Xodeon.' },
     },
   },
   auth: {
@@ -339,7 +339,7 @@ const fr = {
       unknownError: 'Erreur inconnue',
       notEnoughCoins: 'Pas assez de coins',
       notEnoughCoinsDesc: 'Il vous faut {{cost}} coins mais vous en avez {{balance}}.',
-      ngcCodeBelow: '📄 [Code NGC - voir ci-dessous]',
+      ngcCodeBelow: '📄 [Code Xodeon - voir ci-dessous]',
     },
     library: {
       tabLibrary: '📂 Bibliothèque',
@@ -425,7 +425,7 @@ const fr = {
       profile: 'Votre profil (nom, avatar, bio)',
       friends: 'Votre liste d\'amis',
       messages: 'Vos messages privés avec vos amis',
-      apps: 'Vos apps et code NGC/Xodeon',
+      apps: 'Vos apps et code Xodeon',
     },
   },
   adminConnections: {

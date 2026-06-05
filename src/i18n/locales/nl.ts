@@ -339,7 +339,7 @@ const nl = {
       unknownError: 'Onbekende fout',
       notEnoughCoins: 'Niet genoeg coins',
       notEnoughCoinsDesc: 'Je hebt {{cost}} coins nodig maar je hebt er {{balance}}.',
-      ngcCodeBelow: '📄 [NGC code - zie hieronder]',
+      ngcCodeBelow: '📄 [Xodeon code - zie hieronder]',
     },
     library: {
       tabLibrary: '📂 Bibliotheek',
@@ -425,7 +425,7 @@ const nl = {
       profile: 'Je profiel (naam, avatar, bio)',
       friends: 'Je vriendenlijst',
       messages: 'Je privéberichten met vrienden',
-      apps: 'Je apps en NGC/Xodeon code',
+      apps: 'Je apps en Xodeon code',
     },
   },
   adminConnections: {
