@@ -70,8 +70,8 @@ const en = {
   welcome: {
     badge: 'Powered by Xodeon Labs',
     titlePart1: 'Build apps with',
-    titleHighlight: 'Xodeon code',
-    subtitle: 'A visual programming language and collaborative editor to design apps quickly, with your team or friends — right in your browser.',
+    titleHighlight: 'Xodeon Coder',
+    subtitle: 'Xodeon Coder by Xodeon Labs — a visual programming language and collaborative editor to design apps quickly, with your team or friends — right in your browser.',
     ctaStart: 'Get started — free',
     ctaGuest: 'Look around first',
     guestShort: 'View as guest',
