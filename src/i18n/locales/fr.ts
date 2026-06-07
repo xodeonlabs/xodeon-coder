@@ -70,8 +70,8 @@ const fr = {
   welcome: {
     badge: 'Propulsé par Xodeon Labs',
     titlePart1: 'Créez des apps avec',
-    titleHighlight: 'le code Xodeon',
-    subtitle: 'Un langage de programmation visuel et un éditeur collaboratif pour concevoir des apps rapidement, avec votre équipe ou vos amis — directement dans votre navigateur.',
+    titleHighlight: 'Xodeon Coder',
+    subtitle: 'Xodeon Coder par Xodeon Labs — un langage de programmation visuel et un éditeur collaboratif pour concevoir des apps rapidement, avec votre équipe ou vos amis — directement dans votre navigateur.',
     ctaStart: 'Commencer — gratuit',
     ctaGuest: 'Découvrir d\'abord',
     guestShort: 'Voir en invité',
