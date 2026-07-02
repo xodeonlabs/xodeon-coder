@@ -7,7 +7,7 @@ import { useNotificationSound, getNotificationToastEnabled, getDoNotDisturbEnabl
 import { toast } from 'sonner';
 import {
   LayoutDashboard, BarChart3, Building2, Handshake, Users, Database,
-  MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins, PanelLeftClose, PanelLeftOpen, BellOff, Bell, Pin, PinOff, ArrowUp, Package, Cloud, ExternalLink, Plus, Sun, Moon, Code2,
+  MessageCircle, LayoutGrid, Settings, Shield, LogOut, Coins, PanelLeftClose, PanelLeftOpen, BellOff, Bell, Pin, PinOff, ArrowUp, Package, Cloud, ExternalLink, Plus, Sun, Moon, Code2, BookOpen,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import {
@@ -30,6 +30,7 @@ const NAV_ITEMS = [
   { tKey: 'nav.templates', url: '/templates', icon: LayoutGrid },
   { tKey: 'nav.apiData', url: '/xodeon-data', icon: Database },
   { tKey: 'nav.developers', url: '/developers', icon: Code2 },
+  { tKey: 'nav.tutorial', url: '/tutorial', icon: BookOpen },
 ] as const;
 
 export function AppSidebar() {
