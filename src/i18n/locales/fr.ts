@@ -63,6 +63,7 @@ const fr = {
     groups: 'Groupes',
     apiData: 'Données API',
     developers: 'Développeurs',
+    tutorial: 'Tutoriel',
     products: 'Produits',
     more: 'Plus',
     xodeonProducts: 'Produits Xodeon',
