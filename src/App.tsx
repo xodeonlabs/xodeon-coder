@@ -31,6 +31,7 @@ import XodeonData from "./pages/XodeonData";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Welcome from "./pages/Welcome";
 import Developers from "./pages/Developers";
+import Tutorial from "./pages/Tutorial";
 import OAuthAuthorize from "./pages/OAuthAuthorize";
 import AdminConnections from "./components/AdminConnections";
 import { AppLayout as _AppLayout } from "@/components/AppLayout";
@@ -77,6 +78,7 @@ const App = () => (
           <Route path="/oauth/authorize" element={<OAuthAuthorize />} />
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/developers" element={<ProtectedRoute><Developers /></ProtectedRoute>} />
+          <Route path="/tutorial" element={<ProtectedRoute><Tutorial /></ProtectedRoute>} />
           <Route path="/admin/connections" element={<ProtectedRoute><div className="p-6 max-w-5xl mx-auto"><AdminConnections /></div></ProtectedRoute>} />
           <Route path="/organization" element={<ProtectedRoute><Organization /></ProtectedRoute>} />
           <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
