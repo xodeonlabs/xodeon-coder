@@ -203,14 +203,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
-      {/* Floating language switcher (top-right) */}
-      {!HIDE_AD_ROUTES.some(r => location.pathname.startsWith(r)) && (
-        <div className="fixed top-3 right-3 z-[85] lg:top-4 lg:right-4">
-          <div className="rounded-full border border-border/50 bg-background/80 backdrop-blur-md shadow-sm">
-            <LanguageSwitcher variant="compact" />
-          </div>
+      {/* Floating language switcher (top-right) — overal zichtbaar */}
+      <div className="fixed top-3 right-3 z-[85] lg:top-4 lg:right-4">
+        <div className="rounded-full border border-border/50 bg-background/80 backdrop-blur-md shadow-sm">
+          <LanguageSwitcher variant="compact" />
         </div>
-      )}
+      </div>
+
 
       {/* Floating PWA install button — verbergt zichzelf wanneer al geïnstalleerd of niet beschikbaar */}
       {!HIDE_AD_ROUTES.some(r => location.pathname.startsWith(r)) && (
