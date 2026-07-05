@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, Code2, Sparkles, Terminal, Database, Rocket, ArrowRight, Copy, Check } from "lucide-react";
+import { BookOpen, Code2, Sparkles, Terminal, Database, Rocket, ArrowRight, Copy, Check, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TryItBlock } from "@/components/TryItBlock";
 
 const SECTIONS = [
   { id: "intro", label: "Intro", icon: BookOpen },
@@ -9,6 +10,7 @@ const SECTIONS = [
   { id: "vars", label: "Variabelen & Lists", icon: Database },
   { id: "slash", label: "Slash commands", icon: Terminal },
   { id: "ai", label: "AI & Templates", icon: Sparkles },
+  { id: "exercises", label: "Oefeningen", icon: Dumbbell },
   { id: "publish", label: "Publiceren", icon: Rocket },
 ] as const;
 
@@ -169,25 +171,28 @@ export default function Tutorial() {
                 Sla waarden op met <code className="rounded bg-secondary/50 px-1.5 py-0.5 text-xs">Var()</code> en collecties met <code className="rounded bg-secondary/50 px-1.5 py-0.5 text-xs">List()</code>.
               </p>
 
-              <h3 className="mt-6 font-semibold">Counter voorbeeld</h3>
-              <CodeBlock
-                code={`App:
+              <h3 className="mt-6 font-semibold">Counter voorbeeld — probeer & pas aan</h3>
+              <TryItBlock
+                initialCode={`App:
     Var score = 0
 
     Page Home:
         Text Teller:
             Tekst="Score: {score}"
             Positie="50,50"
+            Kleur="#ffffff"
 
         Button Plus:
             Tekst="+1"
             Positie="50,100"
+            Kleur="#6366f1"
             OnClick:
                 Add score = 1
 
         Button Reset:
             Tekst="Reset"
             Positie="120,100"
+            Kleur="#ef4444"
             OnClick:
                 Set score = 0`}
               />
@@ -273,6 +278,76 @@ export default function Tutorial() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
+            </section>
+
+            {/* Exercises */}
+            <section id="exercises" className="scroll-mt-6">
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold">Interactieve oefeningen</h2>
+                <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">LIVE</span>
+              </div>
+              <p className="mt-3 text-muted-foreground">
+                Pas de code aan en druk op <strong className="text-foreground">Run</strong> om je app direct te testen.
+              </p>
+
+              <h3 className="mt-6 font-semibold">Oefening 1 — Zeg hallo</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Verander de tekst naar je eigen naam en pas de kleur aan.</p>
+              <TryItBlock
+                initialCode={`App:
+    Page Home:
+        Text Hallo:
+            Tekst="Hallo wereld!"
+            Positie="50,50"
+            Grootte="300,40"
+            Kleur="#22d3ee"`}
+              />
+
+              <h3 className="mt-6 font-semibold">Oefening 2 — Twee knoppen</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Voeg een derde knop toe die score met 5 verhoogt.</p>
+              <TryItBlock
+                initialCode={`App:
+    Var score = 0
+
+    Page Home:
+        Text T:
+            Tekst="Score: {score}"
+            Positie="50,40"
+            Kleur="#ffffff"
+
+        Button Plus:
+            Tekst="+1"
+            Positie="50,90"
+            Kleur="#10b981"
+            OnClick:
+                Add score = 1
+
+        Button Min:
+            Tekst="-1"
+            Positie="120,90"
+            Kleur="#ef4444"
+            OnClick:
+                Sub score = 1`}
+              />
+
+              <h3 className="mt-6 font-semibold">Oefening 3 — Input echo</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Typ in het invoerveld en klik de knop.</p>
+              <TryItBlock
+                initialCode={`App:
+    Var naam = ""
+
+    Page Home:
+        TextBox In:
+            Placeholder="Jouw naam"
+            Positie="50,50"
+            Grootte="200,36"
+            Variabele="naam"
+
+        Text Uit:
+            Tekst="Hallo {naam}!"
+            Positie="50,110"
+            Grootte="300,30"
+            Kleur="#ffffff"`}
+              />
             </section>
 
             {/* Publish */}
