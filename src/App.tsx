@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { UsernameGate } from "@/components/UsernameGate";
 import { usePresence } from "@/hooks/usePresence";
 import { AppLayout } from "@/components/AppLayout";
+import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import Dashboard from "./pages/Dashboard";
 import Index from "./pages/Index";
 import Organization from "./pages/Organization";
