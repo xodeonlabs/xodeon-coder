@@ -171,25 +171,28 @@ export default function Tutorial() {
                 Sla waarden op met <code className="rounded bg-secondary/50 px-1.5 py-0.5 text-xs">Var()</code> en collecties met <code className="rounded bg-secondary/50 px-1.5 py-0.5 text-xs">List()</code>.
               </p>
 
-              <h3 className="mt-6 font-semibold">Counter voorbeeld</h3>
-              <CodeBlock
-                code={`App:
+              <h3 className="mt-6 font-semibold">Counter voorbeeld — probeer & pas aan</h3>
+              <TryItBlock
+                initialCode={`App:
     Var score = 0
 
     Page Home:
         Text Teller:
             Tekst="Score: {score}"
             Positie="50,50"
+            Kleur="#ffffff"
 
         Button Plus:
             Tekst="+1"
             Positie="50,100"
+            Kleur="#6366f1"
             OnClick:
                 Add score = 1
 
         Button Reset:
             Tekst="Reset"
             Positie="120,100"
+            Kleur="#ef4444"
             OnClick:
                 Set score = 0`}
               />
