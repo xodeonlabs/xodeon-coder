@@ -69,6 +69,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ImpersonationBanner />
         <Routes>
           <Route path="/auth" element={<Auth />} />
           <Route path="/welcome" element={<Welcome />} />
