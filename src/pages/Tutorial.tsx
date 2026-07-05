@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, Code2, Sparkles, Terminal, Database, Rocket, ArrowRight, Copy, Check } from "lucide-react";
+import { BookOpen, Code2, Sparkles, Terminal, Database, Rocket, ArrowRight, Copy, Check, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TryItBlock } from "@/components/TryItBlock";
 
 const SECTIONS = [
   { id: "intro", label: "Intro", icon: BookOpen },
@@ -9,6 +10,7 @@ const SECTIONS = [
   { id: "vars", label: "Variabelen & Lists", icon: Database },
   { id: "slash", label: "Slash commands", icon: Terminal },
   { id: "ai", label: "AI & Templates", icon: Sparkles },
+  { id: "exercises", label: "Oefeningen", icon: Dumbbell },
   { id: "publish", label: "Publiceren", icon: Rocket },
 ] as const;
 
