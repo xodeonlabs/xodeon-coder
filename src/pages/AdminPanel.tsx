@@ -1003,6 +1003,24 @@ export default function AdminPanel() {
                               </button>
                             )}
                             <button
+                              onClick={async () => {
+                                if (!confirm(`Inloggen als ${displayLabel}? Je huidige admin sessie wordt bewaard.`)) return;
+                                try {
+                                  const { startImpersonation } = await import('@/lib/impersonation');
+                                  await startImpersonation(profile.id);
+                                  await logAction('Ingelogd als gebruiker', 'user', profile.id);
+                                  toast({ title: 'Ingelogd', description: `Je bent nu ${displayLabel}` });
+                                  setTimeout(() => window.location.assign('/'), 400);
+                                } catch (e: any) {
+                                  toast({ title: 'Impersonatie mislukt', description: e.message, variant: 'destructive' });
+                                }
+                              }}
+                              className="p-1 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                              title="Inloggen als deze gebruiker"
+                            >
+                              <UserCog className="h-3.5 w-3.5" />
+                            </button>
+                            <button
                               onClick={() => setConfirmAction({ id: profile.id, action: 'delete', type: 'user', name: displayLabel })}
                               className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                               title="Verwijderen"
