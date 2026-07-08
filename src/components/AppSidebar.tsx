@@ -247,8 +247,8 @@ export function AppSidebar() {
           <SidebarGroupLabel>{collapsed ? '' : t('nav.home')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => {
-                const title = t(item.tKey);
+              {NAV_ITEMS.filter(item => item.url !== '/developers' || appMode === 'developer').map((item) => {
+                const title = gamerize(t(item.tKey), appMode);
                 return (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton
