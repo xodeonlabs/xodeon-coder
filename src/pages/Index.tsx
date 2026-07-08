@@ -122,8 +122,6 @@ const Index = () => {
   const [typingUsers, setTypingUsers] = useState<{ id: string; email: string }[]>([]);
   const [activeCollaborators, setActiveCollaborators] = useState<ActiveCollaborator[]>([]);
 
-  // Deferred code for preview parsing — keeps typing smooth
-  const deferredCode = useDeferredValue(code);
 
   // Feature states
   const [zenMode, setZenMode] = useState(false);
