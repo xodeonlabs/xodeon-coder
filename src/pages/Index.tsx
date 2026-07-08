@@ -504,8 +504,11 @@ const Index = () => {
 
 
   // Use deferred code for AST parsing — keeps typing smooth even with complex apps
-  const parseResult = useMemo(() => parseNGC(deferredCode), [deferredCode]);
+  // Parse immediately so code ↔ designer stay in sync
+  const parseResult = useMemo(() => parseNGC(code), [code]);
   const { ast, errors } = parseResult;
+  // Deferred ast for the (heavier) preview panel — keeps typing smooth
+  const deferredAst = useDeferredValue(ast);
 
   // Split code into sections for per-page editing (use immediate code for editor display)
   const sections = useMemo(() => splitCodeIntoSections(code), [code]);
