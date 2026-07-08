@@ -195,6 +195,58 @@
   .dark {
     --radius: 0.75rem;
   }
+
+  /* =========================================================
+     GAMER MODE — Neon arcade palette (overrides both themes)
+     Bright magenta primary + electric green accent on deep purple
+     ========================================================= */
+  .gamer-mode {
+    --background: 265 45% 8%;             /* deep purple-black */
+    --foreground: 140 100% 92%;
+
+    --card: 265 50% 12%;
+    --card-foreground: 140 100% 92%;
+
+    --popover: 265 55% 10%;
+    --popover-foreground: 140 100% 92%;
+
+    --primary: 320 100% 60%;              /* neon magenta */
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 320 100% 55%;
+
+    --secondary: 265 40% 20%;
+    --secondary-foreground: 140 100% 92%;
+
+    --muted: 265 40% 16%;
+    --muted-foreground: 280 30% 75%;
+
+    --accent: 140 100% 55%;               /* electric green */
+    --accent-foreground: 265 60% 8%;
+
+    --destructive: 0 100% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 140 100% 55%;
+    --success-foreground: 265 60% 8%;
+
+    --border: 320 60% 30%;
+    --input: 265 40% 20%;
+    --ring: 320 100% 60%;
+
+    --glass: 265 50% 12% / 0.7;
+    --glass-border: 320 60% 40% / 0.5;
+    --glass-highlight: 320 100% 60% / 0.15;
+
+    --sidebar-background: 265 55% 10%;
+    --sidebar-foreground: 140 100% 92%;
+    --sidebar-primary: 320 100% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 265 40% 20%;
+    --sidebar-accent-foreground: 140 100% 92%;
+    --sidebar-border: 320 60% 30%;
+    --sidebar-ring: 320 100% 60%;
+  }
+
 }
 
 @layer base {
