@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
     const { data: authUser, error: authError } = await adminClient.auth.admin.getUserById(data.id);
     if (authError || !authUser?.user?.email) {
       return new Response(JSON.stringify({ error: "User not found" }), {
-        status: 404,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
