@@ -122,8 +122,6 @@ const Index = () => {
   const [typingUsers, setTypingUsers] = useState<{ id: string; email: string }[]>([]);
   const [activeCollaborators, setActiveCollaborators] = useState<ActiveCollaborator[]>([]);
 
-  // Deferred code for preview parsing — keeps typing smooth
-  const deferredCode = useDeferredValue(code);
 
   // Feature states
   const [zenMode, setZenMode] = useState(false);
@@ -504,8 +502,11 @@ const Index = () => {
 
 
   // Use deferred code for AST parsing — keeps typing smooth even with complex apps
-  const parseResult = useMemo(() => parseNGC(deferredCode), [deferredCode]);
+  // Parse immediately so code ↔ designer stay in sync
+  const parseResult = useMemo(() => parseNGC(code), [code]);
   const { ast, errors } = parseResult;
+  // Deferred ast for the (heavier) preview panel — keeps typing smooth
+  const deferredAst = useDeferredValue(ast);
 
   // Split code into sections for per-page editing (use immediate code for editor display)
   const sections = useMemo(() => splitCodeIntoSections(code), [code]);
@@ -1090,7 +1091,7 @@ const Index = () => {
                   </div>
                 ) : activeRightWidget === 'preview' ? (
                   <div className="flex-1 overflow-hidden min-h-0">
-                    <NGCPreview ast={ast} />
+                    <NGCPreview ast={deferredAst} />
                   </div>
                 ) : null}
               </div>
