@@ -1093,7 +1093,7 @@ const Index = () => {
                   </div>
                 ) : activeRightWidget === 'preview' ? (
                   <div className="flex-1 overflow-hidden min-h-0">
-                    <NGCPreview ast={ast} />
+                    <NGCPreview ast={deferredAst} />
                   </div>
                 ) : null}
               </div>
