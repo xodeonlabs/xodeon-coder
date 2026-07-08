@@ -5,7 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
-import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff, Clock, Coins, Pencil, Bell, BellOff, Sun, Moon, Monitor, Languages } from 'lucide-react';
+import { ArrowLeft, Save, Mail, User, Lock, Trash2, Share2, Globe, Eye, EyeOff, Clock, Coins, Pencil, Bell, BellOff, Sun, Moon, Monitor, Languages, Code2, Gamepad2 } from 'lucide-react';
+import { useAppMode, type AppMode } from '@/hooks/useAppMode';
 import { getNotificationSoundEnabled, setNotificationSoundEnabled, getNotificationToastEnabled, setNotificationToastEnabled, useDoNotDisturb } from '@/hooks/useNotificationSound';
 import { ChatRetentionSelector } from '@/components/ChatRetentionSelector';
 import { getCached, setCache, clearCache, CACHE_TTL } from '@/lib/cache';
@@ -39,6 +40,7 @@ const SECTIONS = [
   { id: 'email', label: 'E-mailadres', icon: Mail },
   { id: 'password', label: 'Wachtwoord', icon: Lock },
   { id: 'appearance', label: 'Uiterlijk', icon: Sun },
+  { id: 'mode', label: 'Modus', icon: Gamepad2 },
   { id: 'notifications', label: 'Notificaties', icon: Bell },
   { id: 'retention', label: 'Bewaartermijnen', icon: Clock },
   { id: 'danger', label: 'Gevarenzone', icon: Trash2 },
@@ -74,6 +76,7 @@ export default function Settings() {
   const { dndEnabled, toggleDnd } = useDoNotDisturb();
   const { theme, setTheme } = useTheme();
   const { i18n } = useTranslation();
+  const [appMode, setAppModeState] = useAppMode();
 
   const isScrollingRef = useRef(false);
 
@@ -579,8 +582,44 @@ export default function Settings() {
           </div>
         </div>
 
+        {/* Modus */}
+        <div id="settings-mode" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+          <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
+            <Gamepad2 className="h-5 w-5 text-primary" />
+            Modus
+          </h2>
+          <p className="text-xs text-muted-foreground mb-4">
+            Kies één modus. Developer modus toont de Developers-tab en zet "For developers" naast het Xodeon logo. Gamer modus verandert het kleurenpalet in de hele app, gebruikt gamertaal en toont "For gamers". Je kan ze niet combineren.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {([
+              { value: 'default', label: 'Standaard', desc: 'Beide uit', icon: Monitor },
+              { value: 'developer', label: 'Developer', desc: 'Developers-tab zichtbaar', icon: Code2 },
+              { value: 'gamer', label: 'Gamer', desc: 'Neon palet + gamertaal', icon: Gamepad2 },
+            ] as const).map(({ value, label, desc, icon: Icon }) => {
+              const active = appMode === (value as AppMode);
+              return (
+                <button
+                  key={value}
+                  onClick={() => setAppModeState(value as AppMode)}
+                  className={`flex flex-col items-start gap-1.5 py-4 px-4 rounded-xl border transition-all text-left ${
+                    active
+                      ? 'border-primary bg-primary/10 text-foreground shadow-md shadow-primary/10'
+                      : 'border-border/50 bg-secondary/30 text-muted-foreground hover:border-border hover:bg-secondary/50'
+                  }`}
+                >
+                  <Icon className={`h-5 w-5 ${active ? 'text-primary' : ''}`} />
+                  <span className="text-sm font-semibold text-foreground">{label}</span>
+                  <span className="text-[11px] text-muted-foreground">{desc}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Taal / Language */}
         <div id="settings-language" className="rounded-xl border border-border/50 p-5 sm:p-6" style={{ background: 'hsl(var(--card))' }}>
+
           <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
             <Languages className="h-5 w-5 text-primary" />
             Taal · Language · Langue
