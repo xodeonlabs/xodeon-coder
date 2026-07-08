@@ -18,6 +18,7 @@ import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { AppIcon } from '@/components/IconPicker';
 import { StatusDot } from '@/components/StatusDot';
 import { useTranslation } from 'react-i18next';
+import { useAppMode, gamerize } from '@/hooks/useAppMode';
 
 const NAV_ITEMS = [
   { tKey: 'nav.dashboard', url: '/', icon: LayoutDashboard },
