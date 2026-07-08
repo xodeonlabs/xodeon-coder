@@ -40,6 +40,7 @@ const SECTIONS = [
   { id: 'email', label: 'E-mailadres', icon: Mail },
   { id: 'password', label: 'Wachtwoord', icon: Lock },
   { id: 'appearance', label: 'Uiterlijk', icon: Sun },
+  { id: 'mode', label: 'Modus', icon: Gamepad2 },
   { id: 'notifications', label: 'Notificaties', icon: Bell },
   { id: 'retention', label: 'Bewaartermijnen', icon: Clock },
   { id: 'danger', label: 'Gevarenzone', icon: Trash2 },
