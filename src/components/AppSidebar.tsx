@@ -206,7 +206,19 @@ export function AppSidebar() {
           <div className="h-8 w-8 flex items-center justify-center shrink-0">
             <XodeonLogo className="h-full w-full object-contain" />
           </div>
-          {!collapsed && <span className="text-base font-bold text-foreground font-display tracking-tight flex-1">Xodeon Labs</span>}
+          {!collapsed && (
+            <div className="flex-1 min-w-0 flex flex-col leading-tight">
+              <span className="text-base font-bold text-foreground font-display tracking-tight truncate">
+                {appMode === 'gamer' ? 'Xodeon Arena' : 'Xodeon Labs'}
+              </span>
+              {appMode === 'developer' && (
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-primary truncate">For developers</span>
+              )}
+              {appMode === 'gamer' && (
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-accent truncate">For gamers</span>
+              )}
+            </div>
+          )}
           <SidebarTrigger className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all shrink-0">
             {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
           </SidebarTrigger>
