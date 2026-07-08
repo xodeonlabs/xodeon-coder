@@ -36,6 +36,10 @@ import Tutorial from "./pages/Tutorial";
 import OAuthAuthorize from "./pages/OAuthAuthorize";
 import AdminConnections from "./components/AdminConnections";
 import { AppLayout as _AppLayout } from "@/components/AppLayout";
+import { applyModeToDom, getAppMode } from "@/hooks/useAppMode";
+
+// Apply saved mode class as early as possible
+applyModeToDom(getAppMode());
 
 const queryClient = new QueryClient();
 
