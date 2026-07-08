@@ -76,6 +76,7 @@ export default function Settings() {
   const { dndEnabled, toggleDnd } = useDoNotDisturb();
   const { theme, setTheme } = useTheme();
   const { i18n } = useTranslation();
+  const [appMode, setAppModeState] = useAppMode();
 
   const isScrollingRef = useRef(false);
 
