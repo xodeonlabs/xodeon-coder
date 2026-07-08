@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
 
     if (!data) {
       return new Response(JSON.stringify({ error: "User not found" }), {
-        status: 404,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
