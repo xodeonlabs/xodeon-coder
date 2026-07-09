@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAppMode, type AppMode } from '@/hooks/useAppMode';
 import { useLocation } from 'react-router-dom';
-import i18n from '@/i18n';
+
+const RERENDER_EVENT = 'site-customization-changed';
 
 export type ColorMap = Record<string, string>; // CSS var name (without --) -> HSL triple "H S% L%"
 export type WordMap = Record<string, string>;  // source -> replacement (case-insensitive whole word)
