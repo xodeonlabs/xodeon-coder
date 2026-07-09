@@ -1256,6 +1256,30 @@ export type Database = {
           },
         ]
       }
+      site_customizations: {
+        Row: {
+          colors: Json
+          mode: string
+          updated_at: string
+          updated_by: string | null
+          word_overrides: Json
+        }
+        Insert: {
+          colors?: Json
+          mode: string
+          updated_at?: string
+          updated_by?: string | null
+          word_overrides?: Json
+        }
+        Update: {
+          colors?: Json
+          mode?: string
+          updated_at?: string
+          updated_by?: string | null
+          word_overrides?: Json
+        }
+        Relationships: []
+      }
       templates: {
         Row: {
           author_id: string
