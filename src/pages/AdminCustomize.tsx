@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ArrowLeft, Save, Plus, Trash2, RotateCcw, Palette, Type } from 'lucide-react';
 import { CUSTOMIZABLE_TOKENS, type ColorMap, type WordMap } from '@/hooks/useSiteCustomization';
-import type { AppMode } from '@/hooks/useAppMode';
+import { GAMER_WORD_MAP, type AppMode } from '@/hooks/useAppMode';
 
 type Row = { mode: AppMode; colors: ColorMap; word_overrides: WordMap };
 
