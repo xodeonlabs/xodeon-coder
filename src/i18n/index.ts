@@ -4,6 +4,8 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import nl from './locales/nl';
 import en from './locales/en';
 import fr from './locales/fr';
+import { applyWordOverrides } from '@/hooks/useSiteCustomization';
+import { getAppMode } from '@/hooks/useAppMode';
 
 export const SUPPORTED_LANGUAGES = ['nl', 'en', 'fr'] as const;
 export type Language = typeof SUPPORTED_LANGUAGES[number];
