@@ -23,12 +23,7 @@ const wordOverridePostProcessor = {
   process(value: string) {
     if (typeof value !== 'string' || !value) return value;
     try {
-      // Lazy import to avoid circular init
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const mod = require('@/hooks/useSiteCustomization');
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const modeMod = require('@/hooks/useAppMode');
-      return mod.applyWordOverrides(value, modeMod.getAppMode());
+      return applyWordOverrides(value, getAppMode());
     } catch {
       return value;
     }
