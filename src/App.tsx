@@ -35,6 +35,7 @@ import Welcome from "./pages/Welcome";
 import Developers from "./pages/Developers";
 import Tutorial from "./pages/Tutorial";
 import OAuthAuthorize from "./pages/OAuthAuthorize";
+import AdminCustomize from "./pages/AdminCustomize";
 import AdminConnections from "./components/AdminConnections";
 import { AppLayout as _AppLayout } from "@/components/AppLayout";
 import { applyModeToDom, getAppMode } from "@/hooks/useAppMode";
