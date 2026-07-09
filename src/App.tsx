@@ -75,8 +75,10 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <SiteCustomizationApplier />
         <ImpersonationBanner />
         <Routes>
+          <Route path="/admin/customize" element={<ProtectedRoute><AdminCustomize /></ProtectedRoute>} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/reset-password" element={<ResetPassword />} />
