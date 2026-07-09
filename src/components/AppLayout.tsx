@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 import { useLanguageSync } from '@/hooks/useLanguageSync';
+import { useSiteCustomization } from '@/hooks/useSiteCustomization';
 import { OnboardingOverlay } from '@/components/OnboardingOverlay';
 import { KonamiEasterEgg } from '@/components/KonamiEasterEgg';
 
@@ -183,6 +184,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const showAd = !HIDE_AD_ROUTES.some(r => location.pathname.startsWith(r));
   useAdminForceRefresh();
   useLanguageSync();
+  useSiteCustomization();
 
   return (
     <SidebarProvider>

@@ -722,6 +722,14 @@ export default function AdminPanel() {
         </div>
         <div className="flex items-center gap-2">
           <button
+            onClick={() => navigate('/admin/customize')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+            title="UI woorden & kleuren aanpassen per modus"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Edit UI</span>
+          </button>
+          <button
             onClick={async () => {
               await supabase.channel('admin-force-refresh').send({ type: 'broadcast', event: 'force-refresh', payload: {} });
               toast({ title: 'Force refresh verstuurd', description: 'Alle gebruikers worden nu herladen.' });
