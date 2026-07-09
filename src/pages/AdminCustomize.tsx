@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ArrowLeft, Save, Plus, Trash2, RotateCcw, Palette, Type } from 'lucide-react';
 import { CUSTOMIZABLE_TOKENS, type ColorMap, type WordMap } from '@/hooks/useSiteCustomization';
-import type { AppMode } from '@/hooks/useAppMode';
+import { GAMER_WORD_MAP, type AppMode } from '@/hooks/useAppMode';
 
 type Row = { mode: AppMode; colors: ColorMap; word_overrides: WordMap };
 
@@ -255,6 +255,34 @@ export default function AdminCustomize() {
                 ))}
               </CardContent>
             </Card>
+
+            {m === 'gamer' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Type className="h-4 w-4" /> Standaard gamer-woordenlijst</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-xs text-muted-foreground">
+                    Ingebouwde mappings die automatisch toegepast worden in Gamer-modus. Alles wat níet in deze lijst of in jouw overrides staat, blijft zijn originele tekst (fallback). Overrides hierboven winnen altijd van deze lijst.
+                  </p>
+                  <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-1 max-h-72 overflow-auto rounded-lg border border-border/40 p-2">
+                    {Object.entries(GAMER_WORD_MAP).map(([src, dst]) => {
+                      const overridden = Object.keys(rows.gamer.word_overrides).some(k => k.toLowerCase() === src.toLowerCase());
+                      return (
+                        <div key={src} className={`text-[11px] font-mono flex items-center gap-1 px-2 py-1 rounded ${overridden ? 'opacity-40 line-through' : ''}`}>
+                          <span className="truncate">{src}</span>
+                          <span className="text-muted-foreground">→</span>
+                          <span className="truncate text-primary">{dst}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">
+                    {Object.keys(GAMER_WORD_MAP).length} ingebouwde termen. Doorgestreept = door jouw override vervangen.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
             <div className="flex justify-end">
               <Button onClick={save} disabled={saving === m}>
