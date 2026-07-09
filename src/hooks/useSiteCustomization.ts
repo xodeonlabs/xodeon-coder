@@ -33,7 +33,12 @@ const cache: Record<AppMode, SiteCustomization | null> = {
 };
 
 const listeners = new Set<() => void>();
-function emit() { listeners.forEach(fn => fn()); }
+function emit() {
+  listeners.forEach(fn => fn());
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(RERENDER_EVENT));
+  }
+}
 
 let loaded = false;
 let loading: Promise<void> | null = null;
