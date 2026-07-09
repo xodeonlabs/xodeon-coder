@@ -52,5 +52,11 @@ i18n
     },
   });
 
+// Re-render translations when admin customizations change or app mode toggles.
+if (typeof window !== 'undefined') {
+  const trigger = () => i18n.emit('languageChanged', i18n.language);
+  window.addEventListener('site-customization-changed', trigger);
+  window.addEventListener('app-mode-changed', trigger);
+}
 
 export default i18n;
