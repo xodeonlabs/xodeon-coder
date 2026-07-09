@@ -228,6 +228,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* First-visit onboarding tour */}
       <OnboardingOverlay />
+
+      {/* Konami code easter egg (gamer mode only) */}
+      <KonamiEasterEgg />
     </SidebarProvider>
   );
 }
