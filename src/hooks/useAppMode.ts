@@ -276,7 +276,7 @@ export const GAMER_WORD_MAP: Record<string, string> = {
   Achievement: 'Trophy',
   Prestaties: 'Trophies',
   Achievements: 'Trophies',
-  'Succès FR': 'Trophies',
+  
   Leaderboard: 'Hall of fame',
   Ranglijst: 'Hall of fame',
   Classement: 'Hall of fame',
