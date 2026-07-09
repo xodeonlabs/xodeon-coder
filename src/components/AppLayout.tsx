@@ -184,6 +184,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const showAd = !HIDE_AD_ROUTES.some(r => location.pathname.startsWith(r));
   useAdminForceRefresh();
   useLanguageSync();
+  useSiteCustomization();
 
   return (
     <SidebarProvider>
