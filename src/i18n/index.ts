@@ -14,8 +14,28 @@ export const LANGUAGE_LABELS: Record<Language, { name: string; flag: string }> =
   fr: { name: 'Français', flag: '🇫🇷' },
 };
 
+// Post-processor that swaps words based on admin site customizations + current app mode.
+const wordOverridePostProcessor = {
+  type: 'postProcessor' as const,
+  name: 'wordOverride',
+  process(value: string) {
+    if (typeof value !== 'string' || !value) return value;
+    try {
+      // Lazy import to avoid circular init
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const mod = require('@/hooks/useSiteCustomization');
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const modeMod = require('@/hooks/useAppMode');
+      return mod.applyWordOverrides(value, modeMod.getAppMode());
+    } catch {
+      return value;
+    }
+  },
+};
+
 i18n
   .use(LanguageDetector)
+  .use(wordOverridePostProcessor as any)
   .use(initReactI18next)
   .init({
     resources: {
@@ -27,11 +47,13 @@ i18n
     supportedLngs: SUPPORTED_LANGUAGES as unknown as string[],
     nonExplicitSupportedLngs: true,
     interpolation: { escapeValue: false },
+    postProcess: ['wordOverride'],
     detection: {
       order: ['localStorage', 'navigator'],
       lookupLocalStorage: 'lang',
       caches: ['localStorage'],
     },
   });
+
 
 export default i18n;
