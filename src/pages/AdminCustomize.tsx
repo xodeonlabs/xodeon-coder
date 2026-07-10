@@ -8,9 +8,32 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { ArrowLeft, Save, Plus, Trash2, RotateCcw, Palette, Type } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, RotateCcw, Palette, Type, Eye, Home, MessageSquare, Users, Settings as SettingsIcon, Coins } from 'lucide-react';
 import { CUSTOMIZABLE_TOKENS, type ColorMap, type WordMap } from '@/hooks/useSiteCustomization';
 import { GAMER_WORD_MAP, type AppMode } from '@/hooks/useAppMode';
+import { Badge } from '@/components/ui/badge';
+
+/** Apply word overrides (draft + optional gamer map fallback) to a sample string. */
+function applyDraftWords(text: string, overrides: WordMap, includeGamer: boolean): string {
+  if (!text) return text;
+  const map: WordMap = includeGamer ? { ...GAMER_WORD_MAP, ...overrides } : { ...overrides };
+  let out = text;
+  for (const [src, dst] of Object.entries(map)) {
+    if (!src || !dst) continue;
+    const escaped = src.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    out = out.replace(new RegExp(`\\b${escaped}\\b`, 'gi'), dst);
+  }
+  return out;
+}
+
+const PREVIEW_NAV: Array<{ icon: any; label: string }> = [
+  { icon: Home, label: 'Dashboard' },
+  { icon: MessageSquare, label: 'Berichten' },
+  { icon: Users, label: 'Groepen' },
+  { icon: Coins, label: 'Coins' },
+  { icon: SettingsIcon, label: 'Instellingen' },
+];
+const PREVIEW_SAMPLE_TEXT = 'Welkom bij je Dashboard — bekijk je Berichten, beheer je Organisatie en verdien Coins met dagelijkse bonus.';
 
 type Row = { mode: AppMode; colors: ColorMap; word_overrides: WordMap };
 
