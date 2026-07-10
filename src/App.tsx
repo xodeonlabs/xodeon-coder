@@ -10,6 +10,7 @@ import { usePresence } from "@/hooks/usePresence";
 import { AppLayout } from "@/components/AppLayout";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import { SiteCustomizationApplier } from "@/components/SiteCustomizationApplier";
+import { KonamiEasterEgg } from "@/components/KonamiEasterEgg";
 import Dashboard from "./pages/Dashboard";
 import Index from "./pages/Index";
 import Organization from "./pages/Organization";
@@ -75,6 +76,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <KonamiEasterEgg />
       <BrowserRouter>
         <SiteCustomizationApplier />
         <ImpersonationBanner />
