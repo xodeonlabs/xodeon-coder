@@ -76,6 +76,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <KonamiEasterEgg />
       <BrowserRouter>
         <SiteCustomizationApplier />
         <ImpersonationBanner />
