@@ -8,9 +8,32 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { ArrowLeft, Save, Plus, Trash2, RotateCcw, Palette, Type } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, RotateCcw, Palette, Type, Eye, Home, MessageSquare, Users, Settings as SettingsIcon, Coins } from 'lucide-react';
 import { CUSTOMIZABLE_TOKENS, type ColorMap, type WordMap } from '@/hooks/useSiteCustomization';
 import { GAMER_WORD_MAP, type AppMode } from '@/hooks/useAppMode';
+import { Badge } from '@/components/ui/badge';
+
+/** Apply word overrides (draft + optional gamer map fallback) to a sample string. */
+function applyDraftWords(text: string, overrides: WordMap, includeGamer: boolean): string {
+  if (!text) return text;
+  const map: WordMap = includeGamer ? { ...GAMER_WORD_MAP, ...overrides } : { ...overrides };
+  let out = text;
+  for (const [src, dst] of Object.entries(map)) {
+    if (!src || !dst) continue;
+    const escaped = src.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    out = out.replace(new RegExp(`\\b${escaped}\\b`, 'gi'), dst);
+  }
+  return out;
+}
+
+const PREVIEW_NAV: Array<{ icon: any; label: string }> = [
+  { icon: Home, label: 'Dashboard' },
+  { icon: MessageSquare, label: 'Berichten' },
+  { icon: Users, label: 'Groepen' },
+  { icon: Coins, label: 'Coins' },
+  { icon: SettingsIcon, label: 'Instellingen' },
+];
+const PREVIEW_SAMPLE_TEXT = 'Welkom bij je Dashboard — bekijk je Berichten, beheer je Organisatie en verdien Coins met dagelijkse bonus.';
 
 type Row = { mode: AppMode; colors: ColorMap; word_overrides: WordMap };
 
@@ -283,6 +306,76 @@ export default function AdminCustomize() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Live preview — reflects unsaved draft */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Eye className="h-4 w-4" /> Live voorbeeld
+                  <span className="text-xs font-normal text-muted-foreground">— niet-opgeslagen wijzigingen</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div
+                  className="rounded-xl border border-border/40 overflow-hidden"
+                  style={Object.fromEntries(
+                    Object.entries(rows[m].colors).map(([k, v]) => [`--${k}`, v])
+                  ) as React.CSSProperties}
+                >
+                  <div className="flex min-h-[340px] bg-background text-foreground">
+                    {/* Sidebar */}
+                    <aside className="w-44 border-r border-border/40 bg-card p-3 space-y-1">
+                      <div className="text-xs font-bold px-2 py-1 text-primary">Xodeon</div>
+                      {PREVIEW_NAV.map(({ icon: Icon, label }, i) => (
+                        <div
+                          key={label}
+                          className={`flex items-center gap-2 px-2 py-1.5 rounded-md text-sm ${
+                            i === 0 ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                          }`}
+                        >
+                          <Icon className="h-3.5 w-3.5" />
+                          <span className="truncate">
+                            {applyDraftWords(label, rows[m].word_overrides, m === 'gamer')}
+                          </span>
+                        </div>
+                      ))}
+                    </aside>
+
+                    {/* Content */}
+                    <div className="flex-1 p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-bold">
+                          {applyDraftWords('Dashboard', rows[m].word_overrides, m === 'gamer')}
+                        </h3>
+                        <Badge>{applyDraftWords('Coins', rows[m].word_overrides, m === 'gamer')}: 1.240</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {applyDraftWords(PREVIEW_SAMPLE_TEXT, rows[m].word_overrides, m === 'gamer')}
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="p-3 rounded-lg bg-secondary text-secondary-foreground text-xs">
+                          {applyDraftWords('Organisatie', rows[m].word_overrides, m === 'gamer')}
+                        </div>
+                        <div className="p-3 rounded-lg bg-accent text-accent-foreground text-xs">
+                          {applyDraftWords('Allianties', rows[m].word_overrides, m === 'gamer')}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 pt-1">
+                        <Button size="sm">
+                          {applyDraftWords('Instellingen', rows[m].word_overrides, m === 'gamer')}
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          {applyDraftWords('Profiel', rows[m].word_overrides, m === 'gamer')}
+                        </Button>
+                        <Button size="sm" variant="destructive">
+                          {applyDraftWords('Verwijderen', rows[m].word_overrides, m === 'gamer')}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             <div className="flex justify-end">
               <Button onClick={save} disabled={saving === m}>
