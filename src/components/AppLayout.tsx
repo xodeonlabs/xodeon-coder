@@ -14,7 +14,6 @@ import { useTranslation } from 'react-i18next';
 import { useLanguageSync } from '@/hooks/useLanguageSync';
 import { useSiteCustomization } from '@/hooks/useSiteCustomization';
 import { OnboardingOverlay } from '@/components/OnboardingOverlay';
-import { KonamiEasterEgg } from '@/components/KonamiEasterEgg';
 
 const HIDE_AD_ROUTES = ['/editor', '/preview'];
 
