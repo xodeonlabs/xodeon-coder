@@ -920,6 +920,27 @@ export default function AdminPanel() {
                         <Users className="h-4 w-4 text-primary" /> Alle gebruikers ({filteredProfiles.length}{countryFilter !== 'all' ? ` / ${profiles.length}` : ''})
                       </h3>
                       <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={async () => {
+                            const { data, error } = await (supabase as any).rpc('admin_export_users');
+                            if (error) {
+                              toast({ title: 'Export mislukt', description: error.message, variant: 'destructive' });
+                              return;
+                            }
+                            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `xodeon-users-export-${new Date().toISOString().slice(0,10)}.json`;
+                            a.click();
+                            URL.revokeObjectURL(url);
+                            toast({ title: 'Export klaar', description: `${(data as any[])?.length ?? 0} gebruikers geëxporteerd (incl. bcrypt-hashes).` });
+                          }}
+                        >
+                          Exporteer gebruikers (JSON)
+                        </Button>
                         <Globe className="h-3.5 w-3.5 text-muted-foreground" />
                         <select
                           value={countryFilter}
