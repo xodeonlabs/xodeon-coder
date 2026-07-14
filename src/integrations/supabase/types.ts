@@ -1369,6 +1369,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_export_users: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          id: string
+          password_hash: string
+          username: string
+        }[]
+      }
       are_friends: {
         Args: { _user1: string; _user2: string }
         Returns: boolean
